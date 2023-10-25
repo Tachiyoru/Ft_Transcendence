@@ -1,0 +1,48 @@
+version: '3'
+services:
+  # Base de données PostgreSQL
+  db:
+    container_name: nest
+    image: postgres.16.0-alpine
+    environment:
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    ports:
+      - 5432:5432
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      - db_network
+    restart: unless-stopped
+
+  # Backend NestJS
+  backend:
+    depends_on:
+      - db
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?}
+      DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@database:5432/pong?schema=public
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: your_db_name
+    expose:
+      - 5000
+    volumes:
+      -/app/node_modules
+    networks:
+      - db_network
+      # - frontend_network
+    restart: unless-stopped
+
+  # Frontend
+  # frontend:
+  #   image: your-frontend-image
+  #   networks:
+  #     - frontend_network
+
+volumes:
+  database:
+
+networks:
+  db_network:
+  # frontend_network:
