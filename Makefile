@@ -2,7 +2,7 @@ all: run
 
 setup :
 	@echo "Installing dependencies"
-
+	cd backend && npm install
 
 run :
 	@echo "Building and running the app"
