@@ -1,48 +1,36 @@
-version: '3'
+version: "3"
+
 services:
-  # Base de données PostgreSQL
-  db:
-    container_name: nest
-    image: postgres.16.0-alpine
-    environment:
-      POSTGRES_DB: $POSTGRES_DB
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-    ports:
-      - 5432:5432
+  trsc_db:
+    container_name: trsc_db
+    image: postgres:latest
+    env_file:
+      - .env
     volumes:
       - database:/var/lib/postgresql/data
     networks:
-      - db_network
+      - backend_network
     restart: unless-stopped
+# Il manque un healthcheck
 
-  # Backend NestJS
-  backend:
+  backend: # Il est ou LE VOLUME 
+    container_name: backend # backend suffit
+    image: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile # Tu as quoi dans le dockerfile ?
     depends_on:
-      - db
-    environment:
-      JWT_SECRET: ${JWT_SECRET:?}
-      DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@database:5432/pong?schema=public
-      POSTGRES_PASSWORD: your_db_password
-      POSTGRES_DB: your_db_name
-    expose:
-      - 5000
-    volumes:
-      -/app/node_modules
+      - trsc_db
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
     networks:
-      - db_network
-      # - frontend_network
+      - backend_network
     restart: unless-stopped
 
-  # Frontend
-  # frontend:
-  #   image: your-frontend-image
-  #   networks:
-  #     - frontend_network
+networks:
+  backend_network:
 
 volumes:
   database:
-
-networks:
-  db_network:
-  # frontend_network:
