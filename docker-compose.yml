@@ -13,12 +13,12 @@ services:
     restart: unless-stopped
 # Il manque un healthcheck
 
-  backend: # Il est ou LE VOLUME 
-    container_name: backend # backend suffit
+  backend:
+    container_name: backend 
     image: backend
     build:
       context: ./backend
-      dockerfile: ./Dockerfile # Tu as quoi dans le dockerfile ?
+      dockerfile: ./Dockerfile
     depends_on:
       - trsc_db
     env_file:
