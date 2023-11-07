@@ -5,9 +5,11 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true}), UserModule, AuthModule, PrismaModule],
+  imports: [ConfigModule.forRoot({isGlobal: true}), MulterModule.register({
+	dest: './uploads'}), UserModule, AuthModule, PrismaModule],
   controllers: [AppController],
   providers: [AppService],
 })
