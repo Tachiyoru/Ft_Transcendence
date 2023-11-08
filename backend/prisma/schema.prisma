@@ -12,7 +12,7 @@ model User {
 	createdAt	DateTime @default(now())
 	updateAt	DateTime @updatedAt
 
-	username	String @unique @db.VarChar(16)
+	email	String @unique @db.VarChar(16)
 	hash		String
 
 	firstName	String?
