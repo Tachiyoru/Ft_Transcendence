@@ -1,8 +1,8 @@
-import React from 'react'
+import { Home } from "./pages"
 
 const RootLayout = () => {
   return (
-	<div>RootLayout</div>
+    <Home/>
   )
 }
 

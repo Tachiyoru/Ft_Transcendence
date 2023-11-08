@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineUser, AiOutlineMail, AiOutlineLock } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 interface IdataRegister {
 	username: string;
@@ -13,6 +14,7 @@ interface IdataRegister {
 const SignupForm = () => {
 
 	const [resStatus, setResStatus] = useState("");
+	const {authenticated, setAuthenticated} = useContext(AuthContext)
 	const navigate = useNavigate();
 
 	const {
@@ -30,6 +32,7 @@ const SignupForm = () => {
 			console.log(response.status);
 			if (response.status === 201) {
 				setResStatus("Successful Registration!");
+				setAuthenticated(true);
 				navigate("/");
 			} else {
 				setResStatus("Error");
