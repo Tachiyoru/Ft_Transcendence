@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AiOutlineUser, AiOutlineMail, AiOutlineLock } from 'react-icons/ai'
+import { AiOutlineUser, AiOutlineMail, AiOutlineLock, AiOutlineEye, AiOutlineEyeInvisible, AiOutlineCheck } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
@@ -16,6 +16,15 @@ const SignupForm = () => {
 	const [resStatus, setResStatus] = useState("");
 	const {authenticated, setAuthenticated} = useContext(AuthContext)
 	const navigate = useNavigate();
+	
+	const [password, setPassword] = useState('');
+	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
+	const [passwordHasContent, setPasswordHasContent] = useState(false);
+	const passwordHasLowercaseLetter = /[a-z]/.test(password);
+	const passwordHasUppercaseLetter = /[A-Z]/.test(password);
+	const passwordHasSpecialCharacter = /[!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?]/.test(password);
+	const passwordHasNumber = /[0-9]/.test(password);
+	const passwordHasValidLength = password.length >= 6;
 
 	const {
 	register,
@@ -45,6 +54,12 @@ const SignupForm = () => {
 	};
 
 	console.log(resStatus);
+
+	const handlePasswordChange = (e) => {
+		const newPassword = e.currentTarget.value;
+		setPassword(newPassword);
+		setPasswordHasContent(newPassword.length > 0);
+	};
 
 	return (
 		<div>
@@ -105,6 +120,7 @@ const SignupForm = () => {
 						placeholder='Enter Email'
 						className= 'px-5 py-4 outline-none'
 						/>
+
 					</div>
 					{
 					errors.email?.message && 
@@ -117,7 +133,7 @@ const SignupForm = () => {
 					<div className='flex flex-row items-center border-b'>
 						<AiOutlineLock className= 'w-4 h-4'/>
 						<input
-						type="password"
+						type={passwordIsVisible ? "text" : "password"}
 						id="password"
 
 						{...register('password', {
@@ -132,9 +148,35 @@ const SignupForm = () => {
 						})}
 
 						placeholder='Enter Password'
-						className= 'px-5 py-4 outline-none'
+						className= 'px-5 py-4 w-full outline-none'
+						onChange={handlePasswordChange}
 						/>
+						<button onClick={() => setPasswordIsVisible((prevState) => !prevState)}>
+							{passwordIsVisible ? <AiOutlineEyeInvisible className= 'w-4 h-4'/> : <AiOutlineEye className= 'w-4 h-4'/> }
+						</button>
 					</div>
+
+					{passwordHasContent && (
+					<ul>
+						<li className="flex align-items text-sm mt-4" style={{ color: passwordHasLowercaseLetter ? 'green' : 'red' }}>
+							<AiOutlineCheck className="mt-0.5 mr-2"/> 
+							One lower letter
+						</li>
+						<li className="flex align-items text-sm" style={{color: passwordHasUppercaseLetter ? 'green' : 'red'}}>
+							<AiOutlineCheck className="mt-0.5 mr-2"/> 
+							One uppercase letter
+						</li>
+						<li className="flex align-items text-sm" style={{color: (passwordHasSpecialCharacter || passwordHasNumber) ? 'green' : 'red'}}>
+							<AiOutlineCheck className="mt-0.5 mr-2"/> 
+							One number or special character
+						</li>
+						<li className="flex align-items text-sm" style={{color: passwordHasValidLength ? 'green' : 'red'}}>
+							<AiOutlineCheck className="mt-0.5 mr-2"/> 
+							Minimum 6 characters
+						</li>
+					</ul>
+					)}
+
 					{
 					errors.password?.message && 
 					(<p className='text-red-500 text-xs mt-1'>{errors.password?.message}</p>)

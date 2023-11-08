@@ -100,7 +100,7 @@ const SigninForm = () => {
 								},
 							})}
 
-							placeholder='Enter Password'
+							placeholder='•••••••'
 							className= 'px-5 py-4 outline-none'
 							/>
 					</div>

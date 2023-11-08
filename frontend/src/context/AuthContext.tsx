@@ -15,6 +15,8 @@ const initialValue = {
   setAuthenticated: () => {},
 };
 
+//TODO Recyperer le JWT https://dev.to/sanjayttg/jwt-authentication-in-react-with-react-router-1d03
+//https://www.permify.co/post/jwt-authentication-in-react/
 const AuthContext = createContext<IAuthContext>(initialValue);
 
 const AuthProvider = ({ children }: Props) => {
