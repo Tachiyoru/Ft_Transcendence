@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ReactNode, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -5,13 +6,23 @@ type Props = {
   children?: ReactNode;
 };
 
+export type IUser = {
+  id: number;
+  email: string;
+  nickname?: string | null;
+  avatar?: string | null;
+  hash: string;
+};
+
 type IAuthContext = {
   authenticated: boolean;
+  user: IUser | null; 
   setAuthenticated: (newState: boolean) => void;
 };
 
 const initialValue = {
   authenticated: false,
+  user: null,
   setAuthenticated: () => {},
 };
 
@@ -26,7 +37,24 @@ const AuthProvider = ({ children }: Props) => {
     return storedAuthState === "true";
   });
 
+  const [user, setUser] = useState<IUser | null>(null);
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/users/me");
+        setUser(response.data);
+      } catch (error) {
+        console.error("Erreur utilisateur", error);
+      }
+    };
+
+    if (authenticated) {
+      fetchUserData();
+    }
+  }, [authenticated]);
 
   // Update LocalStorage
   useEffect(() => {
@@ -34,7 +62,7 @@ const AuthProvider = ({ children }: Props) => {
   }, [authenticated]);
 
   return (
-    <AuthContext.Provider value={{ authenticated, setAuthenticated }}>
+    <AuthContext.Provider value={{ authenticated, user, setAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
