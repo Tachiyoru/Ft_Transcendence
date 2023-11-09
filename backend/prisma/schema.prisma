@@ -1,4 +1,4 @@
-generator client {
+ generator client {
   provider = "prisma-client-js"
 }
 
@@ -7,16 +7,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StatusUser {
+  ONLINE
+  OFFLINE
+  INQUEUE
+  INGAME
+}
+
 model User {
-	id			Int @id @default(autoincrement())
-	createdAt	DateTime @default(now())
-	updateAt	DateTime @updatedAt
+  id            Int         @id @default(autoincrement())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-	username	String @unique @db.VarChar(16)
-	hash		String
+  email         String      @unique
+  nickname      String?		@unique
+  avatar        String?     @unique
+  hash			String
 
-	firstName	String?
-	lastName	String?
+  status		StatusUser  @default(ONLINE)
 
-	@@map("users")
+  stats		 	Stats[]
+
+  friendsof		User[]      @relation("friendslist")
+  friends		User[]      @relation("friendslist")
+
+  blockedBy     User[]      @relation("blockedList")
+  blockedList	User[]      @relation("blockedList")
+  
+  achievements  Achievement[]
+  messages		Message[]	@relation("messageSender")
+  channel		Channel[]	@relation("chanMembers")
+  banned		Channel[]	@relation("chanBanned")
+
+  @@map("Users")
+}
+
+model Achievement {
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  title         String      @unique
+  description   String
+  icon          String
+
+  @@map("Achievements")
+}
+
+
+model Stats {
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int			@unique
+
+  fortyTwoId	Boolean		@default(false)
+  googleId		Boolean		@default(false)
+
+  lvl			Int			@default(1)
+  exp			Int			@default(0)
+
+  partyPlayed	Int         @default(0)
+  partyWin		Int         @default(0)
+  partyLose		Int         @default(0)
+  
+  history		String[]    @default([])
+
+  @@map("Stats")
+}
+
+model Channel {
+	chanId			Int			@id @default(autoincrement())
+	name		String		@unique
+	owner		String
+	op			String[]
+	modes		Int			@default(0)
+	password	String?
+	updatedAt	DateTime	@default(now())
+	members		User[]		@relation("chanMembers")
+	messages	Message[]	@relation("chanMessages")
+	banned		User[]		@relation("chanBanned")
+}
+
+model Message {
+	id			Int			@id @default(autoincrement())
+	channelName	String
+	channel		Channel[]	@relation("chanMessages")
+	author		User[]		@relation("messageSender")
+	content		String
+	createdAt	DateTime	@default(now())
+}
+
+model Game {
+	id			Int			@id @default(autoincrement())
+	name		String		@unique
+	nbrPlayers	Int			@default(0)
+	userId		Int
+	// Player		User[]		@relation(fields: [userId], references: [id])
 }

@@ -15,5 +15,8 @@ COPY ./ ./
 # Exposes port
 EXPOSE 5000
 
+# For prisma update
+# CMD ["tail", "-f", "/dev/null"]
+
 # Starts application
 CMD ["npm", "run", "start:migrate:dev"]

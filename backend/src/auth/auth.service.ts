@@ -20,15 +20,15 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data: {
-          username: dto.username,
+          email: dto.email,
           hash,
         },
       });
-      return this.signToken(user.id, user.username);
+      return this.signToken(user.id, user.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002')
-          throw new ForbiddenException('username already exists');
+          throw new ForbiddenException('email already exists');
       }
     }
     throw error;
@@ -37,23 +37,23 @@ export class AuthService {
   async signin(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
-        username: dto.username,
+        email: dto.email,
       },
     });
 
     if (!user) throw new ForbiddenException('User not found');
     const pwdMatches = await argon.verify(user.hash, dto.password);
     if (!pwdMatches) throw new ForbiddenException('Wrong password');
-    return this.signToken(user.id, user.username);
+    return this.signToken(user.id, user.email);
   }
 
   async signToken(
     userId: number,
-    username: string,
+    email: string,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
-      username,
+      email,
     };
     const secret = this.config.get('JWT_SECRET');
 
