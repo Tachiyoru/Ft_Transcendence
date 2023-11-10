@@ -1,45 +1,58 @@
-import { ReactNode, createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// AuthProvider.tsx
+import { createContext, ReactNode, useEffect, useState } from 'react';
+
+type AuthContextProps = {
+  authenticated: string | null;
+  setAuthenticated: (token: string | null) => void;
+  logout: () => void;
+};
+
+export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 type Props = {
   children?: ReactNode;
 };
 
-type IAuthContext = {
-  authenticated: boolean;
-  setAuthenticated: (newState: boolean) => void;
-};
+export const AuthProvider = ({ children }: Props) => {
+  const [authenticated, setAuthenticated] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-const initialValue = {
-  authenticated: false,
-  setAuthenticated: () => {},
-};
+  const setAuthenticatedContext = (token: string | null) => {
+    console.log('Setting authenticated context with token:', token);
+    setAuthenticated(token);
+    if (token !== null) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('authenticated', token);
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('authenticated');
+    }
+  };
 
-//TODO Recyperer le JWT https://dev.to/sanjayttg/jwt-authentication-in-react-with-react-router-1d03
-//https://www.permify.co/post/jwt-authentication-in-react/
-const AuthContext = createContext<IAuthContext>(initialValue);
+  const logout = () => {
+    setAuthenticatedContext(null);
+  };
 
-const AuthProvider = ({ children }: Props) => {
-  const [authenticated, setAuthenticated] = useState(() => {
-    // Check State
-    const storedAuthState = localStorage.getItem("authenticated");
-    return storedAuthState === "true";
-  });
-
-  const navigate = useNavigate();
-
-  // Update LocalStorage
   useEffect(() => {
-    localStorage.setItem("authenticated", authenticated.toString());
-  }, [authenticated]);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token from localStorage on reload:', token);
+      setAuthenticated(token);
+      setLoading(false); 
+    } catch (error) {
+      console.error('Error setting authenticated context:', error);
+    }
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <AuthContext.Provider value={{ authenticated, setAuthenticated }}>
+    <AuthContext.Provider value={{ authenticated, setAuthenticated: setAuthenticatedContext, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export { AuthContext, AuthProvider };
-
-//In console : localStorage.getItem("authenticated")
+export default AuthProvider

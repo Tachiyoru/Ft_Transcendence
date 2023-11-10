@@ -1,8 +1,12 @@
-import { useContext, useState, ChangeEvent } from "react";
+
+import { useState, ChangeEvent, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineLock, AiOutlineEye, AiOutlineEyeInvisible, AiOutlineCheck } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import UserNameField from '../fields/UserNameField';
+import EmailField from '../fields/EmailField';
+import SocialIcons from '../fields/SocialIcons';
 import { AuthContext } from "../../context/AuthContext";
 import UserNameField from '../fields/UserNameField';
 import EmailField from '../fields/EmailField';
@@ -16,9 +20,9 @@ interface IdataRegister {
 }
 
 const SignupForm = () => {
+	const { setAuthenticated } = useContext(AuthContext);
 
 	const [resStatus, setResStatus] = useState("");
-	const {authenticated, setAuthenticated} = useContext(AuthContext)
 	const navigate = useNavigate();
 	
 	const [password, setPassword] = useState('');
@@ -49,10 +53,11 @@ const SignupForm = () => {
 			console.log(response.status);
 			if (response.status === 201) {
 				setResStatus("Successful Registration!");
-				setAuthenticated(true);
+				setAuthenticated(response.data.access_token);
 				navigate("/");
 			} else {
 				setResStatus("Error");
+
 			}
 		})
 		.catch(function (error) {

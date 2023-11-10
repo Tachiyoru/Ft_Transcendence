@@ -15,7 +15,7 @@ import { AuthContext } from './context/AuthContext';
 const PrivateRoutes = () => {
 	const { authenticated } = useContext(AuthContext);
 
-	if (!authenticated) {
+	if (authenticated === null) {
 		return <Navigate to='/sign-up' replace/>
 	}
 

@@ -1,4 +1,4 @@
-import { AuthProvider } from "./context/AuthContext"
+import AuthProvider from './context/AuthContext'
 import Routes from "./Routes"
 
 const App:React.FC = () => {  
