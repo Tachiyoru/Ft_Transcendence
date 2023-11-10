@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
 
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { AuthContext } from "../../context/AuthContext";
+import { setAuthenticated } from '../../context/AuthUtils';
 import { Si42 } from "react-icons/si";
 
 interface IdataLogin {
@@ -21,7 +21,6 @@ interface IconContainerProps {
 const SigninForm = () => {
 
 	const [resStatus, setResStatus] = useState('');
-	const {authenticated, setAuthenticated} = useContext(AuthContext)
 	const navigate = useNavigate();
 
 	const [password, setPassword] = useState('');
@@ -42,7 +41,7 @@ const SigninForm = () => {
 		console.log(response.status);
 		if (response.status === 201) {
 			setResStatus("Successful Registration!");
-			setAuthenticated(true);
+			setAuthenticated(response.data.access_token);
 			navigate("/");
 		} else {
 			setResStatus("Error");

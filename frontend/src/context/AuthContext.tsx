@@ -1,73 +1,58 @@
-import axios from "axios";
-import { ReactNode, createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// AuthProvider.tsx
+import { createContext, ReactNode, useEffect, useState } from 'react';
+
+type AuthContextProps = {
+  authenticated: string | null;
+  setAuthenticated: (token: string | null) => void;
+  logout: () => void;
+};
+
+export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 type Props = {
   children?: ReactNode;
 };
 
-export type IUser = {
-  id: number;
-  email: string;
-  nickname?: string | null;
-  avatar?: string | null;
-  hash: string;
-};
+export const AuthProvider = ({ children }: Props) => {
+  const [authenticated, setAuthenticated] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-type IAuthContext = {
-  authenticated: boolean;
-  user: IUser | null; 
-  setAuthenticated: (newState: boolean) => void;
-};
-
-const initialValue = {
-  authenticated: false,
-  user: null,
-  setAuthenticated: () => {},
-};
-
-//TODO Recyperer le JWT https://dev.to/sanjayttg/jwt-authentication-in-react-with-react-router-1d03
-//https://www.permify.co/post/jwt-authentication-in-react/
-const AuthContext = createContext<IAuthContext>(initialValue);
-
-const AuthProvider = ({ children }: Props) => {
-  const [authenticated, setAuthenticated] = useState(() => {
-    // Check State
-    const storedAuthState = localStorage.getItem("authenticated");
-    return storedAuthState === "true";
-  });
-
-  const [user, setUser] = useState<IUser | null>(null);
-  const navigate = useNavigate();
-
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/users/me");
-        setUser(response.data);
-      } catch (error) {
-        console.error("Erreur utilisateur", error);
-      }
-    };
-
-    if (authenticated) {
-      fetchUserData();
+  const setAuthenticatedContext = (token: string | null) => {
+    console.log('Setting authenticated context with token:', token);
+    setAuthenticated(token);
+    if (token !== null) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('authenticated', token);
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('authenticated');
     }
-  }, [authenticated]);
+  };
 
-  // Update LocalStorage
+  const logout = () => {
+    setAuthenticatedContext(null);
+  };
+
   useEffect(() => {
-    localStorage.setItem("authenticated", authenticated.toString());
-  }, [authenticated]);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token from localStorage on reload:', token);
+      setAuthenticated(token);
+      setLoading(false); 
+    } catch (error) {
+      console.error('Error setting authenticated context:', error);
+    }
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <AuthContext.Provider value={{ authenticated, user, setAuthenticated }}>
+    <AuthContext.Provider value={{ authenticated, setAuthenticated: setAuthenticatedContext, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export { AuthContext, AuthProvider };
-
-//In console : localStorage.getItem("authenticated")
+export default AuthProvider

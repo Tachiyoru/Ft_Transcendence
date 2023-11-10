@@ -3,18 +3,20 @@ import { useContext } from 'react';
 import { AuthContext } from "../../context/AuthContext";
 
 const Home = () => {
-  const {authenticated, setAuthenticated} = useContext(AuthContext)
+  const { logout } = useContext(AuthContext);
 
   const handleLogout = () => {
-    setAuthenticated(false);
-  };
+    logout();
+  }
 
   return (
   <div>
     <Link to="/profil" className="text-sm underline ">
       Profil
     </Link>
-    <button onClick={handleLogout}>Déconnexion</button>
+    <button onClick={handleLogout}>
+      Logout
+    </button>
   </div>
 
   )
