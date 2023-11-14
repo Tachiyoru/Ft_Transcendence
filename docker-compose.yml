@@ -11,7 +11,7 @@ services:
     networks:
       - backend_network
     restart: unless-stopped
-# Il manque un healthcheck
+  # Il manque un healthcheck
 
   backend:
     container_name: backend 
@@ -27,10 +27,28 @@ services:
       - 5000:5000
     networks:
       - backend_network
+      - frontend_network
+    restart: unless-stopped
+
+  frontend:
+    container_name: frontend 
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - 5173:5173
+    networks:
+      - frontend_network
     restart: unless-stopped
 
 networks:
   backend_network:
+  frontend_network:
 
 volumes:
   database:
