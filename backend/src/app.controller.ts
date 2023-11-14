@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express'
@@ -9,7 +9,7 @@ export class AppController
 	constructor(private readonly appService: AppService) {}
 
 	@Get()
-	getHello(): string {
+	getHello(@Req() req: any): string {
 	return this.appService.getHello();
 	}
 
