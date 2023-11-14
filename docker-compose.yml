@@ -1,34 +1,34 @@
 version: "3"
 
 services:
-#   trsc_db:
-#     container_name: trsc_db
-#     image: postgres:latest
-#     env_file:
-#       - .env
-#     volumes:
-#       - database:/var/lib/postgresql/data
-#     networks:
-#       - backend_network
-#     restart: unless-stopped
-# # Il manque un healthcheck
+  trsc_db:
+    container_name: trsc_db
+    image: postgres:latest
+    env_file:
+      - .env
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      - backend_network
+    restart: unless-stopped
+  # Il manque un healthcheck
 
-#   backend:
-#     container_name: backend 
-#     image: backend
-#     build:
-#       context: ./backend
-#       dockerfile: ./Dockerfile
-#     depends_on:
-#       - trsc_db
-#     env_file:
-#       - .env
-#     ports:
-#       - 5000:5000
-#     networks:
-#       - backend_network
-#       - frontend_network
-#     restart: unless-stopped
+  backend:
+    container_name: backend 
+    image: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    depends_on:
+      - trsc_db
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
+    networks:
+      - backend_network
+      - frontend_network
+    restart: unless-stopped
 
   frontend:
     container_name: frontend 
@@ -36,10 +36,12 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    # depends_on:
-    #   - backend
+    depends_on:
+      - backend
+    env_file:
+      - .env
     ports:
-      - 5173:80
+      - 5173:5173
     networks:
       - frontend_network
     restart: unless-stopped

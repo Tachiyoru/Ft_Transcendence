@@ -19,8 +19,4 @@ EXPOSE 5173
 # CMD ["tail", "-f", "/dev/null"]
 
 # Starts application
-# CMD ["npm", "run", "dev"]
-
-RUN npm add --no-cache curl
-
-ENTRYPOINT npm install && npm run dev
+CMD ["npm", "run", "dev"]

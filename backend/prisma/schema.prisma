@@ -22,7 +22,7 @@ model User {
   email         String      @unique
   username      String?		@unique
   avatar        String?     @unique
-  hash			    String
+  hash			String
 
   status		StatusUser  @default(ONLINE)
 
