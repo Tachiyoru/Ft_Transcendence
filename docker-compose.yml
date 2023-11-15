@@ -18,38 +18,43 @@ services:
     image: backend
     build:
       context: ./backend
+      target: development
       dockerfile: ./Dockerfile
+    command: npm run start:migrate:dev
+    ports:
+      - 5000:5000
     depends_on:
       - trsc_db
     env_file:
       - .env
-    ports:
-      - 5000:5000
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - backend_network
-      - frontend_network
+      # - frontend_network
     restart: unless-stopped
 
-  frontend:
-    container_name: frontend 
-    image: frontend
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-    depends_on:
-      - backend
-    env_file:
-      - .env
-    ports:
-      - 5173:5173
-    networks:
-      - frontend_network
-    restart: unless-stopped
+  # frontend:
+  #   container_name: frontend 
+  #   image: frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: ./Dockerfile
+  #   depends_on:
+  #     - backend
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 5173:5173
+  #   networks:
+  #     - frontend_network
+  #   restart: unless-stopped
 
 
 networks:
   backend_network:
-  frontend_network:
+  # frontend_network:
 
 volumes:
   database:

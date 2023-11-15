@@ -79,6 +79,8 @@ model Channel {
 	name		String		@unique
 	owner		String
 	op			String[]
+	newmsg		Boolean		@default(false)
+	mentions	Int			@default(0)
 	modes		Int			@default(0)
 	password	String?
 	updatedAt	DateTime	@default(now())

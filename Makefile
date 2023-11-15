@@ -3,11 +3,11 @@ all: run
 setup :
 	@echo "Installing dependencies"
 	cd backend && npm install
-	cd frontend && npm install
+# cd frontend && npm install
 
 run :
 	@echo "Building and running the app"
-	docker compose up --build
+	docker-compose up --build
 
 down :
 	@echo "Stopping the app"

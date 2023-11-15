@@ -10,7 +10,7 @@
 		"db:dev:rm": "docker compose rm trsc_db -s -v -f",
 		"db:dev:up": "docker compose up trsc_db -d",
 		"db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && sleep 1 && npm run prisma:dev:deploy",
-		"start:migrate:dev": "sleep 5 && npx prisma migrate deploy && npx prisma db push --accept-data-loss && npm run start:dev",
+		"start:migrate:dev": "sleep 5 && npx prisma migrate deploy && npx prisma db push --accept-data-loss && npm run start:debug",
 		"build": "nest build",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "nest start",

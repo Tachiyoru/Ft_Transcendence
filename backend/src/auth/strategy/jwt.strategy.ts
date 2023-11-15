@@ -21,13 +21,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   private static cookieExtractor(req: RequestType): string | null {
-		return req.cookies?.access_token ?? null
-	}
+    console.log('test');
+    return req.cookies?.access_token ?? null;
+  }
 
-  async validate(payload: { sub: number; email: string }) {
+  async validate(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
+      where: { email,},
     });
+    // console.log(user);
+    // if (!user) {return null;}
+    // else if (user.password !== password) {return null;}
     return user;
   }
 }
