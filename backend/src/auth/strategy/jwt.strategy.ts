@@ -18,19 +18,26 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ]),
       secretOrKey: config.get('JWT_SECRET'),
     });
+    console.log('cookieExtractor init');
   }
 
   private static cookieExtractor(req: RequestType): string | null {
-    console.log('test');
-    return req.cookies?.access_token ?? null;
-  }
+		const accessToken = req.cookies?.user_token;
+		console.log('token extracted from cookie', accessToken);
+		//if null return to login page
+		return accessToken;
+	  }
 
-  async validate(email: string, password: string) {
+  async validate(payload:any) {
+    console.log('validation technique called');
     const user = await this.prisma.user.findUnique({
-      where: { email,},
+      where: { email: payload.email },
     });
     // console.log(user);
-    // if (!user) {return null;}
+    if (!user) {
+      return null;
+    }
+    console.log('User found in validation');
     // else if (user.password !== password) {return null;}
     return user;
   }
