@@ -9,7 +9,6 @@ export class JwtAuthMiddleware implements NestMiddleware {
 	console.log('JwtAuthMiddleware called');
     passport.authenticate('jwt', { session: false }, (err: any, user: User) => {
 	if (user) {
-		console.log('JwtAuthMiddleware user', user);
         req.user = user;
       }
 	  console.log('JwtAuthMiddleware next');

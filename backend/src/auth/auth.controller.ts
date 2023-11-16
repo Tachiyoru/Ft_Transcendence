@@ -12,12 +12,15 @@ export class AuthController {
 	res.cookie('user_token', tokens.access_token, {
       expires: new Date(Date.now() + 3600000),
     });
-    return {};
+    return ("feur");
   }
 
   @Post('signin')
-  async signin(@Body() dto: AuthDto) {
-    return this.authService.signin(dto);
+  async signin(@Body() dto: AuthDto, @Res({ passthrough: true }) res: any) {
+    const tokens = await this.authService.signin(dto)
+	res.cookie('user_token', tokens.access_token, {
+		expires: new Date(Date.now() + 3600000),});
+    return ("coubeh");
   }
 }
 
