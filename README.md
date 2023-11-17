@@ -1,0 +1,3 @@
+# Ft_Transcendence
+
+FAIRE MAKE SETUP AVANT DE MAKE
