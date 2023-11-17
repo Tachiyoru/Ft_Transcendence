@@ -11,7 +11,7 @@ import axios from 'axios';
 import UserNameField from '../fields/UserNameField';
 import EmailField from '../fields/EmailField';
 import SocialIcons from '../fields/SocialIcons';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../../context/AuthContext';
 
 interface IdataRegister {
   username: string;
