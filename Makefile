@@ -5,7 +5,7 @@ setup :
 	cd backend && npm install
 # cd frontend && npm install
 
-run :
+run : down
 	@echo "Building and running the app"
 	docker-compose up --build
 

@@ -22,6 +22,7 @@ model User {
   email         String      @unique
   username      String?		@unique
   avatar        String?     @unique
+  fortyTwoId    Int?   		@unique
   hash			String
 
   status		StatusUser  @default(ONLINE)

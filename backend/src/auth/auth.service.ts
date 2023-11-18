@@ -64,4 +64,44 @@ export class AuthService {
     });
     return { access_token: token };
   }
+
+  async fortyTwoAuth(req: any, res: any) {
+    const fortyTwoId: number = parseInt(req.user.id);
+    console.log('fortytwoauth', req.user);
+    const fortyTwoAvatar: string = req.user._json.image.link;
+    const fortyTwoEmail: string = req.user.email;
+
+    const user = await this.findUserByFortyTwoId(fortyTwoId);
+    if (!user) {
+      const payload = { fortyTwoId, fortyTwoAvatar };
+      const token = await this.signToken(fortyTwoId, fortyTwoEmail);
+      console.log('usernull in fortytwoauth');
+      await this.setAccessTokenCookie(res, token.access_token, 3600000);
+
+      return res.redirect('http://localhost:5000');
+    }
+    const payload = { id: user.id, email: user.email };
+    const token = await this.signToken(payload.id, payload.email);
+    res.cookie('user_token', token.access_token, {
+      expires: new Date(Date.now() + 3600000),
+    });
+
+    return res.redirect('http://localhost:5000');
+  }
+
+  private async setAccessTokenCookie(res:any, token: string, expiresIn: number) {
+    const expirationTime = new Date(Date.now() + expiresIn);
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      expires: expirationTime,
+    });
+  }
+
+  private async findUserByFortyTwoId(fortyTwoId: number) {
+    return this.prisma.user.findUnique({
+      where: { fortyTwoId },
+    });
+  }
 }
