@@ -1,75 +1,119 @@
-import { GoHomeFill } from "react-icons/go";
 import { FaMagnifyingGlass, FaBell, FaUser } from "react-icons/fa6";
 import { useState } from "react";
 
 
 interface NavItemProps {
-	href: string;
 	name: string;
 	icon: IconType;
 	onClick: () => void;
 }
 
 const navItemsInfo = [
-	{ name: "Research", type: "link", href: "/", icon: FaMagnifyingGlass },
-	{ name: "Notifications", type: "link", href: "/", icon: FaBell },
-	{ name: "Chat", type: "link", href: "/", icon: FaUser },
+	{ name: "Research", icon: FaMagnifyingGlass },
+	{ name: "Notifications", icon: FaBell },
+	{ name: "Chat", icon: FaUser },
 ];
 
 
-//const handleClose = () => setOpen(false);
+const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick }) => {
+	const [showContent, setShowContent] = useState(false);
+	const [showDescription, setShowDescription] = useState(false);
 
-
-const NavItem: React.FC<NavItemProps> = ({ href, icon: Icon, name }) => {
-	let notificationDiv = null;
-
-	if (name === 'Notifications') {
-		notificationDiv =
-		<div className="absolute top-0 right-2 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-white text-[0.4rem]">
-			4
-		</div>
-	}
+	const toggleContent = () => {
+		setShowContent(!showContent);
+	};
 
 	return (
-		<li className="relative group">
-		<a href={href} className="px-4 py-2 flex items-center text-gray-400 relative">
-			{notificationDiv}
+		<div className="relative group">   
+
+		{/* ICON */}
+		<a 
+			className="px-4 py-2 flex items-center text-gray-400 relative hover:text-gray-500" 
+			onMouseEnter={() => setShowDescription(true)}
+			onMouseLeave={() => setShowDescription(false)}
+			onClick={() => {onClick(); toggleContent()}}
+		>
 			<Icon size={16} />
 		</a>
-		</li>
+
+		{/* DESCRIPTION */}
+		{showDescription && !showContent && (
+			<span className="absolute left-1/2 transform -translate-x-1/2 top-8 text-sm font-normal text-white py-1 px-2 bg-gray-400 rounded-lg">
+				{name === "Notifications" && "Notifications"}
+				{name === "Chat" && "Chat"}
+			</span>
+		)}
+		</div>
 	);
 };
 
 const NavHorizontal = () => {
 
-	const [open, setOpen] = useState(false);
-	const toggleNotifications = () => {
-		setOpen(!open);
-	}
-	
+	const [selectedSection, setSelectedSection] = useState<string | null>(null);
+
+	const toggleSection = (sectionName: string) => {
+		if (selectedSection === sectionName)
+			setSelectedSection(null);
+		else
+			setSelectedSection(sectionName);
+	};
+
+	const getContent = () => {
+		if (selectedSection === "Notifications") {
+			return (
+			<div className="shadow-md bg-gray-200 rounded-lg py-2 px-4 absolute right-2 mt-1">
+				<div className="text-xs font-normal text-param">
+				Notifications
+				</div>
+			</div>
+			);
+		} else if (selectedSection === "Chat") {
+			return (
+			<div className="shadow-md bg-gray-200 rounded-lg py-2 px-4 w-35 absolute right-2 mt-1">
+				<ul className="p-2">
+					<li className="text-xs font-normal text-param">Profil</li>
+					<li className="text-xs font-normal text-param">Settings</li>
+					<li className="text-xs font-normal text-param">Logout</li>
+				</ul>
+			</div>
+			);
+		}
+		return null;
+	};
+
 	return (
 	<section>
 		<header className="container mx-auto flex justify-between py-4 items-center">
+			{/* LOGO */}
 			<div>
 				<img src="" alt="" className="w-16" />
 			</div>
+
+			{/* NAV */}
 			<div className="right-0">
 				<ul className="flex gap-x-1 font-semibold">
 				{navItemsInfo.map((item, index) => (
-					<NavItem key={index} href={item.href} icon={item.icon} name={item.name} onClick={toggleNotifications}/>)
-				)}
-			</ul>
-			{open && (
-				<div className="notifications">
-					<div>
-						Mark as read
+					<div key={index}>
+					<li>
+						<NavItem 
+							icon={item.icon}
+							name={item.name}
+							onClick={() => {
+								toggleSection(item.name);
+							}}
+						/>
+					</li>
+					{selectedSection === item.name && (
+						<div className="relative">
+							{getContent()}
+						</div>
+					)}
+					
 					</div>
-					<button onClick={toggleNotifications}>Close Notifications</button>
-				</div>
-			)}
+				))}
+			</ul>
 			</div>
 		</header>
-	
 	</section>
 	)
 }
