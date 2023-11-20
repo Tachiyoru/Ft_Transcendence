@@ -45,20 +45,15 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 
 const NavHorizontal = () => {
 	const [selectedSection, setSelectedSection] = useState<string | null>(null);
-	
-const toggleSection = (sectionName: string) => {
-	console.log("se", selectedSection);
-	console.log("name", sectionName);
 
-	setSelectedSection((prevSection) => {
-	if (prevSection === sectionName) {
-		return null;
-	} else {
-		return sectionName;
-	}
-});
-};
-	
+	const toggleSection = (sectionName: string) => {
+
+		if (selectedSection === sectionName) {
+			setSelectedSection(null);
+		} else {
+			setSelectedSection(sectionName);
+		}
+	};
 	
 	const menuRef = useRef<HTMLDivElement>(null);
 
@@ -68,13 +63,13 @@ const toggleSection = (sectionName: string) => {
 			setSelectedSection(null);
 		}
 		};
-	
+
 		document.addEventListener("mousedown", handleClickOutside);
-	
+
 		return () => {
 		document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [selectedSection]);
+	});
 
 	const getContent = () => {
 		if (selectedSection === "Notifications") {
@@ -116,10 +111,13 @@ const toggleSection = (sectionName: string) => {
 						<NavItem 
 							icon={item.icon}
 							name={item.name}
-							onClick={() => toggleSection(item.name)}
+							onClick={() => {
+								toggleSection(item.name);
+							}}
 							selectedSection={selectedSection}
 						/>
 					</li>
+
 					{selectedSection === item.name && (
 						<div className="relative">
 							{getContent()}

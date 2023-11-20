@@ -8,12 +8,12 @@ const MainLayout = ({ children, currentPage }) => {
 			<NavHorizontal />
 		</div> 
 		<div className="flex flex-row">
-		<div className="w-1/8"> 
-			<NavVertical currentPage={currentPage} />
-		</div>
-		<div className="w-5/6 ml-4"> 
-			{children}
-		</div>
+			<div className="md:w-1/12 sm:w-2/12"> 
+				<NavVertical currentPage={currentPage} />
+			</div>
+			<div className="w-11/12 ml-4"> 
+				{children}
+			</div>
 		</div>
 	</div>
 	)

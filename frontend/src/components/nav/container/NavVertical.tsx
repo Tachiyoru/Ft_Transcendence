@@ -23,8 +23,8 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ href, icon:
 
 	return (
 	<li className="relative group">
-		<a href={href} className={`px-2 py-2 flex items-center ${iconColorClass} bg-gray-400 m-5 rounded-lg transition duration-300 ease-in-out hover:bg-gray-500 hover:scale-110`}>
-			<Icon size={32} />
+		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-gray-400 m-5 rounded-lg transition duration-300 ease-in-out hover:bg-gray-500 hover:scale-110`}>
+			<Icon size={28} />
 		</a>
 	</li>
 	);
