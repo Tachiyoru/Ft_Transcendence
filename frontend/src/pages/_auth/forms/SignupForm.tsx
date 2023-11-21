@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useContext } from 'react';
+import { useState, ChangeEvent, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AiOutlineLock,
@@ -7,11 +7,11 @@ import {
   AiOutlineCheck,
 } from 'react-icons/ai';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import UserNameField from '../fields/UserNameField';
 import EmailField from '../fields/EmailField';
 import SocialIcons from '../fields/SocialIcons';
-import { AuthContext } from '../../../context/AuthContext';
+import AuthContext from '../../../context/AuthContext';
+
 
 interface IdataRegister {
   username: string;
@@ -21,7 +21,6 @@ interface IdataRegister {
 }
 
 const SignupForm = () => {
-  const { setAuthenticated } = useContext(AuthContext);
 
   const [resStatus, setResStatus] = useState('');
   const navigate = useNavigate();
@@ -46,25 +45,12 @@ const SignupForm = () => {
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<IdataRegister>();
+//https://www.learmoreseekmore.com/2022/10/reactjs-v18-jwtauthentication-using-httponly-cookie.html
 
-  const submitHandler = (data: IdataRegister) => {
-    console.log(data);
-    axios
-      .post('http://localhost:5000/auth/signup', data)
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 201) {
-          setResStatus('Successful Registration!');
-          setAuthenticated(response.data.access_token);
-          navigate('/');
-        } else {
-          setResStatus('Error');
-        }
-      })
-      .catch(function (error) {
-        setResStatus('Error');
-        console.log(error.response.data.message);
-      });
+  const { signup } = useContext(AuthContext);
+  
+  const submitHandler = async (data: IdataRegister) => {
+    await signup(data);
   };
 
   console.log(resStatus);

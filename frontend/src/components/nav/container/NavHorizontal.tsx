@@ -96,7 +96,7 @@ const NavHorizontal = () => {
 
 	return (
 	<section>
-		<header className="container mx-auto flex justify-between py-4 items-center">
+		<header className="flex justify-end py-4">
 			{/* LOGO */}
 			<div>
 				<img src="" alt="" className="w-16" />

@@ -34,8 +34,8 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 
 	return (
 	<section>
-		<header className="container mx-auto flex justify-between py-4 items-center">
-			<div className="right-0">
+		<header className="mx-auto flex justify-between py-4 items-center">
+			<div className="">
 				<ul className="flex-col font-semibold">
 				{navItemsInfo.map((item, index) => (
 					<NavItem key={index} href={item.href} icon={item.icon} currentPage={currentPage}/>)

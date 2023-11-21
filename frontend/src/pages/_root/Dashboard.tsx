@@ -1,6 +1,8 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { FaUser } from "react-icons/fa6";
+import Profil from "./container/Profil";
+import Home from "./container/Home";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -8,9 +10,11 @@ const Dashboard = () => {
 
   return (
     <MainLayout currentPage={currentPage}>
+        <Profil/>
+        <Home/>
         <div className="flex w-full h-40rem sm:h-60rem">
           {/*leftSideBar*/}
-          <div className="w-3/12 lg:w-3/12 bg-gray-200 p-4 px-4 text-gray-400">
+          <div className="w-[220px] bg-gray-200 p-4 px-4 text-gray-400">
             
             {/*User*/}
             <div className="flex m-1 mt-4">
@@ -38,7 +42,7 @@ const Dashboard = () => {
           </div>
 
           {/*Dashboard*/}
-          <div className="w-9/12 lg:w-10/12 bg-gray-300 p-4 ">
+          <div className="w-full bg-gray-300 p-4 ">
 
             <div className="flex m-2 flex-wrap gap-2">
 
