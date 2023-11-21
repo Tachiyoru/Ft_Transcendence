@@ -10,8 +10,7 @@ import
 	UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
-import { FortyTwoAuthGuard } from './guard/42-auth.guard';
+import { AuthDto, AuthDto2 } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { User } from '@prisma/client';
@@ -32,7 +31,7 @@ export class AuthController
 	}
 
 	@Post('signin')
-	async signin(@Body() dto: AuthDto, @Res({ passthrough: true }) res: any)
+	async signin(@Body() dto: AuthDto2, @Res({ passthrough: true }) res: any)
 	{
 		const tokens = await this.authService.signin(dto);
 		res.cookie('user_token', tokens.access_token, {

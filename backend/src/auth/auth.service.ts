@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { AuthDto, AuthDto2 } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { error } from 'console';
@@ -40,7 +40,7 @@ export class AuthService
 		throw error;
 	}
 
-	async signin(dto: AuthDto)
+	async signin(dto: AuthDto2)
 	{
 		const user = await this.prisma.user.findUnique({
 			where: {

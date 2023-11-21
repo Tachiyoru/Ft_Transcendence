@@ -11,7 +11,18 @@ export class AuthDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty({message: 'error'})
+  @IsNotEmpty()
   @IsString()
   password: string;
 }
+
+export class AuthDto2 {
+	@IsNotEmpty()
+	@IsEmail()
+	email: string;
+  
+	@IsNotEmpty()
+	@IsString()
+	password: string;
+  }
+  

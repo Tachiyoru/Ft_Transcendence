@@ -1,5 +1,7 @@
 all: run
 
+re: clean run
+
 setup :
 	@echo "Installing dependencies"
 	cd backend && npm install
@@ -17,6 +19,10 @@ clean: down
 	@echo "Cleaning up"
 	rm -rf backend/prisma/migrations
 	rm -rf backend/uploads
-	docker system prune -a
+	docker system prune -af
 
-.PHONY: all setup run down
+reset_prisma:
+	rm -rf backend/node_modules
+	cd backend && npm install
+
+.PHONY: all setup run down reset_prisma clean
