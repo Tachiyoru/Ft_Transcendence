@@ -1,108 +1,116 @@
- generator client {
-  provider = "prisma-client-js"
+generator client {
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum StatusUser {
-  ONLINE
-  OFFLINE
-  INQUEUE
-  INGAME
+    ONLINE
+    OFFLINE
+    INQUEUE
+    INGAME
+}
+
+enum Role {
+    ADMIN
+    USER
+    OPERATOR
+    BANNED
 }
 
 model User {
-  id            Int         @id @default(autoincrement())
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  email         String      @unique
-  username      String?		@unique
-  avatar        String?     @unique
-  fortyTwoId    Int?   		@unique
-  hash			String
+    email    String  @unique
+    username String? @unique
+    avatar   String? @unique
+    tittle   String?
+    hash     String
 
-  status		StatusUser  @default(ONLINE)
+    fortyTwoId   Int?    @unique
+    fortyTwoAuth Boolean @default(false)
+    googleId     Boolean @default(false)
 
-  stats		 	Stats[]
+    role   Role       @default(USER)
+    status StatusUser @default(ONLINE)
 
-  friendsof		User[]      @relation("friendslist")
-  friends		User[]      @relation("friendslist")
+    stats Stats[]
 
-  blockedBy     User[]      @relation("blockedList")
-  blockedList	User[]      @relation("blockedList")
-  
-  achievements  Achievement[]
-  messages		Message[]	@relation("messageSender")
-  channel		Channel[]	@relation("chanMembers")
-  banned		Channel[]	@relation("chanBanned")
+    friendsof User[] @relation("friendslist")
+    friends   User[] @relation("friendslist")
 
-  @@map("Users")
+    blockedBy   User[] @relation("blockedList")
+    blockedList User[] @relation("blockedList")
+
+    achievements Achievement[]
+    messages     Message[]     @relation("messageSender")
+    channel      Channel[]     @relation("chanMembers")
+    banned       Channel[]     @relation("chanBanned")
+
+    @@map("Users")
 }
 
 model Achievement {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        Int
-  title         String      @unique
-  description   String
-  icon          String
+    id          Int    @id @default(autoincrement())
+    user        User   @relation(fields: [userId], references: [id])
+    userId      Int
+    title       String @unique
+    description String
+    icon        String
 
-  @@map("Achievements")
+    @@map("Achievements")
 }
 
-
 model Stats {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        Int			@unique
+    id     Int  @id @default(autoincrement())
+    user   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
 
-  fortyTwoId	Boolean		@default(false)
-  googleId		Boolean		@default(false)
+    lvl Int @default(1)
+    exp Int @default(0)
 
-  lvl			Int			@default(1)
-  exp			Int			@default(0)
+    partyPlayed Int @default(0)
+    partyWin    Int @default(0)
+    partyLose   Int @default(0)
 
-  partyPlayed	Int         @default(0)
-  partyWin		Int         @default(0)
-  partyLose		Int         @default(0)
-  
-  history		String[]    @default([])
+    history String[] @default([])
 
-  @@map("Stats")
+    @@map("Stats")
 }
 
 model Channel {
-	chanId			Int			@id @default(autoincrement())
-	name		String		@unique
-	owner		String
-	op			String[]
-	newmsg		Boolean		@default(false)
-	mentions	Int			@default(0)
-	modes		Int			@default(0)
-	password	String?
-	updatedAt	DateTime	@default(now())
-	members		User[]		@relation("chanMembers")
-	messages	Message[]	@relation("chanMessages")
-	banned		User[]		@relation("chanBanned")
+    chanId    Int       @id @default(autoincrement())
+    name      String    @unique
+    owner     String
+    op        String[]
+    newmsg    Boolean   @default(false)
+    mentions  Int       @default(0)
+    modes     Int       @default(0)
+    password  String?
+    updatedAt DateTime  @default(now())
+    members   User[]    @relation("chanMembers")
+    messages  Message[] @relation("chanMessages")
+    banned    User[]    @relation("chanBanned")
 }
 
 model Message {
-	id			Int			@id @default(autoincrement())
-	channelName	String
-	channel		Channel[]	@relation("chanMessages")
-	author		User[]		@relation("messageSender")
-	content		String
-	createdAt	DateTime	@default(now())
+    id          Int       @id @default(autoincrement())
+    channelName String
+    channel     Channel[] @relation("chanMessages")
+    author      User[]    @relation("messageSender")
+    content     String
+    createdAt   DateTime  @default(now())
 }
 
 model Game {
-	id			Int			@id @default(autoincrement())
-	name		String		@unique
-	nbrPlayers	Int			@default(0)
-	userId		Int
-	// Player		User[]		@relation(fields: [userId], references: [id])
+    id         Int    @id @default(autoincrement())
+    name       String @unique
+    nbrPlayers Int    @default(0)
+    userId     Int
+    // Player		User[]		@relation(fields: [userId], references: [id])
 }
