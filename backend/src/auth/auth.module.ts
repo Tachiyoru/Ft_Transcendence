@@ -6,6 +6,7 @@ import { JwtStrategy } from './strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtAuthMiddleware } from './strategy/jwt-auth.middleware';
 import { FortyTwoStrategy } from './strategy/42.strategy';
+import { GithubStrategy } from './strategy/github.strategy';
 
 @Module({
 	imports: [
@@ -13,7 +14,7 @@ import { FortyTwoStrategy } from './strategy/42.strategy';
 		JwtModule.register({ secret: 'feur', signOptions: { expiresIn: '3h' } }),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, JwtStrategy, FortyTwoStrategy],
+	providers: [AuthService, JwtStrategy, FortyTwoStrategy, GithubStrategy],
 })
 
 export class AuthModule implements NestModule
@@ -22,7 +23,7 @@ export class AuthModule implements NestModule
 	{
 		consumer
 			.apply(JwtAuthMiddleware)
-			.exclude('/auth/signup', '/auth/signin', '/auth/42Auth')
+			.exclude('/auth/signup', '/auth/signin', '/auth/42')
 			.forRoutes('*');
 		console.log('JwtAuthMiddleware applied');
 	}

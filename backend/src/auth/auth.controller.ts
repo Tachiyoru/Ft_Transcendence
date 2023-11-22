@@ -11,7 +11,6 @@ import
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
-import { FortyTwoAuthGuard } from './guard/42-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { User } from '@prisma/client';
@@ -42,16 +41,40 @@ export class AuthController
 	}
 
 	@UseGuards(AuthGuard('42'))
-	@Get('42Auth')
+	@Get('42')
 	async fortyTwo(@Req() req: Request, @Res({ passthrough: true }) res: any)
 	{
-		console.log('42Auth');
+		console.log('42');
 		return this.authService.fortyTwoAuth(req, res);
 	}
 
 	@Get('/42/callback')
 	@UseGuards(AuthGuard('42'))
-	async callback(@Req() req: Request, @Res() res: Response)
+	async fortyTwoCallback(@Req() req: Request, @Res() res: Response)
+	{
+		if (req.user === undefined) throw new UnauthorizedException();
+		const user: User = req.user as User;
+		const token = await this.authService.signToken(user.id, user.email);
+
+		res.cookie('access_token', token, {
+			expires: new Date(Date.now() + 3600000),
+		});
+		console.log(req.cookies.access_token);
+
+		return res.redirect(`https://google.com`); //change to profil frontend url
+	}
+
+	@UseGuards(AuthGuard('github'))
+	@Get('github')
+	async github(@Req() req: Request, @Res({ passthrough: true }) res: any)
+	{
+		console.log('github Auth');
+		return this.authService.githubAuth(req, res);
+	}
+
+	@Get('/github/callback')
+	@UseGuards(AuthGuard('github'))
+	async GithubCallback(@Req() req: Request, @Res() res: Response)
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
@@ -65,9 +88,3 @@ export class AuthController
 		return res.redirect(`https://google.com`); //change to profil frontend url
 	}
 }
-
-
-// async logout(@Res({ passthrough: true }) res) {
-//     res.cookie('user_token', '', { expires: new Date(Date.now()) });
-//     return {};
-//   }

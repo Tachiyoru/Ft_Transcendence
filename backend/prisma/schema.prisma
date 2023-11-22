@@ -23,6 +23,7 @@ model User {
   username      String?		@unique
   avatar        String?     @unique
   fortyTwoId    Int?   		@unique
+  githubId	    Int?   		@unique
   hash			String
 
   status		StatusUser  @default(ONLINE)

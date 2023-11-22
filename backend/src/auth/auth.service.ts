@@ -98,6 +98,32 @@ export class AuthService
 		return res.redirect('https://google.com');
 	}
 
+	async githubAuth(req: any, res: any)
+	{
+		const githubId: number = parseInt(req.user.id);
+		console.log('githubAuth', req.user);
+		const githubAvatar: string = req.user._json.image.link;
+		const githubEmail: string = req.user.email;
+
+		const user = await this.findUserByGithubId(githubId);
+		if (!user)
+		{
+			const payload = { githubId, githubAvatar };
+			const token = await this.signToken(githubId, githubEmail);
+			console.log('usernull in githubAuth');
+			await this.setAccessTokenCookie(res, token.access_token, 3600000);
+
+			return res.redirect('https://google.com');
+		}
+		const payload = { id: user.id, email: user.email };
+		const token = await this.signToken(payload.id, payload.email);
+		res.cookie('user_token', token.access_token, {
+			expires: new Date(Date.now() + 3600000),
+		});
+
+		return res.redirect('https://google.com');
+	}
+
 	private async setAccessTokenCookie(res: any, token: string, expiresIn: number)
 	{
 		const expirationTime = new Date(Date.now() + expiresIn);
@@ -113,6 +139,13 @@ export class AuthService
 	{
 		return this.prisma.user.findUnique({
 			where: { fortyTwoId },
+		});
+	}
+
+	private async findUserByGithubId(githubId: number)
+	{
+		return this.prisma.user.findUnique({
+			where: { githubId },
 		});
 	}
 }
