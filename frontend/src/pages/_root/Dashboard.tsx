@@ -10,17 +10,17 @@ const Dashboard = () => {
     <MainLayout currentPage={currentPage}>
         <div className="flex-1 md:flex flex-row">
           {/*leftSideBar*/}
-          <div className="grid grid-rows-[auto,1fr,auto] bg-black bg-opacity-60 p-4 px-4 text-gray-400 rounded-l-lg">
+          <div className="grid grid-rows-[auto,1fr,auto] bg-purple-950  p-4 px-4 text-gray-400 rounded-l-lg">
             
             {/*User*/}
-            <div className="flex m-1 mt-4">
-              <div className="bg-white rounded-full p-2">
-                <FaUser className="w-[66px] h-[66px] p-3 "/>
+            <div className="flex mt-4">
+              <div className="bg-purple-700	rounded-full p-2">
+                <FaUser className="w-[66px] h-[66px] p-3 text-purple-500	"/>
               </div>
               <div className="pl-4 pt-4">
-                <p className="text-xs">Member sinced 20/12/23</p>
-                <p className="text-sm font-medium">ClemCheyrou</p>
-                <p className="mt-1 text-white text-xs font-medium"><span className="bg-gray-400 py-[0.15rem] px-[0.4rem]">Legend</span></p>
+                <p className="text-xs text-purple-300">Member sinced 20/12/23</p>
+                <p className="text-sm font-medium text-purple-500">ClemCheyrou</p>
+                <p className="mt-1 text-white text-xs font-medium text-purple-200"><span className="bg-purple-400 py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
               </div>
             </div>
 
@@ -42,7 +42,7 @@ const Dashboard = () => {
           </div>
 
           {/*Dashboard*/}
-          <div className="flex-1 bg-black bg-opacity-70 p-4 rounded-r-lg">
+          <div className="flex-1 bg-purple-950 bg-opacity-80 p-4 rounded-r-lg">
 
             <div className="flex m-2 flex-row gap-4 md:gap-6">
 
