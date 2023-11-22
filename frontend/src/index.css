@@ -3,6 +3,6 @@
 @tailwind utilities;
 
 body {
-	background-image: url('Background-V01-BIG.png'); /* Chemin vers votre image */
+	background-image: url('Background-V01-BIG'); /* Chemin vers votre image */
 	background-size: cover;
 }
