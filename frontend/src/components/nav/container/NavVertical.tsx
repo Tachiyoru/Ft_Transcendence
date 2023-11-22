@@ -23,7 +23,7 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ href, icon:
 
 	return (
 	<li className="relative group">
-		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-gray-400 m-5 rounded-lg transition duration-300 ease-in-out hover:bg-gray-500 hover:scale-110`}>
+		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-gray-400 mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-gray-500 hover:scale-110`}>
 			<Icon size={28} />
 		</a>
 	</li>
@@ -34,9 +34,9 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 
 	return (
 	<section>
-		<header className="container mx-auto flex justify-between py-4 items-center">
+		<header className="container my-12 mx-auto flex justify-between items-center">
 			<div className="right-0">
-				<ul className="flex-col font-semibold">
+				<ul className="flex-col">
 				{navItemsInfo.map((item, index) => (
 					<NavItem key={index} href={item.href} icon={item.icon} currentPage={currentPage}/>)
 				)}

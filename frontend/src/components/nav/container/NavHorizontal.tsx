@@ -24,12 +24,12 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 
 		{/* ICON */}
 		<a 
-			className="px-4 py-2 flex items-center text-gray-400 relative hover:text-gray-500" 
+			className="px-3 py-2 flex items-center text-gray-400 relative hover:text-gray-500" 
 			onMouseEnter={() => setShowDescription(true)}
 			onMouseLeave={() => setShowDescription(false)}
 			onClick={() => onClick()}
 		>
-			<Icon size={16} />
+			<Icon size={14} />
 		</a>
 
 		{/* DESCRIPTION */}
@@ -96,7 +96,7 @@ const NavHorizontal = () => {
 
 	return (
 	<section>
-		<header className="container mx-auto flex justify-between py-4 items-center">
+		<header className="flex justify-between pt-4 pb-4">
 			{/* LOGO */}
 			<div>
 				<img src="" alt="" className="w-16" />

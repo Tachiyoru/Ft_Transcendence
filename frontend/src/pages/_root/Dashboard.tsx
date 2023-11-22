@@ -8,79 +8,83 @@ const Dashboard = () => {
 
   return (
     <MainLayout currentPage={currentPage}>
-        <div className="flex w-full h-40rem sm:h-60rem">
+        <div className="flex-1 md:flex flex-row">
           {/*leftSideBar*/}
-          <div className="w-3/12 lg:w-3/12 bg-gray-200 p-4 px-4 text-gray-400">
+          <div className="grid grid-rows-[auto,1fr,auto] bg-black bg-opacity-60 p-4 px-4 text-gray-400 rounded-l-lg">
             
             {/*User*/}
             <div className="flex m-1 mt-4">
-              <FaUser className="w-12 h-12 p-3 bg-white rounded-lg"/>
-              <div className="pl-2">
+              <div className="bg-white rounded-full p-2">
+                <FaUser className="w-[66px] h-[66px] p-3 "/>
+              </div>
+              <div className="pl-4 pt-4">
                 <p className="text-xs">Member sinced 20/12/23</p>
-                <p className="text-sm">Ccheyrou</p>
-                <p className="bg-gray-300 text-white text-xs rounded py-0.2 text-center">Legend</p>
+                <p className="text-sm font-medium">ClemCheyrou</p>
+                <p className="mt-1 text-white text-xs font-medium"><span className="bg-gray-400 py-[0.15rem] px-[0.4rem]">Legend</span></p>
               </div>
             </div>
 
             {/*Stats*/}
-            <div className="flex gap-2 mt-4 lg:flex-row md:flex-row sm:flex-col">
-                <div className="flex bg-white dark:text-gray-200 h-16 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
-                  <p className="text-sm">Win</p>
-                </div>
+            <div className="flex flex-col justify-end mb-2">
+              <div className="bg-white dark:text-gray-200 gap-2 mt-2 h-24 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
+                <p className="text-sm">Total</p>
+              </div>
+              <div className="flex gap-4 mt-4 flex-row">
+                  <div className="flex bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
+                    <p className="text-sm">Win</p>
+                  </div>
 
-                <div className="flex bg-white dark:text-gray-200 h-16 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
-                  <p className="text-sm">Loss</p>
-                </div>
-            </div>
-            <div className="bg-white dark:text-gray-200 gap-2 mt-2 h-20 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
-              <p className="text-sm">Loss</p>
+                  <div className="flex bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
+                    <p className="text-sm">Loss</p>
+                  </div>
+              </div>
             </div>
           </div>
 
           {/*Dashboard*/}
-          <div className="w-9/12 lg:w-10/12 bg-gray-300 p-4 ">
+          <div className="flex-1 bg-black bg-opacity-70 p-4 rounded-r-lg">
 
-            <div className="flex m-2 flex-wrap gap-2">
+            <div className="flex m-2 flex-row gap-4 md:gap-6">
 
-                <div className="bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-60 px-4 py-2  rounded-lg ">
+                <div className="bg-white dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2  rounded-lg ">
                   <p><span className="text-sm">Data</span></p>
                   <p className="text-sm text-gray-400">Badges</p>
 
                 </div>
 
-                <div className="bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-28 px-4 py-2  rounded-lg ">
+                <div className="bg-white dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
                 <p><span className="text-sm">Data</span></p>
                   <p className="text-sm text-gray-400">Badges</p>
                 </div>
 
             </div>
 
-            <div className="flex m-2 mt-2 flex-wrap gap-2">
+            <div className="flex flex-row m-2 mt-6 gap-4 md:gap-6">
 
-              <div className="bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-28 px-4 py-2 rounded-lg ">
+              <div className="bg-white dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2 rounded-lg ">
                 <p><span className="text-sm">Data</span></p>
                 <p className="text-sm text-gray-400">Podium</p>              
               </div>
 
-              <div className="bg-white h-24 dark:text-gray-200 dark:bg-secondary-dark-bg w-60 px-4 py-2 rounded-lg ">
+              <div className="bg-white h-40 dark:text-gray-200 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2 rounded-lg hidden md:block">
                 <p><span className="text-sm">Data</span></p>
                 <p className="text-sm text-gray-400">Podium</p>
               </div>
 
-              <div className="bg-white dark:text-gray-200 h-24 dark:bg-secondary-dark-bg w-28 px-4 py-2  rounded-lg ">
+              <div className="bg-white dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
                 <p><span className="text-sm">Data</span></p>
                 <p className="text-sm text-gray-400">Top players</p>
               </div>
             </div>
 
               
-            <div className="bg-white text-normal h-40 rounded-md m-2 mt-2 px-4 py-2  pt-4">
+            <div className="bg-white text-normal h-60 rounded-md m-2 mt-6 px-4 py-2 pt-4">
                 <div>
                   <p className="text-sm text-gray-400">History</p>
                 </div>
               </div>
-            </div>
 
+            </div>
         </div>
 
     </MainLayout>
