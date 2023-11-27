@@ -7,11 +7,20 @@ const Chat = () => {
 
 	return (
 	<MainLayout currentPage={currentPage}>
-	<div className="flex justify-between" style={{ height: '30rem' }}>
-		<div className="w-1/4 bg-gray-200 p-6 mr-4">Chat</div>
-		<div className="w-1/2 bg-gray-300 p-6 mr-4"></div>
-		<div className="w-1/4 bg-gray-200 p-6"></div>
-	</div>
+	    <div className="flex flex-row h-[80vh]">
+		
+		{/*LEFT SIDE BAR*/}
+		<div className="w-[425px] md:rounded-l-lg bg-dark-purple p-4 text-gray-300 text-xs">
+		</div>
+
+		{/*MIDDLE*/}
+		<div className="w-full bg-gray-300 p-4 text-gray-300 text-xs">
+		</div>
+
+		{/*RIGHT SIDE BAR*/}
+		<div className="w-[400px] md:rounded-r-lg bg-dark-purple p-4 text-gray-300 text-xs">
+		</div>
+		</div>
 	</MainLayout>
 	)
 }

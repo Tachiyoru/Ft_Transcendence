@@ -19,11 +19,11 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ href, icon:
 
 	const isCurrentPage = href === currentPage;
 
-	const iconColorClass = isCurrentPage ? "text-purple-400" : "text-purple-500";
+	const iconColorClass = isCurrentPage ? "text-pink" : "text-purple-unhoover";
 
 	return (
 	<li className="relative group">
-		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-purple-700 mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple-300 hover:scale-110`}>
+		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-purple-hoover mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple-300 hover:scale-110`}>
 			<Icon size={28} />
 		</a>
 	</li>

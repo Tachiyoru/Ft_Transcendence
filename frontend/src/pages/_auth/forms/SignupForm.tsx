@@ -11,7 +11,8 @@ import axios from 'axios';
 import UserNameField from '../fields/UserNameField';
 import EmailField from '../fields/EmailField';
 import SocialIcons from '../fields/SocialIcons';
-import { AuthContext } from '../../../context/AuthContext';
+import { useCookies } from 'react-cookie';
+import { useDispatch } from 'react-redux';
 
 interface IdataRegister {
   username: string;
@@ -21,7 +22,8 @@ interface IdataRegister {
 }
 
 const SignupForm = () => {
-  const { setAuthenticated } = useContext(AuthContext);
+  const [cookies] = useCookies(['user_token']);
+  const dispatch = useDispatch();
 
   const [resStatus, setResStatus] = useState('');
   const navigate = useNavigate();
@@ -48,14 +50,16 @@ const SignupForm = () => {
   } = useForm<IdataRegister>();
 
   const submitHandler = (data: IdataRegister) => {
-    console.log(data);
     axios
       .post('http://localhost:5000/auth/signup', data)
       .then((response) => {
         console.log(response.status);
-        if (response.status === 201) {
+        if (response.status === 201 && cookies['user_token']) {
           setResStatus('Successful Registration!');
-          setAuthenticated(response.data.access_token);
+          const token = cookies['user_token'];
+          console.log(token);
+          dispatch(loginSuccess(`Bearer ${token}`)); 
+
           navigate('/');
         } else {
           setResStatus('Error');

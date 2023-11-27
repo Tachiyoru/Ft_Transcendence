@@ -3,6 +3,20 @@
 @tailwind utilities;
 
 body {
-	background-image: url('Background-V01-BIG'); /* Chemin vers votre image */
-	background-size: cover;
+	background-image: url('Background-V01-BIG.ai'); /* Chemin vers votre image */
+	background-size: contain;
+}
+
+@layer base {
+	.font-outline-2 {
+	text-shadow:
+		0 0 5px #fff,
+		0 0 10px #fff,
+		0 0 20px #fff,
+		0 0 40px #EF1FEA,
+		0 0 80px #EF1FEA,
+		0 0 90px #EF1FEA,
+		0 0 100px #EF1FEA,
+		0 0 150px #EF1FEA;
+		}
 }
