@@ -25,8 +25,4 @@ reset_prisma:
 	rm -rf backend/node_modules
 	cd backend && npm install
 
-reset_prisma:
-	rm -rf backend/node_modules
-	cd backend && npm install
-
 .PHONY: all setup run down
