@@ -54,10 +54,10 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
-		console.log({ user_id: user.id, user_email: user.email });
 		const token = await this.authService.signToken(user.id, user.email);
 		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
+		console.log('fortyTwoCallback ---> access_token', token);
 		res.cookie('access_token', token, {
 			expires: new Date(Date.now() + 3600000),
 		});
