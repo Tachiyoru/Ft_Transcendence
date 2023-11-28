@@ -37,6 +37,8 @@ model User {
 	githubId	    Int?   		@unique
     googleId     Boolean @default(false)
 
+	twoFASecret String? @unique
+
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)
 

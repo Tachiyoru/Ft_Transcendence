@@ -7,14 +7,16 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtAuthMiddleware } from './strategy/jwt-auth.middleware';
 import { FortyTwoStrategy } from './strategy/42.strategy';
 import { GithubStrategy } from './strategy/github.strategy';
+import { TwoFaController } from './twoFA/two-fa/two-fa.controller';
+import { TwoFaService } from './twoFA/two-fa/two-fa.service';
 
 @Module({
 	imports: [
 		PassportModule.register({ defaultStrategy: 'jwt' }),
 		JwtModule.register({ secret: 'feur', signOptions: { expiresIn: '3h' } }),
 	],
-	controllers: [AuthController],
-	providers: [AuthService, JwtStrategy, FortyTwoStrategy, GithubStrategy],
+	controllers: [AuthController, TwoFaController],
+	providers: [AuthService, JwtStrategy, FortyTwoStrategy, GithubStrategy, TwoFaService],
 })
 
 export class AuthModule implements NestModule

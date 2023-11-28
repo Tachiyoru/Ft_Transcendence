@@ -6,6 +6,8 @@ import { AuthDto, AuthDto2 } from "./dto";
 import * as argon from "argon2";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
+import { User } from "@prisma/client";
+import { GetUser } from "./decorator";
 
 @Injectable({})
 export class AuthService
@@ -13,7 +15,7 @@ export class AuthService
 	constructor(
 		private prisma: PrismaService,
 		private jwt: JwtService,
-		private config: ConfigService
+		private config: ConfigService,
 	) {}
 
 	async signup(dto: AuthDto)
@@ -150,6 +152,14 @@ export class AuthService
 	{
 		return this.prisma.user.findUnique({
 			where: { githubId },
+		});
+	}
+
+	async set2FASecret(@GetUser() user: User, secret: string, userId: number): Promise<User>
+	{
+		return this.prisma.user.update({
+			where: { id: userId },
+			data: { twoFASecret: secret },
 		});
 	}
 }
