@@ -1,14 +1,14 @@
 import
-	{
-		Body,
-		Controller,
-		Get,
-		Post,
-		Req,
-		Res,
-		UnauthorizedException,
-		UseGuards,
-	} from "@nestjs/common";
+{
+	Body,
+	Controller,
+	Get,
+	Post,
+	Req,
+	Res,
+	UnauthorizedException,
+	UseGuards,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthDto, AuthDto2 } from "./dto";
 import { AuthGuard } from "@nestjs/passport";
@@ -54,12 +54,13 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
+		console.log({ user_id: user.id, user_email: user.email });
 		const token = await this.authService.signToken(user.id, user.email);
+		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
 		res.cookie('access_token', token, {
 			expires: new Date(Date.now() + 3600000),
 		});
-		console.log(req.cookies.access_token);
 
 		return res.redirect(`https://google.com`); //change to profil frontend url
 	}
