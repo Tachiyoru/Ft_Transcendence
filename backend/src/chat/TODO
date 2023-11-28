@@ -1,5 +1,5 @@
 - Create the chat room
--	Set the owner of the chat room (from cookies ?)
+- Set the owner of the chat room (from cookies ?)
 - Allow the owner to add/remove users
 - Allow the owner to delete the chat room
 - Allow the owner to change the chat room name
@@ -14,4 +14,3 @@
 - Add notifications when a user joins/leaves the chat room
 - Add notifications there is a new message (if not in the chat room)
 - Add notifications when the user is mentioned (with count of mentions)
-

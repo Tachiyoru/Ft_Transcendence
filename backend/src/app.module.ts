@@ -6,7 +6,7 @@ import { AuthModule } from "./auth/auth.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
-// import { GatewayModule } from "./chat/gateway/gateway.module";
+import { chatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { MulterModule } from "@nestjs/platform-express";
     UserModule,
     AuthModule,
     PrismaModule,
-    // GatewayModule,
+    chatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

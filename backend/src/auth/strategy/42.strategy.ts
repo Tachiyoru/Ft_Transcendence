@@ -8,9 +8,9 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, "42") {
   constructor(configService: ConfigService) {
     // console.log('42Strategy');
     super({
-      clientID: configService.get("CLIENT_ID"),
-      clientSecret: configService.get("CLIENT_SECRET"),
-      callbackURL: configService.get("CALLBACK_URL"),
+      clientID: configService.get("f_CLIENT_ID"),
+      clientSecret: configService.get("f_CLIENT_SECRET"),
+      callbackURL: configService.get("f_CALLBACK_URL"),
     });
   }
 

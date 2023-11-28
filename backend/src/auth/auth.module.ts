@@ -15,6 +15,8 @@ import { FortyTwoStrategy } from "./strategy/42.strategy";
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, FortyTwoStrategy],
 })
+/// le middleware est appliqué sur toutes les routes sauf sur les routes precisées dans le exclude, 
+//il va s'appliquer a chaque route et verifier que l'utilisateur est bien log sinon il retournera une redirection vers la page signin/up a voir
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer

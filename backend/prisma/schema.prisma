@@ -21,6 +21,13 @@ enum Role {
     BANNED
 }
 
+enum Mode {
+    CHAT // user to user
+    CONVERSATION // user to n users
+    PRIVATE	// user to n user with password
+    INVONLY // user to n user with invitation
+}
+
 model User {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
@@ -90,7 +97,7 @@ model Channel {
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)
-    modes     Int       @default(0)
+    modes     Mode      @default(CHAT)
     password  String?
     updatedAt DateTime  @default(now())
     members   User[]    @relation("chanMembers")

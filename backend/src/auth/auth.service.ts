@@ -85,7 +85,7 @@ export class AuthService {
     res.cookie("user_token", token.access_token, {
       expires: new Date(Date.now() + 3600000),
     });
-
+	
     return res.redirect("https://google.com");
   }
 

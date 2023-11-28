@@ -47,13 +47,14 @@ export class AuthController {
   @UseGuards(AuthGuard("42"))
   async callback(@Req() req: Request, @Res() res: Response) {
     if (req.user === undefined) throw new UnauthorizedException();
+	console.log('callback successsssssss');
     const user: User = req.user as User;
     const token = await this.authService.signToken(user.id, user.email);
     res.cookie("access_token", token, {
       expires: new Date(Date.now() + 3600000),
     });
     // console.log(req.cookies.access_token);
-
+	console.log('callback success');
     return res.redirect(`https://google.com`); //change to profil frontend url
   }
 }
