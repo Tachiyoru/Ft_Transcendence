@@ -24,7 +24,7 @@ enum Role {
 enum Mode {
     CHAT // user to user
     CONVERSATION // user to n users
-    PRIVATE	// user to n user with password
+    PRIVATE // user to n user with password
     INVONLY // user to n user with invitation
 }
 
@@ -58,6 +58,7 @@ model User {
     messages     Message[]     @relation("messageSender")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
+    Channel      Channel[]
 
     @@map("Users")
 }
@@ -93,7 +94,7 @@ model Stats {
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     String
+    owner     User      @relation(fields: [chanId], references: [id])
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)

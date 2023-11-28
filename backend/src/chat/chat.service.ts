@@ -1,10 +1,8 @@
-import { Injectable, Request } from "@nestjs/common";
+import { Injectable, Request, RequestMapping } from "@nestjs/common";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { UpdateMessageDto } from "./dto/update-message.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Channel, User } from "@prisma/client";
-import { Socket } from "socket.io";
-import { ChannelCreateInput } from "./creat.input";
+import { Channel, Mode, User } from "@prisma/client";
 
 @Injectable()
 export class chatService {
@@ -15,21 +13,11 @@ export class chatService {
   // 	// Appeler le serveur pour créer un nouveau canal
   // 	socket.emit('createChannel', { channelName });
   //   };
-  private async createChan(chaninput: ChannelCreateInput) {
-    const chan = await this.prisma.channel.findFirst();
-    if (!chan) {
-      await this.prisma.channel.create({
-        data: {
-          name: chaninput.name,
-          owner: chaninput.owner,
-        },
-      });
-    }
-  }
 
   async createChannel(
     channelName: string,
-		users: User[],
+    users: User[],
+    mode: Mode,
     @Request() req: any
   ) {
     // voir dans le front comment envoyer sois la liste des target pour la conversation soit juste un nom pour le chan directement
@@ -40,10 +28,163 @@ export class chatService {
       channelName = channelName + "1";
     }
     const channel: Channel = await this.prisma.channel.create({
-      data: { name: channelName, owner: req.user.username },
-      // voir si on peut deja la ajouter les users dans le chan via la variables members:User[]
+      data: {
+        name: channelName,
+        modes: mode,
+        owner: { connect: { id: req.user.id } },
+        members: { connect: users.map((user) => ({ id: user.id })) },
+      },
     });
+    return channel;
   }
+
+  async addOp(chanName: string, username: string, owner: User, req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user.id === owner) {
+      throw new Error("You are not allowed to add an op to this channel");
+    }
+    if (chan.op.includes(username)) {
+      throw new Error("User is already an op in this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: { op: { push: username } },
+    });
+
+    return updatedChannel;
+  }
+
+  async renameChan(chanName: string, newName: string, owner: User, req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user === owner || chan.op.includes(req.user.username)) {
+      const updatedChannel = await this.prisma.channel.update({
+        where: { name: chanName },
+        data: { name: newName },
+      });
+      return updatedChannel;
+    } else {
+      throw new Error("You are not allowed to rename this channel");
+    }
+  }
+
+  async joinChannel(chanName: string, banlist: User[], @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (banlist.includes(req.user)) {
+      throw new Error("You are banned from this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: { members: { connect: { id: req.user.id } } },
+    });
+    return updatedChannel;
+  }
+
+  async leaveChannel(chanName: string, owner: User, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user === owner) {
+      await this.prisma.channel.delete({
+        where: { name: chanName },
+      });
+      return {
+        success: true,
+        message: `Channel ${chanName} deleted successfully`,
+      };
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: { members: { disconnect: { id: req.user.id } } },
+    });
+    return updatedChannel;
+  }
+
+  async banUser(
+    chanName: string,
+    username: string,
+    banlist: User[],
+    owner: User,
+    req: any
+  ) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user !== owner && !chan.op.includes(req.user.username)) {
+      throw new Error("You are not allowed to ban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    if (banlist.includes(target)) {
+      throw new Error("User is already banned from this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: {
+        banned: { connect: { id :target.id } },
+        members: { disconnect: { id :target.id } },
+      },
+    });
+    return updatedChannel;
+  }
+
+  async unBanUser(
+    chanName: string,
+    username: string,
+    banlist: User[],
+    owner: User,
+    req: any
+  ) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user !== owner && !chan.op.includes(req.user.username)) {
+      throw new Error("You are not allowed to unban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+	if (!target) {
+		throw new Error("Could not find user");
+	  }
+	  if (!banlist.includes(target)) {
+		throw new Error("User is not banned from this channel");
+	  }
+	  const updatedChannel = await this.prisma.channel.update({
+		where: { name: chanName },
+		data: {
+		  banned: { disconnect: { id :target.id } },
+		},
+	  });
+	  return updatedChannel;
+	}
 
   //   async messageSend(@Request() req: any, createMessageDto: CreateMessageDto) {
   //     const user: User = req.user;
