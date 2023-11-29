@@ -22,7 +22,7 @@ services:
       dockerfile: ./Dockerfile
     command: npm run start:migrate:dev
     ports:
-      - 5000:5000
+      - 5001:5001
     depends_on:
       - trsc_db
     env_file:

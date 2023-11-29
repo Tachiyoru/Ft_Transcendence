@@ -9,17 +9,17 @@ const Chat = () => {
 	<MainLayout currentPage={currentPage}>
 	    <div className="flex flex-row h-[80vh]">
 		
-		{/*LEFT SIDE BAR*/}
-		<div className="w-[425px] md:rounded-l-lg bg-dark-purple p-4 text-gray-300 text-xs">
-		</div>
+			{/*LEFT SIDE BAR*/}
+			<div className="w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs">
+			</div>
 
-		{/*MIDDLE*/}
-		<div className="w-full bg-gray-300 p-4 text-gray-300 text-xs">
-		</div>
+			{/*MIDDLE*/}
+			<div className="flex-1 bg-dark-violet p-4 text-gray-300 text-xs">
+			</div>
 
-		{/*RIGHT SIDE BAR*/}
-		<div className="w-[400px] md:rounded-r-lg bg-dark-purple p-4 text-gray-300 text-xs">
-		</div>
+			{/*RIGHT SIDE BAR*/}
+			<div className="w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs hidden lg:block">
+			</div>~
 		</div>
 	</MainLayout>
 	)

@@ -11,9 +11,10 @@ import Dashboard from './pages/_root/Dashboard';
 import ForgetPassword from './pages/_auth/forms/ForgetPassword';
 import Game from './pages/_game/Game';
 import Chat from './pages/_chat/Chat';
-import AllFriends from './pages/_friends/container/AllFriends copy 2';
-import Invitations from './pages/_friends/container/Invitations';
-import BlockedFriends from './pages/_friends/container/BlockedFriends';
+import Friends from './pages/_friends/Friends';
+import SetFriends from './pages/_friends/container/SetFriends';
+import AccountSetting from './pages/_editProfile/container/AccountSetting';
+import Settings from './pages/_editProfile/EditProfile';
 
 const App:React.FC = () => {  
   return (
@@ -26,10 +27,13 @@ const App:React.FC = () => {
 			<Route index element={<Dashboard />} />
 			<Route path="/game" element={<Game />} />
 			<Route path="/chat" element={<Chat />} />
-			<Route path="/friends" element={<AllFriends />} />
-			<Route path="/all_friends" element={<AllFriends/>} />
-			<Route path="/invitations" element={<Invitations />} />
-			<Route path="/blocked_friends" element={<BlockedFriends />} />
+			<Route path="/friends" element={<Friends />}>
+				<Route path="/friends" element={<SetFriends />}/>
+			</Route>
+			<Route path="/settings" element={<Settings />}>			
+				<Route path="/settings" element={<AccountSetting />}/>
+			</Route>			
+			
 		</Route>
 
 		{/*private routes */}

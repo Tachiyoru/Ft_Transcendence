@@ -25,15 +25,15 @@ const Game = () => {
 					<div className="flex w-full h-80 p-4 rounded-lg grid grid-rows-[auto,1fr,auto] bg-black bg-opacity-20">
 						<div></div>
 						<div></div>
-						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-medium-purple">
+						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-purple">
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Invite friends</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Invite friends</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
-							<div className="border-t border-light-purple"></div>
+							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Random player</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Random player</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
 					</div>
@@ -42,15 +42,15 @@ const Game = () => {
 					<div className="flex w-full h-80 p-4 rounded-lg grid grid-rows-[auto,1fr,auto] bg-black bg-opacity-20">
 						<div></div>
 						<div></div>
-						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-medium-purple">
+						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-purple">
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Invite friends</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Invite friends</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
-							<div className="border-t border-light-purple"></div>
+							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Random player</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Random player</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
 					</div>
@@ -59,15 +59,15 @@ const Game = () => {
 					<div className="flex w-full h-80 p-4 rounded-lg grid grid-rows-[auto,1fr,auto] bg-black bg-opacity-20">
 						<div></div>
 						<div></div>
-						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-medium-purple">
+						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-purple">
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Invite friends</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Invite friends</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
-							<div className="border-t border-light-purple"></div>
+							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-light-purple">Random player</div>
-								<IoIosArrowForward className="w-2 h-2 text-light-purple"/>
+								<div className="text-xs text-lilac">Random player</div>
+								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
 					</div>

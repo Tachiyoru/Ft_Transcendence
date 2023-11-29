@@ -50,14 +50,15 @@ const SignupForm = () => {
   } = useForm<IdataRegister>();
 
   const submitHandler = (data: IdataRegister) => {
+    console.log(data);
     axios
-      .post('http://localhost:5000/auth/signup', data)
+      .post('http://localhost:5001/auth/signup', data)
       .then((response) => {
-        console.log(response.status);
+        console.log("test", response.status);
         if (response.status === 201 && cookies['user_token']) {
           setResStatus('Successful Registration!');
           const token = cookies['user_token'];
-          console.log(token);
+          console.log("salut", token);
           dispatch(loginSuccess(`Bearer ${token}`)); 
 
           navigate('/');
@@ -96,7 +97,7 @@ const SignupForm = () => {
 
   return (
     <div>
-      <section className="container mx-auto px-5 py-10">
+      <section className="container bg-black bg-opacity-70 rounded-md mt-20 px-5 py-10">
         <div className="w-full max-w-sm mx-auto">
           <h1 className="text-2xl text-center mb-8">Create an Account</h1>
           <form onSubmit={handleSubmit(submitHandler)}>
@@ -120,8 +121,8 @@ const SignupForm = () => {
 
             {/*Form Password*/}
             <div className="mb-4 w-full">
-              <div className="flex flex-row items-center border-b">
-                <AiOutlineLock className="w-4 h-4" />
+              <div className="flex flex-row items-center border-b border-lilac">
+                <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
                   id="password"
@@ -136,7 +137,7 @@ const SignupForm = () => {
                     },
                   })}
                   placeholder="Enter Password"
-                  className="px-5 py-4 w-full outline-none"
+                  className="px-5 py-4 w-full text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
                   onChange={handlePasswordChange}
                 />
                 <button
@@ -146,9 +147,9 @@ const SignupForm = () => {
                   }}
                 >
                   {passwordIsVisible ? (
-                    <AiOutlineEyeInvisible className="w-4 h-4" />
+                    <AiOutlineEyeInvisible className="w-4 h-4 text-lilac" />
                   ) : (
-                    <AiOutlineEye className="w-4 h-4" />
+                    <AiOutlineEye className="w-4 h-4 text-lilac" />
                   )}
                 </button>
               </div>
@@ -203,8 +204,8 @@ const SignupForm = () => {
             </div>
 
             <div className="mb-6 w-full">
-              <div className="flex flex-row items-center border-b">
-                <AiOutlineLock className="w-4 h-4" />
+              <div className="flex flex-row items-center border-lilac border-b">
+                <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
                   id="confirmPassword"
@@ -215,7 +216,7 @@ const SignupForm = () => {
                     },
                   })}
                   placeholder="Confirm Password"
-                  className="px-5 py-4 w-full outline-none"
+                  className="px-5 py-4 w-full text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
                   onChange={handleConfirmPassword}
                 />
                 <button
@@ -225,9 +226,9 @@ const SignupForm = () => {
                   }}
                 >
                   {passwordIsVisible ? (
-                    <AiOutlineEyeInvisible className="w-4 h-4" />
+                    <AiOutlineEyeInvisible className="w-4 h-4 text-lilac" />
                   ) : (
-                    <AiOutlineEye className="w-4 h-4" />
+                    <AiOutlineEye className="w-4 h-4 text-lilac" />
                   )}
                 </button>
               </div>
@@ -253,22 +254,22 @@ const SignupForm = () => {
             <button
               type="submit"
               disabled={!isValid || !confirmPassword}
-              className="border bg-gray-200 py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
+              className="border bg-lilac py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
             >
               Create an account
             </button>
 
-            <p className="text-sm text-center mb-8">
+            <p className="text-sm text-center text-lilac mb-8">
               You have an account?{' '}
-              <Link to="/sign-in" className="underline">
+              <Link to="/sign-in" className="text-lilac underline">
                 Login now
               </Link>
             </p>
 
             <div className="flex items-center mb-2 ">
-              <div className="border-t flex-grow border-gray-300"></div>
-              <span className="mx-4 text-sm text-gray-500">OR</span>
-              <div className="border-t flex-grow border-gray-300"></div>
+              <div className="border-t flex-grow border-lilac"></div>
+              <span className="mx-4 text-sm text-lilac">OR</span>
+              <div className="border-t flex-grow border-lilac"></div>
             </div>
 
             {/*Social Sign*/}

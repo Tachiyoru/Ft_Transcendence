@@ -13,7 +13,7 @@
 # COPY ./ ./
 
 # # Exposes port
-# EXPOSE 5000
+# EXPOSE 5001
 
 # # For prisma update
 # # CMD ["tail", "-f", "/dev/null"]

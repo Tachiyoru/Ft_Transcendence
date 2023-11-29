@@ -27,7 +27,7 @@ export class AuthController
 		res.cookie('user_token', tokens.access_token, {
 			expires: new Date(Date.now() + 360000000),
 		});
-		return 'feur';
+		return res.cookie;
 	}
 
 	@Post('signin')

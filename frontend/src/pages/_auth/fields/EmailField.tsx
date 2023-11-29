@@ -2,8 +2,8 @@ import { AiOutlineMail } from "react-icons/ai";
 
 const EmailField = ({ register, errors, showUsernameErrors, resStatus, setShowUsernameErrors}) => (
 	<div className='mb-2 w-full'>
-	<div className='flex flex-row items-center border-b'>
-		<AiOutlineMail className= 'w-4 h-4'/>
+	<div className='flex flex-row items-center border-b border-lilac'>
+		<AiOutlineMail className= 'w-4 h-4 text-lilac'/>
 		<input
 		type="email"
 		id="email"
@@ -20,7 +20,7 @@ const EmailField = ({ register, errors, showUsernameErrors, resStatus, setShowUs
 		})}
 
 		placeholder='Enter Email'
-		className= 'px-5 py-4 outline-none'
+		className= 'px-5 py-4 text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none'
 		/>
 
 	</div>

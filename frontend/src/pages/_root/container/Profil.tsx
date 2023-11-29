@@ -13,7 +13,7 @@ const Profil = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/users/me', {
+        const response = await axios.get('http://localhost:5001/users/me', {
           headers: {
             Authorization: `Bearer ${authenticated}`,
           },

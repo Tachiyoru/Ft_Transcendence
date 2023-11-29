@@ -10,12 +10,13 @@ async function bootstrap()
 	dotenv.config();
 	const app = await NestFactory.create(AppModule);
 	app.enableCors({
-		origin: 'http://localhost',
+		origin: 'http://localhost:5173',
+		allowedHeaders: 'Content-Type,Authorization',
 		credentials: true,
 	});
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 	app.use(cookieParser());
 	app.use(passport.initialize());
-	await app.listen(5000);
+	await app.listen(5001);
 }
 bootstrap();
