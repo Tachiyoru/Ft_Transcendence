@@ -58,15 +58,43 @@ model User {
     messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
-    Channel      Channel[]
+    ownedChannel Channel[]     @relation("ownedchan")
 
     @@map("Users")
+}
+
+model Achievement {
+    id          Int    @id @default(autoincrement())
+    user        User   @relation(fields: [userId], references: [id])
+    userId      Int
+    title       String @unique
+    description String
+    icon        String
+
+    @@map("Achievements")
+}
+
+model Stats {
+    id     Int  @id @default(autoincrement())
+    user   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
+
+    lvl Int @default(1)
+    exp Int @default(0)
+
+    partyPlayed Int @default(0)
+    partyWin    Int @default(0)
+    partyLose   Int @default(0)
+
+    history String[] @default([])
+
+    @@map("Stats")
 }
 
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     User      @relation(fields: [chanId], references: [id])
+    owner     User      @relation("ownedchan", fields: [chanId], references: [id])
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)
@@ -86,37 +114,6 @@ model Message {
     content     String
     createdAt   DateTime @default(now())
 }
-
-
-model Achievement {
-    id          Int    @id @default(autoincrement())
-    user        User   @relation(fields: [userId], references: [id])
-    userId      Int
-    title       String @unique
-    description String
-    icon        String
-
-    @@map("Achievements")
-}
-
-
-model Stats {
-    id     Int  @id @default(autoincrement())
-    user   User @relation(fields: [userId], references: [id])
-    userId Int  @unique
-
-    lvl Int @default(1)
-    exp Int @default(0)
-
-    partyPlayed Int @default(0)
-    partyWin    Int @default(0)
-    partyLose   Int @default(0)
-
-    history String[] @default([])
-
-    @@map("Stats")
-}
-
 
 model Game {
     id         Int    @id @default(autoincrement())

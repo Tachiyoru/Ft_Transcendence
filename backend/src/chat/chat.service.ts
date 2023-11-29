@@ -1,8 +1,12 @@
-import { Injectable, Request, RequestMapping } from "@nestjs/common";
-import { CreateMessageDto } from "./dto/create-message.dto";
-import { UpdateMessageDto } from "./dto/update-message.dto";
+import { Injectable, Request } from "@nestjs/common";
+import {
+  CreateMessageDto,
+  UpdateMessageDto,
+  createChannel,
+} from "./dto/create-message.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Channel, Message, Mode, User } from "@prisma/client";
+import * as argon from "argon2";
 
 @Injectable()
 export class chatService {
@@ -14,31 +18,36 @@ export class chatService {
   // 	socket.emit('createChannel', { channelName });
   //   };
 
-  async createChannel(
-    channelName: string,
-    users: User[],
-    mode: Mode,
-    @Request() req: any
-  ) {
-    // voir dans le front comment envoyer sois la liste des target pour la conversation soit juste un nom pour le chan directement
+  // voir dans le front comment envoyer sois la liste des target pour la conversation soit juste un nom pour le chan directement
+  async createChannel(settings: createChannel, @Request() req: any) {
     const existingChannel = await this.prisma.channel.findUnique({
-      where: { name: channelName },
+      where: { name: settings.name },
     });
-    while (existingChannel) {
-      channelName = channelName + "1";
+    if (existingChannel) {
+      throw new Error("Channel's name is already taken");
     }
+
+    const hashedPassword: string = settings.password
+      ? await argon.hash(settings.password)
+      : "";
     const channel: Channel = await this.prisma.channel.create({
       data: {
-        name: channelName,
-        modes: mode,
+        name: settings.name,
+        modes: settings.mode,
+        password: hashedPassword,
         owner: { connect: { id: req.user.id } },
-        members: { connect: users.map((user) => ({ id: user.id })) },
+        members: { connect: settings.members.map((user) => ({ id: user.id })) },
       },
     });
     return channel;
   }
 
-  async addOp(chanName: string, username: string, owner: User, req: any) {
+  async addOp(
+    chanName: string,
+    username: string,
+    owner: User,
+    @Request() req: any
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
@@ -59,7 +68,12 @@ export class chatService {
     return updatedChannel;
   }
 
-  async renameChan(chanName: string, newName: string, owner: User, req: any) {
+  async renameChan(
+    chanName: string,
+    newName: string,
+    owner: User,
+    @Request() req: any
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
@@ -87,6 +101,11 @@ export class chatService {
     if (banlist.includes(req.user)) {
       throw new Error("You are banned from this channel");
     }
+	if (chan.modes === Mode.CHAT) {
+    } else if (chan.modes === Mode.CONVERSATION) {
+    } else if (chan.modes === Mode.PRIVATE) {
+    } else if (chan.modes === Mode.INVONLY) {
+    }
     const updatedChannel = await this.prisma.channel.update({
       where: { name: chanName },
       data: { members: { connect: { id: req.user.id } } },
@@ -94,7 +113,11 @@ export class chatService {
     return updatedChannel;
   }
 
-  async leaveChannel(chanName: string, owner: User, @Request() req: any) {
+  async leaveChannel(
+    chanName: string,
+    owner: User,
+    @Request() @Request() req: any
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
@@ -122,7 +145,7 @@ export class chatService {
     username: string,
     banlist: User[],
     owner: User,
-    req: any
+    @Request() req: any
   ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
@@ -157,7 +180,7 @@ export class chatService {
     username: string,
     banlist: User[],
     owner: User,
-    req: any
+    @Request() req: any
   ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
@@ -186,7 +209,12 @@ export class chatService {
     return updatedChannel;
   }
 
-  async kickUser(chanName: string, username: string, owner: User, req: any) {
+  async kickUser(
+    chanName: string,
+    username: string,
+    owner: User,
+    @Request() req: any
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
@@ -213,7 +241,7 @@ export class chatService {
 
   async createMessage(
     createMessageDto: CreateMessageDto,
-    req: any
+    @Request() req: any
   ): Promise<Message> {
     const { content, chanName } = createMessageDto;
     const chan = await this.prisma.channel.findUnique({
@@ -243,11 +271,8 @@ export class chatService {
     return message;
   }
 
-  async updateMessage(
-	UpdateMessageDto:UpdateMessageDto,
-    req: any
-  ) {
-    const { content, chanName, msgId} = UpdateMessageDto;
+  async updateMessage(UpdateMessageDto: UpdateMessageDto, @Request() req: any) {
+    const { content, chanName, msgId } = UpdateMessageDto;
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
@@ -275,7 +300,12 @@ export class chatService {
     return updatedChannel;
   }
 
-  async removeMessages(chanName: string, msgId: number, owner: User, req: any) {
+  async removeMessages(
+    chanName: string,
+    msgId: number,
+    owner: User,
+    @Request() req: any
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });

@@ -1,4 +1,4 @@
-import { StatusUser, User } from "@prisma/client";
+import { Mode, User } from "@prisma/client";
 
 export class Message {
   message: string;
@@ -7,23 +7,14 @@ export class Message {
 //   createdAt: Date = new Date(Date.now());
 }
 
-export type Member = {
-  memberId: number;
-  nickName: string;
-  avatar: string;
-  status: StatusUser;
-  modes: string;
-};
-
 export class Channel {
   chanId: number;
   name: string;
-  owner: string;
+  owner: User;
   op: string[];
-  modes: number;
+  modes: Mode;
   password: string;
-  userLimit: number;
-  members: Member[];
+  members: User[];
   messages: Message[];
   bannedUsers: User[];
 }

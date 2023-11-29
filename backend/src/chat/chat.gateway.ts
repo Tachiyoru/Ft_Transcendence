@@ -6,14 +6,16 @@ import {
   ConnectedSocket,
 } from "@nestjs/websockets";
 import { chatService } from "./chat.service";
-import { CreateMessageDto } from "./dto/create-message.dto";
+import {
+  CreateMessageDto,
+  UpdateMessageDto,
+  createChannel,
+} from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import { Request } from "@nestjs/common";
-import { Channel, Message, Mode, User } from "@prisma/client";
+import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { channel } from "diagnostics_channel";
-import { resourceLimits } from "worker_threads";
-import { UpdateMessageDto } from "./dto/update-message.dto";
 
 @WebSocketGateway({})
 export class chatGateway {
@@ -27,21 +29,19 @@ export class chatGateway {
   @SubscribeMessage("createChannel")
   async createchan(
     client: Socket,
+    @MessageBody("settings") settings: createChannel,
     @MessageBody() data: { chanName: string; users: User[]; mode: Mode },
     @Request() req: any
   ) {
-    const { chanName, users, mode } = data;
     try {
-      const chan = await this.chatService.createChannel(
-        chanName,
-        users,
-        mode,
-        req
-      );
+      const chan = await this.chatService.createChannel(settings, req);
       client.emit("channelCreated", chan);
-      client.join(chanName);
+      client.join(chan.name);
     } catch (error) {
-      client.emit("channelCreateError", { error: "Could not create channel" });
+      client.emit("channelCreateError", {
+        error: "Could not create channel because :",
+        message: error.message,
+      });
     }
   }
 
@@ -309,10 +309,12 @@ export class chatGateway {
     @MessageBody() UpdateMessageDto: UpdateMessageDto,
     @Request() req: any
   ) {
-    return this.chatService.updateMessage(
-		UpdateMessageDto,
-      req
-    );
+    try {
+      this.chatService.updateMessage(UpdateMessageDto, req);
+      this.server.emit("messageUpdated");
+    } catch (error) {
+      client.emit("createMsgError", { message: error.message });
+    }
   }
 
   @SubscribeMessage("removeMessage")
