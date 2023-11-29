@@ -55,40 +55,12 @@ model User {
     blockedList User[] @relation("blockedList")
 
     achievements Achievement[]
-    messages     Message[]     @relation("messageSender")
+    messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
     Channel      Channel[]
 
     @@map("Users")
-}
-
-model Achievement {
-    id          Int    @id @default(autoincrement())
-    user        User   @relation(fields: [userId], references: [id])
-    userId      Int
-    title       String @unique
-    description String
-    icon        String
-
-    @@map("Achievements")
-}
-
-model Stats {
-    id     Int  @id @default(autoincrement())
-    user   User @relation(fields: [userId], references: [id])
-    userId Int  @unique
-
-    lvl Int @default(1)
-    exp Int @default(0)
-
-    partyPlayed Int @default(0)
-    partyWin    Int @default(0)
-    partyLose   Int @default(0)
-
-    history String[] @default([])
-
-    @@map("Stats")
 }
 
 model Channel {
@@ -107,13 +79,44 @@ model Channel {
 }
 
 model Message {
-    id          Int       @id @default(autoincrement())
+    id          Int      @id @default(autoincrement())
     channelName String
-    channel     Channel[] @relation("chanMessages")
-    author      User[]    @relation("messageSender")
+    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name])
+    author      User     @relation("author", fields: [id], references: [id])
     content     String
-    createdAt   DateTime  @default(now())
+    createdAt   DateTime @default(now())
 }
+
+
+model Achievement {
+    id          Int    @id @default(autoincrement())
+    user        User   @relation(fields: [userId], references: [id])
+    userId      Int
+    title       String @unique
+    description String
+    icon        String
+
+    @@map("Achievements")
+}
+
+
+model Stats {
+    id     Int  @id @default(autoincrement())
+    user   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
+
+    lvl Int @default(1)
+    exp Int @default(0)
+
+    partyPlayed Int @default(0)
+    partyWin    Int @default(0)
+    partyLose   Int @default(0)
+
+    history String[] @default([])
+
+    @@map("Stats")
+}
+
 
 model Game {
     id         Int    @id @default(autoincrement())

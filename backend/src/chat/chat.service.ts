@@ -2,7 +2,7 @@ import { Injectable, Request, RequestMapping } from "@nestjs/common";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { UpdateMessageDto } from "./dto/update-message.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Channel, Mode, User } from "@prisma/client";
+import { Channel, Message, Mode, User } from "@prisma/client";
 
 @Injectable()
 export class chatService {
@@ -45,7 +45,7 @@ export class chatService {
     if (!chan) {
       throw new Error("Could not find channel");
     }
-    if (req.user.id === owner) {
+    if (req.user !== owner) {
       throw new Error("You are not allowed to add an op to this channel");
     }
     if (chan.op.includes(username)) {
@@ -145,8 +145,8 @@ export class chatService {
     const updatedChannel = await this.prisma.channel.update({
       where: { name: chanName },
       data: {
-        banned: { connect: { id :target.id } },
-        members: { disconnect: { id :target.id } },
+        banned: { connect: { id: target.id } },
+        members: { disconnect: { id: target.id } },
       },
     });
     return updatedChannel;
@@ -171,39 +171,139 @@ export class chatService {
     const target = await this.prisma.user.findUnique({
       where: { username: username },
     });
-	if (!target) {
-		throw new Error("Could not find user");
-	  }
-	  if (!banlist.includes(target)) {
-		throw new Error("User is not banned from this channel");
-	  }
-	  const updatedChannel = await this.prisma.channel.update({
-		where: { name: chanName },
-		data: {
-		  banned: { disconnect: { id :target.id } },
-		},
-	  });
-	  return updatedChannel;
-	}
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    if (!banlist.includes(target)) {
+      throw new Error("User is not banned from this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: {
+        banned: { disconnect: { id: target.id } },
+      },
+    });
+    return updatedChannel;
+  }
 
-  //   async messageSend(@Request() req: any, createMessageDto: CreateMessageDto) {
-  //     const user: User = req.user;
-  //     const message = {
-  //       author: user.id,
-  //       message: createMessageDto.message,
-  //       //   createdAt: new Date(Date.now()),
-  //     };
-  //     return message;
-  //   }
+  async kickUser(chanName: string, username: string, owner: User, req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user !== owner && !chan.op.includes(req.user.username)) {
+      throw new Error("You are not allowed to ban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { name: chanName },
+      data: {
+        members: { disconnect: { id: target.id } },
+      },
+    });
+    return updatedChannel;
+  }
 
-  //   findAll() {
-  //     return this.messages;
-  //   }
+  async createMessage(
+    createMessageDto: CreateMessageDto,
+    req: any
+  ): Promise<Message> {
+    const { content, chanName } = createMessageDto;
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+      include: { banned: true },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: req.user.username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    } else if (chan.banned.includes(target)) {
+      throw new Error("User has been banned from this channel");
+    }
+    // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
+    // si l'user est ban .some((user) => user.username === req.user.username)
+    const message = await this.prisma.message.create({
+      data: {
+        content: content,
+        channelName: chanName,
+        author: { connect: { id: req.user.id } },
+      },
+    });
+    return message;
+  }
+
+  async updateMessage(
+	UpdateMessageDto:UpdateMessageDto,
+    req: any
+  ) {
+    const { content, chanName, msgId} = UpdateMessageDto;
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    const target = await this.prisma.message.findUnique({
+      where: {
+        channelName: chanName,
+        id: msgId,
+      },
+      include: { author: true },
+    });
+    if (!target) {
+      throw new Error("Could not find message");
+    } else if (target.author.username !== req.user.username) {
+      throw new Error(
+        "You are not allowed to update messages from this channel"
+      );
+    }
+    const updatedChannel = await this.prisma.message.update({
+      where: { channelName: chanName, id: msgId },
+      data: { content: content },
+    });
+    return updatedChannel;
+  }
+
+  async removeMessages(chanName: string, msgId: number, owner: User, req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    const target = await this.prisma.message.findUnique({
+      where: {
+        channelName: chanName,
+        id: msgId,
+      },
+      include: { author: true },
+    });
+    if (!target) {
+      throw new Error("Could not find message");
+    }
+    if (
+      req.user !== owner &&
+      !chan.op.includes(req.user.username) &&
+      target.author.username !== req.user.username
+    ) {
+      throw new Error(
+        "You are not allowed to remove messages from this channel"
+      );
+    }
+    const updatedChannel = await this.prisma.message.delete({
+      where: { channelName: chanName, id: msgId },
+    });
+    return updatedChannel;
+  }
 }
-// update(id: number, updateMessageDto: UpdateMessageDto) {
-// 	return `This action updates a #${id} message`;
-// }
-
-// remove(id: number) {
-// 	return `This action removes a #${id} message`;
-// }

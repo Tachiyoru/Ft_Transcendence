@@ -9,9 +9,11 @@ import { chatService } from "./chat.service";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import { Request } from "@nestjs/common";
-import { Channel, Mode, User } from "@prisma/client";
+import { Channel, Message, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { channel } from "diagnostics_channel";
+import { resourceLimits } from "worker_threads";
+import { UpdateMessageDto } from "./dto/update-message.dto";
 
 @WebSocketGateway({})
 export class chatGateway {
@@ -150,10 +152,12 @@ export class chatGateway {
   ) {
     try {
       const owner = await channel
-.caller(
-          this.prisma.channel.findUnique({ where: { name: data.chanName } }))
+        .caller(
+          this.prisma.channel.findUnique({ where: { name: data.chanName } })
+        )
         .owner();
-      const banlist = await channel.caller(
+      const banlist = await channel
+        .caller(
           this.prisma.channel.findUnique({ where: { name: data.chanName } })
         )
         .banned();
@@ -170,103 +174,184 @@ export class chatGateway {
     }
   }
 
-
   @SubscribeMessage("unBanUser")
   async unBanUser(
-	client: Socket,
-	@MessageBody() data: { chanName: string; username: string },
-	@Request() req: any
+    client: Socket,
+    @MessageBody() data: { chanName: string; username: string },
+    @Request() req: any
   ) {
-	try {
-		const owner = await channel
-  .caller(
-			this.prisma.channel.findUnique({ where: { name: data.chanName } }))
-		  .owner();
-		const banlist = await channel.caller(
-			this.prisma.channel.findUnique({ where: { name: data.chanName } }))
-		  .banned();
-		const result = await this.chatService.unBanUser(
-		  data.chanName,
-		  data.username,
-		  banlist,
-		  owner,
-		  req
-		);
-		client.emit("userUnBanned", result);
-	  } catch (error) {
-		client.emit("unBanUserError", { message: error.message });
-	  }
+    try {
+      const owner = await channel
+        .caller(
+          this.prisma.channel.findUnique({ where: { name: data.chanName } })
+        )
+        .owner();
+      const banlist = await channel
+        .caller(
+          this.prisma.channel.findUnique({ where: { name: data.chanName } })
+        )
+        .banned();
+      const result = await this.chatService.unBanUser(
+        data.chanName,
+        data.username,
+        banlist,
+        owner,
+        req
+      );
+      client.emit("userUnBanned", result);
+    } catch (error) {
+      client.emit("unBanUserError", { message: error.message });
+    }
   }
 
   @SubscribeMessage("kickUser")
-//   async kickUser(
-// 	client: Socket,
-// 	@MessageBody() data: { chanName: string; username: string },
-// 	@Request() req: any
-//   ) {
-// 	try {
-// 	  const owner = await channel
-// 		.caller(
-// 		  this.prisma.channel.findUnique({ where: { name: data.chanName } })
-// 		)
-// 		.owner();
-// 	  const result = await this.chatService.kickUser(
-// 		data.chanName,
-// 		data.username,
-// 		owner,
-// 		req
-// 	  );
-// 	  client.emit("userKicked", result);
-// 	} catch (error) {
-// 	  client.emit("kickUserError", { message: error.message });
-// 	}
-//   }
-  
-  @SubscribeMessage("findAllMembers")
-  //   async findAllMembers(
-  //     @MessageBody("chanName") chanName: string
-  //   ): Promise<User[]> {
-  //     return this.chatService.findAllMembers(chanName);
-  //   }
-  @SubscribeMessage("findAllBannedMembers")
-  //   async findAllBannedMembers(
-  //     @MessageBody("chanName") chanName: string
-  //   ): Promise<User[]> {
-  //     return this.chatService.findAllBannedMembers(chanName);
-  //   }
-  @SubscribeMessage("findAllMessages")
-  //   async findAllMessages(
-  //     @MessageBody("chanName") chanName: string
-  //   ): Promise<any> {
-  //     return this.chatService.findAllMessages(chanName);
-  //   }
-  @SubscribeMessage("createMessage")
-  async create(
-    @MessageBody() createMessageDto: CreateMessageDto,
-    @ConnectedSocket() client: Socket
+  async kickUser(
+    client: Socket,
+    @MessageBody() data: { chanName: string; username: string },
+    @Request() req: any
   ) {
-    // const message = await this.chatService.create(
-    //   createMessageDto,
-    //   client.id
-    // );
-    // this.server.emit("newMessage", message);
-    // return message;
+    try {
+      const owner = await channel
+        .caller(
+          this.prisma.channel.findUnique({ where: { name: data.chanName } })
+        )
+        .owner();
+      const result = await this.chatService.kickUser(
+        data.chanName,
+        data.username,
+        owner,
+        req
+      );
+      client.emit("userKicked", result);
+    } catch (error) {
+      client.emit("kickUserError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("findAllMembers")
+  async findAllMembers(
+    client: Socket,
+    @MessageBody() data: { chanName: string }
+  ) {
+    try {
+      const memberList = await channel
+        .caller(this.prisma.channel.findMany({}))
+        .members();
+      client.emit("allMembers", memberList);
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("findAllUsers")
+  async findAllUsers(
+    client: Socket,
+    @MessageBody() data: { chanName: string }
+  ) {
+    try {
+      const UserList = await this.prisma.user.findMany();
+      client.emit("allUsers", UserList);
+    } catch (error) {
+      client.emit("findAllUsersError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("findAllBannedMembers")
+  async findAllBannedMembers(
+    client: Socket,
+    @MessageBody() data: { chanName: string }
+  ) {
+    try {
+      const bannedList = await channel
+        .caller(this.prisma.channel.findMany({}))
+        .banned();
+      client.emit("allMembers", bannedList);
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("findAllMessages")
+  async findAllChanMessages(
+    client: Socket,
+    @MessageBody() data: { chanName: string }
+  ) {
+    try {
+      const messagesList = await channel
+        .caller(this.prisma.channel.findMany({}))
+        .messages();
+      client.emit("allMembers", messagesList);
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("createMessage")
+  async createMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @Request() req: any
+  ) {
+    try {
+      const message = await this.chatService.createMessage(
+        createMessageDto,
+        req
+      );
+      this.server.emit("newMessage", message);
+    } catch (error) {
+      client.emit("createMsgError", { message: error.message });
+    }
   }
 
   @SubscribeMessage("updateMessage")
-  //   update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-  //     return this.chatService.update(updateMessageDto.id, updateMessageDto);
-  //   }
+  async updateMessage(
+    client: Socket,
+    @MessageBody() UpdateMessageDto: UpdateMessageDto,
+    @Request() req: any
+  ) {
+    return this.chatService.updateMessage(
+		UpdateMessageDto,
+      req
+    );
+  }
+
   @SubscribeMessage("removeMessage")
-  //   remove(@MessageBody() id: number) {
-  //     return this.chatService.remove(id);
-  //   }
+  async removeMessages(
+    client: Socket,
+    @MessageBody() data: { chanName: string; msgId: number },
+    @Request() req: any
+  ) {
+    try {
+      const owner = await channel
+        .caller(
+          this.prisma.channel.findUnique({ where: { name: data.chanName } })
+        )
+        .owner();
+      await this.chatService.removeMessages(
+        data.chanName,
+        data.msgId,
+        owner,
+        req
+      );
+      client.emit("allMembers", { message: "Message removed" });
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
+
   @SubscribeMessage("typing")
   async typing(
     @MessageBody("isTyping") isTyping: boolean,
+    @MessageBody("user") username: string,
     @ConnectedSocket() client: Socket
   ) {
-    // const name = await this.chatService.getClientName(client.id);
+    const user = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!user) {
+      return;
+    }
+    const name = user.username;
     client.broadcast.emit("typing", { name, isTyping });
   }
 }

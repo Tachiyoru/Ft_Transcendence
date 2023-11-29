@@ -1,13 +1,13 @@
-- Create the chat room
-- Set the owner of the chat room (from cookies ?)
-- Allow the owner to add/remove users
-- Allow the owner to delete the chat room
-- Allow the owner to change the chat room name
-- Allow the owner to change the chat room password
-- Allow Users to join and send messages
-- Allow Users to leave the chat room (if not owner)
-- Allow Users to change their nickname
-- Add a list of connected users in the chat room
+- Create the chat room x
+- Set the owner of the chat room (from cookies ?)x
+- Allow the owner to add/remove users x
+- Allow the owner to delete the chat room x
+- Allow the owner to change the chat room name x
+- Allow the owner to change the chat room password 
+- Allow Users to join and send messages x
+- Allow Users to leave the chat room (if not owner) x
+- Allow Users to change their nickname 
+- Add a list of connected users in the chat room 
 - Add a list of connected chat rooms
 - Allow infinite scroll in the chat room
 - Add notifications when a user joins/leaves the chat room
