@@ -1,10 +1,17 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { FaUser } from "react-icons/fa6";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from './store/store';
+import Profil from "./container/Profil";
+import Home from "./container/Home";
+
 
 const Dashboard = () => {
   const location = useLocation();
   const currentPage = location.pathname;
+
+
 
   return (
     <MainLayout currentPage={currentPage}>
@@ -14,6 +21,8 @@ const Dashboard = () => {
           <div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs grid grid-rows-[auto,1fr,auto]">
 
               {/*User*/}
+              <Profil/>
+              <Home/>
               <div className="flex mt-4 mb-10 m-2">
                 <div className="bg-purple rounded-full p-2">
                   <FaUser className="w-[66px] h-[66px] p-3 text-lilac"/>

@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useContext } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AiOutlineLock,
@@ -7,12 +7,13 @@ import {
   AiOutlineCheck,
 } from 'react-icons/ai';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import axios from '../../../axios/api';
 import UserNameField from '../fields/UserNameField';
 import EmailField from '../fields/EmailField';
 import SocialIcons from '../fields/SocialIcons';
-import { useCookies } from 'react-cookie';
+
 import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../../services/UserSlice';
 
 interface IdataRegister {
   username: string;
@@ -22,11 +23,10 @@ interface IdataRegister {
 }
 
 const SignupForm = () => {
-  const [cookies] = useCookies(['user_token']);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [resStatus, setResStatus] = useState('');
-  const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState(false);
@@ -48,18 +48,17 @@ const SignupForm = () => {
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<IdataRegister>();
-
-  const submitHandler = (data: IdataRegister) => {
-    console.log(data);
-    axios
-      .post('http://localhost:5001/auth/signup', data)
+  
+  const SubmitHandler = (data: IdataRegister) => {
+      axios
+      .post('/auth/signup', data)
       .then((response) => {
-        console.log("test", response.status);
-        if (response.status === 201 && cookies['user_token']) {
+        if (response.status === 201) {
+          //const token = Cookies.get('user_token');
           setResStatus('Successful Registration!');
-          const token = cookies['user_token'];
-          console.log("salut", token);
-          dispatch(loginSuccess(`Bearer ${token}`)); 
+          dispatch(loginSuccess(response.data))
+          console.log(response.data)
+          //dispatch(loginSuccess(`Bearer ${token}`)); 
 
           navigate('/');
         } else {
@@ -100,7 +99,7 @@ const SignupForm = () => {
       <section className="container bg-black bg-opacity-70 rounded-md mt-20 px-5 py-10">
         <div className="w-full max-w-sm mx-auto">
           <h1 className="text-2xl text-center mb-8">Create an Account</h1>
-          <form onSubmit={handleSubmit(submitHandler)}>
+          <form onSubmit={handleSubmit(SubmitHandler)}>
             {/*Form name*/}
             <UserNameField
               register={register}

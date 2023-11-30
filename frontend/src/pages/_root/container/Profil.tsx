@@ -1,21 +1,20 @@
 // Profil.tsx
 import { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
+import axios from '../../../axios/api';
+import Cookies from 'js-cookie';
 
 const Profil = () => {
-  const { authenticated } = useContext(AuthContext);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+
+  const token = Cookies.get('user_token');
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/users/me', {
+        const response = await axios.get('/users/me', {
           headers: {
-            Authorization: `Bearer ${authenticated}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setUserData(response.data);
@@ -27,7 +26,7 @@ const Profil = () => {
     };
 
     fetchUserData();
-  });
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -38,7 +37,7 @@ const Profil = () => {
   }
 
   return (
-    <div>
+    <div className='text-lilac'>
       <h1>User Profile</h1>
       <p>Username: {userData.username}</p>
       <p>Email: {userData.email}</p>

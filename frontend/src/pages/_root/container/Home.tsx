@@ -1,20 +1,18 @@
 import { Link } from "react-router-dom";
-import { useContext } from 'react';
-import { AuthContext } from "../../context/AuthContext";
+import { useDispatch } from "react-redux";
+import { setLogout } from "../../../services/UserSlice";
 
 const Home = () => {
-  const { logout } = useContext(AuthContext);
+  const dispatch = useDispatch();
+
 
   const handleLogout = () => {
-    logout();
+    dispatch(setLogout())
   }
 
   return (
   <div>
-    <Link to="/profil" className="text-sm underline ">
-      Profil
-    </Link>
-    <button onClick={handleLogout}>
+    <button className="text-red-500 underline" onClick={handleLogout}>
       Logout
     </button>
   </div>

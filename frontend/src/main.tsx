@@ -5,9 +5,10 @@ import './index.css'
 
 //Redux
 import { Provider } from 'react-redux';
-import store from './store/store';
+import { store } from './store/store';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
+  
   <BrowserRouter>
     <Provider store={store}>
       <App />
