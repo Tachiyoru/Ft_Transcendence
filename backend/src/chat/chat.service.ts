@@ -277,13 +277,6 @@ export class chatService {
       const message = await this.prisma.message.create({
         data: {
           content: content,
-          channelName: chanName,
-          authorId: author.id,
-        },
-      });
-      await this.prisma.message.update({
-        where: { id: message.id },
-        data: {
           channel: { connect: { name: chan.name } },
           author: { connect: { id: target.id } },
         },

@@ -19,28 +19,15 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post("signup")
-  async signup(@Body() dto: AuthDto, @Res({ passthrough: true }) res: any) {
-    const tokens = await this.authService.signup(dto);
-    res.cookie("user_token", tokens.access_token, {
-      expires: new Date(Date.now() + 360000000),
-    });
-    return "feur";
+  async signup(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
+    const user = await this.authService.signup(dto, res);
+    return { user };
   }
 
   @Post("signin")
   async signin(@Body() dto: AuthDto2, @Res({ passthrough: true }) res: any) {
-    const tokens = await this.authService.signin(dto);
-    res.cookie("user_token", tokens.access_token, {
-      expires: new Date(Date.now() + 3600000),
-    });
-    return "coubeh";
-  }
-
-  @UseGuards(AuthGuard("42"))
-  @Get("42Auth")
-  async fortyTwo(@Req() req: Request, @Res({ passthrough: true }) res: any) {
-    // console.log('42Auth');
-    return this.authService.fortyTwoAuth(req, res);
+    const user = await this.authService.signin(dto, res);
+    return { user };
   }
 
   @Get("/42/callback")
@@ -49,11 +36,8 @@ export class AuthController {
     if (req.user === undefined) throw new UnauthorizedException();
 	console.log('callback successsssssss');
     const user: User = req.user as User;
-    const token = await this.authService.signToken(user.id, user.email);
-    res.cookie("access_token", token, {
-      expires: new Date(Date.now() + 3600000),
-    });
-    // console.log(req.cookies.access_token);
+    await this.authService.fortyTwoAuth(user, res);
+    console.log(req.cookies.access_token);
 	console.log('callback success');
     return res.redirect(`https://google.com`); //change to profil frontend url
   }

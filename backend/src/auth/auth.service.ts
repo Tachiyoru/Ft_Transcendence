@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Res } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -6,6 +11,8 @@ import { AuthDto, AuthDto2 } from "./dto";
 import * as argon from "argon2";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
+import { Response, Request } from "express";
+import { User } from "@prisma/client";
 
 @Injectable({})
 export class AuthService {
@@ -15,7 +22,40 @@ export class AuthService {
     private config: ConfigService
   ) {}
 
-  async signup(dto: AuthDto) {
+  async refreshToken(req: Request, res: Response) {
+    const refreshToken = req.cookies["refresh_token"];
+
+    if (!refreshToken) {
+      throw new UnauthorizedException("Refresh token not found");
+    }
+    let payload;
+    try {
+      payload = this.jwt.verify(refreshToken, {
+        secret: this.config.get<string>("REFRESH_TOKEN_SECRET"),
+      });
+    } catch (error) {
+      throw new UnauthorizedException("Invalid or expired refresh token");
+    }
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+    if (!userExists) {
+      throw new BadRequestException("User no longer exists");
+    }
+    const expiresIn = 15000;
+    const expiration = Math.floor(Date.now() / 1000) + expiresIn;
+    const accessToken = this.jwt.sign(
+      { ...payload, exp: expiration },
+      {
+        secret: this.config.get<string>("ACCESS_TOKEN_SECRET"),
+      }
+    );
+    res.cookie("access_token", accessToken, { httpOnly: true });
+
+    return accessToken;
+  }
+
+  async signup(dto: AuthDto, res: Response) {
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prisma.user.create({
@@ -25,7 +65,7 @@ export class AuthService {
           hash,
         },
       });
-      return this.signToken(user.id, user.email);
+      return this.forgeTokens(user, res);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002")
@@ -35,77 +75,44 @@ export class AuthService {
     throw error;
   }
 
-  async signin(dto: AuthDto2) {
+  async signin(dto: AuthDto2, res: Response) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
     });
-
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash, dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
-    return this.signToken(user.id, user.email);
+    return this.forgeTokens(user, res);
   }
 
-  async signToken(
-    userId: number,
-    email: string
-  ): Promise<{ access_token: string }> {
-    const payload = {
-      sub: userId,
-      email,
-    };
-    const secret = this.config.get("JWT_SECRET");
+  private async forgeTokens(user: User, response: Response) {
+    const payload = { username: user.username, sub: user.id };
 
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: "15m",
-      secret: secret,
+    const accessToken = this.jwt.sign(
+      { ...payload },
+      {
+        secret: this.config.get<string>("JWT_SECRET_ACCESS"),
+        expiresIn: "150sec",
+      }
+    );
+    const refreshToken = this.jwt.sign(payload, {
+      secret: this.config.get<string>("JWT_SECRET_REFRESH"),
+      expiresIn: "7d",
     });
-    return { access_token: token };
+    response.cookie("access_token", accessToken, { httpOnly: true });
+    response.cookie("refresh_token", refreshToken, { httpOnly: true });
+    return { user };
   }
 
-  async fortyTwoAuth(req: any, res: any) {
-    const fortyTwoId: number = parseInt(req.user.id);
-    console.log("fortytwoauth", req.user);
-    const fortyTwoAvatar: string = req.user._json.image.link;
-    const fortyTwoEmail: string = req.user.email;
-
-    const user = await this.findUserByFortyTwoId(fortyTwoId);
-    if (!user) {
-      const payload = { fortyTwoId, fortyTwoAvatar };
-      const token = await this.signToken(fortyTwoId, fortyTwoEmail);
-      console.log("usernull in fortytwoauth");
-      await this.setAccessTokenCookie(res, token.access_token, 3600000);
-
-      return res.redirect("https://google.com");
-    }
-    const payload = { id: user.id, email: user.email };
-    const token = await this.signToken(payload.id, payload.email);
-    res.cookie("user_token", token.access_token, {
-      expires: new Date(Date.now() + 3600000),
-    });
-	
-    return res.redirect("https://google.com");
+  async fortyTwoAuth(user: User, res: any) {
+	return this.forgeTokens(user, res);
   }
 
-  private async setAccessTokenCookie(
-    res: any,
-    token: string,
-    expiresIn: number
-  ) {
-    const expirationTime = new Date(Date.now() + expiresIn);
-
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      sameSite: "strict",
-      expires: expirationTime,
-    });
-  }
-
-  private async findUserByFortyTwoId(fortyTwoId: number) {
-    return this.prisma.user.findUnique({
-      where: { fortyTwoId },
-    });
+  async logout(response: Response) {
+    response.clearCookie("access_token");
+    response.clearCookie("refresh_token");
+    return "Successfully logged out";
   }
 }

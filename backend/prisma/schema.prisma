@@ -108,9 +108,9 @@ model Channel {
 
 model Message {
     id          Int      @id @default(autoincrement())
-    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name])
+    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade)
     channelName String
-    author      User     @relation("author", fields: [authorId], references: [id])
+    author      User     @relation("author", fields: [authorId], references: [id], onDelete: Cascade)
     authorId    Int      @unique
     content     String
     createdAt   DateTime @default(now())
