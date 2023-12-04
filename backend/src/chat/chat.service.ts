@@ -7,6 +7,7 @@ import {
 import { PrismaService } from "src/prisma/prisma.service";
 import { Channel, Message, Mode, User } from "@prisma/client";
 import * as argon from "argon2";
+import { channel } from "diagnostics_channel";
 
 @Injectable()
 export class chatService {
@@ -18,7 +19,7 @@ export class chatService {
   // 	socket.emit('createChannel', { channelName });
   //   };
 
-  // voir dans le front comment envoyer sois la liste des target pour la conversation soit juste un nom pour le chan directement
+  // voir dans le front comment envoyer sois la liste des target pour la GROUPCHAT soit juste un nom pour le chan directement
   async createChannel(settings: createChannel, @Request() req: any) {
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: settings.name },
@@ -26,7 +27,6 @@ export class chatService {
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-
     const hashedPassword: string = settings.password
       ? await argon.hash(settings.password)
       : "";
@@ -91,20 +91,35 @@ export class chatService {
     }
   }
 
-  async joinChannel(chanName: string, banlist: User[], @Request() req: any) {
+  async joinChannel(
+    chanName: string,
+    invited: boolean,
+    @Request() req: any,
+    password?: string
+  ) {
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
     });
     if (!chan) {
       throw new Error("Could not find channel");
     }
+    const banlist: User[] = await channel
+      .caller(this.prisma.channel.findUnique({ where: { name: chanName } }))
+      .banned();
     if (banlist.includes(req.user)) {
       throw new Error("You are banned from this channel");
     }
-	if (chan.modes === Mode.CHAT) {
-    } else if (chan.modes === Mode.CONVERSATION) {
+    if (chan.modes === Mode.CHAT) {
+    } else if (chan.modes === Mode.GROUPCHAT) {
     } else if (chan.modes === Mode.PRIVATE) {
+      const hashedPassword: string = password ? await argon.hash(password) : "";
+      if (hashedPassword !== chan.password) {
+        throw new Error("Wrong password");
+      }
     } else if (chan.modes === Mode.INVONLY) {
+      if (invited === false) {
+        throw new Error("You are not allowed to join this channel");
+      }
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { name: chanName },
@@ -243,7 +258,7 @@ export class chatService {
     createMessageDto: CreateMessageDto,
     @Request() req: any
   ): Promise<Message> {
-    const { content, chanName } = createMessageDto;
+    const { content, chanName, author } = createMessageDto;
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
       include: { banned: true },
@@ -258,18 +273,26 @@ export class chatService {
       throw new Error("Could not find user");
     } else if (chan.banned.includes(target)) {
       throw new Error("User has been banned from this channel");
+    } else {
+      const message = await this.prisma.message.create({
+        data: {
+          content: content,
+          channelName: chanName,
+          authorId: author.id,
+        },
+      });
+      await this.prisma.message.update({
+        where: { id: message.id },
+        data: {
+          channel: { connect: { name: chan.name } },
+          author: { connect: { id: target.id } },
+        },
+      });
+      return message;
     }
-    // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
-    // si l'user est ban .some((user) => user.username === req.user.username)
-    const message = await this.prisma.message.create({
-      data: {
-        content: content,
-        channelName: chanName,
-        author: { connect: { id: req.user.id } },
-      },
-    });
-    return message;
   }
+  // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
+  // si l'user est ban .some((user) => user.username === req.user.username)
 
   async updateMessage(UpdateMessageDto: UpdateMessageDto, @Request() req: any) {
     const { content, chanName, msgId } = UpdateMessageDto;

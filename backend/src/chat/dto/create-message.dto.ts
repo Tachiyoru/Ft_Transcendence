@@ -26,3 +26,8 @@ export class createChannel extends Channel {
   password: string;
   members: User[];
 }
+
+export class joinChannel extends Channel {
+	name: string;
+	password: string;
+}

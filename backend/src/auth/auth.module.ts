@@ -23,6 +23,6 @@ export class AuthModule implements NestModule {
       .apply(JwtAuthMiddleware)
       .exclude("/auth/signup", "/auth/signin", "/auth/42Auth")
       .forRoutes("*");
-    console.log("JwtAuthMiddleware applied");
+    // console.log("JwtAuthMiddleware applied");
   }
 }

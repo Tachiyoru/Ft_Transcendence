@@ -46,7 +46,7 @@ export class chatGateway {
   }
 
   @SubscribeMessage("addOp")
-  async handleAddOp(
+  async addOp(
     client: Socket,
     @MessageBody() data: { chanName: string; username: string },
     @Request() req: any
@@ -70,7 +70,7 @@ export class chatGateway {
   }
 
   @SubscribeMessage("renameChan")
-  async handleRenameChan(
+  async renameChan(
     client: Socket,
     @MessageBody() data: { chanName: string; newName: string },
     @Request() req: any
@@ -102,19 +102,19 @@ export class chatGateway {
   @SubscribeMessage("joinChan")
   async joinChan(
     client: Socket,
-    @MessageBody() data: { chanName: string },
+    @MessageBody()
+    data: { chanName: string; password?: string; invited?: boolean },
     @Request() req: any
   ) {
     try {
-      const banlist: User[] = await channel
-        .caller(
-          this.prisma.channel.findUnique({ where: { name: data.chanName } })
-        )
-        .banned();
+      if (!data.invited) {
+        data.invited = false;
+      }
       const result = await this.chatService.joinChannel(
         data.chanName,
-        banlist,
-        req
+        data.invited,
+        req,
+        data.password
       );
       client.emit("channelJoined", result);
     } catch (error) {

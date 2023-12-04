@@ -2,7 +2,8 @@ import { Mode, User } from "@prisma/client";
 
 export class Message {
   message: string;
-  author: string;
+  author: User;
+  chanName: string;
 //   channelId: number;
 //   createdAt: Date = new Date(Date.now());
 }

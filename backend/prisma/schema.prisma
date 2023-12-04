@@ -23,13 +23,13 @@ enum Role {
 
 enum Mode {
     CHAT // user to user
-    CONVERSATION // user to n users
+    GROUPCHAT // user to n users
     PRIVATE // user to n user with password
     INVONLY // user to n user with invitation
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
+    id        Int      @id @unique @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -108,9 +108,10 @@ model Channel {
 
 model Message {
     id          Int      @id @default(autoincrement())
-    channelName String
     channel     Channel  @relation("chanMessages", fields: [channelName], references: [name])
-    author      User     @relation("author", fields: [id], references: [id])
+    channelName String
+    author      User     @relation("author", fields: [authorId], references: [id])
+    authorId    Int      @unique
     content     String
     createdAt   DateTime @default(now())
 }
