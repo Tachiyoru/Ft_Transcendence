@@ -1,7 +1,9 @@
 import { GoHomeFill } from "react-icons/go";
 import { RiGamepadFill, RiMessage3Fill } from "react-icons/ri";
-import { FaUserGroup } from "react-icons/fa6";
+import { FaArrowRightFromBracket, FaUserGroup } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { setLogout } from "../../../services/UserSlice";
+import { useDispatch } from "react-redux";
 
 interface NavItemProps {
 	lien: string;
@@ -32,19 +34,24 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ lien, icon:
 };
 
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
+	const dispatch = useDispatch();
+
+	const handleLogout = () => {
+	  dispatch(setLogout());
+	};
+
+	const navItemStyle = "px-3 py-3 flex items-center bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110";
 
 	return (
-	<section>
-		<header className="container my-12 mx-auto flex justify-between items-center">
-			<div className="right-0">
-				<ul className="flex-col">
-				{navItemsInfo.map((item, index) => (
-					<NavItem key={index} lien={item.lien} icon={item.icon} currentPage={currentPage}/>)
-				)}
-				</ul>
-			</div>
-		</header>
-	
+	<section className="flex flex-col h-full">
+		<ul className="flex-col flex-grow mt-12">
+			{navItemsInfo.map((item, index) => (
+				<NavItem key={index} lien={item.lien} icon={item.icon} currentPage={currentPage}/>)
+			)}
+		</ul>
+		<button className={`flex items-center ${navItemStyle} mb-12`} onClick={handleLogout}>
+			<FaArrowRightFromBracket className="text-accent-violet transform rotate-180" size={26}/>
+		</button>
 	</section>
 	)
 }

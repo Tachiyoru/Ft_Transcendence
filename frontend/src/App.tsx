@@ -26,7 +26,8 @@ const {user} = useSelector((state: RootState) => state.user)
 			<Route path="/sign-in" element={<SigninForm />} />
 			<Route path="/sign-up" element={<SignupForm />} />
 			<Route path="/forget-password" element={<ForgetPassword />} />
-			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />} />
+			{/*<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />} />*/}
+			<Route index element={<Dashboard />} />
 			<Route path="/game" element={<Game />} />
 			<Route path="/chat" element={<Chat />} />
 			<Route path="/friends" element={<Friends />}>

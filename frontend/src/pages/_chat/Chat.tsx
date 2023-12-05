@@ -1,10 +1,12 @@
-import { FaArrowTurnUp, FaMagnifyingGlass, FaPaperPlane, FaUser, FaUserGroup, FaXmark } from "react-icons/fa6";
+import { FaArrowTurnUp, FaBan, FaMagnifyingGlass, FaPaperPlane, FaUser, FaUserGroup, FaXmark } from "react-icons/fa6";
 
 import MainLayout from "../../components/nav/MainLayout"
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { SlOptions } from "react-icons/sl";
 import { IoIosArrowForward } from "react-icons/io";
+import { Link } from "react-router-dom";
+import { RiGamepadFill } from "react-icons/ri";
 
 type FilterType = 'all' | 'personnal' | 'channel'; 
 
@@ -164,9 +166,31 @@ const Chat = () => {
 					{/*NAV PERSONNAL CONV*/}
 					<nav className="mt-4">
 						<ul className="text-lilac">
-							<li>See Profile</li>
-							<li>Invite to play</li>
-							<li>Block</li>
+							<li>
+								<Link to="/settings">
+									<div className="flex flex-row items-center">
+										<FaUser className="w-3 h-4 mr-2"/>
+										<p className="hover:underline">See Profile</p>
+									</div>
+								</Link>
+							</li>
+							<li>
+								<Link to="/settings">
+									<div className="flex flex-row items-center">
+										<RiGamepadFill className="w-3 h-4 mr-2"/>
+										<p className="hover:underline">Invite to play</p>
+									</div>
+								</Link>
+							</li>
+							<li>
+								<Link to="/settings">
+									<div className="flex flex-row items-center">
+										<FaBan className="w-3 h-4 mr-2"/>
+										<p className="hover:underline">Block</p>
+									</div>
+								</Link>
+							</li>
+
 						</ul>
 					</nav>
 

@@ -26,7 +26,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 
 		{/* ICON */}
 		<a 
-			className="px-3 py-2 flex items-center text-dark-violet relative hover:text-purple" 
+			className="px-3 py-2 flex items-center text-purple relative hover:text-fushia" 
 			onMouseEnter={() => setShowDescription(true)}
 			onMouseLeave={() => setShowDescription(false)}
 			onClick={() => onClick()}

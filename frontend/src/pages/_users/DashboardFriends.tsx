@@ -1,9 +1,10 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
-import { FaUser, FaVolumeXmark } from "react-icons/fa6";
-import { IoSettingsSharp } from "react-icons/io5";
-
-import { Link } from "react-router-dom";
+import { FaUser } from "react-icons/fa6";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from './store/store';
+import Profil from "./container/Profil";
+import Home from "./container/Home";
 
 
 const Dashboard = () => {
@@ -30,17 +31,6 @@ const Dashboard = () => {
                   <p className="mt-2 text-white text-xs font-medium text-lilac"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>
               </div>
-              
-              <div>	
-                <Link to="/settings">
-									<div className="flex flex-row items-center bg-purple hover:bg-black mx-2 p-2 pl-5 rounded-md text-lilac">
-										<IoSettingsSharp className="w-3 h-4 mr-2"/>
-										<p>Edit Profile</p>
-									</div>
-								</Link>
-              </div>
-
-              <div>Bar</div>
 
               {/*Stats*/}
               <div className="flex flex-col justify-end m-2">

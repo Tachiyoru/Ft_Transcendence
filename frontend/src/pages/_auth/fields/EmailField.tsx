@@ -20,7 +20,7 @@ const EmailField = ({ register, errors, showUsernameErrors, resStatus, setShowUs
 		})}
 
 		placeholder='Enter Email'
-		className= 'px-5 py-4 text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none'
+		className= 'px-5 py-4 text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none'
 		/>
 
 	</div>

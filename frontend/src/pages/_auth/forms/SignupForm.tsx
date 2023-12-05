@@ -95,10 +95,10 @@ const SignupForm = () => {
   };
 
   return (
-    <div>
-      <section className="container bg-black bg-opacity-70 rounded-md mt-20 px-5 py-10">
-        <div className="w-full max-w-sm mx-auto">
-          <h1 className="text-2xl text-center mb-8">Create an Account</h1>
+    <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
+      <section className="w-full max-w-sm border-container">
+        <div className="mx-auto p-8">
+          <h1 className="text-xl font-outline-2 text-white text-center mb-8">Create an Account</h1>
           <form onSubmit={handleSubmit(SubmitHandler)}>
             {/*Form name*/}
             <UserNameField
@@ -136,7 +136,7 @@ const SignupForm = () => {
                     },
                   })}
                   placeholder="Enter Password"
-                  className="px-5 py-4 w-full text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
+                  className="px-5 py-4 w-full text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
                   onChange={handlePasswordChange}
                 />
                 <button
@@ -158,7 +158,7 @@ const SignupForm = () => {
                   <li
                     className="flex align-items text-xs mt-4"
                     style={{
-                      color: passwordHasLowercaseLetter ? 'green' : 'red',
+                      color: passwordHasLowercaseLetter ? '#D8F828' : '#FF4501',
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -167,7 +167,7 @@ const SignupForm = () => {
                   <li
                     className="flex align-items text-xs"
                     style={{
-                      color: passwordHasUppercaseLetter ? 'green' : 'red',
+                      color: passwordHasUppercaseLetter ? '#D8F828' : '#FF4501',
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -178,8 +178,8 @@ const SignupForm = () => {
                     style={{
                       color:
                         passwordHasSpecialCharacter || passwordHasNumber
-                          ? 'green'
-                          : 'red',
+                          ? '#D8F828'
+                          : '#FF4501',
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -187,7 +187,7 @@ const SignupForm = () => {
                   </li>
                   <li
                     className="flex align-items text-xs"
-                    style={{ color: passwordHasValidLength ? 'green' : 'red' }}
+                    style={{ color: passwordHasValidLength ? '#D8F828' : '#FF4501' }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
                     Minimum 6 characters
@@ -215,7 +215,7 @@ const SignupForm = () => {
                     },
                   })}
                   placeholder="Confirm Password"
-                  className="px-5 py-4 w-full text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
+                  className="px-5 py-4 w-full text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
                   onChange={handleConfirmPassword}
                 />
                 <button
@@ -235,7 +235,7 @@ const SignupForm = () => {
                 <ul>
                   <li
                     className="flex align-items text-xs mt-4"
-                    style={{ color: confirmPassword ? 'green' : 'red' }}
+                    style={{ color: confirmPassword ? '#D8F828' : 'red' }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
                     Confirm password
@@ -253,7 +253,7 @@ const SignupForm = () => {
             <button
               type="submit"
               disabled={!isValid || !confirmPassword}
-              className="border bg-lilac py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
+              className="border bg-lilac text-1xl py-2 px-10 w-full rounded mb-6 disabled:opacity-20"
             >
               Create an account
             </button>

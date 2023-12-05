@@ -9,8 +9,7 @@ body {
 	height: 100vh;
 }
 
-@layer base {
-	.font-outline-2 {
+.font-outline-2 {
 	text-shadow:
 		0 0 5px #fff,
 		0 0 10px #fff,
@@ -20,5 +19,16 @@ body {
 		0 0 90px #EF1FEA,
 		0 0 100px #EF1FEA,
 		0 0 150px #EF1FEA;
-		}
+}
+
+.border-container {
+	border: 0.1rem solid #fff;
+	border-radius: 1rem;
+	padding: 0.2em;
+	box-shadow: 0 0 .2rem #fff,
+			  0 0 .2rem #fff,
+			  0 0 2rem #EF1FEA,
+			  0 0 0.8rem #EF1FEA,
+			  0 0 1rem #EF1FEA,
+			  inset 0 0 1.1rem #EF1FEA; 
 }

@@ -66,7 +66,7 @@ const SecurityEdit = () => {
               </div>
             </div>
 
-			<div className="flex flex-row items-center border-b border-lilac">
+			<div className="w-[260px] flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
