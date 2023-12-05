@@ -18,34 +18,28 @@ import { User } from "@prisma/client";
 @Controller("auth")
 export class AuthController
 {
-	constructor(private authService: AuthService) {}
+	constructor(private readonly authService: AuthService) {}
 
 	@Post("signup")
-	async signup(@Body() dto: AuthDto, @Res({ passthrough: true }) res: any)
+	async signup(
+		@Body() dto: AuthDto,
+		@Res({ passthrough: true }) res: Response
+	)
 	{
-		const tokens = await this.authService.signup(dto);
-		res.cookie("user_token", tokens.access_token, {
-			expires: new Date(Date.now() + 360000000),
-		});
-		return "feur";
+		const user = await this.authService.signup(dto, res);
+		return { user };
 	}
 
 	@Post("signin")
-	async signin(@Body() dto: AuthDto2, @Res({ passthrough: true }) res: any)
+	async signin(@Body() dto: AuthDto2, @Res({ passthrough: true }) res: Response)
 	{
-		const tokens = await this.authService.signin(dto);
-		res.cookie("user_token", tokens.access_token, {
-			expires: new Date(Date.now() + 3600000),
-		});
-		return "coubeh";
+		const user = await this.authService.signin(dto, res);
+		return { user };
 	}
 
-	@UseGuards(AuthGuard('42'))
-	@Get('42')
-	async fortyTwo(@Req() req: Request, @Res({ passthrough: true }) res: any)
+	async logout(@Res({ passthrough: true }) res: Response)
 	{
-		console.log('42');
-		return this.authService.fortyTwoAuth(req, res);
+		return await this.authService.logout(res);
 	}
 
 	@Get('/42/callback')
@@ -54,23 +48,11 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
-		const token = await this.authService.signToken(user.id, user.email);
+		await this.authService.callForgeTokens(user, res);
+
 		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
-		console.log('fortyTwoCallback ---> access_token', token);
-		res.cookie('access_token', token, {
-			expires: new Date(Date.now() + 3600000),
-		});
-
 		return res.redirect(`https://google.com`); //change to profil frontend url
-	}
-
-	@UseGuards(AuthGuard('github'))
-	@Get('github')
-	async github(@Req() req: Request, @Res({ passthrough: true }) res: any)
-	{
-		console.log('github Auth');
-		return this.authService.githubAuth(req, res);
 	}
 
 	@Get('/github/callback')
@@ -79,11 +61,8 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
-		const token = await this.authService.signToken(user.id, user.email);
+		await this.authService.callForgeTokens(user, res);
 
-		res.cookie('access_token', token, {
-			expires: new Date(Date.now() + 3600000),
-		});
 		console.log(req.cookies.access_token);
 
 		return res.redirect(`https://google.com`); //change to profil frontend url

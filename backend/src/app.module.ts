@@ -6,20 +6,19 @@ import { AuthModule } from "./auth/auth.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
-// import { GatewayModule } from "./chat/gateway/gateway.module";
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MulterModule.register({
-      dest: "./uploads",
-    }),
-    UserModule,
-    AuthModule,
-    PrismaModule,
-    // GatewayModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [
+		ConfigModule.forRoot({ isGlobal: true }),
+		MulterModule.register({
+			dest: "./uploads",
+		}),
+		UserModule,
+		AuthModule,
+		PrismaModule,
+	],
+	controllers: [AppController],
+	providers: [AppService, JwtService],
 })
 export class AppModule {}

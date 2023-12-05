@@ -1,7 +1,7 @@
-import { Controller, ForbiddenException, Post, Res } from '@nestjs/common';
-import { TwoFaService } from './two-fa.service';
+import { Body, Controller, ForbiddenException, Post, Res } from '@nestjs/common';
+import { TwoFAService } from './two-fa.service';
 import { AuthService } from 'src/auth/auth.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
 
@@ -9,24 +9,40 @@ import { User } from '@prisma/client';
 export class TwoFaController
 {
 	constructor(
-		private readonly twoFaService: TwoFaService,
+		private readonly twoFAService: TwoFAService,
 		private readonly authService: AuthService,
 	) {}
 
 	@Post('generate-qrcode')
-	async generate(@Res() res: Response, @GetUser() user: User)
+	async generate(@Res() res: Response, @Body() body: User)
 	{
-		const otpAuthUrl = await this.twoFaService.generateQrCode(user);
+		const str = body.email;
+
+		const user: User | null = await this.authService.getUserByEmail(str);
+		// console.log({ user });
+
+		if (user)
+		{
+			const otpAuthUrl = await this.twoFAService.generate2FASecret(user);
+			const qrcodeStream = await this.twoFAService.qrcodeStream(res, otpAuthUrl);
+			return qrcodeStream;
+		}
 	}
 
 	@Post('authenticate')
-	async authenticateWith2FA(@GetUser() user: User, token: string)
+	async authenticateWith2FA(@Body() body: User, token: string, @Res() res: Response)
 	{
-		const isValid = await this.twoFaService.verify2FACode(user, token);
-		if (!isValid)
-			throw new ForbiddenException("Invalid 2FA Token");
-		const access_token = await this.authService.signToken(user.id, user.email);
+		const user = await this.authService.getUserByEmail(body.email);
+		console.log({ user });
 
-		return { user, access_token };
+		if (user)
+		{
+			const isValid = await this.twoFAService.verify2FACode(user, token);
+			if (!isValid)
+				throw new ForbiddenException("Invalid 2FA Token");
+			const access_token = await this.authService.callForgeTokens(user, res);
+
+			return { user, access_token };
+		}
 	}
 }

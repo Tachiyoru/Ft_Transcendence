@@ -1,21 +1,29 @@
 import { Body, Controller, Get, Patch, UseGuards } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { GetUser } from "../auth/decorator";
-import { JwtGuard } from "../auth/guard/jwt.guard";
 import { EditUserDto } from "./dto";
 import { UserService } from "./user.service";
+import { TokenGuard } from "../auth/guard/token.guard";
 
-@UseGuards(JwtGuard)
 @Controller("users")
-export class UserController {
-  constructor(private userService: UserService) {}
-  @Get("me")
-  getMe(@GetUser() user: User) {
-    return user;
-  }
+export class UserController
+{
+	constructor(private userService: UserService) {}
 
-  @Patch()
-  editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
-    return this.userService.editUser(userId, dto);
-  }
+
+	@UseGuards(TokenGuard)
+	@Get("me")
+	getMe(@GetUser() user: User)
+	{
+		return user;
+	}
+
+	@UseGuards(TokenGuard)
+	@Patch("edit")
+	editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto)
+	{
+		//
+		// peut etre save des maintenant l'image et recup l'URL et la send dans edit 57:00 
+		return this.userService.editUser(userId, dto);
+	}
 }

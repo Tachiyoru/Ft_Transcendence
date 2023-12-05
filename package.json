@@ -1,9 +1,11 @@
 {
   "devDependencies": {
-    "@types/passport-github2": "^1.2.9"
+    "@types/passport-github2": "^1.2.9",
+    "@types/qrcode": "^1.5.5"
   },
   "dependencies": {
     "otplib": "^12.0.1",
+    "qrcode": "^1.5.3",
     "typeorm": "^0.3.17",
     "url-otpauth": "^2.0.0"
   }
