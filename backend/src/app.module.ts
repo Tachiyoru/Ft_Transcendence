@@ -7,6 +7,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
 import { chatModule } from './chat/chat.module';
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import { chatModule } from './chat/chat.module';
     chatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtService],
 })
 export class AppModule {}
