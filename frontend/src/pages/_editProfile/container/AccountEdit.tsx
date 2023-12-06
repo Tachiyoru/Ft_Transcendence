@@ -24,7 +24,7 @@ const AccountEdit = () => {
 
 	const submitHandler = async () => {
 		try {
-			const token = Cookies.get('user_token');
+			const token = Cookies.get('refresh_token');
 			setLoading(true);
 			if (token) {
 				const filteredData: Partial<IdataRegister> = {};

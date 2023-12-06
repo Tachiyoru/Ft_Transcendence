@@ -13,7 +13,7 @@ export class TokenGuard implements CanActivate
 	async canActivate(context: ExecutionContext): Promise<boolean>
 	{
 		const request: Request = context.switchToHttp().getRequest();
-		// console.log("payloaaaaaaaaaaaaaaaaaad", request.cookies);
+		console.log("payloaaaaaaaaaaaaaaaaaad", request.cookies);
 		const token = this.extractTokenFromCookie(request);
 		// console.log("payloaaaaaaaaaaaaaaaaaad", token);
 		if (!token)

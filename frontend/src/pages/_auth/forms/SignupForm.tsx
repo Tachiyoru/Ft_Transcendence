@@ -84,8 +84,17 @@ const SignupForm = () => {
 
 
   const handle42Click = async () => {
-    window.location.href = "http://localhost:5001/auth/42Auth";
-  };
+    try{
+      const response = window.location.href = "http://localhost:5001/auth/42/callback";
+      if (response)
+      {
+        dispatch(loginSuccess(response))
+        navigate('/');
+      }
+    } catch {
+      setResStatus('Error');
+    }
+};
 
   return (
     <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>

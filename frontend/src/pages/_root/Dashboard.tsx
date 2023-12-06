@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   
   useEffect(() => {
-    const token = Cookies.get('user_token');
+    const token = Cookies.get('refresh_token');
     const fetchUserData = async () => {
       console.log(token);
       try {

@@ -48,11 +48,13 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
+		console.log({user});
 		await this.authService.callForgeTokens(user, res);
 
 		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
-		return res.redirect(`https://google.com`); //change to profil frontend url
+		res.redirect('http://localhost:5173/');
+		return user;//change to profil frontend url
 	}
 
 	@Get('/github/callback')
@@ -65,6 +67,6 @@ export class AuthController
 
 		console.log(req.cookies.access_token);
 
-		return res.redirect(`http://localhost:5000/auth/42/callback'`); //change to profil frontend url
+		return res.redirect(`http://localhost:5173/auth/42/callback'`); //change to profil frontend url
 	}
 }

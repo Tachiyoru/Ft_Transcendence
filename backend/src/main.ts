@@ -12,7 +12,7 @@ async function bootstrap()
 	const app = await NestFactory.create(AppModule);
 
 	app.use((req: Request, res: Response, next: NextFunction) => {
-		const allowedOrigins = ['http://localhost:5000', 'https://api.intra.42.fr'];
+		const allowedOrigins = ['http://localhost:5173', 'https://api.intra.42.fr'];
 		const origin: string | undefined = req.headers.origin;	  
 
 		if (typeof origin === 'string' && allowedOrigins.includes(origin)) {
