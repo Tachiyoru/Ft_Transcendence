@@ -1,5 +1,7 @@
 import { FaMagnifyingGlass, FaBell, FaUser } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
+import { MdSettings } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 
 interface NavItemProps {
@@ -24,7 +26,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 
 		{/* ICON */}
 		<a 
-			className="px-3 py-2 flex items-center text-purple-400 relative hover:text-purple-500" 
+			className="px-3 py-2 flex items-center text-purple relative hover:text-fushia" 
 			onMouseEnter={() => setShowDescription(true)}
 			onMouseLeave={() => setShowDescription(false)}
 			onClick={() => onClick()}
@@ -45,12 +47,15 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 
 const NavHorizontal = () => {
 	const [selectedSection, setSelectedSection] = useState<string | null>(null);
+	const [prevSelectedSection, setPrevSelectedSection] = useState<string | null>(null)
 
 	const toggleSection = (sectionName: string) => {
-
-		if (selectedSection === sectionName) {
+		if (selectedSection === sectionName || prevSelectedSection == sectionName)
+		{
+			setPrevSelectedSection(null);
 			setSelectedSection(null);
 		} else {
+			setPrevSelectedSection(sectionName);
 			setSelectedSection(sectionName);
 		}
 	};
@@ -69,12 +74,12 @@ const NavHorizontal = () => {
 		return () => {
 		document.removeEventListener("mousedown", handleClickOutside);
 		};
-	});
+	}, [menuRef]);
 
 	const getContent = () => {
 		if (selectedSection === "Notifications") {
 			return (
-			<div ref={menuRef} className="shadow-md bg-gray-200 rounded-lg py-2 px-4 absolute right-2 mt-1">
+			<div ref={menuRef} className="shadow-md bg-dark-violet rounded-lg py-2 px-4 absolute right-2 mt-1">
 				<div className="text-xs font-normal text-param">
 				Notifications
 				</div>
@@ -82,11 +87,24 @@ const NavHorizontal = () => {
 			);
 		} else if (selectedSection === "Chat") {
 			return (
-			<div ref={menuRef} className="shadow-md bg-gray-200 rounded-lg py-2 px-4 w-35 absolute right-2 mt-1">
-				<ul className="p-2">
-					<li className="text-xs font-normal text-param">Profil</li>
-					<li className="text-xs font-normal text-param">Settings</li>
-					<li className="text-xs font-normal text-param">Logout</li>
+			<div ref={menuRef} className="shadow-md bg-dark-violet rounded-lg p-4 w-35 absolute right-2 mt-1">
+				<ul className="">
+					<li className="text-sm font-light text-lilac mb-1">
+						<Link to="/settings" >
+							<div className="flex flex-row items-center">
+								<FaUser className="w-3 h-2 mr-2"/>
+								<p className="hover:underline">Profile</p>
+							</div>
+						</Link>
+					</li>
+					<li className="text-sm font-light text-lilac">
+						<Link to="/settings">
+							<div className="flex flex-row items-center">
+								<MdSettings className="w-3 h-4 mr-2"/>
+								<p className="hover:underline">Settings</p>
+							</div>
+						</Link>
+					</li>
 				</ul>
 			</div>
 			);

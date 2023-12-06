@@ -16,7 +16,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({ register, errors, label }
 };
 
 return (
-<div className='mb-4 w-full'>
+<div className='mb-4 w-full '>
 	<div className='flex flex-row items-center border-b'>
 	<AiOutlineLock className='w-4 h-4' />
 	<input
