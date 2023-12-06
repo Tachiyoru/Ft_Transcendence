@@ -3,3 +3,4 @@
 .prettierrc
 Backend/prisma/migrations
 .vscode
+.env

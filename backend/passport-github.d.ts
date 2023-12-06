@@ -1,11 +1,6 @@
-import {
-  Strategy as OAuth2Strategy,
-  StrategyOptions as OAuth2StrategyOptions,
-  VerifyFunction,
-} from "passport-oauth2";
+import { Strategy as OAuth2Strategy, StrategyOptions as OAuth2StrategyOptions, VerifyFunction } from 'passport-oauth2';
 
-type PartialOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> &
-  Partial<Pick<T, K>>;
+type PartialOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>;
 
 interface Profile
 {
@@ -22,11 +17,12 @@ type StrategyOptions = PartialOmit<OAuth2StrategyOptions, 'authorizationURL' | '
 	};
 };
 
-declare class FortyTwoStrategy extends OAuth2Strategy
+
+declare class githubStrategy extends OAuth2Strategy
 {
 	constructor(options: StrategyOptions, verify: VerifyFunction);
 }
 
-export { FortyTwoStrategy };
+export { githubStrategy };
 
-export { FortyTwoStrategy as Strategy, StrategyOptions };
+export { githubStrategy as Strategy, StrategyOptions };
