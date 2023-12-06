@@ -5,18 +5,14 @@ FROM node:lts
 RUN apt-get update
 
 # Sets the working directory
-WORKDIR /frontend
+WORKDIR /usr/src/app
 
 # Installs project dependencies
 COPY package.json package-lock.json ./
+RUN npm install glob rimraf
+
 RUN npm install
-COPY ./ ./
+COPY . .
 
-# Exposes port
-EXPOSE 5173
-
-# For prisma update
-# CMD ["tail", "-f", "/dev/null"]
-
-# Starts application
+# RUN npm run build
 CMD ["npm", "run", "dev"]
