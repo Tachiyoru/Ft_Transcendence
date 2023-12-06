@@ -15,14 +15,14 @@ const SecurityEdit = () => {
 		register,
 		handleSubmit,
 		formState: { isValid },
-	  } = useForm<IdataRegister>();
+    } = useForm<IdataRegister>();
 
-	  const submitHandler = (data: IdataRegister) => {
-		console.log(data);
-	  };
+    const submitHandler = (data: IdataRegister) => {
+    console.log(data);
+    };
 
-	  return (
-	<div>
+	return (
+	<div className="mx-2">
 		{/*TITLE*/}
 		<div className="text-lilac mt-4">
 			<h2>Password and Security</h2>
@@ -34,7 +34,7 @@ const SecurityEdit = () => {
 			<h3 className="text-sm text-lilac">Edit Password</h3>
 
 			<div className="mt-4 w-full">
-              <div className="flex flex-row items-center border-b border-lilac">
+              <div className="w-[260px] flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
@@ -98,7 +98,7 @@ const SecurityEdit = () => {
               </div>
 
             <div className="mb-6 w-full">
-              <div className="flex flex-row items-center border-lilac border-b">
+              <div className="w-[260px] flex flex-row items-center border-lilac border-b">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}

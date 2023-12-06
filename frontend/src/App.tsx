@@ -19,22 +19,21 @@ const App:React.FC = () => {
 
 const {user} = useSelector((state: RootState) => state.user)
 
-  return (
+return (
 		<Router>
 		{/*public routes */}
 		<Route element={<AuthLayout />}>
 			<Route path="/sign-in" element={<SigninForm />} />
 			<Route path="/sign-up" element={<SignupForm />} />
 			<Route path="/forget-password" element={<ForgetPassword />} />
-			{/*<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />} />*/}
-			<Route index element={<Dashboard />} />
-			<Route path="/game" element={<Game />} />
-			<Route path="/chat" element={<Chat />} />
-			<Route path="/friends" element={<Friends />}>
-				<Route path="/friends" element={<SetFriends />}/>
+			<Route index element={<Dashboard/>} />
+			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
+			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
+			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>
+				<Route path="/friends" element={user ? <SetFriends /> : <Navigate to="/sign-in" />}/>
 			</Route>
-			<Route path="/settings" element={<Settings />}>			
-				<Route path="/settings" element={<AccountSetting />}/>
+			<Route path="/settings" element={user ? <Settings /> : <Navigate to="/sign-in" />}>			
+				<Route path="/settings" element={user ? <AccountSetting /> : <Navigate to="/sign-in" />}/>
 			</Route>			
 			
 		</Route>

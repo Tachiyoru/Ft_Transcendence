@@ -37,7 +37,7 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 	const dispatch = useDispatch();
 
 	const handleLogout = () => {
-	  dispatch(setLogout());
+		dispatch(setLogout());
 	};
 
 	const navItemStyle = "px-3 py-3 flex items-center bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110";

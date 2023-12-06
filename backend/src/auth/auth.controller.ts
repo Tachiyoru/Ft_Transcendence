@@ -52,6 +52,8 @@ export class AuthController
 	@UseGuards(AuthGuard('42'))
 	async callback(@Req() req: Request, @Res() res: Response)
 	{
+		res.header('Access-Control-Allow-Origin', '*');
+
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
 		const token = await this.authService.signToken(user.id, user.email);
@@ -59,9 +61,9 @@ export class AuthController
 		res.cookie('access_token', token, {
 			expires: new Date(Date.now() + 3600000),
 		});
-		console.log(req.cookies.access_token);
+		console.log("lol", req.cookies.access_token);
 
-		return res.redirect(`https://google.com`); //change to profil frontend url
+		return res.redirect(`http://localhost:5000/auth/42/callback'`); //change to profil frontend url
 	}
 }
 

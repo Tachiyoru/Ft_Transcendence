@@ -24,7 +24,6 @@ const AccountSetting: React.FC = () => {
         <div className="w-[260px] md:rounded-l-lg bg-violet-black">
           <div className='p-4'>
             <h1 className="font-outline-2 mt-6 m-2 text-white">Settings</h1>
-             
           </div>
 
             <nav>

@@ -54,12 +54,8 @@ const SignupForm = () => {
       .post('/auth/signup', data)
       .then((response) => {
         if (response.status === 201) {
-          //const token = Cookies.get('user_token');
           setResStatus('Successful Registration!');
           dispatch(loginSuccess(response.data))
-          console.log(response.data)
-          //dispatch(loginSuccess(`Bearer ${token}`)); 
-
           navigate('/');
         } else {
           setResStatus('Error');
@@ -86,12 +82,9 @@ const SignupForm = () => {
     setConfirmPasswordHasContent(confirmPasswordValue.length > 0);
   };
 
-  const handleGoogleClick = () => {
-    navigate('/42API');
-  };
 
-  const handle42Click = () => {
-    navigate('/42API');
+  const handle42Click = async () => {
+    window.location.href = "http://localhost:5001/auth/42Auth";
   };
 
   return (
@@ -273,7 +266,7 @@ const SignupForm = () => {
 
             {/*Social Sign*/}
             <SocialIcons
-              onGoogleClick={handleGoogleClick}
+              onGoogleClick={handle42Click}
               on42Click={handle42Click}
             />
           </form>

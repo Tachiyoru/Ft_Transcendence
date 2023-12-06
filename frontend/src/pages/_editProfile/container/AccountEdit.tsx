@@ -1,26 +1,61 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineMail, AiOutlineUser } from "react-icons/ai"
 import { FaUser } from "react-icons/fa6"
+import axios from "../../../axios/api";
+import Cookies from 'js-cookie';
 
 interface IdataRegister {
 	username: string;
 	email: string;
 }
-  
+
 const AccountEdit = () => {
 
+	const [loading, setLoading] = useState(true);
+	
 	const {
 		register,
 		handleSubmit,
-		formState: { isValid },
-	  } = useForm<IdataRegister>();
+		formState: { isValid }, watch,
+	} = useForm<IdataRegister>();
+	
+	const { username, email } = watch();
 
-	  const submitHandler = (data: IdataRegister) => {
-		console.log(data);
-	  };
+	const submitHandler = async () => {
+		try {
+			const token = Cookies.get('user_token');
+			setLoading(true);
+			if (token) {
+				const filteredData: Partial<IdataRegister> = {};
+	
+				if (username) {
+					filteredData.username = username;
+				}
+	
+				if (email) {
+					filteredData.email = email;
+				}
+	
+				await axios.patch('/users', filteredData, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+	
+				console.log('User data updated successfully:', filteredData);
+				console.log(token);
+			}
+        } catch (error) {
+            console.error('Error updating user data:', error);
+        } finally {
+            setLoading(false);
+		}
+	};
 
-	  return (
-	<div>
+
+	return (
+	<div className="mx-2">
 		{/*TITLE*/}
 		<div className="text-lilac mt-4">
 			<h2>Profile and account</h2>
@@ -52,10 +87,6 @@ const AccountEdit = () => {
 				value: 1,
 				message: 'Name length must be at least 1 character:',
 				},
-				required: {
-				value: true,
-				message: 'Name is required',
-				}
 			})}
 			placeholder='Enter name'
 			className="px-5 py-3 text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
@@ -73,10 +104,6 @@ const AccountEdit = () => {
 					value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 					message: 'Please enter a valid email',
 					},
-					required: {
-					value: true,
-					message: 'Email is required',
-					},
 				})}
 
 			placeholder='Email'
@@ -85,18 +112,18 @@ const AccountEdit = () => {
 
 			</div>
 			<button
-              type="submit"
-              disabled={!isValid}
-              className="mt-4 border text-sm bg-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
+				type="submit"
+				disabled={!isValid}
+				className="mt-4 border text-sm bg-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
             >
-              Save changes
+            Save changes
             </button>
 		</form>
 
 		{/*DELETE ACCOUNT*/}
-		<p className="text-xs text-lilac pt-2 underline">Unblock Friend</p>
+		<p className="text-xs text-lilac pt-2 underline">Delete Account</p>
 	</div>
-  )
+	)
 }
 
 export default AccountEdit

@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit'
 
 interface userSlice {
 	user: string | null;
-  }  
+}  
 
 const initialState = {
     user: null
