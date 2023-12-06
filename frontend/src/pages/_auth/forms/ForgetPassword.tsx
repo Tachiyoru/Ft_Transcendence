@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { AiOutlineMail } from "react-icons/ai";
 
+
 interface IdataRecoverPassword {
 	email: string;
 }

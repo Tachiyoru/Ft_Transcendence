@@ -1,50 +1,16 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
-import { FaUser, FaVolumeXmark } from "react-icons/fa6";
-import { IoSettingsSharp } from "react-icons/io5";
-import axios from '../../axios/api';
-import Cookies from 'js-cookie';
-
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { FaUser } from "react-icons/fa6";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from './store/store';
+import Profil from "./container/Profil";
+import Home from "./container/Home";
 
 
 const Dashboard = () => {
   const location = useLocation();
   const currentPage = location.pathname;
 
-  const [userData, setUserData] = useState<{username: string; email: string}>();
-  const [loading, setLoading] = useState(true);
-
-  
-  useEffect(() => {
-    const token = Cookies.get('user_token');
-    const fetchUserData = async () => {
-      console.log(token);
-      try {
-        const response = await axios.get('/users/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUserData(response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-  
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!userData) {
-    return <div>Error loading user data</div>;
-  }
 
 
   return (
@@ -61,30 +27,8 @@ const Dashboard = () => {
                 </div>
                 <div className="pl-4 pt-4">
                   <p className="text-xs font-light text-lilac">Member sinced 20/12/23</p>
-                  <p className="text-sm font-semibold text-lilac">{userData.username} {userData.email}</p>
-                  <p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
-                </div>
-              </div>
-              
-              <div>	
-                <Link to="/settings">
-									<div className="flex flex-row items-center bg-purple hover:bg-violet-black-nav mx-2 p-2 pl-5 rounded-md text-lilac text-sm">
-										<IoSettingsSharp className="w-3 h-4 mr-2"/>
-										<p>Edit Profile</p>
-									</div>
-								</Link>
-              </div>
-
-              <div className="mx-2">
-                <div className='h-2 bg-white'>
-                  <div
-                      style={{ width: 40}}
-                      className="h-full bg-purple">
-                  </div>
-                </div>
-                <div className="flex flex-row justify-between mt-2 text-sm text-lilac">
-                  <span>Level 1</span>
-                  <span>20/400</span>
+                  <p className="text-sm font-semibold text-lilac">ClemCheyrou</p>
+                  <p className="mt-2 text-white text-xs font-medium text-lilac"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>
               </div>
 
@@ -113,13 +57,13 @@ const Dashboard = () => {
 
                 <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2  rounded-lg ">
                   <p><span className="text-sm text-lilac">Data</span></p>
-                  <p className="text-gray-300 text-xs">Badges</p>
+                  <p className="text-sm text-gray-300 text-xs">Badges</p>
 
                 </div>
 
                 <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
                 <p><span className="text-sm text-lilac">Data</span></p>
-                  <p className="text-gray-300 text-xs">Badges</p>
+                  <p className="text-sm text-gray-300 text-xs">Badges</p>
                 </div>
 
             </div>
@@ -128,17 +72,17 @@ const Dashboard = () => {
 
               <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2 rounded-lg ">
                 <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Podium</p>              
+                <p className="text-sm text-gray-300 text-xs">Podium</p>              
               </div>
 
               <div className="bg-purple h-40 dark:text-gray-200 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2 rounded-lg hidden md:block">
                 <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Podium</p>
+                <p className="text-sm text-gray-300 text-xs">Podium</p>
               </div>
 
               <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
                 <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Top players</p>
+                <p className="text-sm text-gray-300 text-xs">Top players</p>
               </div>
             </div>
 
