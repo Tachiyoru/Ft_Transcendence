@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "otplib": "^12.0.1",
+    "passport-42": "^1.2.6",
     "qrcode": "^1.5.3",
     "typeorm": "^0.3.17",
     "url-otpauth": "^2.0.0"

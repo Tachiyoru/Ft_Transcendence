@@ -30,19 +30,20 @@ export class TwoFaController
 	}
 
 	@Post('authenticate')
-	async authenticateWith2FA(@Body() body: User, token: string, @Res() res: Response)
+	async authenticateWith2FA(@Body() body: User, @Res() res: Response)
 	{
 		const user = await this.authService.getUserByEmail(body.email);
-		console.log({ user });
+		// console.log({ user });
 
 		if (user)
 		{
-			const isValid = await this.twoFAService.verify2FACode(user, token);
+			const isValid = await this.twoFAService.verify2FACode(user);
 			if (!isValid)
 				throw new ForbiddenException("Invalid 2FA Token");
 			const access_token = await this.authService.callForgeTokens(user, res);
 
-			return { user, access_token };
+			// return { user, access_token };
+			res.redirect("https://google.com");
 		}
 	}
 }

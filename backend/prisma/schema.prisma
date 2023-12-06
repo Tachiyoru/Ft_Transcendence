@@ -32,11 +32,6 @@ model User {
     tittle   String?
     hash     String
 
-    fortyTwoId   Int?    @unique
-    fortyTwoAuth Boolean @default(false)
-	githubId	    Int?   		@unique
-    googleId     Boolean @default(false)
-
 	twoFASecret String? @unique
 
     role   Role       @default(USER)
