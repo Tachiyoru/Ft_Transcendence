@@ -14,7 +14,7 @@ services:
   # Il manque un healthcheck
 
   backend:
-    container_name: backend 
+    container_name: backend
     image: backend
     build:
       context: ./backend
@@ -36,7 +36,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    container_name: frontend 
+    container_name: frontend
     image: frontend
     build:
       context: ./frontend
@@ -47,13 +47,12 @@ services:
     env_file:
       - .env
     ports:
-      - 5000:5000
+      - 5173:5173
     volumes:
       - ./frontend:/usr/src/app
     networks:
       - frontend_network
     restart: unless-stopped
-
 
 networks:
   backend_network:

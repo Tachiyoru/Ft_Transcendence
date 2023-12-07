@@ -42,7 +42,7 @@ export class AuthService {
     if (!userExists) {
       throw new BadRequestException("User no longer exists");
     }
-    const expiresIn = 15000;
+    const expiresIn = 15173;
     const expiration = Math.floor(Date.now() / 1000) + expiresIn;
     const accessToken = this.jwt.sign(
       { ...payload, exp: expiration },
@@ -107,7 +107,7 @@ export class AuthService {
   }
 
   async fortyTwoAuth(user: User, res: any) {
-	return this.forgeTokens(user, res);
+    return this.forgeTokens(user, res);
   }
 
   async logout(response: Response) {
