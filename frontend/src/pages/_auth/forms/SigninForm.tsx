@@ -1,11 +1,11 @@
-import { ReactNode } from 'react';
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
+import { AiOutlineMail, AiOutlineLock, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { Si42 } from "react-icons/si";
+import SocialIcons from '../fields/SocialIcons';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../../services/UserSlice';
 
 interface IdataLogin {
 	username: string;
@@ -13,12 +13,8 @@ interface IdataLogin {
 	password: string;
 }
 
-interface IconContainerProps {
-	children: ReactNode;
-}
-
 const SigninForm = () => {
-
+	const dispatch = useDispatch();
 	const [resStatus, setResStatus] = useState('');
 	const navigate = useNavigate();
 
@@ -51,21 +47,38 @@ const SigninForm = () => {
 		});
 	};
 
-	const IconContainer : React.FC<IconContainerProps> = ({ children }) => (		<div className="flex items-center justify-center border rounded m-6 border-lilac w-10 h-10">
-			{children}
-		</div>
-	);
-
-	const handleSignin42 = () => {
-		navigate("/42API");
-	};
-
 	const handlePasswordChange = (e) => {
 		const newPassword = e.currentTarget.value;
 		setPassword(newPassword);
 		setShowUsernameErrors(true);
 	};
-    
+
+	const handle42Click = async () => {
+		try{
+			const response = window.location.href = "http://localhost:5001/auth/42/callback";
+			if (response)
+			{
+			dispatch(loginSuccess(response))
+			navigate('/');
+			}
+		} catch {
+			setResStatus('Error');
+		}
+	};
+
+	const handleGitClick = async () => {
+		try{
+			const response = window.location.href = "http://localhost:5001/auth/github/callback";
+			if (response)
+			{
+			dispatch(loginSuccess(response))
+			navigate('/');
+			}
+		} catch {
+			setResStatus('Error');
+		}
+	};
+
 	return (
 		<div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
 		<section className='w-full max-w-sm border-container'>
@@ -167,19 +180,10 @@ const SigninForm = () => {
 				</div>
 
 				{/*Social Sign*/}
-				<div className="flex items-center justify-center">
-					<IconContainer>
-						<button onClick={handleSignin42}>
-							<AiOutlineGoogle className="w-4 h-4 text-lilac" />
-						</button>
-					</IconContainer>
-
-					<IconContainer>
-						<button onClick={handleSignin42}>
-							<Si42 className="w-4 h-4 text-lilac" />
-						</button>
-					</IconContainer>
-				</div>
+				<SocialIcons
+				onGitClick={handleGitClick}
+				on42Click={handle42Click}
+				/>
 				</form>
 			</div>
 		</section>

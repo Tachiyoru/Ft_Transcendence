@@ -24,30 +24,27 @@ const AccountEdit = () => {
 
 	const submitHandler = async () => {
 		try {
-			const token = Cookies.get('refresh_token');
 			setLoading(true);
-			if (token) {
 				const filteredData: Partial<IdataRegister> = {};
 	
 				if (username) {
 					filteredData.username = username;
+					console.log('username : ', filteredData.username);
 				}
 	
 				if (email) {
 					filteredData.email = email;
+					console.log('email : ', filteredData.email);
 				}
 	
-				await axios.patch('/users', filteredData, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
+				const response = await axios.patch('/users/edit', filteredData);
 	
-				console.log('User data updated successfully:', filteredData);
-				console.log(token);
-			}
-        } catch (error) {
+				console.log('User data updated successfully:', filteredData);;
+        } catch (error: any) {
             console.error('Error updating user data:', error);
+			if (error.response) {
+				console.error('Server responded with:', error.response.data);
+			}
         } finally {
             setLoading(false);
 		}

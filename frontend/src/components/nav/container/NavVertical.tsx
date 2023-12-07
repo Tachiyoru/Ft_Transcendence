@@ -4,6 +4,7 @@ import { FaArrowRightFromBracket, FaUserGroup } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { setLogout } from "../../../services/UserSlice";
 import { useDispatch } from "react-redux";
+import axios from "../../../axios/api";
 
 interface NavItemProps {
 	lien: string;
@@ -38,6 +39,11 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 
 	const handleLogout = () => {
 		dispatch(setLogout());
+		axios
+		.post('/auth/logout')
+		.catch((error) => {
+			console.error('Erreur lors de la déconnexion côté serveur :', error);
+		});
 	};
 
 	const navItemStyle = "px-3 py-3 flex items-center bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110";

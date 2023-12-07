@@ -18,15 +18,10 @@ const Dashboard = () => {
 
   
   useEffect(() => {
-    const token = Cookies.get('refresh_token');
     const fetchUserData = async () => {
-      console.log(token);
       try {
-        const response = await axios.get('/users/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get('/users/me');
+        console.log(response.data);
         setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -60,8 +55,8 @@ const Dashboard = () => {
                   <FaUser className="w-[66px] h-[66px] p-3 text-lilac"/>
                 </div>
                 <div className="pl-4 pt-4">
-                  <p className="text-xs font-light text-lilac">Member sinced 20/12/23</p>
-                  <p className="text-sm font-semibold text-lilac">{userData.username} {userData.email}</p>
+                  <p className="text-xs font-light text-lilac">Member sinced</p>
+                  <p className="text-sm font-semibold text-lilac">{userData.username}</p>
                   <p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>
               </div>

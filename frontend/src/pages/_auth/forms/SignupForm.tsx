@@ -55,6 +55,7 @@ const SignupForm = () => {
       .then((response) => {
         if (response.status === 201) {
           setResStatus('Successful Registration!');
+          console.log(response.data);
           dispatch(loginSuccess(response.data))
           navigate('/');
         } else {
@@ -94,7 +95,20 @@ const SignupForm = () => {
     } catch {
       setResStatus('Error');
     }
-};
+  };
+
+  const handleGitClick = async () => {
+    try{
+      const response = window.location.href = "http://localhost:5001/auth/github/callback";
+      if (response)
+      {
+        dispatch(loginSuccess(response))
+        navigate('/');
+      }
+    } catch {
+      setResStatus('Error');
+    }
+  };
 
   return (
     <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
@@ -275,7 +289,7 @@ const SignupForm = () => {
 
             {/*Social Sign*/}
             <SocialIcons
-              onGoogleClick={handle42Click}
+              onGitClick={handleGitClick}
               on42Click={handle42Click}
             />
           </form>

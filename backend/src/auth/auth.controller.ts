@@ -36,7 +36,8 @@ export class AuthController
 		const user = await this.authService.signin(dto, res);
 		return { user };
 	}
-
+	
+	@Post('logout')
 	async logout(@Res({ passthrough: true }) res: Response)
 	{
 		return await this.authService.logout(res);
@@ -54,7 +55,7 @@ export class AuthController
 		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
 		res.redirect('http://localhost:5173/');
-		return user;//change to profil frontend url
+		return user;
 	}
 
 	@Get('/github/callback')
@@ -67,6 +68,7 @@ export class AuthController
 
 		console.log(req.cookies.access_token);
 
-		return res.redirect(`http://localhost:5173/auth/42/callback'`); //change to profil frontend url
+		res.redirect(`http://localhost:5173/`);
+		return user;
 	}
 }
