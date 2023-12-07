@@ -90,7 +90,6 @@ const SignupForm = () => {
       if (response)
       {
         dispatch(loginSuccess(response))
-        navigate('/');
       }
     } catch {
       setResStatus('Error');
@@ -103,7 +102,6 @@ const SignupForm = () => {
       if (response)
       {
         dispatch(loginSuccess(response))
-        navigate('/');
       }
     } catch {
       setResStatus('Error');

@@ -7,13 +7,14 @@ import Cookies from 'js-cookie';
 
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import DateConverter from "../../components/date/DateConverter";
 
 
 const Dashboard = () => {
   const location = useLocation();
   const currentPage = location.pathname;
 
-  const [userData, setUserData] = useState<{username: string; email: string}>();
+  const [userData, setUserData] = useState<{username: string; createdAt: string}>();
   const [loading, setLoading] = useState(true);
 
   
@@ -55,7 +56,7 @@ const Dashboard = () => {
                   <FaUser className="w-[66px] h-[66px] p-3 text-lilac"/>
                 </div>
                 <div className="pl-4 pt-4">
-                  <p className="text-xs font-light text-lilac">Member sinced</p>
+                  <DateConverter initialDate={userData.createdAt}/>
                   <p className="text-sm font-semibold text-lilac">{userData.username}</p>
                   <p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>

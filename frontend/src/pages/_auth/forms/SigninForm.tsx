@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineMail, AiOutlineLock, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import SocialIcons from '../fields/SocialIcons';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../../services/UserSlice';
+import axios from "../../../axios/api";
 
 interface IdataLogin {
 	username: string;
@@ -31,11 +31,12 @@ const SigninForm = () => {
 	const submitHandler = (data: IdataLogin) => {
 		console.log(data);
 		axios
-		.post("http://localhost:5001/auth/signin", data)
+		.post("auth/signin", data)
 		.then( (response) => {
 		console.log(response.status);
 		if (response.status === 201) {
 			setResStatus("Successful Registration!");
+			dispatch(loginSuccess(response.data))
 			navigate("/");
 		} else {
 			setResStatus("Error");
@@ -59,7 +60,6 @@ const SigninForm = () => {
 			if (response)
 			{
 			dispatch(loginSuccess(response))
-			navigate('/');
 			}
 		} catch {
 			setResStatus('Error');
@@ -72,7 +72,6 @@ const SigninForm = () => {
 			if (response)
 			{
 			dispatch(loginSuccess(response))
-			navigate('/');
 			}
 		} catch {
 			setResStatus('Error');

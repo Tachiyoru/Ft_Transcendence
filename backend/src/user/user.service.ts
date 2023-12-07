@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { EditUserDto } from "./dto";
 import { UserCreateInput } from "./user-create.input";
-import { User } from "@prisma/client";
+import * as argon from "argon2";
 
 @Injectable()
 export class UserService
@@ -26,6 +26,7 @@ export class UserService
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
 			role: "ADMIN",
+			
 		});
 		await this.createInitialUser({
 			avatar: "",
@@ -55,16 +56,35 @@ export class UserService
 		}
 	}
 
-	async editUser(userId: number, dto: EditUserDto): Promise<User>
+	async editUser(userId: number, dto: EditUserDto)
 	{
-		const user = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				...dto,
+	const user = await this.prisma.user.findFirst({
+		where: {
+			id: userId,
+		},
+		});
+		if (user) {
+		if (dto.password) {
+			const pwdMatches = await argon.verify(user.hash?? "", dto.password);
+			if (!pwdMatches) {
+			throw new BadRequestException("Invalid password");
+			}
+		}
+		if (dto.newPassword) {
+			dto.password = await argon.hash(dto.newPassword);
+		}
+		}
+		const {password, username: newusername} = dto
+		console.log("id : ", userId);
+		const user2 = await this.prisma.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			hash: password,
+			username: newusername,
 			},
 		});
-		return (user);
+		return user2;
 	}
 }

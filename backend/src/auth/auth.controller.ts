@@ -31,9 +31,11 @@ export class AuthController
 	}
 
 	@Post("signin")
-	async signin(@Body() dto: AuthDto2, @Res({ passthrough: true }) res: Response)
+	async signin(@Body() dto: AuthDto2, @Req() req: Request, @Res({ passthrough: true }) res: Response)
 	{
 		const user = await this.authService.signin(dto, res);
+		console.log(req.cookies.access_token);
+		console.log("token post singin = ", req.cookies.refresh_token)
 		return { user };
 	}
 	
@@ -48,14 +50,17 @@ export class AuthController
 	async fortyTwoCallback(@Req() req: Request, @Res() res: Response)
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
-		const user: User = req.user as User;
-		console.log({user});
-		await this.authService.callForgeTokens(user, res);
+		const user = req.user as User;
+		user.username = user.username+"_42";
+		const user2 = await this.authService.authExtUserCreate(user)
+		// console.log({user});
+		await this.authService.callForgeTokens(user2, res);
 
 		console.log('fortyTwoCallback --> access_token', req.cookies.access_token);
 
 		res.redirect('http://localhost:5173/');
-		return user;
+		// console.log("aaaaaaaaaaaaaaaaaaaaaaaaa", {user})
+		return user2;
 	}
 
 	@Get('/github/callback')
@@ -64,11 +69,13 @@ export class AuthController
 	{
 		if (req.user === undefined) throw new UnauthorizedException();
 		const user: User = req.user as User;
-		await this.authService.callForgeTokens(user, res);
+		user.username = user.username+"_git";
+		const user2 = await this.authService.authExtUserCreate(user)
+		await this.authService.callForgeTokens(user2, res);
 
 		console.log(req.cookies.access_token);
 
 		res.redirect(`http://localhost:5173/`);
-		return user;
+		return user2;
 	}
 }
