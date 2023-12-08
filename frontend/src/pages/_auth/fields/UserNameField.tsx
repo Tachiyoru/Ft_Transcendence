@@ -3,8 +3,8 @@ import { AiOutlineUser } from "react-icons/ai";
 const UserNameField = ({ register, errors, showUsernameErrors, resStatus, setShowUsernameErrors}) => (
 
 	<div className='mb-2 w-full'>
-		<div className='flex flex-row items-center border-b'>
-			<AiOutlineUser className= 'w-4 h-4'/>
+		<div className='flex flex-row items-center border-lilac border-b'>
+			<AiOutlineUser className= 'w-4 h-4 text-lilac'/>
 			<input
 			type="text"
 			id="name"
@@ -20,7 +20,7 @@ const UserNameField = ({ register, errors, showUsernameErrors, resStatus, setSho
 				}
 			})}
 			placeholder='Enter name'
-			className={`px-5 py-4 outline-none ${errors.username ? "border-red-500" : "outline-none"}`}
+			className={`px-5 py-4 text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none ${errors.username ? "border-red-500" : "outline-none"}`}
 			/>
 		</div>
 

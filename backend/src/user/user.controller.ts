@@ -15,6 +15,7 @@ export class UserController
 	@Get("me")
 	getMe(@GetUser() user: User)
 	{
+		console.log(user)
 		return user;
 	}
 
@@ -22,8 +23,7 @@ export class UserController
 	@Patch("edit")
 	editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto)
 	{
-		//
-		// peut etre save des maintenant l'image et recup l'URL et la send dans edit 57:00 
-		return this.userService.editUser(userId, dto);
+		console.log("userId : ", userId)
+		return (this.userService.editUser(userId, dto));
 	}
 }

@@ -1,14 +1,11 @@
-import { ReactNode } from 'react';
-
-
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AiOutlineMail, AiOutlineLock, AiOutlineGoogle, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
+import { AiOutlineMail, AiOutlineLock, AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/ai'
 import { useForm } from "react-hook-form";
-import axios from "axios";
-import { setAuthenticated } from '../../../context/AuthUtils';
-import { AuthContext } from '../../../context/AuthContext';
-import { Si42 } from "react-icons/si";
+import SocialIcons from '../fields/SocialIcons';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../../services/UserSlice';
+import axios from "../../../axios/api";
 
 interface IdataLogin {
 	username: string;
@@ -16,12 +13,8 @@ interface IdataLogin {
 	password: string;
 }
 
-interface IconContainerProps {
-	children: ReactNode;
-}
-
 const SigninForm = () => {
-
+	const dispatch = useDispatch();
 	const [resStatus, setResStatus] = useState('');
 	const navigate = useNavigate();
 
@@ -38,12 +31,12 @@ const SigninForm = () => {
 	const submitHandler = (data: IdataLogin) => {
 		console.log(data);
 		axios
-		.post("http://localhost:5000/auth/signin", data)
+		.post("auth/signin", data)
 		.then( (response) => {
 		console.log(response.status);
 		if (response.status === 201) {
 			setResStatus("Successful Registration!");
-			setAuthenticated(response.data.access_token);
+			dispatch(loginSuccess(response.data))
 			navigate("/");
 		} else {
 			setResStatus("Error");
@@ -55,32 +48,47 @@ const SigninForm = () => {
 		});
 	};
 
-	const IconContainer : React.FC<IconContainerProps> = ({ children }) => (		<div className="flex items-center justify-center border rounded m-6 border-gray-300 w-10 h-10">
-			{children}
-		</div>
-	);
-
-	const handleSignin42 = () => {
-		navigate("/42API");
-	};
-
 	const handlePasswordChange = (e) => {
 		const newPassword = e.currentTarget.value;
 		setPassword(newPassword);
 		setShowUsernameErrors(true);
 	};
-    
+
+	const handle42Click = async () => {
+		try{
+			const response = window.location.href = "http://localhost:5001/auth/42/callback";
+			if (response)
+			{
+			dispatch(loginSuccess(response))
+			}
+		} catch {
+			setResStatus('Error');
+		}
+	};
+
+	const handleGitClick = async () => {
+		try{
+			const response = window.location.href = "http://localhost:5001/auth/github/callback";
+			if (response)
+			{
+			dispatch(loginSuccess(response))
+			}
+		} catch {
+			setResStatus('Error');
+		}
+	};
+
 	return (
-		<div>
-		<section className='container mx-auto px-5 py-10'>
-			<div className='w-full max-w-sm mx-auto'>
-				<h1 className='text-2x1 text-center mb-8'>Login</h1>
+		<div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
+		<section className='w-full max-w-sm border-container'>
+			<div className='mx-auto p-8'>
+				<h1 className='text-xl font-outline-2 text-white text-center mb-8'>Login</h1>
 				<form onSubmit={handleSubmit(submitHandler)}>
 
 				{/*Form Email*/}
 				<div className='mb-2 w-full'>
-					<div className='flex flex-row items-center border-b'>
-						<AiOutlineMail className= 'w-4 h-4'/>
+					<div className='flex flex-row items-center border-b border-lilac'>
+						<AiOutlineMail className= 'w-4 h-4 text-lilac'/>
 						<input
 						type="email"
 						id="email"
@@ -97,20 +105,20 @@ const SigninForm = () => {
 						})}
 
 						placeholder='Enter Email'
-						className= 'px-5 py-4 outline-none'
+						className= 'px-5 py-4 text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none'
 						
 						/>
 					</div>
 					{
 					showUsernameErrors && errors.email?.message && 
-					(<p className='text-red-500 text-xs mt-1'>{errors.email?.message}</p>)
+					(<p className='text-red-orange text-xs mt-1'>{errors.email?.message}</p>)
 					}
 				</div>
 
 				{/*Form Password*/}
-				<div className='mb-2 w-full'>
-					<div className='flex flex-row items-center border-b'>
-						<AiOutlineLock className= 'w-4 h-4'/>
+				<div className='mb-4 w-full'>
+					<div className='flex flex-row items-center border-b border-lilac'>
+						<AiOutlineLock className= 'w-4 h-4 text-lilac'/>
 						<input
 						type={passwordIsVisible ? "text" : "password"}
 						id="password"
@@ -127,7 +135,7 @@ const SigninForm = () => {
 						})}
 
 						placeholder='Enter Password'
-						className= 'px-5 py-4 w-full outline-none'
+						className= 'px-5 py-4 w-full text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none'
 						onChange={handlePasswordChange}
 
 						/>
@@ -135,16 +143,16 @@ const SigninForm = () => {
 							setPasswordIsVisible((prevState) => !prevState);
 							setShowUsernameErrors(false)}}
 						>
-							{passwordIsVisible ? <AiOutlineEyeInvisible className= 'w-4 h-4'/> : <AiOutlineEye className= 'w-4 h-4'/> }
+							{passwordIsVisible ? <AiOutlineEyeInvisible className= 'w-4 h-4 text-lilac'/> : <AiOutlineEye className= 'w-4 h-4 text-lilac'/> }
 						</button>
 					</div>
 					{
 					showUsernameErrors && errors.password?.message && 
-					(<p className='text-red-500 text-xs mt-1'>{errors.password?.message}</p>)
+					(<p className='text-red-orange text-xs mt-1'>{errors.password?.message}</p>)
 					}
 				</div>
 
-				<Link to="/forget-password" className="text-sm underline ">
+				<Link to="/forget-password" className="text-sm text-lilac underline ">
 					Forgot password?
 				</Link>
 
@@ -153,11 +161,11 @@ const SigninForm = () => {
 				<button
 					type="submit"
 					disabled={!isValid}
-					className="border bg-gray-200 mt-6 py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
+					className="border bg-gray-200 text-lilac mt-6 py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
 				>
 					Sign In
 				</button>
-				<p className="text-sm mb-6">
+				<p className="text-sm mb-6 text-lilac">
 					Do not have an account?{" "}
 					<Link to="/sign-up" className="underline ">
 						Register now
@@ -165,25 +173,16 @@ const SigninForm = () => {
 				</p>
 
 				<div className="flex items-center mb-2 ">
-					<div className="border-t flex-grow border-gray-300"></div>
-					<span className="mx-4 text-sm text-gray-500">OR</span>
-					<div className="border-t flex-grow border-gray-300"></div>
+					<div className="border-t flex-grow border-lilac"></div>
+					<span className="mx-4 text-sm text-lilac">OR</span>
+					<div className="border-t flex-grow border-lilac"></div>
 				</div>
 
 				{/*Social Sign*/}
-				<div className="flex items-center justify-center">
-					<IconContainer>
-						<button onClick={handleSignin42}>
-							<AiOutlineGoogle className="w-4 h-4" />
-						</button>
-					</IconContainer>
-
-					<IconContainer>
-						<button onClick={handleSignin42}>
-							<Si42 className="w-4 h-4" />
-						</button>
-					</IconContainer>
-				</div>
+				<SocialIcons
+				onGitClick={handleGitClick}
+				on42Click={handle42Click}
+				/>
 				</form>
 			</div>
 		</section>

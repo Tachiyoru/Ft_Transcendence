@@ -12,5 +12,13 @@ export class EditUserDto
 
 	@IsString()
 	@IsOptional()
+	password?: string;
+
+	@IsString()
+	@IsOptional()
+	newPassword?: string;
+
+	@IsString()
+	@IsOptional()
 	avatar?: string;
 }

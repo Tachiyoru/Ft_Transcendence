@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class TokenGuard implements CanActivate
@@ -9,23 +10,30 @@ export class TokenGuard implements CanActivate
 	constructor(
 		private jwt: JwtService,
 		private config: ConfigService,
+		private prisma: PrismaService
 	) {}
 	async canActivate(context: ExecutionContext): Promise<boolean>
 	{
 		const request: Request = context.switchToHttp().getRequest();
-		// console.log("payloaaaaaaaaaaaaaaaaaad", request.cookies);
 		const token = this.extractTokenFromCookie(request);
-		// console.log("payloaaaaaaaaaaaaaaaaaad", token);
+		console.log("payloaaaaaaaaaaaaaaaaaad", token);
 		if (!token)
 		{
 			throw new UnauthorizedException();
 		}
 		try
 		{
+			console.log("token traitement");
 			const payload = await this.jwt.verifyAsync(token, {
 				secret: this.config.get<string>('JWT_SECRET_ACCESS'),
 			});
-			request['user'] = payload;
+			const user = await this.prisma.user.findUnique({
+				where: { id: payload.sub },
+			});
+			if (!user) {
+			throw new UnauthorizedException();
+			}
+			request.user = user;
 		} catch (err)
 		{
 			throw new UnauthorizedException();

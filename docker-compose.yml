@@ -22,7 +22,7 @@ services:
       dockerfile: ./Dockerfile
     command: npm run start:migrate:dev
     ports:
-      - 5000:5000
+      - 5001:5001
     depends_on:
       - trsc_db
     env_file:
@@ -32,7 +32,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - backend_network
-      # - frontend_network
+      - frontend_network
     restart: unless-stopped
 
   # frontend:
@@ -53,7 +53,7 @@ services:
 
 networks:
   backend_network:
-  # frontend_network:
+  frontend_network:
 
 volumes:
   database:

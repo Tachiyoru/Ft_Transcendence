@@ -5,7 +5,7 @@ re: clean run
 setup :
 	@echo "Installing dependencies"
 	cd backend && npm install
-# cd frontend && npm install
+	cd frontend && npm install
 
 run : down
 	@echo "Building and running the app"

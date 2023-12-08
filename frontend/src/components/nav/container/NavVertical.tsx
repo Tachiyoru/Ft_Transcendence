@@ -1,49 +1,63 @@
 import { GoHomeFill } from "react-icons/go";
 import { RiGamepadFill, RiMessage3Fill } from "react-icons/ri";
-import { FaUserGroup } from "react-icons/fa6";
+import { FaArrowRightFromBracket, FaUserGroup } from "react-icons/fa6";
+import { Link } from "react-router-dom";
+import { setLogout } from "../../../services/UserSlice";
+import { useDispatch } from "react-redux";
+import axios from "../../../axios/api";
 
 interface NavItemProps {
-	href: string;
+	lien: string;
 	icon: IconType;
 }
 
 const navItemsInfo = [
-	{ name: "Dashboard", type: "link", href: "/", icon: GoHomeFill },
-	{ name: "Game", type: "link", href: "/game", icon: RiGamepadFill },
-	{ name: "Chat", type: "link", href: "/chat", icon: RiMessage3Fill },
-	{ name: "Friends", type: "link", href: "/friends", icon: FaUserGroup},
+	{ name: "Dashboard", type: "link", lien: "/", icon: GoHomeFill },
+	{ name: "Game", type: "link", lien: "/game", icon: RiGamepadFill },
+	{ name: "Chat", type: "link", lien: "/chat", icon: RiMessage3Fill },
+	{ name: "Friends", type: "link", lien: "/friends", icon: FaUserGroup},
 ];
 
 
-const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ href, icon: Icon, currentPage }) => {
+const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ lien, icon: Icon, currentPage }) => {
 
-	const isCurrentPage = href === currentPage;
+	const isCurrentPage = lien === currentPage;
 
-	const iconColorClass = isCurrentPage ? "text-purple-400" : "text-purple-500";
+	const iconColorClass = isCurrentPage ? "text-fushia bg-purple" : "text-accent-violet";
 
 	return (
 	<li className="relative group">
-		<a href={href} className={`px-3 py-3 flex items-center ${iconColorClass} bg-purple-700 mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple-300 hover:scale-110`}>
+		<Link to={lien} className={`px-3 py-3 flex items-center ${iconColorClass} bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110`}>
 			<Icon size={28} />
-		</a>
+		</Link>
 	</li>
 	);
 };
 
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
+	const dispatch = useDispatch();
+
+	const handleLogout = () => {
+		dispatch(setLogout());
+		axios
+		.post('/auth/logout')
+		.catch((error) => {
+			console.error('Erreur lors de la déconnexion côté serveur :', error);
+		});
+	};
+
+	const navItemStyle = "px-3 py-3 flex items-center bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110";
 
 	return (
-	<section>
-		<header className="container my-12 mx-auto flex justify-between items-center">
-			<div className="right-0">
-				<ul className="flex-col">
-				{navItemsInfo.map((item, index) => (
-					<NavItem key={index} href={item.href} icon={item.icon} currentPage={currentPage}/>)
-				)}
-				</ul>
-			</div>
-		</header>
-	
+	<section className="flex flex-col h-full">
+		<ul className="flex-col flex-grow mt-12">
+			{navItemsInfo.map((item, index) => (
+				<NavItem key={index} lien={item.lien} icon={item.icon} currentPage={currentPage}/>)
+			)}
+		</ul>
+		<button className={`flex items-center ${navItemStyle} mb-12`} onClick={handleLogout}>
+			<FaArrowRightFromBracket className="text-accent-violet transform rotate-180" size={26}/>
+		</button>
 	</section>
 	)
 }

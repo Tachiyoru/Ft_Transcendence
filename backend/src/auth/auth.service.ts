@@ -9,6 +9,7 @@ import { error } from "console";
 import { User } from "@prisma/client";
 import { GetUser } from "./decorator";
 import { Response } from "express";
+import { UserService } from "src/user/user.service";
 
 @Injectable({})
 export class AuthService
@@ -17,6 +18,7 @@ export class AuthService
 		private prisma: PrismaService,
 		private jwt: JwtService,
 		private config: ConfigService,
+		private user: UserService,
 	) {}
 
 	async signup(dto: AuthDto, res: Response)
@@ -50,10 +52,33 @@ export class AuthService
 				email: dto.email,
 			},
 		});
+		if (user)
+			console.log("user exist")
 		if (!user) throw new ForbiddenException("User not found");
-		const pwdMatches = await argon.verify(user.hash, dto.password);
+		const pwdMatches = await argon.verify(user.hash?? "", dto.password);
 		if (!pwdMatches) throw new ForbiddenException("Wrong password");
 		return (this.forgeTokens(user, res));
+	}
+
+	async authExtUserCreate(userInfo: any){
+		const name: string = userInfo.username; 
+		const email: string = userInfo._json.email?? ""; 
+		const user = await this.prisma.user.findFirst({
+			where: {username: name}
+		});
+		if (!user)
+		{
+			const user2 = await this.prisma.user.create({
+				data: {
+					email: email,
+					username: name,
+					hash: "",
+				}
+			})
+			console.log({user2});
+			return user2;
+		}// console.log("info in real user= ", user)
+		return user;
 	}
 
 	private async forgeTokens(user: User, response: Response)
@@ -67,12 +92,15 @@ export class AuthService
 				expiresIn: "150sec",
 			}
 		);
+		console.log("token1", accessToken);
 		const refreshToken = this.jwt.sign(payload, {
 			secret: this.config.get<string>("JWT_SECRET_REFRESH"),
 			expiresIn: "7d",
 		});
+		console.log("token2", refreshToken)
 		response.cookie("access_token", accessToken, { httpOnly: true });
 		response.cookie("refresh_token", refreshToken, { httpOnly: true });
+		console.log("la", response.cookie)
 		return { user };
 	}
 

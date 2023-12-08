@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 
-const Friends = () => {
+const Settings = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
 	return (
@@ -12,4 +12,4 @@ const Friends = () => {
 	)
 }
 
-export default Friends
+export default Settings
