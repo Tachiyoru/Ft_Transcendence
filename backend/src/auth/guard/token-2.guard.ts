@@ -5,7 +5,7 @@ import { Request } from "express";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
-export class TokenGuard implements CanActivate
+export class TokenGuardTwo implements CanActivate
 {
 	constructor(
 		private jwt: JwtService,
@@ -25,7 +25,7 @@ export class TokenGuard implements CanActivate
 		{
 			console.log("token traitement");
 			const payload = await this.jwt.verifyAsync(token, {
-				secret: this.config.get<string>('JWT_SECRET_ACCESS'),
+				secret: this.config.get<string>('JWT_SECRET_REFRESH'),
 			});
 			const user = await this.prisma.user.findUnique({
 				where: { id: payload.sub },
@@ -44,7 +44,7 @@ export class TokenGuard implements CanActivate
 
 	private extractTokenFromCookie(request: Request): string | undefined
 	{
-		const accessToken = request.cookies?.access_token;
-		return accessToken
+		const refreshToken = request.cookies?.refresh_token;
+		return refreshToken
 	}
 }
