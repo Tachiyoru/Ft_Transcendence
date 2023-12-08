@@ -7,6 +7,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
 import { JwtService } from "@nestjs/jwt";
+import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 
 @Module({
 	imports: [
@@ -16,6 +17,7 @@ import { JwtService } from "@nestjs/jwt";
 		}),
 		UserModule,
 		AuthModule,
+		FriendsListModule,
 		PrismaModule,
 	],
 	controllers: [AppController],
