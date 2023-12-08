@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -6,16 +8,9 @@ export class FriendsListService
 {
 	constructor(private prismaService: PrismaService) {}
 
-	async addFriend(userId: number, friendId: number)
+	async addFriend(@GetUser() user: User, friendId: number)
 	{
-		const user = await this.prismaService.user.findUnique({
-			where: {
-				id: userId,
-			},
-			include: {
-				friends: true,
-			},
-		});
+		console.log({ user });
 
 		const friend = await this.prismaService.user.findUnique({
 			where: {
@@ -29,8 +24,8 @@ export class FriendsListService
 		if (!user || !friend)
 			throw new Error('User not found');
 
-		const updatedUser = await this.prismaService.user.update({
-			where: { id: userId },
+		user = await this.prismaService.user.update({
+			where: { id: user.id },
 			data: {
 				friends: {
 					connect: { id: friendId },  // Connectez l'ami existant
@@ -39,20 +34,11 @@ export class FriendsListService
 			include: { friends: true },  // Inclure les amis dans la réponse
 		});
 
-		return (updatedUser);
+		return (user);
 	}
 
-	async removeFriend(userId: number, friendId: number)
+	async removeFriend(user: User, friendId: number)
 	{
-		const user = await this.prismaService.user.findUnique({
-			where: {
-				id: userId,
-			},
-			include: {
-				friends: true,
-			},
-		});
-
 		const friend = await this.prismaService.user.findUnique({
 			where: {
 				id: friendId,
@@ -65,8 +51,8 @@ export class FriendsListService
 		if (!user || !friend)
 			throw new Error('User not found');
 
-		const updatedUser = await this.prismaService.user.update({
-			where: { id: userId },
+		user = await this.prismaService.user.update({
+			where: { id: user.id },
 			data: {
 				friends: {
 					disconnect: { id: friendId },  // Déconnectez l'ami existant
@@ -75,6 +61,6 @@ export class FriendsListService
 			include: { friends: true },  // Inclure les amis dans la réponse
 		});
 
-		return (updatedUser);
+		return (user);
 	}
 }
