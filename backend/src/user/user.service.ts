@@ -56,6 +56,10 @@ export class UserService
 		}
 	}
 
+	async getAllUsers() {
+		return this.prisma.user.findMany();
+	}
+
 	async editUser(userId: number, dto: EditUserDto)
 	{
 	const user = await this.prisma.user.findFirst({

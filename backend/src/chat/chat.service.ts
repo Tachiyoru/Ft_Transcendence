@@ -24,9 +24,15 @@ export class chatService {
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: settings.name },
     });
+
+    if (!settings.name) {
+      throw new Error("Invalid channel name");
+    }
+
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
+
     const hashedPassword: string = settings.password
       ? await argon.hash(settings.password)
       : "";

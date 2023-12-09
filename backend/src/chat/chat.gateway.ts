@@ -17,7 +17,7 @@ import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { channel } from "diagnostics_channel";
 
-@WebSocketGateway({})
+@WebSocketGateway({cors: '*:*'})
 export class chatGateway {
   @WebSocketServer()
   server: Server;
@@ -28,7 +28,7 @@ export class chatGateway {
 
   @SubscribeMessage("createChannel")
   async createchan(
-    client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody("settings") settings: createChannel,
     @MessageBody() data: { chanName: string; users: User[]; mode: Mode },
     @Request() req: any
