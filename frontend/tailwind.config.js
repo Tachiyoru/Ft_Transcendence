@@ -18,17 +18,21 @@ export default {
         'transparent-violet-black': '#160030',
         'acid-green': '#D8F828',
         'red-orange': '#FF4501',
+        'filter': '#160030'
       },
       fontSize: {
-        xs: '0.6rem',
+        xs: '0.62rem',
         sm: '0.7rem',
         base: '0.8rem',
-        xl: '1.25rem',
+        xl: '1.15rem',
         '2xl': '1.563rem',
         '3xl': '1.953rem',
         '4xl': '2.441rem',
         '5xl': '3.052rem',
-      }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],

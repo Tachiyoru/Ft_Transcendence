@@ -1,9 +1,8 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
-import { FaUser, FaVolumeXmark } from "react-icons/fa6";
+import { FaUser } from "react-icons/fa6";
 import { IoSettingsSharp } from "react-icons/io5";
 import axios from '../../axios/api';
-import Cookies from 'js-cookie';
 
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -22,7 +21,6 @@ const Dashboard = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get('/users/me');
-        console.log(response.data);
         setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -103,7 +101,7 @@ const Dashboard = () => {
           </div>
 
           {/*Dashboard*/}
-          <div className="flex-1 bg-black bg-opacity-40 p-4 md:rounded-r-lg">
+          <div className="flex-1 bg-violet-black-nav bg-opacity-8e0 p-4 md:rounded-r-lg">
 
             <div className="flex m-2 flex-row gap-4 md:gap-6">
 

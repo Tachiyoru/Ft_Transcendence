@@ -4,6 +4,8 @@ import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import userReducer from '../services/UserSlice';
 
+export type RootState = ReturnType<typeof rootReducer>;
+
 const rootReducer = combineReducers({
     user: userReducer,
 });

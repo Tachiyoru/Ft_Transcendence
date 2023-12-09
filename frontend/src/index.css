@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-	background-image: url('background-t.svg'); /* Chemin vers votre image */
+	background-image: url('background-t.svg');
 	background-size: cover;
 	background-position: center;
 	height: 100vh;
