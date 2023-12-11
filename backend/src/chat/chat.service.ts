@@ -21,28 +21,34 @@ export class chatService {
 
   // voir dans le front comment envoyer sois la liste des target pour la GROUPCHAT soit juste un nom pour le chan directement
   async createChannel(settings: createChannel, @Request() req: any) {
+    const channelName = settings.members.map((user) => user.username).join(', ') + ', ' +req.user.username;
+    
     const existingChannel = await this.prisma.channel.findUnique({
-      where: { name: settings.name },
+      where: { name: channelName },
     });
-
-    if (!settings.name) {
+    if (!channelName) {
       throw new Error("Invalid channel name");
     }
-
+    
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-
+    
     const hashedPassword: string = settings.password
       ? await argon.hash(settings.password)
       : "";
+
+
     const channel: Channel = await this.prisma.channel.create({
       data: {
-        name: settings.name,
+        name: channelName,
         modes: settings.mode,
         password: hashedPassword,
         owner: { connect: { id: req.user.id } },
-        members: { connect: settings.members.map((user) => ({ id: user.id })) },
+        members: { connect: [
+          {id: req.user.id },
+          ...settings.members.map((user) => ({ id: user.id })),
+        ]},
       },
     });
     return channel;
@@ -117,14 +123,10 @@ export class chatService {
     }
     if (chan.modes === Mode.CHAT) {
     } else if (chan.modes === Mode.GROUPCHAT) {
-    } else if (chan.modes === Mode.PRIVATE) {
+    } else if (chan.modes === Mode.PROTECTED) {
       const hashedPassword: string = password ? await argon.hash(password) : "";
       if (hashedPassword !== chan.password) {
         throw new Error("Wrong password");
-      }
-    } else if (chan.modes === Mode.INVONLY) {
-      if (invited === false) {
-        throw new Error("You are not allowed to join this channel");
       }
     }
     const updatedChannel = await this.prisma.channel.update({

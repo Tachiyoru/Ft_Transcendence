@@ -6,19 +6,25 @@ import io from 'socket.io-client';
 const CreateConv: React.FC = () => {
 	const [isPopinOpen, setIsPopinOpen] = useState(false);
 	const [isTyping, setIsTyping] = useState(false);
-	const [listUsers, setListUsers] = useState<string[]>([]);
-	const [checkedItems, setCheckedItems] = useState(new Map());
+	const [listUsers, setListUsers] = useState<{ username: string;}[]>([]);
+	const [checkedItems, setCheckedItems] = useState<{ [key: string]: { username: string } }>({});
+	const [channelType, setChannelType] = useState<'public' | 'private'>('public');
+	const [password, setPassword] = useState('');
 
-	const handleCheckboxChange = (nom: string) => {
-		const newCheckedItems = new Map(checkedItems);
-		
-		if (newCheckedItems.has(nom)) {
-			newCheckedItems.delete(nom);
-		} else {
-			newCheckedItems.set(nom, true);
-		}
-		
-		setCheckedItems(newCheckedItems);
+	const handleCheckboxChange = (user: { username: string }) => {
+		setCheckedItems(prevCheckedItems => {
+			const newCheckedItems = { ...prevCheckedItems };
+			if (newCheckedItems[user.username]) {
+			delete newCheckedItems[user.username];
+			} else {
+			newCheckedItems[user.username] = user;
+			}
+			return newCheckedItems;
+		});
+	};
+
+	const handleChangeChannelType = (e: ChangeEvent<HTMLSelectElement>) => {
+		setChannelType(e.target.value as 'public' | 'private');
 	};
 
 	useEffect(() => {
@@ -27,8 +33,7 @@ const CreateConv: React.FC = () => {
 			const response = await axios.get<{ username: string }[]>('/users/all');
 			console.log(response.data);
 			
-			const usernamesArray = response.data.map(user => user.username);
-			setListUsers(usernamesArray);
+			setListUsers(response.data);
 			} catch (error) {
 			console.error('Error fetching user list:', error);
 			}
@@ -36,7 +41,7 @@ const CreateConv: React.FC = () => {
 	fetchUserData();
 	}, []);
 
-	const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+	const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
 			const inputValue = e.target.value;
 			setIsTyping(inputValue !== '');
 	};
@@ -46,20 +51,29 @@ const CreateConv: React.FC = () => {
 	};
 
 	const handleSubmit = () => {
-		const selectedItems = Array.from(checkedItems.keys());
+		const selectedItems = Object.values(checkedItems);
 		console.log('Selection:', selectedItems);
-
-		const channelData = {
-			name: "salut toi",
-			members: selectedItems,
-			mode: 'CHAT',
-			};
 		
-		const socket = io('http://localhost:5001/');
+		const channelData = {
+			members: selectedItems,
+			mode: '',
+			password: '',
+		};
+		
+		if (Object.keys(checkedItems).length === 1) {
+			channelData.mode = 'CHAT';
+		} else {
+			channelData.mode = channelType === 'private' ? 'PROTECTED' : 'GROUPCHAT';
+			channelData.password = channelType === 'private' ? password : '';
+		}
+		
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+			});
 	
 		socket.on('connect', () => {
 		console.log('Connected to server');
-	
+		console.log(channelData);
 		socket.emit('createChannel', { settings: channelData });
 
 		socket.on("channelCreateError", (errorData) => {
@@ -72,7 +86,8 @@ const CreateConv: React.FC = () => {
 			socket.disconnect();
 		});
 
-		checkedItems.clear();
+		setCheckedItems({}); 
+		console.log("vide", checkedItems);
 		togglePopin();
 	};
 
@@ -118,35 +133,62 @@ const CreateConv: React.FC = () => {
 
 			{/*SELECT USERS*/}
 			<div className='h-32 overflow-auto pr-3'>
-			{listUsers.map((nom, index) => (
+			{listUsers.map((user, index) => (
 				
 				<div key={index} className='flex flex-row justify-between items-center mt-2'>
 				<div className="flex items-center">
 				<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
 					<FaUser className="w-[8px] h-[8px] text-lilac"/>
 				</div>
-				<p className='text-sm font-regular ml-2'>{nom}</p>
+				<p className='text-sm font-regular ml-2'>{user.username}</p>
 				</div>
 
 				<label className="inline-flex items-center space-x-2 cursor-pointer">
-				<input
+					<input
 					type="checkbox"
-					checked={checkedItems.has(nom)} // Vérifie si l'élément est coché dans la Map
-					onChange={() => handleCheckboxChange(nom)} // Appelle la fonction handleCheckboxChange avec le nom correspondant
+					checked={checkedItems[user.username] !== undefined}
+					onChange={() => handleCheckboxChange(user)} 
 					className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
-				/>
+					/>
 				</label>
 			</div>
 			))}
 			</div>
+
+			{Object.keys(checkedItems).length > 1 && (
+				<div className="flex flex-col mt-4">
+					<div>
+						<label className="text-sm mr-2">Channel Type:</label>
+						<select
+						value={channelType}
+						onChange={handleChangeChannelType}
+						className="rounded-md px-1 ml-4 text-sm bg-lilac text-accent-violet"
+						>
+						<option value="public">Public</option>
+						<option value="private">Private</option>
+						</select>
+					</div>
+					{channelType === 'private' && (
+						<div className='mr-3 mt-1'>
+							<input
+							type="password"
+							placeholder="Enter password"
+							onChange={(e) => setPassword(e.target.value)}
+							className="rounded-md w-full px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet"
+							/>
+						</div>
+					)}
+				</div>
+			)}
+
 			<div className="flex flex-col items-center">
 				<button
-				disabled={checkedItems.size === 0}
+				disabled={Object.keys(checkedItems).length === 0}
 				className={`mt-4 px-4 py-2 text-sm rounded-md 
-				${checkedItems.size === 0 ? 'bg-purple opacity-50 text-lilac cursor-not-allowed' : 'bg-purple text-lilac cursor-pointer'}`}
+				${Object.keys(checkedItems).length === 0 ? 'bg-purple opacity-50 text-lilac cursor-not-allowed' : 'bg-purple text-lilac cursor-pointer'}`}
 				onClick={handleSubmit}
 				>
-					{checkedItems.size === 1 || checkedItems.size === 0 ? 'Create a conversation' : 'Create a channel'}
+					{Object.keys(checkedItems).length === 1 || Object.keys(checkedItems).length === 0 ? 'Create a conversation' : 'Create a channel'}
 				</button>
 			</div>
 		</div>

@@ -84,7 +84,7 @@ const Dashboard = () => {
 
               {/*Stats*/}
               <div className="flex flex-col justify-end m-2">
-                <div className="bg-purple dark:text-gray-200 gap-2 mt-2 h-24 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
+                <div className="bg-purple font-audiowide dark:text-gray-200 gap-2 mt-2 h-24 dark:bg-secondary-dark-bg w-full px-2 py-2 rounded-md ">
                   <p className="text-sm text-lilac">Total</p>
                 </div>
                 <div className="flex gap-4 mt-4 flex-row">
@@ -101,48 +101,77 @@ const Dashboard = () => {
           </div>
 
           {/*Dashboard*/}
-          <div className="flex-1 bg-violet-black-nav bg-opacity-8e0 p-4 md:rounded-r-lg">
+          <div className="flex-1 bg-violet-black-nav bg-opacity-80 p-4 md:rounded-r-lg">
 
-            <div className="flex m-2 flex-row gap-4 md:gap-6">
+            <div className="flex mx-2 flex-row gap-4 md:gap-6">
 
-                <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2  rounded-lg ">
-                  <p><span className="text-sm text-lilac">Data</span></p>
-                  <p className="text-gray-300 text-xs">Badges</p>
+              <div className="w-full relative">
+                <p><span className="text-xl font-audiowide absolute text-lilac mix-blend-difference	">Badges</span></p>
+                <div className="bg-purple lg:w-60 h-40 my-4 px-4 py-4 rounded-lg ">
+                  <p className="text-gray-300 text-xs">No badges at the moment</p>
 
                 </div>
+              </div>
 
-                <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
-                <p><span className="text-sm text-lilac">Data</span></p>
-                  <p className="text-gray-300 text-xs">Badges</p>
+              <div className="w-full relative">
+                <div className="bg-purple lg:w-60 h-40 my-4 px-4 py-4 rounded-lg ">
+                  <p className="text-gray-300 text-xs">No badges at the moment</p>
                 </div>
+              </div>
 
             </div>
 
-            <div className="flex flex-row m-2 mt-6 gap-4 md:gap-6">
-
-              <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2 rounded-lg ">
-                <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Podium</p>              
-              </div>
-
-              <div className="bg-purple h-40 dark:text-gray-200 dark:bg-secondary-dark-bg w-full lg:w-60 px-4 py-2 rounded-lg hidden md:block">
-                <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Podium</p>
-              </div>
-
-              <div className="bg-purple dark:text-gray-200 h-40 dark:bg-secondary-dark-bg w-full lg:w-40 px-4 py-2  rounded-lg ">
-                <p><span className="text-sm text-lilac">Data</span></p>
-                <p className="text-gray-300 text-xs">Top players</p>
-              </div>
-            </div>
-
-              
-            <div className="bg-purple text-normal h-60 rounded-md m-2 mt-6 px-4 py-2 pt-4">
-                <div>
-                  <p className="text-sm text-lilac">History</p>
+            <div className="flex flex-row m-2 gap-4 md:gap-6">
+            
+              <div className="w-full relative">
+                <div className="bg-purple lg:w-40 h-40 my-4 px-4 py-4 rounded-lg ">
+                  <p className="text-gray-300 text-xs"></p>
                 </div>
               </div>
 
+              <div className="w-full relative">
+                <p><span className="text-xl font-audiowide absolute text-lilac">Tournament</span></p>
+                <div className="bg-purple lg:w-60 h-40 my-4 py-4 rounded-lg ">
+                  <div className="overflow-x-auto">
+                  <table className="w-full ">
+                    <tbody className="text-xs">
+                      <tr className="bg-accent-violet">
+                        <td className="px-2">1-Name</td>
+                        <td className="px-2">2-Name</td>
+                        <td className="px-2">3-Name</td>
+                      </tr>
+                      <tr>
+                        <td className="px-2">4-Name</td>
+                        <td className="px-2">5-Name</td>
+                        <td className="px-2">6-Name</td>
+                      </tr>
+                      <tr className="bg-accent-violet">
+                        <td className="px-2">7-Name</td>
+                        <td className="px-2">8-Name</td>
+                        <td className="px-2">9-Name</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                </div>
+              </div>
+
+              <div className="w-full relative">
+                <p><span className="text-xl font-audiowide absolute text-lilac">Classement</span></p>
+                <div className="bg-purple dark:text-gray-200 h-40 my-4 py-4 w-full lg:w-40 px-4 rounded-lg ">
+                </div>
+                </div>
+            </div>
+
+            <div className="flex mx-2 flex-row gap-4 md:gap-6">
+              <div className="w-full relative">
+                <p><span className="text-xl font-audiowide absolute text-lilac">History</span></p>
+                <div className="bg-purple text-normal my-4 h-60 rounded-md m-2 px-4 py-2 pt-4">
+                  <div>
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
         </div>
 

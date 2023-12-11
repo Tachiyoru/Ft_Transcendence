@@ -24,8 +24,7 @@ enum Role {
 enum Mode {
     CHAT // user to user
     GROUPCHAT // user to n users
-    PRIVATE // user to n user with password
-    INVONLY // user to n user with invitation
+    PROTECTED // user to n user with password
 }
 
 model User {
@@ -35,7 +34,7 @@ model User {
 
     email    String  @unique
     username String? @unique
-    avatar   String? @unique
+    avatar   String?
     tittle   String?
     hash     String
 
@@ -92,7 +91,8 @@ model Stats {
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     User      @relation("ownedchan", fields: [chanId], references: [id])
+    owner     User      @relation("ownedchan", fields: [ownerId], references: [id])
+    ownerId   Int
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)

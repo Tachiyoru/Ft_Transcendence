@@ -21,7 +21,7 @@ export default {
         'filter': '#160030'
       },
       fontSize: {
-        xs: '0.62rem',
+        xs: '0.5rem',
         sm: '0.7rem',
         base: '0.8rem',
         xl: '1.15rem',
@@ -32,6 +32,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        audiowide: ['Audiowide', 'sans-serif'],
       },
     },
   },

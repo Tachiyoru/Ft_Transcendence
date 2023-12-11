@@ -3,7 +3,7 @@ import { User } from "@prisma/client";
 import { GetUser } from "../auth/decorator";
 import { EditUserDto } from "./dto";
 import { UserService } from "./user.service";
-import { TokenGuard } from "../auth/guard/token.guard";
+import { TokenGuard } from "src/auth/guard/token.guard";
 
 @Controller("users")
 export class UserController

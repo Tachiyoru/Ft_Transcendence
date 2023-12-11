@@ -12,16 +12,16 @@ export class UserService
 	async onModuleInit()
 	{
 		await this.createInitialUser({
-			avatar: "/upload_permanent/Tachi.png",
 			username: "Tachi",
+			avatar: "/upload_permanent/Tachi.png",
 			email: "shanley@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "The G.O.A.T",
 			role: "ADMIN",
 		});
 		await this.createInitialUser({
-			avatar: "",
 			username: "Mansha",
+			avatar: "a",
 			email: "mansha@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
@@ -29,8 +29,8 @@ export class UserService
 			
 		});
 		await this.createInitialUser({
-			avatar: "",
 			username: "Cremette",
+			avatar: "f",
 			email: "creme@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "La Ptite Creme",
@@ -40,15 +40,19 @@ export class UserService
 
 	private async createInitialUser(userinput: UserCreateInput)
 	{
-		const user = await this.prisma.user.findFirst();
+		const user = await this.prisma.user.findUnique({
+			where:{
+				username: userinput.username,
+			}
+		});
 		if (!user)
 		{
 			await this.prisma.user.create({
 				data: {
+					username: userinput.username ?? "",
 					avatar: userinput.avatar ?? "",
 					email: userinput.email ?? "",
 					hash: userinput.hash ?? "",
-					username: userinput.username ?? "",
 					tittle: userinput.tittle ?? "",
 					role: userinput.role ?? "USER",
 				},
