@@ -14,7 +14,7 @@ services:
   # Il manque un healthcheck
 
   backend:
-    container_name: backend
+    container_name: backend 
     image: backend
     build:
       context: ./backend
@@ -37,11 +37,12 @@ services:
     restart: unless-stopped
 
   frontend:
-    container_name: frontend
+    container_name: frontend 
     image: frontend
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
+    command: npm run dev
     depends_on:
       - backend
     env_file:
@@ -50,9 +51,11 @@ services:
       - 5173:5173
     volumes:
       - ./upload:/usr/src/app/upload
+      - ./frontend:/usr/src/app
     networks:
       - frontend_network
     restart: unless-stopped
+
 
 networks:
   backend_network:
