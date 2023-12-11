@@ -29,27 +29,30 @@ services:
       - .env
     volumes:
       - ./backend:/usr/src/app
+      - ./upload:/usr/src/app/upload
       - /usr/src/app/node_modules
     networks:
       - backend_network
       - frontend_network
     restart: unless-stopped
 
-  # frontend:
-  #   container_name: frontend
-  #   image: frontend
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: ./Dockerfile
-  #   depends_on:
-  #     - backend
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - 5173:5173
-  #   networks:
-  #     - frontend_network
-  #   restart: unless-stopped
+  frontend:
+    container_name: frontend
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - 5173:5173
+    volumes:
+      - ./upload:/usr/src/app/upload
+    networks:
+      - frontend_network
+    restart: unless-stopped
 
 networks:
   backend_network:

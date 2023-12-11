@@ -5,6 +5,8 @@ import { IoSettingsSharp } from "react-icons/io5";
 import axios from '../../axios/api';
 import Cookies from 'js-cookie';
 
+
+
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DateConverter from "../../components/date/DateConverter";
@@ -14,7 +16,7 @@ const Dashboard = () => {
   const location = useLocation();
   const currentPage = location.pathname;
 
-  const [userData, setUserData] = useState<{username: string; createdAt: string}>();
+  const [userData, setUserData] = useState<{username: string; avatar: string; createdAt: string}>();
   const [loading, setLoading] = useState(true);
 
   
@@ -53,7 +55,7 @@ const Dashboard = () => {
               {/*User*/}
               <div className="flex mt-4 mb-10 m-2">
                 <div className="bg-purple rounded-full p-2">
-                  <FaUser className="w-[66px] h-[66px] p-3 text-lilac"/>
+                  <img src={userData.avatar} alt="w-[66px] h-[66px] p-3 text-lilac"/>
                 </div>
                 <div className="pl-4 pt-4">
                   <DateConverter initialDate={userData.createdAt}/>
