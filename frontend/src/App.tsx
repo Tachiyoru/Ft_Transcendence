@@ -15,6 +15,10 @@ import Settings from './pages/_editProfile/EditProfile';
 import { useSelector } from "react-redux";
 import { RootState } from './store/store';
 
+//import socketIO from 'socket.io-client';
+
+//const socket = socketIO.connect('http://localhost:5001');
+
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)

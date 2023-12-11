@@ -22,8 +22,14 @@ enum Role {
     BANNED
 }
 
+enum Mode {
+    CHAT // user to user
+    GROUPCHAT // user to n users
+    PROTECTED // user to n user with password
+}
+
 model User {
-    id        Int      @id @default(autoincrement())
+    id        Int      @id @unique @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -31,9 +37,9 @@ model User {
     username String? @unique
     avatar   String?
     tittle   String?
-    hash     String?
+    hash     String
 
-	twoFASecret String? @unique
+    twoFASecret String? @unique
 
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)
@@ -47,9 +53,10 @@ model User {
     blockedList User[] @relation("blockedList")
 
     achievements Achievement[]
-    messages     Message[]     @relation("messageSender")
+    messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
+    ownedChannel Channel[]     @relation("ownedchan")
 
     @@map("Users")
 }
@@ -85,11 +92,12 @@ model Stats {
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     String
+    owner     User      @relation("ownedchan", fields: [ownerId], references: [id])
+    ownerId   Int
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)
-    modes     Int       @default(0)
+    modes     Mode      @default(CHAT)
     password  String?
     updatedAt DateTime  @default(now())
     members   User[]    @relation("chanMembers")
@@ -98,12 +106,13 @@ model Channel {
 }
 
 model Message {
-    id          Int       @id @default(autoincrement())
+    id          Int      @id @default(autoincrement())
+    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade)
     channelName String
-    channel     Channel[] @relation("chanMessages")
-    author      User[]    @relation("messageSender")
+    author      User     @relation("author", fields: [authorId], references: [id], onDelete: Cascade)
+    authorId    Int      @unique
     content     String
-    createdAt   DateTime  @default(now())
+    createdAt   DateTime @default(now())
 }
 
 model Game {

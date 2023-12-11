@@ -112,7 +112,7 @@ const SignupForm = () => {
     <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
       <section className="w-full max-w-sm border-container">
         <div className="mx-auto p-8">
-          <h1 className="text-xl font-outline-2 text-white text-center mb-8">Create an Account</h1>
+          <h1 className="text-xl font-outline-2 text-white text-center mb-8">SIGN UP</h1>
           <form onSubmit={handleSubmit(SubmitHandler)}>
             {/*Form name*/}
             <UserNameField
@@ -263,21 +263,17 @@ const SignupForm = () => {
                 </p>
               )}
             </div>
+            
+            <div className='flex flex-col items-center'>
+              <button
+                type="submit"
+                disabled={!isValid || !confirmPassword}
+                className="bg-purple text-lilac text-1xl py-2 px-10 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
+              >
+                Create an account
+              </button>
+            </div>
 
-            <button
-              type="submit"
-              disabled={!isValid || !confirmPassword}
-              className="border bg-lilac text-1xl py-2 px-10 w-full rounded mb-6 disabled:opacity-20"
-            >
-              Create an account
-            </button>
-
-            <p className="text-sm text-center text-lilac mb-8">
-              You have an account?{' '}
-              <Link to="/sign-in" className="text-lilac underline">
-                Login now
-              </Link>
-            </p>
 
             <div className="flex items-center mb-2 ">
               <div className="border-t flex-grow border-lilac"></div>
@@ -291,6 +287,14 @@ const SignupForm = () => {
               on42Click={handle42Click}
             />
           </form>
+
+          <p className="text-sm text-center text-lilac mb-8">
+            You have an account?{' '}
+            <Link to="/sign-in" className="text-lilac underline">
+              Login now
+            </Link>
+          </p>
+
         </div>
       </section>
     </div>

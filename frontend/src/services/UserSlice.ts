@@ -1,10 +1,10 @@
-import {createSlice} from '@reduxjs/toolkit'
+import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 
-interface userSlice {
+interface UserState {
 	user: string | null;
 }  
 
-const initialState = {
+const initialState: UserState = {
     user: null
 }
 
@@ -12,7 +12,7 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        loginSuccess: (state, action) => {
+        loginSuccess: (state, action: PayloadAction<string | null>) => {
             state.user = action.payload
         },
         setLogout: (state) => {

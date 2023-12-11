@@ -4,7 +4,6 @@ import { GetUser } from "../auth/decorator";
 import { EditUserDto } from "./dto";
 import { UserService } from "./user.service";
 import { TokenGuard } from "../auth/guard/token.guard";
-import { TokenGuardTwo } from "src/auth/guard/token-2.guard";
 
 @Controller("users")
 export class UserController
@@ -20,11 +19,9 @@ export class UserController
 		return user;
 	}
 
-	@UseGuards(TokenGuardTwo)
-	@Get("list")
-	getUsersList(): Promise<User[]>
-	{
-		return (this.userService.getUsersList());
+	@Get("all")
+	getAllUsers() {
+		return this.userService.getAllUsers();
 	}
 
 	@UseGuards(TokenGuard)
