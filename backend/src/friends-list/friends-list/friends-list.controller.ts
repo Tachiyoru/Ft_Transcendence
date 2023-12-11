@@ -26,9 +26,15 @@ export class FriendsListController
 		return (this.friendListService.removeFriend(user, friendId));
 	}
 
-	@Get("all")
-	async getAllFriends(@GetUser() user: User): Promise<User[]>
+	@Get()
+	async getMyFriends(@GetUser() user: User): Promise<User[]>
 	{
-		return (this.friendListService.getAllFriends(user));
+		return (this.friendListService.getMyFriends(user));
+	}
+
+	@Get("from/:id")
+	async getFriendsFrom(@Param('id', ParseIntPipe) id: number): Promise<User[]>
+	{
+		return (this.friendListService.getFriendsFrom(id));
 	}
 }

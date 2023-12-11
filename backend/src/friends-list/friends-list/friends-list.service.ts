@@ -61,14 +61,25 @@ export class FriendsListService
 		return (user);
 	}
 
-	async getAllFriends(user: User)
+	async getMyFriends(user: User)
 	{
-		const update = await this.prismaService.user.findUnique({
+		const me = await this.prismaService.user.findUnique({
 			where: { id: user.id },
 			include: { friends: true },
 		});
-		if (!update)
+		if (!me)
 			throw new Error('User not found');
-		return (update.friends)
+		return (me.friends);
+	}
+
+	async getFriendsFrom(userId: number)
+	{
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
+			include: { friends: true },
+		});
+		if (!user)
+			throw new Error('User not found');
+		return (user.friends);
 	}
 }
