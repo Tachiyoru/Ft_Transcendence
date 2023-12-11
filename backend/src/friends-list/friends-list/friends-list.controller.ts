@@ -14,18 +14,6 @@ export class FriendsListController
 	constructor(private friendListService: FriendsListService,
 		private readonly prismaService: PrismaService) {}
 
-	@Post("add/:friendId")
-	addFriend(@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number): Promise<User>
-	{
-		return (this.friendListService.addFriend(user, friendId));
-	}
-
-	@Delete("remove/:friendId")
-	removeFriend(@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number): Promise<User>
-	{
-		return (this.friendListService.removeFriend(user, friendId));
-	}
-
 	@Get()
 	async getMyFriends(@GetUser() user: User): Promise<User[]>
 	{
@@ -36,5 +24,17 @@ export class FriendsListController
 	async getFriendsFrom(@Param('id', ParseIntPipe) id: number): Promise<User[]>
 	{
 		return (this.friendListService.getFriendsFrom(id));
+	}
+
+	@Post("add/:friendId")
+	addFriend(@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number): Promise<User>
+	{
+		return (this.friendListService.addFriend(user, friendId));
+	}
+
+	@Delete("remove/:friendId")
+	removeFriend(@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number): Promise<User>
+	{
+		return (this.friendListService.removeFriend(user, friendId));
 	}
 }
