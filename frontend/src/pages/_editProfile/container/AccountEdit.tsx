@@ -4,6 +4,7 @@ import { AiOutlineMail, AiOutlineUser } from "react-icons/ai"
 import { FaUser } from "react-icons/fa6"
 import axios from "../../../axios/api";
 import Cookies from 'js-cookie';
+import FileUpload from "../../../components/photo/FileUpload";
 
 interface IdataRegister {
 	username: string;
@@ -24,28 +25,22 @@ const AccountEdit = () => {
 
 	const submitHandler = async () => {
 		try {
-			const token = Cookies.get('user_token');
 			setLoading(true);
-			if (token) {
 				const filteredData: Partial<IdataRegister> = {};
 	
 				if (username) {
 					filteredData.username = username;
+					console.log('username : ', filteredData.username);
 				}
 	
 				if (email) {
 					filteredData.email = email;
+					console.log('email : ', filteredData.email);
 				}
 	
-				await axios.patch('/users', filteredData, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
+				await axios.patch('/users/edit', filteredData);
 	
-				console.log('User data updated successfully:', filteredData);
-				console.log(token);
-			}
+				console.log('User data updated successfully:', filteredData);;
         } catch (error) {
             console.error('Error updating user data:', error);
         } finally {
@@ -68,8 +63,7 @@ const AccountEdit = () => {
 				<FaUser className="w-[30px] h-[30px] text-lilac"/>
 			</div>
 			<div>
-				<div className="text-xs py-1 px-3 border border-lilac rounded-lg mb-3">Upload picture</div>
-				<div className="text-xs py-1 px-3 border border-lilac rounded-lg">Delete picture</div>
+				<FileUpload />
 			</div>
 		</div>
 

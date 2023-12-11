@@ -1,8 +1,13 @@
 {
+  "devDependencies": {
+    "@types/passport-github2": "^1.2.9",
+    "@types/qrcode": "^1.5.5"
+  },
   "dependencies": {
-    "@types/react-router-dom": "^5.3.3",
-    "js-cookie": "^3.0.5",
-    "react-router-dom": "^6.20.0",
-    "redux-persist": "^6.0.0"
+    "otplib": "^12.0.1",
+    "passport-42": "^1.2.6",
+    "qrcode": "^1.5.3",
+    "typeorm": "^0.3.17",
+    "url-otpauth": "^2.0.0"
   }
 }

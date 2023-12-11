@@ -3,24 +3,27 @@ import { User } from "@prisma/client";
 import { GetUser } from "../auth/decorator";
 import { EditUserDto } from "./dto";
 import { UserService } from "./user.service";
-import { TokenGuard } from "src/auth/guard/token.guard";
+import { TokenGuard } from "../auth/guard/token.guard";
 
 @Controller("users")
-export class UserController {
-  constructor(private userService: UserService) {}
+export class UserController
+{
+	constructor(private userService: UserService) {}
 
 
-  @UseGuards(TokenGuard)
-  @Get("me")
-  getMe(@GetUser() user: User) {
-	console.log("aaaaaaaaaaaaaaaa");
-    return user;
-  }
+	@UseGuards(TokenGuard)
+	@Get("me")
+	getMe(@GetUser() user: User)
+	{
+		console.log(user)
+		return user;
+	}
 
-  @UseGuards(TokenGuard)
-  @Patch()
-  editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
-	//peut etre save des maintenant l'image et recup l'URL et la send dans edit 57:00 
-    return this.userService.editUser(userId, dto);
-  }
+	@UseGuards(TokenGuard)
+	@Patch("edit")
+	editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto)
+	{
+		console.log("userId : ", userId)
+		return (this.userService.editUser(userId, dto));
+	}
 }

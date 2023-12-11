@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
-import { AiOutlineGoogle } from 'react-icons/ai';
+import { AiOutlineGithub } from 'react-icons/ai';
 import { Si42 } from 'react-icons/si';
 
 interface SocialIconsProps {
-  onGoogleClick: () => void;
+  onGitClick: () => void;
   on42Click: () => void;
 }
 
@@ -17,12 +17,12 @@ const IconContainer : React.FC<IconContainerProps> = ({ children }) => (
 	</div>
 );
 
-const SocialIcons: React.FC<SocialIconsProps> = ({ onGoogleClick, on42Click }) => (
+const SocialIcons: React.FC<SocialIconsProps> = ({ onGitClick, on42Click }) => (
 
 	<div className="flex items-center justify-center">
 		<IconContainer>
-			<button onClick={onGoogleClick}>
-			<AiOutlineGoogle className="w-4 h-4 text-lilac" />
+			<button onClick={onGitClick}>
+			<AiOutlineGithub className="w-4 h-4 text-lilac" />
 			</button>
 		</IconContainer>
 

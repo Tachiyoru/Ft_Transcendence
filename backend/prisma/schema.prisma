@@ -1,5 +1,6 @@
 generator client {
     provider = "prisma-client-js"
+	// output = "./generated/client"
 }
 
 datasource db {
@@ -37,11 +38,9 @@ model User {
     username String? @unique
     avatar   String? @unique
     tittle   String?
-    hash     String
+    hash     String?
 
-    fortyTwoId   Int?    @unique
-    fortyTwoAuth Boolean @default(false)
-    googleId     Boolean @default(false)
+	twoFASecret String? @unique
 
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)

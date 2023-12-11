@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLock } from "react-icons/ai"
+import axios from "../../../axios/api";
 
 interface IdataRegister {
-	oldPassword: string;
 	password: string;
+	newPassword: string;
 	confirmPassword: string;
 }
   
 const SecurityEdit = () => {
 	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
+	const [loading, setLoading] = useState(true);
 
 	const {
 		register,
@@ -17,8 +19,18 @@ const SecurityEdit = () => {
 		formState: { isValid },
     } = useForm<IdataRegister>();
 
-    const submitHandler = (data: IdataRegister) => {
-    console.log(data);
+    const submitHandler = async (data: IdataRegister) => {
+
+      try {
+          setLoading(true);
+          await axios.patch('/users/edit', data);
+    
+          console.log('User data updated successfully:', data);;
+          } catch (error) {
+              console.error('Error updating user data:', error);
+          } finally {
+              setLoading(false);
+      }
     };
 
 	return (
@@ -38,8 +50,8 @@ const SecurityEdit = () => {
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
-                  id="oldPassword"
-                  {...register('oldPassword', {
+                  id="password"
+                  {...register('password', {
                     required: {
                       value: true,
                       message: 'Password is required',
@@ -70,8 +82,8 @@ const SecurityEdit = () => {
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
-                  id="password"
-                  {...register('password', {
+                  id="newPassword"
+                  {...register('newPassword', {
                     required: {
                       value: true,
                       message: 'Password is required',
@@ -110,7 +122,7 @@ const SecurityEdit = () => {
                     },
                   })}
                   placeholder="Confirm New Password"
-                  className="px-5 py-3 w-full text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"                />
+                  className="px-5 py-3 w-full text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"/>
                 <button
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);

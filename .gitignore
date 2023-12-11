@@ -4,3 +4,4 @@
 .env
 Backend/prisma/migrations
 .vscode
+.env

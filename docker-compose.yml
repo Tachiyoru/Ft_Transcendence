@@ -35,6 +35,7 @@ services:
       - frontend_network
     restart: unless-stopped
 
+<<<<<<< HEAD
   frontend:
     container_name: frontend
     image: frontend
@@ -53,6 +54,23 @@ services:
     networks:
       - frontend_network
     restart: unless-stopped
+=======
+  # frontend:
+  #   container_name: frontend
+  #   image: frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: ./Dockerfile
+  #   depends_on:
+  #     - backend
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 5173:5173
+  #   networks:
+  #     - frontend_network
+  #   restart: unless-stopped
+>>>>>>> d95e83e51981742c99b13db90a3f698fd9fcdd64
 
 networks:
   backend_network:
