@@ -1,6 +1,6 @@
 generator client {
     provider = "prisma-client-js"
-	// output = "./generated/client"
+    // output = "./generated/client"
 }
 
 datasource db {
@@ -33,7 +33,7 @@ model User {
     tittle   String?
     hash     String?
 
-	twoFASecret String? @unique
+    twoFASecret String? @unique
 
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)
@@ -50,6 +50,7 @@ model User {
     messages     Message[]     @relation("messageSender")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
+    Channel      Channel[]     @relation("chanOwner")
 
     @@map("Users")
 }
@@ -85,7 +86,7 @@ model Stats {
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     String
+    owner     User      @relation("chanOwner", fields: [userId], references: [id])
     op        String[]
     newmsg    Boolean   @default(false)
     mentions  Int       @default(0)
@@ -95,6 +96,7 @@ model Channel {
     members   User[]    @relation("chanMembers")
     messages  Message[] @relation("chanMessages")
     banned    User[]    @relation("chanBanned")
+    userId    Int
 }
 
 model Message {

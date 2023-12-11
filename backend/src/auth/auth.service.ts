@@ -60,7 +60,7 @@ export class AuthService
 		return (this.forgeTokens(user, res));
 	}
 
-	async authExtUserCreate(userInfo: any){
+	async authExtUserCreate(userInfo: any, imageLink: string){
 		const name: string = userInfo.username; 
 		const email: string = userInfo._json.email?? ""; 
 		const user = await this.prisma.user.findFirst({
@@ -73,6 +73,7 @@ export class AuthService
 					email: email,
 					username: name,
 					hash: "",
+					avatar: imageLink,
 				}
 			})
 			console.log({user2});
