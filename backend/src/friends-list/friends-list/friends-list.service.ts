@@ -72,6 +72,29 @@ export class FriendsListService
 		return (me.friends);
 	}
 
+	async getNonFriends(user: User)
+	{
+		const me = await this.prismaService.user.findUnique({
+			where: { id: user.id },
+			include: {
+				friends: true,
+			},
+		});
+
+		if (!me)
+			throw new Error('User not found');
+
+		const friendIds = me.friends.map(friend => friend.id);
+		console.log(friendIds);
+
+		const nonFriends = await this.prismaService.user.findMany({
+			where: {
+				id: { notIn: [me.id, ...friendIds] },
+			},
+		});
+		return (nonFriends);
+	}
+
 	async getFriendsFrom(userId: number)
 	{
 		const user = await this.prismaService.user.findUnique({

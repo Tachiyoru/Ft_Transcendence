@@ -16,6 +16,12 @@ export class FriendsListController
 		return (this.friendListService.getMyFriends(user));
 	}
 
+	@Get("non-friends")
+	async getNonFriends(@GetUser() user: User): Promise<User[]>
+	{
+		return (this.friendListService.getNonFriends(user));
+	}
+
 	@Get("from/:id")
 	async getFriendsFrom(@Param('id', ParseIntPipe) id: number): Promise<User[]>
 	{
