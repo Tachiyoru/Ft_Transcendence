@@ -26,7 +26,7 @@ export class UserService
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
 			role: "ADMIN",
-			
+
 		});
 		await this.createInitialUser({
 			avatar: "",
@@ -40,7 +40,13 @@ export class UserService
 
 	private async createInitialUser(userinput: UserCreateInput)
 	{
-		const user = await this.prisma.user.findFirst();
+		const user = await this.prisma.user.findUnique(
+			{
+				where: {
+					email: userinput.email,
+				},
+			}
+		);
 		if (!user)
 		{
 			await this.prisma.user.create({
@@ -56,33 +62,43 @@ export class UserService
 		}
 	}
 
+	async getUsersList()
+	{
+		const usersList = await this.prisma.user.findMany();
+		return (usersList);
+	}
+
 	async editUser(userId: number, dto: EditUserDto)
 	{
-	const user = await this.prisma.user.findFirst({
-		where: {
-			id: userId,
-		},
+		const user = await this.prisma.user.findFirst({
+			where: {
+				id: userId,
+			},
 		});
-		if (user) {
-		if (dto.password) {
-			const pwdMatches = await argon.verify(user.hash?? "", dto.password);
-			if (!pwdMatches) {
-			throw new BadRequestException("Invalid password");
+		if (user)
+		{
+			if (dto.password)
+			{
+				const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
+				if (!pwdMatches)
+				{
+					throw new BadRequestException("Invalid password");
+				}
+			}
+			if (dto.newPassword)
+			{
+				dto.password = await argon.hash(dto.newPassword);
 			}
 		}
-		if (dto.newPassword) {
-			dto.password = await argon.hash(dto.newPassword);
-		}
-		}
-		const {password, username: newusername} = dto
+		const { password, username: newusername } = dto
 		console.log("id : ", userId);
 		const user2 = await this.prisma.user.update({
-		where: {
-			id: userId,
-		},
-		data: {
-			hash: password,
-			username: newusername,
+			where: {
+				id: userId,
+			},
+			data: {
+				hash: password,
+				username: newusername,
 			},
 		});
 		return user2;

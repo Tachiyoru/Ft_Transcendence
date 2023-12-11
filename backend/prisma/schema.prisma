@@ -29,7 +29,7 @@ model User {
 
     email    String  @unique
     username String? @unique
-    avatar   String? @unique
+    avatar   String?
     tittle   String?
     hash     String?
 
@@ -56,10 +56,10 @@ model User {
 
 model Achievement {
     id          Int    @id @default(autoincrement())
-    user        User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId      Int
+    user        User?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId      Int?
     title       String @unique
-    description String
+    description String @unique
     icon        String
 
     @@map("Achievements")

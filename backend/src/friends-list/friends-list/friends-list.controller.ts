@@ -2,17 +2,13 @@ import { Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } fr
 import { FriendsListService } from './friends-list.service';
 import { GetUser } from 'src/auth/decorator';
 import { User } from '@prisma/client';
-import { TokenGuard } from 'src/auth/guard';
 import { TokenGuardTwo } from 'src/auth/guard/token-2.guard';
-import { channel } from 'diagnostics_channel';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller("friends-list")
 @UseGuards(TokenGuardTwo)
 export class FriendsListController
 {
-	constructor(private friendListService: FriendsListService,
-		private readonly prismaService: PrismaService) {}
+	constructor(private friendListService: FriendsListService) {}
 
 	@Get()
 	async getMyFriends(@GetUser() user: User): Promise<User[]>

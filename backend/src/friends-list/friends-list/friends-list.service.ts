@@ -25,10 +25,10 @@ export class FriendsListService
 			where: { id: user.id },
 			data: {
 				friends: {
-					connect: { id: friendId },  // Connectez l'ami existant
+					connect: { id: friendId },  // connect existing friend
 				},
 			},
-			include: { friends: true },  // Inclure les amis dans la réponse
+			include: { friends: true },  // inlcude friends in the response
 		});
 
 		return (user);
