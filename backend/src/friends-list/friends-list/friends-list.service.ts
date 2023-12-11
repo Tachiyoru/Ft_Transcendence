@@ -89,7 +89,7 @@ export class FriendsListService
 
 		const nonFriends = await this.prismaService.user.findMany({
 			where: {
-				id: { notIn: [me.id, ...friendIds] },
+				id: { notIn: [user.id, ...friendIds] },
 			},
 		});
 		return (nonFriends);

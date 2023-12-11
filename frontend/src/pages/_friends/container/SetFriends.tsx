@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { FaArrowTurnUp, FaUserPlus } from "react-icons/fa6";
+import { FaArrowTurnUp, FaUser, FaUserPlus } from "react-icons/fa6";
 import AllFriends from './AllFriends';
 import Invitations from './Invitations';
 import Blocked from './Blocked';
+import axios from "../../../axios/api";
 
 type FilterType = 'tous' | 'invitations' | 'blocked'; 
 
@@ -11,6 +12,34 @@ const SetFriends: React.FC = () => {
 
 	const [isTyping, setIsTyping] = useState(false);
   const [filtreActif, setFiltreActif] = useState<FilterType>('tous');
+	const [listUsers, setListUsers] = useState<{ id: number}[]>([]);
+	const [checkedItems, setCheckedItems] = useState<{ [key: string]: { id: number } }>({});
+
+	useEffect(() => {
+		const fetchUserData = async () => {
+			try {
+				const response = await axios.get<{ id: number }[]>('/friends-list/non-friends');
+				console.log(response.data);
+				
+				setListUsers(response.data);
+				} catch (error) {
+				console.error('Error fetching user list:', error);
+				}
+			};
+		fetchUserData();
+	}, []);
+
+  const handleCheckboxChange = (user: { id: number }) => {
+		setCheckedItems(prevCheckedItems => {
+			const newCheckedItems = { ...prevCheckedItems };
+			if (newCheckedItems[user.id]) {
+			delete newCheckedItems[user.id];
+			} else {
+			newCheckedItems[user.id] = user;
+			}
+			return newCheckedItems;
+		});
+	};
 
 	const handleInputChange = (e) => {
         const inputValue = e.target.value;
@@ -35,6 +64,18 @@ const SetFriends: React.FC = () => {
       setFiltreActif(hash);
     }
   }, []);
+
+  const handleSubmit = async () => {
+		const selectedItems = Object.values(checkedItems);
+		console.log('Selection:', selectedItems);
+    console.log('Selection:', selectedItems[0].id);
+    try {
+      const response = await axios.post(`/friends-list/add/${selectedItems[0].id}`);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   return (
       <div className="flex flex-row h-[80vh]">
@@ -61,6 +102,36 @@ const SetFriends: React.FC = () => {
                   </span>
                 </div>
             </div>
+          </div>
+          <div className='h-32 overflow-auto pr-3'>
+          {listUsers.map((user, index) => (
+            
+            <div key={index} className='flex flex-row justify-between items-center mt-2'>
+            <div className="flex items-center">
+            <div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
+              <FaUser className="w-[8px] h-[8px] text-lilac"/>
+            </div>
+            <p className='text-sm font-regular ml-2'>{user.id}</p>
+            </div>
+
+            <label className="inline-flex items-center space-x-2 cursor-pointer">
+              <input
+              type="checkbox"
+              checked={checkedItems[user.id] !== undefined}
+              onChange={() => handleCheckboxChange(user)} 
+              className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
+              />
+            </label>
+          </div>
+          ))}
+            <button
+            disabled={Object.keys(checkedItems).length === 0}
+            className={`mt-4 px-4 py-2 text-sm rounded-md 
+            ${Object.keys(checkedItems).length === 0 ? 'bg-purple opacity-50 text-lilac cursor-not-allowed' : 'bg-purple text-lilac cursor-pointer'}`}
+            onClick={handleSubmit}
+            >
+              Add friend
+            </button>
           </div>
 
             <nav>

@@ -30,7 +30,7 @@ const CreateConv: React.FC = () => {
 	useEffect(() => {
 	const fetchUserData = async () => {
 		try {
-			const response = await axios.get<{ username: string }[]>('/users/all');
+			const response = await axios.get<{ username: string }[]>('/friends-list/');
 			console.log(response.data);
 			
 			setListUsers(response.data);

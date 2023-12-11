@@ -2,7 +2,8 @@ import { FaUser } from "react-icons/fa6"
 import { SlOptions } from "react-icons/sl";
 
 const AllFriends = () => {
-  return (
+
+	return (
 	<div className="mt-10 m-4 gap-4 flex flex-wrap">
 		{/*TEST USER PENDING*/}
 		<div className="flex flex-col items-center px-6">
@@ -42,7 +43,7 @@ const AllFriends = () => {
 		
 
 	</div>
-  )
+	)
 }
 
 export default AllFriends
