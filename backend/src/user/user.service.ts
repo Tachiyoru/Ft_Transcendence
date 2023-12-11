@@ -14,7 +14,6 @@ export class UserService
 		await this.createInitialUser({
 			avatar: "/upload/Tachi.png",
 			username: "Tachi",
-			avatar: "/upload_permanent/Tachi.png",
 			email: "shanley@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "The G.O.A.T",
@@ -23,7 +22,6 @@ export class UserService
 		await this.createInitialUser({
 			avatar: "/upload/Manu.png",
 			username: "Mansha",
-			avatar: "a",
 			email: "mansha@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
@@ -33,7 +31,6 @@ export class UserService
 		await this.createInitialUser({
 			avatar: "/upload/Clem.png",
 			username: "Cremette",
-			avatar: "f",
 			email: "creme@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "La Ptite Creme",
