@@ -14,6 +14,7 @@ export class UserService
 		await this.createInitialUser({
 			avatar: "/upload/Tachi.png",
 			username: "Tachi",
+			avatar: "/upload_permanent/Tachi.png",
 			email: "shanley@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "The G.O.A.T",
@@ -22,15 +23,17 @@ export class UserService
 		await this.createInitialUser({
 			avatar: "/upload/Manu.png",
 			username: "Mansha",
+			avatar: "a",
 			email: "mansha@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
 			role: "ADMIN",
-			
+
 		});
 		await this.createInitialUser({
 			avatar: "/upload/Clem.png",
 			username: "Cremette",
+			avatar: "f",
 			email: "creme@test.fr",
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "La Ptite Creme",
@@ -41,18 +44,18 @@ export class UserService
 	private async createInitialUser(userinput: UserCreateInput)
 	{
 		const user = await this.prisma.user.findUnique({
-			where: {
-				email: userinput.email,
-			},
+			where:{
+				username: userinput.username,
+			}
 		});
 		if (!user)
 		{
 			await this.prisma.user.create({
 				data: {
+					username: userinput.username ?? "",
 					avatar: userinput.avatar ?? "",
 					email: userinput.email ?? "",
 					hash: userinput.hash ?? "",
-					username: userinput.username ?? "",
 					tittle: userinput.tittle ?? "",
 					role: userinput.role ?? "USER",
 				},
@@ -60,33 +63,41 @@ export class UserService
 		}
 	}
 
+	async getAllUsers() {
+		return this.prisma.user.findMany();
+	}
+
 	async editUser(userId: number, dto: EditUserDto)
 	{
-	const user = await this.prisma.user.findFirst({
-		where: {
-			id: userId,
-		},
+		const user = await this.prisma.user.findFirst({
+			where: {
+				id: userId,
+			},
 		});
-		if (user) {
-		if (dto.password) {
-			const pwdMatches = await argon.verify(user.hash?? "", dto.password);
-			if (!pwdMatches) {
-			throw new BadRequestException("Invalid password");
+		if (user)
+		{
+			if (dto.password)
+			{
+				const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
+				if (!pwdMatches)
+				{
+					throw new BadRequestException("Invalid password");
+				}
+			}
+			if (dto.newPassword)
+			{
+				dto.password = await argon.hash(dto.newPassword);
 			}
 		}
-		if (dto.newPassword) {
-			dto.password = await argon.hash(dto.newPassword);
-		}
-		}
-		const {password, username: newusername} = dto
+		const { password, username: newusername } = dto
 		console.log("id : ", userId);
 		const user2 = await this.prisma.user.update({
-		where: {
-			id: userId,
-		},
-		data: {
-			hash: password,
-			username: newusername,
+			where: {
+				id: userId,
+			},
+			data: {
+				hash: password,
+				username: newusername,
 			},
 		});
 		return user2;

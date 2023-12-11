@@ -82,7 +82,7 @@ const SigninForm = () => {
 		<div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
 		<section className='w-full max-w-sm border-container'>
 			<div className='mx-auto p-8'>
-				<h1 className='text-xl font-outline-2 text-white text-center mb-8'>Login</h1>
+				<h1 className='text-xl font-outline-2 text-white text-center mb-8'>LOGIN</h1>
 				<form onSubmit={handleSubmit(submitHandler)}>
 
 				{/*Form Email*/}
@@ -152,27 +152,23 @@ const SigninForm = () => {
 					}
 				</div>
 
-				<Link to="/forget-password" className="text-sm text-lilac underline ">
-					Forgot password?
+				<Link to="/forget-password" className="text-sm text-lilac underline text-center">
+					<p>Forgot password?</p>
 				</Link>
 
 				{ resStatus && (<p className='text-red-500 text-xs mt-1'>Invalid username or password</p>)}
 
-				<button
-					type="submit"
-					disabled={!isValid}
-					className="border bg-gray-200 text-lilac mt-6 py-2 px-10 w-full rounded mb-6 disabled:opacity-40"
-				>
-					Sign In
-				</button>
-				<p className="text-sm mb-6 text-lilac">
-					Do not have an account?{" "}
-					<Link to="/sign-up" className="underline ">
-						Register now
-					</Link>
-				</p>
+				<div className="flex flex-col items-center mt-6">
+					<button
+						type="submit"
+						disabled={!isValid}
+						className=" bg-purple text-lilac text-1xl py-2 px-10 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
+					>
+						Sign In
+					</button>
+				</div>
 
-				<div className="flex items-center mb-2 ">
+				<div className="flex items-center mt-6 mb-2 ">
 					<div className="border-t flex-grow border-lilac"></div>
 					<span className="mx-4 text-sm text-lilac">OR</span>
 					<div className="border-t flex-grow border-lilac"></div>
@@ -184,6 +180,12 @@ const SigninForm = () => {
 				on42Click={handle42Click}
 				/>
 				</form>
+				<p className="text-sm text-center m-6 text-lilac">
+					Do not have an account?{" "}
+					<Link to="/sign-up" className="underline ">
+						Register now
+					</Link>
+				</p>
 			</div>
 		</section>
 		</div>

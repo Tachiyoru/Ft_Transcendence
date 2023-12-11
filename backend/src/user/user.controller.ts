@@ -19,6 +19,11 @@ export class UserController
 		return user;
 	}
 
+	@Get("all")
+	getAllUsers() {
+		return this.userService.getAllUsers();
+	}
+
 	@UseGuards(TokenGuard)
 	@Patch("edit")
 	editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto)

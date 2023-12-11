@@ -25,10 +25,10 @@ export class FriendsListService
 			where: { id: user.id },
 			data: {
 				friends: {
-					connect: { id: friendId },  // Connectez l'ami existant
+					connect: { id: friendId },  // connect existing friend
 				},
 			},
-			include: { friends: true },  // Inclure les amis dans la réponse
+			include: { friends: true },  // inlcude friends in the response
 		});
 
 		return (user);
@@ -61,14 +61,48 @@ export class FriendsListService
 		return (user);
 	}
 
-	async getAllFriends(user: User)
+	async getMyFriends(user: User)
 	{
-		const update = await this.prismaService.user.findUnique({
+		const me = await this.prismaService.user.findUnique({
 			where: { id: user.id },
 			include: { friends: true },
 		});
-		if (!update)
+		if (!me)
 			throw new Error('User not found');
-		return (update.friends)
+		return (me.friends);
+	}
+
+	async getNonFriends(user: User)
+	{
+		const me = await this.prismaService.user.findUnique({
+			where: { id: user.id },
+			include: {
+				friends: true,
+			},
+		});
+
+		if (!me)
+			throw new Error('User not found');
+
+		const friendIds = me.friends.map(friend => friend.id);
+		console.log(friendIds);
+
+		const nonFriends = await this.prismaService.user.findMany({
+			where: {
+				id: { notIn: [me.id, ...friendIds] },
+			},
+		});
+		return (nonFriends);
+	}
+
+	async getFriendsFrom(userId: number)
+	{
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
+			include: { friends: true },
+		});
+		if (!user)
+			throw new Error('User not found');
+		return (user.friends);
 	}
 }
