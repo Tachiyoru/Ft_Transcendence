@@ -56,15 +56,9 @@ export class UserService
 					username: userinput.username ?? "",
 					tittle: userinput.tittle ?? "",
 					role: userinput.role ?? "USER",
-					// stats: {
-					// 	create: {
-					// 		exp: 0,
-					// 		partyPlayed: 0,
-					// 		partyWin: 0,
-					// 		partyLose: 0,
-					// 		history: [],
-					// 	},
-					// },
+					stats: {
+						create: {},
+					},
 				},
 			});
 		}

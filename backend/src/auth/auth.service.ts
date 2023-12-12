@@ -31,6 +31,9 @@ export class AuthService
 					email: dto.email,
 					username: dto.username,
 					hash,
+					stats: {
+						create: {},
+					},
 				},
 			});
 			return (this.forgeTokens(user, res));
@@ -55,16 +58,17 @@ export class AuthService
 		if (user)
 			console.log("user exist")
 		if (!user) throw new ForbiddenException("User not found");
-		const pwdMatches = await argon.verify(user.hash?? "", dto.password);
+		const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
 		if (!pwdMatches) throw new ForbiddenException("Wrong password");
 		return (this.forgeTokens(user, res));
 	}
 
-	async authExtUserCreate(userInfo: any){
-		const name: string = userInfo.username; 
-		const email: string = userInfo._json.email?? ""; 
+	async authExtUserCreate(userInfo: any)
+	{
+		const name: string = userInfo.username;
+		const email: string = userInfo._json.email ?? "";
 		const user = await this.prisma.user.findFirst({
-			where: {username: name}
+			where: { username: name }
 		});
 		if (!user)
 		{
@@ -73,9 +77,12 @@ export class AuthService
 					email: email,
 					username: name,
 					hash: "",
+					stats: {
+						create: {},
+					},
 				}
 			})
-			console.log({user2});
+			console.log({ user2 });
 			return user2;
 		}// console.log("info in real user= ", user)
 		return user;
