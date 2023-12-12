@@ -1,10 +1,10 @@
 import { Achievement, User } from '.prisma/client';
 import { Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
-import { TokenGuardTwo } from '../auth/guard/token-2.guard';
 import { AchievementsService } from './achievements.service';
+import { TokenGuard } from 'src/auth/guard';
 
 @Controller('achievements')
-@UseGuards(TokenGuardTwo)
+@UseGuards(TokenGuard)
 export class AchievementsController
 {
 	constructor(private achievementsService: AchievementsService) {}

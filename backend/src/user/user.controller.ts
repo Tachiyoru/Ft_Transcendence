@@ -20,10 +20,9 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(TokenGuard)
   @Get("me")
   getMe(@GetUser() user: User) {
-    console.log(user);
+    console.log("users/me", user);
     return user;
   }
 
@@ -38,12 +37,10 @@ export class UserController {
     @GetUser("id") userId: number,
     @UploadedFiles() file: Express.Multer.File[]
   ) {
-    console.log("file =", file[0].path);
     const filepath = file[0].path;
     this.userService.editAvatar(userId, filepath);
   }
 
-  @UseGuards(TokenGuard)
   @Patch("edit")
   editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
     console.log("userId : ", userId);

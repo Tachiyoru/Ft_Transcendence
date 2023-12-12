@@ -9,6 +9,7 @@ import { chatModule } from "./chat/chat.module";
 import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 import { AchievementsModule } from "./achievements/achievements.module";
+import { AuthService } from "./auth/auth.service";
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { AchievementsModule } from "./achievements/achievements.module";
     chatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService],
+  providers: [AppService, JwtService ],
 })
 export class AppModule {}

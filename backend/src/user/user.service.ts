@@ -66,7 +66,7 @@ export class UserService {
     });
     if (file) {
       if (user) {
-        if (user.avatar) {
+        if (user.avatar && user.avatar.startsWith("/upload")) {
           await unlink(user.avatar);
         }
         await this.prisma.user.update({
@@ -99,7 +99,6 @@ export class UserService {
       }
     }
     const { password, username: newusername } = dto;
-    console.log("id : ", userId);
     const user2 = await this.prisma.user.update({
       where: {
         id: userId,

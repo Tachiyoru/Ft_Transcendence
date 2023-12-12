@@ -1,6 +1,7 @@
 *dist
 *node_modules
 .prettierrc
+./upload/*
 Backend/prisma/migrations
 .vscode
 .env

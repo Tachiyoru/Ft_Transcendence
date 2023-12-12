@@ -8,7 +8,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
 import { User } from "@prisma/client";
 import { GetUser } from "./decorator";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { UserService } from "src/user/user.service";
 
 @Injectable({})
@@ -73,6 +73,36 @@ export class AuthService {
     } // console.log("info in real user= ", user)
     return user;
   }
+
+  async refresh(request: Request, response: Response) {
+	const refreshToken = request.cookies?.refresh_token;
+	if (!refreshToken) throw new ForbiddenException("No token provided");
+	try {
+	  const payload = await this.jwt.verifyAsync(refreshToken, {
+		secret: this.config.get<string>("JWT_SECRET_REFRESH"),
+	  });
+	  const user = await this.prisma.user.findUnique({
+		where: { id: payload.sub },
+	  });
+	  if (!user) throw new ForbiddenException("User not found");
+	  return this.reForgeTokens(user, response);
+	} catch (err) {
+	  throw new ForbiddenException("Invalid token");
+	}
+  }
+
+  private async reForgeTokens(user: User, response: Response) {
+    const payload = { username: user.username, sub: user.id };
+    const accessToken = this.jwt.sign(
+      { ...payload },
+      {
+        secret: this.config.get<string>("JWT_SECRET_ACCESS"),
+        expiresIn: "150sec",
+      }
+    );
+    response.cookie("access_token", accessToken, { httpOnly: true });
+    return { user };
+}
 
   private async forgeTokens(user: User, response: Response) {
     const payload = { username: user.username, sub: user.id };

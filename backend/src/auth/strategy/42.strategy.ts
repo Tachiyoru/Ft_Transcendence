@@ -6,7 +6,7 @@ import { Strategy } from "passport-42";
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, "42") {
   constructor(configService: ConfigService) {
-    console.log("42Strategy");
+    // console.log("42Strategy");
     super({
       clientID: configService.get("FORTYTWO_CLIENT_ID"),
       clientSecret: configService.get("FORTYTWO_CLIENT_SECRET"),

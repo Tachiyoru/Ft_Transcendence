@@ -11,10 +11,10 @@ import {
 import { FriendsListService } from "./friends-list.service";
 import { GetUser } from "src/auth/decorator";
 import { User } from "@prisma/client";
-import { TokenGuardTwo } from "src/auth/guard/token-2.guard";
+import { TokenGuard } from "src/auth/guard";
 
 @Controller("friends-list")
-@UseGuards(TokenGuardTwo)
+@UseGuards(TokenGuard)
 export class FriendsListController {
   constructor(private friendListService: FriendsListService) {}
 

@@ -45,6 +45,11 @@ export class AuthController {
     return await this.authService.logout(res);
   }
 
+  @Get("refresh")
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+	return await this.authService.refresh(req, res);
+  }
+
   @Get("/42/callback")
   @UseGuards(AuthGuard("42"))
   async fortyTwoCallback(@Req() req: Request, @Res() res: Response) {
