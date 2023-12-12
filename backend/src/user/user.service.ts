@@ -26,7 +26,6 @@ export class UserService
 			hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
 			tittle: "Wow Addict",
 			role: "ADMIN",
-
 		});
 		await this.createInitialUser({
 			avatar: "",
@@ -57,6 +56,15 @@ export class UserService
 					username: userinput.username ?? "",
 					tittle: userinput.tittle ?? "",
 					role: userinput.role ?? "USER",
+					// stats: {
+					// 	create: {
+					// 		exp: 0,
+					// 		partyPlayed: 0,
+					// 		partyWin: 0,
+					// 		partyLose: 0,
+					// 		history: [],
+					// 	},
+					// },
 				},
 			});
 		}

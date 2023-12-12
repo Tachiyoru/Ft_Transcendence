@@ -67,7 +67,7 @@ model Achievement {
 
 model Stats {
     id     Int  @id @default(autoincrement())
-    user   User @relation(fields: [userId], references: [id])
+    user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId Int  @unique
 
     lvl Int @default(1)

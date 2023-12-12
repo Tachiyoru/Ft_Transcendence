@@ -9,6 +9,7 @@ import { MulterModule } from "@nestjs/platform-express";
 import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 import { AchievementsModule } from "./achievements/achievements.module";
+import { StatsModule } from "./stats/stats.module";
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AchievementsModule } from "./achievements/achievements.module";
 		AchievementsModule,
 		AuthModule,
 		FriendsListModule,
+		StatsModule,
 		PrismaModule,
 	],
 	controllers: [AppController],
