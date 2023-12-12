@@ -13,13 +13,6 @@ import { channel } from "diagnostics_channel";
 export class chatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  //   dans le front on envoie le nom du chan et le nom des users qui sont dedans
-  //   const createChannel = (channelName) => {
-  // 	// Appeler le serveur pour créer un nouveau canal
-  // 	socket.emit('createChannel', { channelName });
-  //   };
-
-  // voir dans le front comment envoyer sois la liste des target pour la GROUPCHAT soit juste un nom pour le chan directement
   async createChannel(settings: createChannel, @Request() req: any) {
     const channelName = settings.members.map((user) => user.username).join(', ') + ', ' +req.user.username;
     

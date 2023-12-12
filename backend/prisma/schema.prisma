@@ -103,7 +103,6 @@ model Channel {
     members   User[]    @relation("chanMembers")
     messages  Message[] @relation("chanMessages")
     banned    User[]    @relation("chanBanned")
-    userId    Int
 }
 
 model Message {
