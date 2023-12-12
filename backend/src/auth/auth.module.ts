@@ -1,4 +1,4 @@
-import { Module, } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtModule } from "@nestjs/jwt";
@@ -9,9 +9,14 @@ import { TwoFaController } from "./twoFA/two-fa/two-fa.controller";
 import { UserService } from "src/user/user.service";
 
 @Module({
-	imports: [JwtModule],
-	controllers: [AuthController, TwoFaController],
-	providers: [AuthService, FortyTwoStrategy, GithubStrategy, TwoFAService, UserService],
+  imports: [JwtModule],
+  controllers: [AuthController, TwoFaController],
+  providers: [
+    AuthService,
+    FortyTwoStrategy,
+    GithubStrategy,
+    TwoFAService,
+    UserService,
+  ],
 })
-
 export class AuthModule {}

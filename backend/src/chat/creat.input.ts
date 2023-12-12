@@ -1,4 +1,4 @@
 export interface ChannelCreateInput {
-	name: string;
-	owner: string;
+  name: string;
+  owner: string;
 }

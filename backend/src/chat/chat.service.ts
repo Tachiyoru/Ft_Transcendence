@@ -14,23 +14,25 @@ export class chatService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createChannel(settings: createChannel, @Request() req: any) {
-    const channelName = settings.members.map((user) => user.username).join(', ') + ', ' +req.user.username;
-    
+    const channelName =
+      settings.members.map((user) => user.username).join(", ") +
+      ", " +
+      req.user.username;
+
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: channelName },
     });
     if (!channelName) {
       throw new Error("Invalid channel name");
     }
-    
+
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-    
+
     const hashedPassword: string = settings.password
       ? await argon.hash(settings.password)
       : "";
-
 
     const channel: Channel = await this.prisma.channel.create({
       data: {
@@ -38,10 +40,12 @@ export class chatService {
         modes: settings.mode,
         password: hashedPassword,
         owner: { connect: { id: req.user.id } },
-        members: { connect: [
-          {id: req.user.id },
-          ...settings.members.map((user) => ({ id: user.id })),
-        ]},
+        members: {
+          connect: [
+            { id: req.user.id },
+            ...settings.members.map((user) => ({ id: user.id })),
+          ],
+        },
       },
     });
     return channel;

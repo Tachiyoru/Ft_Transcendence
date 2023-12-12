@@ -71,9 +71,12 @@ export class AuthController {
     if (req.user === undefined) throw new UnauthorizedException();
     const user: User = req.user as User;
     let raw = req.user as any;
-	console.log("raw = ", raw._json.avatar_url);
+    console.log("raw = ", raw._json.avatar_url);
     user.username = user.username + "_git";
-    const user2 = await this.authService.authExtUserCreate(user, raw._json.avatar_url);
+    const user2 = await this.authService.authExtUserCreate(
+      user,
+      raw._json.avatar_url
+    );
     await this.authService.callForgeTokens(user2, res);
 
     console.log(req.cookies.access_token);

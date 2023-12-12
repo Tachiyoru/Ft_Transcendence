@@ -6,7 +6,7 @@ import { Mode, User } from "@prisma/client";
 export class CreateMessageDto extends Message {
   @IsString({ message: "Content must be a string" })
   @IsNotEmpty({ message: "Content cannot be empty" })
-  @MaxLength(255, { message: 'Content must not exceed 255 characters' })
+  @MaxLength(255, { message: "Content must not exceed 255 characters" })
   readonly content: string;
   @IsString({ message: "Content must be a string" })
   @IsNotEmpty({ message: "Content cannot be empty" })
@@ -14,13 +14,13 @@ export class CreateMessageDto extends Message {
 }
 
 export class UpdateMessageDto extends PartialType(CreateMessageDto) {
-	readonly msgId: number;
-  }
+  readonly msgId: number;
+}
 
 export class createChannel extends Channel {
   @IsString({ message: "Content must be a string" })
   @IsNotEmpty({ message: "Content cannot be empty" })
-  @MaxLength(16, { message: 'Content must not exceed 16 characters' })
+  @MaxLength(16, { message: "Content must not exceed 16 characters" })
   name: string;
   mode: Mode;
   password: string;
@@ -28,6 +28,6 @@ export class createChannel extends Channel {
 }
 
 export class joinChannel extends Channel {
-	name: string;
-	password: string;
+  name: string;
+  password: string;
 }

@@ -15,8 +15,8 @@ import { UserService } from "./user.service";
 import { TokenGuard } from "../auth/guard/token.guard";
 import { FilesInterceptor } from "@nestjs/platform-express";
 
-  @UseGuards(TokenGuard)
-  @Controller("users")
+@UseGuards(TokenGuard)
+@Controller("users")
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -34,10 +34,13 @@ export class UserController {
 
   @Patch("addAvatar")
   @UseInterceptors(FilesInterceptor("image"))
-  uploadFile(@GetUser("id") userId: number, @UploadedFiles() file: Express.Multer.File[]) {
-	console.log("file =", file[0].path);
-	const filepath = file[0].path;
-	this.userService.editAvatar(userId, filepath);
+  uploadFile(
+    @GetUser("id") userId: number,
+    @UploadedFiles() file: Express.Multer.File[]
+  ) {
+    console.log("file =", file[0].path);
+    const filepath = file[0].path;
+    this.userService.editAvatar(userId, filepath);
   }
 
   @UseGuards(TokenGuard)
