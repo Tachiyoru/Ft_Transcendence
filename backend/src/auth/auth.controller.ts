@@ -14,6 +14,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { raw } from "body-parser";
+import { GetUser } from "./decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -41,13 +42,19 @@ export class AuthController {
   }
 
   @Post("logout")
-  async logout(@Res({ passthrough: true }) res: Response) {
-    return await this.authService.logout(res);
+  async logout(
+    @GetUser("id") userid: number,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return await this.authService.logout(userid, res);
   }
 
   @Get("refresh")
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-	return await this.authService.refresh(req, res);
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return await this.authService.refresh(req, res);
   }
 
   @Get("/42/callback")

@@ -63,7 +63,7 @@ model User {
 
 model Achievement {
     id          Int    @id @default(autoincrement())
-    user        User?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId      Int?
     title       String @unique
     description String @unique
@@ -74,7 +74,7 @@ model Achievement {
 
 model Stats {
     id     Int  @id @default(autoincrement())
-    user   User @relation(fields: [userId], references: [id])
+    user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId Int  @unique
 
     lvl Int @default(1)
@@ -92,7 +92,7 @@ model Stats {
 model Channel {
     chanId    Int       @id @default(autoincrement())
     name      String    @unique
-    owner     User      @relation("chanOwner", fields: [ownerId], references: [id])
+    owner     User      @relation("chanOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     ownerId   Int
     op        String[]
     newmsg    Boolean   @default(false)
@@ -107,9 +107,9 @@ model Channel {
 
 model Message {
     id          Int      @id @default(autoincrement())
-    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade)
+    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade, onUpdate: Cascade)
     channelName String
-    author      User     @relation("author", fields: [authorId], references: [id], onDelete: Cascade)
+    author      User     @relation("author", fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     authorId    Int      @unique
     content     String
     createdAt   DateTime @default(now())

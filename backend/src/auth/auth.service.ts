@@ -6,8 +6,7 @@ import { AuthDto, AuthDto2 } from "./dto";
 import * as argon from "argon2";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
-import { User } from "@prisma/client";
-import { GetUser } from "./decorator";
+import { StatusUser, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { UserService } from "src/user/user.service";
 
@@ -46,10 +45,10 @@ export class AuthService {
         email: dto.email,
       },
     });
-    if (user) console.log("user exist");
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
+    user.status = StatusUser.ONLINE;
     return this.forgeTokens(user, res);
   }
 
@@ -70,25 +69,26 @@ export class AuthService {
       });
       console.log({ user2 });
       return user2;
-    } // console.log("info in real user= ", user)
+    }
+    user.status = StatusUser.ONLINE;
     return user;
   }
 
   async refresh(request: Request, response: Response) {
-	const refreshToken = request.cookies?.refresh_token;
-	if (!refreshToken) throw new ForbiddenException("No token provided");
-	try {
-	  const payload = await this.jwt.verifyAsync(refreshToken, {
-		secret: this.config.get<string>("JWT_SECRET_REFRESH"),
-	  });
-	  const user = await this.prisma.user.findUnique({
-		where: { id: payload.sub },
-	  });
-	  if (!user) throw new ForbiddenException("User not found");
-	  return this.reForgeTokens(user, response);
-	} catch (err) {
-	  throw new ForbiddenException("Invalid token");
-	}
+    const refreshToken = request.cookies?.refresh_token;
+    if (!refreshToken) throw new ForbiddenException("No token provided");
+    try {
+      const payload = await this.jwt.verifyAsync(refreshToken, {
+        secret: this.config.get<string>("JWT_SECRET_REFRESH"),
+      });
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!user) throw new ForbiddenException("User not found");
+      return this.reForgeTokens(user, response);
+    } catch (err) {
+      throw new ForbiddenException("Invalid token");
+    }
   }
 
   private async reForgeTokens(user: User, response: Response) {
@@ -102,7 +102,7 @@ export class AuthService {
     );
     response.cookie("access_token", accessToken, { httpOnly: true });
     return { user };
-}
+  }
 
   private async forgeTokens(user: User, response: Response) {
     const payload = { username: user.username, sub: user.id };
@@ -126,7 +126,12 @@ export class AuthService {
     return this.forgeTokens(user, res);
   }
 
-  async logout(response: Response) {
+  async logout(userid: number, response: Response) {
+    let user = await this.prisma.user.findFirst({
+      where: { id: userid },
+    });
+    if (!user) throw new ForbiddenException("User not found");
+    user.status = StatusUser.OFFLINE;
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
     return "Successfully logged out";

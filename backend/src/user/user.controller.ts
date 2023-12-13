@@ -31,6 +31,16 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+  @Get("allOnline")
+  getAllOnlineUsers() {
+    return this.userService.getAllOnlineUsers();
+  }
+
+  @Patch("deleteAvatar")
+  deleteAvatar(@GetUser("id") userId: number) {
+    return this.userService.deleteAvatar(userId);
+  }
+
   @Patch("addAvatar")
   @UseInterceptors(FilesInterceptor("image"))
   uploadFile(

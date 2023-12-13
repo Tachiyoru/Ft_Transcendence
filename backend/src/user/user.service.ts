@@ -4,6 +4,7 @@ import { EditUserDto } from "./dto";
 import { UserCreateInput } from "./user-create.input";
 import * as argon from "argon2";
 import { unlink } from "fs/promises";
+import { StatusUser } from "@prisma/client";
 
 @Injectable()
 export class UserService {
@@ -58,6 +59,33 @@ export class UserService {
 
   async getAllUsers() {
     return this.prisma.user.findMany();
+  }
+
+  async getAllOnlineUsers() {
+    return this.prisma.user.findMany({
+      where: {
+        status: StatusUser.ONLINE,
+      },
+    });
+  }
+
+  async deleteAvatar(userId: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+    if (user) {
+      if (user.avatar && user.avatar.startsWith("/upload")) {
+        await unlink(user.avatar);
+      }
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          avatar: null,
+        },
+      });
+    }
   }
 
   async editAvatar(userId: number, file: string) {
