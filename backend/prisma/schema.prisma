@@ -21,6 +21,19 @@ enum Role {
     BANNED
 }
 
+enum NotificationType {
+
+	FRIENDREQUEST_RECEIVED
+	FRIENDREQUEST_ACCEPTED
+	INVITED_TO_GAME
+	ACHIEVEMENT_UNLOCKED
+	INVITED_TO_CHANNEL
+	INTEGRATED_TO_CHANNEL
+	CHANNEL_PRIVILEGE_GRANTED
+	// RANKING (top 3 only for example)
+	// FRIEND_ACHIEVEMENT_UNLOCKED (optional)
+}
+
 enum Mode {
     CHAT // user to user
     GROUPCHAT // user to n users
@@ -52,6 +65,9 @@ model User {
     blockedList User[] @relation("blockedList")
 
     achievements Achievement[]
+
+	notifications Notification[]
+	
     messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
@@ -86,6 +102,21 @@ model Stats {
     history String[] @default([])
 
     @@map("Stats")
+}
+
+model Notification {
+	id        Int      @id @default(autoincrement())
+	createdAt DateTime @default(now())
+
+	user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+	userId Int // unique ?
+
+	type	Int
+
+	content String
+	read    Boolean @default(false)
+// Rajouter delai avant suppression ?
+	@@map("Notifications")
 }
 
 model Channel {

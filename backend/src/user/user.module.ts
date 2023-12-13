@@ -7,23 +7,24 @@ import { diskStorage } from "multer";
 import { extname } from "path";
 
 @Module({
-  imports: [
-    MulterModule.register({
-      storage: diskStorage({
-        destination: "./upload", // Choisissez le répertoire de destination
-        filename: (req, file, cb) => {
-          const randomName = Array(15)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join("");
+	imports: [
+		MulterModule.register({
+			storage: diskStorage({
+				destination: "./upload", // Choisissez le répertoire de destination
+				filename: (req, file, cb) =>
+				{
+					const randomName = Array(15)
+						.fill(null)
+						.map(() => Math.round(Math.random() * 16).toString(16))
+						.join("");
 
-          const originalExtension = extname(file.originalname);
-          return cb(null, `${randomName}${originalExtension}`);
-        },
-      }),
-    }),
-  ],
-  controllers: [UserController],
-  providers: [UserService, JwtService],
+					const originalExtension = extname(file.originalname);
+					return cb(null, `${randomName}${originalExtension}`);
+				},
+			}),
+		}),
+	],
+	controllers: [UserController],
+	providers: [UserService, JwtService],
 })
 export class UserModule {}

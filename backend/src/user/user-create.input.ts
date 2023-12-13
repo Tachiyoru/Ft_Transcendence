@@ -7,7 +7,6 @@ export interface UserCreateInput {
   email: string;
   hash: string;
   role: Role;
-  stats: statsCreateInput;
 }
 
 export interface statsCreateInput {

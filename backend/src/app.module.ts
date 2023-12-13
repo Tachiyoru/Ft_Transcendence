@@ -8,6 +8,7 @@ import { ConfigModule } from "@nestjs/config";
 import { chatModule } from "./chat/chat.module";
 import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
+import { NotificationModule } from "./notification/notification.module";
 import { AchievementsModule } from "./achievements/achievements.module";
 import { AuthService } from "./auth/auth.service";
 import { StatsModule } from "./stats/stats.module";
@@ -19,8 +20,9 @@ import { StatsModule } from "./stats/stats.module";
     AchievementsModule,
     AuthModule,
 	StatsModule,
-    FriendsListModule,
-    PrismaModule,
+	FriendsListModule,
+	NotificationModule,
+	PrismaModule,
     chatModule,
   ],
   controllers: [AppController],
