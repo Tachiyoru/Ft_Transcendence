@@ -12,7 +12,7 @@ export class UserService {
 
   async onModuleInit() {
     await this.createInitialUser({
-      avatar: "/upload/Tachi.png",
+      avatar: "/upload_permanent/Tachi.png",
       username: "Tachi",
       email: "shanley@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -20,7 +20,7 @@ export class UserService {
       role: "ADMIN",
     });
     await this.createInitialUser({
-      avatar: "/upload/Manu.png",
+      avatar: "",
       username: "Mansha",
       email: "mansha@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -28,7 +28,7 @@ export class UserService {
       role: "ADMIN",
     });
     await this.createInitialUser({
-      avatar: "/upload/Clem.png",
+      avatar: "",
       username: "Cremette",
       email: "creme@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -40,25 +40,24 @@ export class UserService {
   private async createInitialUser(userinput: UserCreateInput) {
     const user = await this.prisma.user.findUnique({
       where: {
-        username: userinput.username,
+        email: userinput.email,
       },
     });
     if (!user) {
       await this.prisma.user.create({
         data: {
-          username: userinput.username ?? "",
           avatar: userinput.avatar ?? "",
           email: userinput.email ?? "",
           hash: userinput.hash ?? "",
+          username: userinput.username ?? "",
           tittle: userinput.tittle ?? "",
           role: userinput.role ?? "USER",
+          stats: {
+            create: {},
+          },
         },
       });
     }
-  }
-
-  async getAllUsers() {
-    return this.prisma.user.findMany();
   }
 
   async getAllOnlineUsers() {

@@ -18,7 +18,7 @@ import { TokenGuard } from "src/auth/guard";
 export class FriendsListController {
   constructor(private friendListService: FriendsListService) {}
 
-  @Get()
+  @Get("mine")
   async getMyFriends(@GetUser() user: User): Promise<User[]> {
     return this.friendListService.getMyFriends(user);
   }

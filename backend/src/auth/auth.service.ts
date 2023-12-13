@@ -27,6 +27,9 @@ export class AuthService {
           email: dto.email,
           username: dto.username,
           hash,
+          stats: {
+            create: {},
+          },
         },
       });
       return this.forgeTokens(user, res);
@@ -45,6 +48,7 @@ export class AuthService {
         email: dto.email,
       },
     });
+    if (user) console.log("user exist");
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
@@ -53,25 +57,30 @@ export class AuthService {
   }
 
   async authExtUserCreate(userInfo: any, imageLink: string) {
-    const name: string = userInfo.username;
-    const email: string = userInfo._json.email ?? "";
-    const user = await this.prisma.user.findFirst({
-      where: { username: name },
-    });
-    if (!user) {
-      const user2 = await this.prisma.user.create({
-        data: {
-          email: email,
-          username: name,
-          hash: "",
-          avatar: imageLink,
-        },
+    {
+      const name: string = userInfo.username;
+      const email: string = userInfo._json.email ?? "";
+      const user = await this.prisma.user.findFirst({
+        where: { username: name },
       });
-      console.log({ user2 });
-      return user2;
+      if (!user) {
+        const user2 = await this.prisma.user.create({
+          data: {
+            email: email,
+            username: name,
+            hash: "",
+            avatar: imageLink,
+            stats: {
+              create: {},
+            },
+          },
+        });
+        console.log({ user2 });
+        return user2;
+      } // console.log("info in real user= ", user)
+      user.status = StatusUser.ONLINE;
+      return user;
     }
-    user.status = StatusUser.ONLINE;
-    return user;
   }
 
   async refresh(request: Request, response: Response) {
