@@ -128,6 +128,7 @@ export class NotificationService
 		return (updatedNotification);
 	}
 
+	// For test only, need to delete it after
 	async getAllNotifications()
 	{
 		const notifications = await this.prismaService.notification.findMany();
@@ -145,7 +146,14 @@ export class NotificationService
 		if (!me)
 			throw new Error('User not found');
 
-		const deletedNotification = await this.prismaService.notification.delete({
+		let deletedNotification = await this.prismaService.notification.findFirst({
+			where: { id: notificationId },
+		});
+
+		if (!deletedNotification)
+			throw new Error('Notification not found');
+
+		deletedNotification = await this.prismaService.notification.delete({
 			where: { id: notificationId },
 		});
 

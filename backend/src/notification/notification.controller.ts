@@ -17,6 +17,7 @@ export class NotificationController
 		return (this.notificationService.getMyNotifications(user));
 	}
 
+	// test only, delete after
 	@Get('all')
 	async getAllNotifications(): Promise<Notification[]>
 	{
