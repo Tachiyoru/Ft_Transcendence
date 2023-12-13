@@ -8,20 +8,21 @@ import { ConfigModule } from "@nestjs/config";
 import { chatModule } from "./chat/chat.module";
 import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
+import { NotificationModule } from "./notification/notification.module";
 import { AchievementsModule } from "./achievements/achievements.module";
-import { AuthService } from "./auth/auth.service";
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    UserModule,
-    AchievementsModule,
-    AuthModule,
-    FriendsListModule,
-    PrismaModule,
-    chatModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService, JwtService ],
+	imports: [
+		ConfigModule.forRoot({ isGlobal: true }),
+		UserModule,
+		AchievementsModule,
+		AuthModule,
+		FriendsListModule,
+		NotificationModule,
+		PrismaModule,
+		chatModule,
+	],
+	controllers: [AppController],
+	providers: [AppService, JwtService],
 })
 export class AppModule {}
