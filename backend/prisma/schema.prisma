@@ -44,7 +44,7 @@ model User {
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)
 
-    stats Stats[]
+    stats Stats? @relation("stats")
 
     friendsof User[] @relation("friendslist")
     friends   User[] @relation("friendslist")
@@ -74,7 +74,7 @@ model Achievement {
 
 model Stats {
     id     Int  @id @default(autoincrement())
-    user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    user   User @relation("stats", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId Int  @unique
 
     lvl Int @default(1)
@@ -82,7 +82,7 @@ model Stats {
 
     partyPlayed Int @default(0)
     partyWin    Int @default(0)
-    partyLose   Int @default(0)
+    partyLost   Int @default(0)
 
     history String[] @default([])
 

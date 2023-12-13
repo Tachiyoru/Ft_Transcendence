@@ -7,4 +7,14 @@ export interface UserCreateInput {
   email: string;
   hash: string;
   role: Role;
+  stats: statsCreateInput;
 }
+
+export interface statsCreateInput {
+	lvl?: number;
+	exp?: number;
+	partyPlayed?: number;
+	partyWon?: number;
+	partyLost?: number;
+	history?: [string]
+  };

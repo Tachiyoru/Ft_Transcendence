@@ -56,4 +56,14 @@ export class UserController {
     console.log("userId : ", userId);
     return this.userService.editUser(userId, dto);
   }
+
+  @Get("rankingGlobal")
+  getRankingGlobal() {
+    return this.userService.getRankingGlobal();
+  }
+
+  @Get("rankingFriends")
+  getRankingFriends(@GetUser("id") userId: number) {
+    // return this.userService.getRankingFriends(userId);
+  }
 }

@@ -18,6 +18,13 @@ export class UserService {
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
       tittle: "The G.O.A.T",
       role: "ADMIN",
+	  stats: {
+		lvl: 15,
+		partyPlayed: 42,
+		partyWon: 42,
+		partyLost: 0,
+		history: ["You would not understand"]
+	  },
     });
     await this.createInitialUser({
       avatar: "/upload/Manu.png",
@@ -26,6 +33,13 @@ export class UserService {
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
       tittle: "Wow Addict",
       role: "ADMIN",
+	  stats: {
+		lvl: 3,
+		partyPlayed: 42,
+		partyWon: 0,
+		partyLost: 41,
+		history: ["You could not wistand this loose series"]
+	  },
     });
     await this.createInitialUser({
       avatar: "/upload/Clem.png",
@@ -34,6 +48,13 @@ export class UserService {
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
       tittle: "La Ptite Creme",
       role: "ADMIN",
+	  stats: {
+		lvl: 1,
+		partyPlayed: 1,
+		partyWon: 0,
+		partyLost: 1,
+		history: ["just a noob"]
+	  },
     });
   }
 
@@ -53,9 +74,9 @@ export class UserService {
           tittle: userinput.tittle ?? "",
           role: userinput.role ?? "USER",
         },
-      });
-    }
+	});
   }
+}
 
   async getAllUsers() {
     return this.prisma.user.findMany();
@@ -138,4 +159,21 @@ export class UserService {
     });
     return user2;
   }
+
+
+
+  async getRankingGlobal(){
+	const users = await this.prisma.user.findMany({
+	  include: {
+		stats: true,
+	  },
+	  orderBy: {
+		stats: {lvl: 'desc'},
+	  },
+	});
+	return users;
+  }
+
+//   async getRankingFriends(userId){}
+
 }
