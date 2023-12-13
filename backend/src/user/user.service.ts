@@ -39,28 +39,30 @@ export class UserService
 		});
 	}
 
-  private async createInitialUser(userinput: UserCreateInput) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: userinput.email,
-      },
-    });
-    if (!user) {
-      await this.prisma.user.create({
-        data: {
-          avatar: userinput.avatar ?? "",
-          email: userinput.email ?? "",
-          hash: userinput.hash ?? "",
-          username: userinput.username ?? "",
-          tittle: userinput.tittle ?? "",
-          role: userinput.role ?? "USER",
-          stats: {
-            create: {},
-          },
-        },
-      });
-    }
-  }
+	private async createInitialUser(userinput: UserCreateInput)
+	{
+		const user = await this.prisma.user.findUnique({
+			where: {
+				email: userinput.email,
+			},
+		});
+		if (!user)
+		{
+			await this.prisma.user.create({
+				data: {
+					avatar: userinput.avatar ?? "",
+					email: userinput.email ?? "",
+					hash: userinput.hash ?? "",
+					username: userinput.username ?? "",
+					tittle: userinput.tittle ?? "",
+					role: userinput.role ?? "USER",
+					stats: {
+						create: {},
+					},
+				},
+			});
+		}
+	}
 
 	async getAllOnlineUsers()
 	{
