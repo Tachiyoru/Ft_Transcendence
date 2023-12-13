@@ -14,7 +14,7 @@ services:
   # Il manque un healthcheck
 
   backend:
-    container_name: backend 
+    container_name: backend
     image: backend
     build:
       context: ./backend
@@ -33,11 +33,11 @@ services:
       - /usr/src/app/node_modules
     networks:
       - backend_network
-      # - frontend_network
+      - frontend_network
     restart: unless-stopped
 
   frontend:
-    container_name: frontend 
+    container_name: frontend
     image: frontend
     build:
       context: ./frontend
@@ -56,10 +56,9 @@ services:
       - frontend_network
     restart: unless-stopped
 
-
 networks:
   backend_network:
-  # frontend_network:
+  frontend_network:
 
 volumes:
   database:

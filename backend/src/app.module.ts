@@ -15,9 +15,6 @@ import { AuthService } from "./auth/auth.service";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
-		MulterModule.register({
-			dest: "./uploads",
-		}),
 		UserModule,
 		AchievementsModule,
 		AuthModule,
