@@ -10,6 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 import { NotificationModule } from "./notification/notification.module";
 import { AchievementsModule } from "./achievements/achievements.module";
+import { StatsModule } from "./stats/stats.module";
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AchievementsModule } from "./achievements/achievements.module";
 		FriendsListModule,
 		NotificationModule,
 		PrismaModule,
+		StatsModule,
 		chatModule,
 	],
 	controllers: [AppController],

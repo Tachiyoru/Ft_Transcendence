@@ -1,8 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { TokenGuard } from 'src/auth/guard';
 import { NotificationService } from './notification.service';
 import { GetUser } from 'src/auth/decorator';
 import { Notification, User } from '@prisma/client';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @Controller('notification')
 @UseGuards(TokenGuard)
@@ -16,11 +17,16 @@ export class NotificationController
 		return (this.notificationService.getMyNotifications(user));
 	}
 
-
 	@Post('add')
-	async addNotification(@GetUser() user: User): Promise<Notification>
+	async addNotification(@GetUser() user: User, @Body() notificationDto: CreateNotificationDto, @Body('type', ParseIntPipe) notifType: number): Promise<Notification>
 	{
-		return (this.notificationService.addNotification(user));
+		return (this.notificationService.addNotification(user, notificationDto, notifType));
+	}
+
+	@Patch('read/:id')
+	async setNotificationReadById(@GetUser() user: User, @Param('id', ParseIntPipe) notificationId: number): Promise<Notification>
+	{
+		return (this.notificationService.setNotificationReadById(user, notificationId));
 	}
 
 	@Get(':id')

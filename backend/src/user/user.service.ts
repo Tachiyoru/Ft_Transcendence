@@ -64,6 +64,11 @@ export class UserService
 		}
 	}
 
+	async getAllUsers()
+	{
+		return this.prisma.user.findMany();
+	}
+
 	async getAllOnlineUsers()
 	{
 		return this.prisma.user.findMany({

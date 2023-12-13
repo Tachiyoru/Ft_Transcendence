@@ -9,14 +9,14 @@ import { TwoFaController } from "./twoFA/two-fa/two-fa.controller";
 import { UserService } from "src/user/user.service";
 
 @Module({
-  imports: [JwtModule],
-  controllers: [AuthController, TwoFaController],
-  providers: [
-    AuthService,
-    FortyTwoStrategy,
-    GithubStrategy,
-    TwoFAService,
-    UserService,
-  ],
+	imports: [JwtModule],
+	controllers: [AuthController, TwoFaController],
+	providers: [
+		AuthService,
+		FortyTwoStrategy,
+		GithubStrategy,
+		TwoFAService,
+		UserService,
+	],
 })
 export class AuthModule {}

@@ -24,7 +24,7 @@ enum Role {
 
 enum NotificationType {
 
-	FRIENDREQUEST_RECEIVED // user to user
+	FRIENDREQUEST_RECEIVED
 	FRIENDREQUEST_ACCEPTED
 	INVITED_TO_GAME
 	ACHIEVEMENT_UNLOCKED
@@ -110,9 +110,10 @@ model Notification {
 	createdAt DateTime @default(now())
 
 	user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-	userId Int  @unique
+	userId Int // unique ?
 
-	type    String
+	type	Int
+
 	content String
 	read    Boolean @default(false)
 // Rajouter delai avant suppression ?

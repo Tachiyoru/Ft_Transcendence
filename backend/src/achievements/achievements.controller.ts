@@ -2,6 +2,7 @@ import { Achievement, User } from '.prisma/client';
 import { Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { AchievementsService } from './achievements.service';
 import { TokenGuard } from 'src/auth/guard';
+import { GetUser } from 'src/auth/decorator';
 
 @Controller('achievements')
 @UseGuards(TokenGuard)
@@ -14,6 +15,12 @@ export class AchievementsController
 	{
 		console.log("getAchievementsList");
 		return (this.achievementsService.getAchievementsList());
+	}
+
+	@Get("/mine")
+	async getMyAchievements(@GetUser() user: User): Promise<Achievement[]>
+	{
+		return (this.achievementsService.getMyAchievements(user));
 	}
 
 	@Get("/:id")

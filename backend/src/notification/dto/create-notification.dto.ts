@@ -1,10 +1,21 @@
-import { IsString } from "class-validator";
+import { IsEmpty, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateNotificationDto
 {
+	@IsOptional()
 	@IsString()
-	type: string;
+	@IsNotEmpty()
+	fromUser: string;
 
+	@IsOptional()
 	@IsString()
-	content: string;
+	achievementName: string;
+
+	@IsOptional()
+	@IsString()
+	channelName: string;
+
+	@IsOptional()
+	@IsString()
+	privilegeName: string;
 }
