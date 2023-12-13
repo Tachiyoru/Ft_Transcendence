@@ -21,7 +21,7 @@ export default {
         'filter': '#160030'
       },
       fontSize: {
-        xs: '0.5rem',
+        xs: '0.6rem',
         sm: '0.7rem',
         base: '0.8rem',
         xl: '1.15rem',
@@ -33,6 +33,9 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         audiowide: ['Audiowide', 'sans-serif'],
+      },
+      boxShadow: {
+        'inner-custom': 'inset 0 -40px 30px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.3)',
       },
     },
   },

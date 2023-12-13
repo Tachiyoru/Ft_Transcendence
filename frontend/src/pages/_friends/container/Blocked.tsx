@@ -1,18 +1,47 @@
-import { FaUser } from "react-icons/fa6"
+import { useEffect, useState } from "react";
+import { FaUser } from "react-icons/fa6";
+import axios from "../../../axios/api";
 
 const Blocked = () => {
-  return (
+	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string;}[]>([]);
+	
+	useEffect(() => {
+		const fetchBlockedUsers = async () => {
+		try {
+			const response = await axios.get("/friends-list/blocked-users");
+			setBlockedUsers(response.data);
+		} catch (error) {
+			console.error("Error fetching blocked users:", error);
+		}
+		};
+
+		fetchBlockedUsers();
+	}, []);
+
+	const unblockUser = async (userId: number) => {
+		try {
+			await axios.post(`/friends-list/unblock/${userId}`);
+			const updatedBlockedUsers = blockedUsers.filter(user => user.id !== userId);
+			setBlockedUsers(updatedBlockedUsers);
+		} catch (error) {
+			console.error('Error deblocked users:', error);
+		}
+	};
+
+	return (
 	<div className="mt-10 m-4 gap-4 flex flex-wrap">
 		{/*TEST USER PENDING*/}
-		<div className="flex flex-col items-center px-6">
+		{blockedUsers.map((user, index) => (
+		<div key={index} className="flex flex-col items-center px-6">
 			<div className="w-[80px] h-[80px] mt-2 bg-fushia rounded-full grid justify-items-center items-center">
 				<FaUser className="w-[30px] h-[30px] "/>
 			</div>
-			<p className="text-sm text-fushia bg-opacity-40 pt-2">Name</p>
-			<p className="text-xs text-lilac pt-2 underline">Unblock Friend</p>
+			<p className="text-sm text-fushia bg-opacity-40 pt-2">{user.username}</p>
+			<p className="text-xs text-lilac pt-2 underline hover:text-white" onClick={() => unblockUser(user.id)}>Unblock Friend</p>
 		</div>
+		))}
 	</div>
-  )
+	)
 }
 
 export default Blocked

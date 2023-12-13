@@ -1,4 +1,4 @@
-import { FaMagnifyingGlass, FaBell, FaUser } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaBell } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
@@ -14,31 +14,39 @@ interface NavItemProps {
 const navItemsInfo = [
 	{ name: "Research", icon: FaMagnifyingGlass },
 	{ name: "Notifications", icon: FaBell },
-	{ name: "Chat", icon: FaUser },
+	{ name: "Settings", icon: MdSettings },
 ];
 
 
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSection }) => {
 	const [showDescription, setShowDescription] = useState(false);
+	
+	const linkContent = name === 'Settings' ? (
+		<Link to="/settings">
+			<Icon size={16} />
+		</Link>
+	) : (
+		<Icon size={14} />
+	);
 
 	return (
 		<div className="relative group">   
 
 		{/* ICON */}
-		<a 
-			className="px-3 py-2 flex items-center text-purple relative hover:text-fushia" 
+		<div 
+			className="px-3 py-2 flex items-center text-purple relative hover:text-fuchsia" 
 			onMouseEnter={() => setShowDescription(true)}
 			onMouseLeave={() => setShowDescription(false)}
 			onClick={() => onClick()}
 		>
-			<Icon size={14} />
-		</a>
+			{linkContent}
+		</div>
 
 		{/* DESCRIPTION */}
 		{showDescription && !selectedSection && (
 			<span className="absolute left-1/2 transform -translate-x-1/2 top-8 text-sm font-normal text-white py-1 px-2 bg-gray-400 rounded-lg">
 				{name === "Notifications" && "Notifications"}
-				{name === "Chat" && "Chat"}
+				{name === "Settings" && "Settings"}
 			</span>
 		)}
 		</div>
@@ -83,29 +91,6 @@ const NavHorizontal = () => {
 				<div className="text-xs font-normal text-param">
 				Notifications
 				</div>
-			</div>
-			);
-		} else if (selectedSection === "Chat") {
-			return (
-			<div ref={menuRef} className="shadow-md bg-dark-violet rounded-lg p-4 w-35 absolute right-2 mt-1">
-				<ul className="">
-					<li className="text-sm font-light text-lilac mb-1">
-						<Link to="/settings" >
-							<div className="flex flex-row items-center">
-								<FaUser className="w-3 h-2 mr-2"/>
-								<p className="hover:underline">Profile</p>
-							</div>
-						</Link>
-					</li>
-					<li className="text-sm font-light text-lilac">
-						<Link to="/settings">
-							<div className="flex flex-row items-center">
-								<MdSettings className="w-3 h-4 mr-2"/>
-								<p className="hover:underline">Settings</p>
-							</div>
-						</Link>
-					</li>
-				</ul>
 			</div>
 			);
 		}

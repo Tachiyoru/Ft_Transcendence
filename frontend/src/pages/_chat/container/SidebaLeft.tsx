@@ -10,7 +10,7 @@ interface SidebarLeftProps {
 	isTyping: boolean;
 }
 
-type FilterType = 'all' | 'personnal' | 'channel'; 
+type FilterType = 'all' | 'personnal' | 'channel' | 'spam'; 
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
 	handleInputChange,
@@ -20,7 +20,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 
 	useEffect(() => {
 		const hash = window.location.hash.substr(1) as FilterType;
-		if (hash && ['all', 'personnal', 'channel'].includes(hash)) {
+		if (hash && ['all', 'personnal', 'channel', 'spam'].includes(hash)) {
 		setFiltreActif(hash);
 		}
 	}, []);
@@ -34,6 +34,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 		all: <AllConv/>,
 		personnal: <PersoConv/>,
 		channel: <ChannelConv/>,
+		spam: <ChannelConv/>
 	};
 
 	return (
@@ -63,13 +64,14 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 				</div>
 			</div>
 			{/*NAV*/}
-			<nav className="hidden md:block">
-				<ul className='mx-4 my-2 flex flex-row justify-between'>
-					<li className={`text-sm text-lilac ${filtreActif === 'all' ? 'bg-purple py-1 p-4 rounded-md' : 'py-1 p-4'}`} onClick={() => handleFiltre('all')}>All</li>
-					<li className={`text-sm text-lilac ${filtreActif === 'personnal' ? 'bg-purple py-1 p-4 rounded-md' : 'py-1 p-4'}`} onClick={() => handleFiltre('personnal')}>Personnal</li>
-					<li className={`text-sm text-lilac ${filtreActif === 'channel' ? 'bg-purple py-1 p-4 rounded-md' : 'py-1 p-4'}`} onClick={() => handleFiltre('channel')}>Channels</li>
+			<div className='flex w-full'>
+				<ul className='flex flex-row m-2 flex-between'>
+					<li className={`text-sm text-lilac ${filtreActif === 'all' ? 'bg-purple py-1 p-3 rounded-md' : 'py-1 p-3'}`} onClick={() => handleFiltre('all')}>All</li>
+					<li className={`text-sm text-lilac ${filtreActif === 'personnal' ? 'bg-purple py-1 p-3 rounded-md' : 'py-1 p-3'}`} onClick={() => handleFiltre('personnal')}>Direct</li>
+					<li className={`text-sm text-lilac ${filtreActif === 'channel' ? 'bg-purple py-1 p-3 rounded-md' : 'py-1 p-3'}`} onClick={() => handleFiltre('channel')}>Group</li>
+					<li className={`text-sm text-lilac ${filtreActif === 'spam' ? 'bg-purple py-1 p-3 rounded-md' : 'py-1 p-3'}`} onClick={() => handleFiltre('spam')}>Spam</li>
 				</ul>
-			</nav>
+			</div>
 		</div>
 
 		<div className="flex-1"> 
