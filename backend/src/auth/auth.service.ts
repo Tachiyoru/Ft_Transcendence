@@ -20,73 +20,69 @@ export class AuthService
 		private user: UserService
 	) {}
 
-	async signup(dto: AuthDto, res: Response)
-	{
-		const hash = await argon.hash(dto.password);
-		try
-		{
-			const user = await this.prisma.user.create({
-				data: {
-					email: dto.email,
-					username: dto.username,
-					hash,
-					stats: {
-						create: {},
-					},
-				},
-			});
-			return (this.forgeTokens(user, res));
-		} catch (error)
-		{
-			if (error instanceof PrismaClientKnownRequestError)
-			{
-				if (error.code === "P2002")
-					throw new ForbiddenException("email already exists");
-			}
-		}
-		throw error;
-	}
+  async signup(dto: AuthDto, res: Response) {
+    const hash = await argon.hash(dto.password);
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          username: dto.username,
+          hash,
+          stats: {
+            create: {},
+          },
+        },
+      });
+      return this.forgeTokens(user, res);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2002")
+          throw new ForbiddenException("email already exists");
+      }
+    }
+    throw error;
+  }
 
-	async signin(dto: AuthDto2, res: Response)
-	{
-		const user = await this.prisma.user.findUnique({
-			where: {
-				email: dto.email,
-			},
-		});
-		if (!user) throw new ForbiddenException("User not found");
-		const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
-		if (!pwdMatches) throw new ForbiddenException("Wrong password");
-		user.status = StatusUser.ONLINE;
-		return this.forgeTokens(user, res);
-	}
+  async signin(dto: AuthDto2, res: Response) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (user) console.log("user exist");
+    if (!user) throw new ForbiddenException("User not found");
+    const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
+    if (!pwdMatches) throw new ForbiddenException("Wrong password");
+    user.status = StatusUser.ONLINE;
+    return this.forgeTokens(user, res);
+  }
 
-	async authExtUserCreate(userInfo: any, imageLink: string)
-	{
-		const name: string = userInfo.username;
-		const email: string = userInfo._json.email ?? "";
-		const user = await this.prisma.user.findFirst({
-			where: { username: name },
-		});
-		if (!user)
-		{
-			const user2 = await this.prisma.user.create({
-				data: {
-					email: email,
-					username: name,
-					hash: "",
-					avatar: imageLink,
-					stats: {
-						create: {},
-					},
-				},
-			});
-			console.log({ user2 });
-			return user2;
-		}
-		user.status = StatusUser.ONLINE;
-		return user;
-	}
+  async authExtUserCreate(userInfo: any, imageLink: string) {
+    {
+      const name: string = userInfo.username;
+      const email: string = userInfo._json.email ?? "";
+      const user = await this.prisma.user.findFirst({
+        where: { username: name },
+      });
+      if (!user) {
+        const user2 = await this.prisma.user.create({
+          data: {
+            email: email,
+            username: name,
+            hash: "",
+            avatar: imageLink,
+            stats: {
+              create: {},
+            },
+          },
+        });
+        console.log({ user2 });
+        return user2;
+      } // console.log("info in real user= ", user)
+      user.status = StatusUser.ONLINE;
+      return user;
+    }
+  }
 
 	async refresh(request: Request, response: Response)
 	{
