@@ -120,7 +120,13 @@ export class NotificationService
 		if (!me)
 			throw new Error('User not found');
 
-		const updatedNotification = await this.prismaService.notification.update({
+		let updatedNotification = await this.prismaService.notification.findFirst({
+			where: { id: notificationId },
+		});
+		if (!updatedNotification)
+			throw new Error('Notification not found');
+
+		updatedNotification = await this.prismaService.notification.update({
 			where: { id: notificationId },
 			data: { read: true },
 		});
