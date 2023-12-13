@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { TokenGuard } from 'src/auth/guard';
 import { NotificationService } from './notification.service';
 import { GetUser } from 'src/auth/decorator';
@@ -16,4 +16,16 @@ export class NotificationController
 		return (this.notificationService.getMyNotifications(user));
 	}
 
+
+	@Post('add')
+	async addNotification(@GetUser() user: User): Promise<Notification>
+	{
+		return (this.notificationService.addNotification(user));
+	}
+
+	@Get(':id')
+	async getNotificationsById(@Param('id', ParseIntPipe) userId: number): Promise<Notification[]>
+	{
+		return (this.notificationService.getNotificationsById(userId));
+	}
 }

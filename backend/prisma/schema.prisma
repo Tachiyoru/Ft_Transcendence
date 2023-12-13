@@ -22,6 +22,19 @@ enum Role {
     BANNED
 }
 
+enum NotificationType {
+
+	FRIENDREQUEST_RECEIVED // user to user
+	FRIENDREQUEST_ACCEPTED
+	INVITED_TO_GAME
+	ACHIEVEMENT_UNLOCKED
+	INVITED_TO_CHANNEL
+	INTEGRATED_TO_CHANNEL
+	CHANNEL_PRIVILEGE_GRANTED
+	// RANKING (top 3 only for example)
+	// FRIEND_ACHIEVEMENT_UNLOCKED (optional)
+}
+
 enum Mode {
     CHAT // user to user
     GROUPCHAT // user to n users
@@ -95,7 +108,6 @@ model Stats {
 model Notification {
 	id        Int      @id @default(autoincrement())
 	createdAt DateTime @default(now())
-	updatedAt DateTime @updatedAt
 
 	user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 	userId Int  @unique
@@ -103,7 +115,7 @@ model Notification {
 	type    String
 	content String
 	read    Boolean @default(false)
-
+// Rajouter delai avant suppression ?
 	@@map("Notifications")
 }
 
