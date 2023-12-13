@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { TokenGuard } from 'src/auth/guard';
 import { NotificationService } from './notification.service';
 import { GetUser } from 'src/auth/decorator';
@@ -17,10 +17,22 @@ export class NotificationController
 		return (this.notificationService.getMyNotifications(user));
 	}
 
+	@Get('all')
+	async getAllNotifications(): Promise<Notification[]>
+	{
+		return (this.notificationService.getAllNotifications());
+	}
+
 	@Post('add')
 	async addNotification(@GetUser() user: User, @Body() notificationDto: CreateNotificationDto, @Body('type', ParseIntPipe) notifType: number): Promise<Notification>
 	{
 		return (this.notificationService.addNotification(user, notificationDto, notifType));
+	}
+
+	@Delete('delete/:id')
+	async deleteNotificationById(@GetUser() user: User, @Param('id', ParseIntPipe) notificationId: number)
+	{
+		return (this.notificationService.deleteNotificationById(user, notificationId));
 	}
 
 	@Patch('read/:id')

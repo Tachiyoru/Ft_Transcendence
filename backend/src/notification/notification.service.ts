@@ -127,4 +127,28 @@ export class NotificationService
 
 		return (updatedNotification);
 	}
+
+	async getAllNotifications()
+	{
+		const notifications = await this.prismaService.notification.findMany();
+
+		return (notifications);
+	}
+
+	async deleteNotificationById(user: User, notificationId: number)
+	{
+		const me = await this.prismaService.user.findUnique({
+			where: { id: user.id },
+			include: { notifications: true },
+		});
+
+		if (!me)
+			throw new Error('User not found');
+
+		const deletedNotification = await this.prismaService.notification.delete({
+			where: { id: notificationId },
+		});
+
+		return (deletedNotification);
+	}
 }
