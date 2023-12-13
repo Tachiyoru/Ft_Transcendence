@@ -33,7 +33,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - backend_network
-      - frontend_network
+      # - frontend_network
     restart: unless-stopped
 
   frontend:
@@ -59,7 +59,7 @@ services:
 
 networks:
   backend_network:
-  frontend_network:
+  # frontend_network:
 
 volumes:
   database:
