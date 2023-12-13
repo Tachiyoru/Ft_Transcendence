@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Post,
@@ -26,6 +27,13 @@ export class UserController {
     return user;
   }
 
+  @Get("him")
+  getHim(@Body() id: number) {
+	const user = this.userService.getUserById(id);
+    console.log("users/me", user);
+    return user;
+  }
+
   @Get("all")
   getAllUsers() {
     return this.userService.getAllUsers();
@@ -34,6 +42,11 @@ export class UserController {
   @Get("allOnline")
   getAllOnlineUsers() {
     return this.userService.getAllOnlineUsers();
+  }
+
+  @Delete("deleteUser")
+  deleteUser(@GetUser("id") userId: number) {
+    return this.userService.deleteUser(userId);
   }
 
   @Patch("deleteAvatar")
@@ -63,7 +76,7 @@ export class UserController {
   }
 
   @Get("rankingFriends")
-  getRankingFriends(@GetUser("id") userId: number) {
-    // return this.userService.getRankingFriends(userId);
+  getRankingFriends(@Body() userId: number) {
+    return this.userService.getRankingFriends(userId);
   }
 }

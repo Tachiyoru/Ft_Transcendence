@@ -10,6 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 import { AchievementsModule } from "./achievements/achievements.module";
 import { AuthService } from "./auth/auth.service";
+import { StatsModule } from "./stats/stats.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthService } from "./auth/auth.service";
     UserModule,
     AchievementsModule,
     AuthModule,
+	StatsModule,
     FriendsListModule,
     PrismaModule,
     chatModule,

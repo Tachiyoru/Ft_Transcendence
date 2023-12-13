@@ -1,6 +1,5 @@
 generator client {
     provider = "prisma-client-js"
-    // output = "./generated/client"
 }
 
 datasource db {
@@ -74,14 +73,14 @@ model Achievement {
 
 model Stats {
     id     Int  @id @default(autoincrement())
-    user   User @relation("stats", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId Int  @unique
+    user   User? @relation("stats", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId Int?  @unique
 
     lvl Int @default(1)
     exp Int @default(0)
 
     partyPlayed Int @default(0)
-    partyWin    Int @default(0)
+    partyWon    Int @default(0)
     partyLost   Int @default(0)
 
     history String[] @default([])
