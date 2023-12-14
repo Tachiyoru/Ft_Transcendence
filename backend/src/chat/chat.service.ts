@@ -1,19 +1,24 @@
 import { Injectable, Request } from "@nestjs/common";
 import
-	{
-		CreateMessageDto,
-		UpdateMessageDto,
-		createChannel,
-	} from "./dto/create-message.dto";
+{
+	CreateMessageDto,
+	UpdateMessageDto,
+	createChannel,
+} from "./dto/create-message.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Channel, Message, Mode, User } from "@prisma/client";
 import * as argon from "argon2";
 import { channel } from "diagnostics_channel";
+import { NotificationService } from "src/notification/notification.service";
+import { NotificationType } from "src/notification/content-notification";
+import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
 
 @Injectable()
 export class chatService
 {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private notificationService: NotificationService) {}
 
 	async createChannel(settings: createChannel, @Request() req: any)
 	{
@@ -82,6 +87,19 @@ export class chatService
 			where: { name: chanName },
 			data: { op: { push: username } },
 		});
+
+		const userTarget = await this.prisma.user.findUnique({
+			where: { username: username },
+		});
+
+		if (!userTarget)
+			throw new Error('User not found');
+
+		const notificationDto = new CreateNotificationDto();
+		notificationDto.privilegeName = "operator";
+		notificationDto.channelName = chanName;
+
+		await this.notificationService.addNotificationByUserId(userTarget.id, notificationDto, NotificationType.CHANNEL_PRIVILEGE_GRANTED)
 
 		return updatedChannel;
 	}

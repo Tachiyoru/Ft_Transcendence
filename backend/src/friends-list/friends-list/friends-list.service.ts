@@ -41,7 +41,7 @@ export class FriendsListService
 		if (user.username)
 			notificationDto.fromUser = user.username;
 
-		this.notificationService.addNotificationByUserId(friendId, notificationDto, NotificationType.FRIENDREQUEST_RECEIVED);
+		await this.notificationService.addNotificationByUserId(friendId, notificationDto, NotificationType.FRIENDREQUEST_RECEIVED);
 
 		return user;
 	}

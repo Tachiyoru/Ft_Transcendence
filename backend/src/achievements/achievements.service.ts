@@ -117,7 +117,7 @@ export class AchievementsService
 		const notificationDto = new CreateNotificationDto();
 		notificationDto.achievementName = achievement.title;
 
-		this.notificationService.addNotificationByUserId(userId, notificationDto, NotificationType.ACHIEVEMENT_UNLOCKED);
+		await this.notificationService.addNotificationByUserId(userId, notificationDto, NotificationType.ACHIEVEMENT_UNLOCKED);
 
 		return (updatedUser);
 	}

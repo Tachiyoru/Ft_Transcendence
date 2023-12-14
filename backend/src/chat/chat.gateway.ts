@@ -1,18 +1,18 @@
 import
-	{
-		WebSocketGateway,
-		SubscribeMessage,
-		MessageBody,
-		WebSocketServer,
-		ConnectedSocket,
-	} from "@nestjs/websockets";
+{
+	WebSocketGateway,
+	SubscribeMessage,
+	MessageBody,
+	WebSocketServer,
+	ConnectedSocket,
+} from "@nestjs/websockets";
 import { chatService } from "./chat.service";
 import
-	{
-		CreateMessageDto,
-		UpdateMessageDto,
-		createChannel,
-	} from "./dto/create-message.dto";
+{
+	CreateMessageDto,
+	UpdateMessageDto,
+	createChannel,
+} from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import { Request, UseGuards } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
