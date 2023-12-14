@@ -1,11 +1,17 @@
 import { Injectable, Req } from "@nestjs/common";
 import { User } from "@prisma/client";
+import { NotificationType } from "src/notification/content-notification";
+import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
+import { NotificationService } from "src/notification/notification.service";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class FriendsListService
 {
-	constructor(private prismaService: PrismaService) {}
+	constructor(
+		private prismaService: PrismaService,
+		private notificationService: NotificationService
+	) {}
 
 	async addFriend(user: User, friendId: number)
 	{
@@ -18,7 +24,8 @@ export class FriendsListService
 			},
 		});
 
-		if (!user || !friend) throw new Error("User not found");
+		if (!user || !friend)
+			throw new Error("User not found");
 
 		user = await this.prismaService.user.update({
 			where: { id: user.id },
@@ -29,6 +36,12 @@ export class FriendsListService
 			},
 			include: { friends: true }, // inlcude friends in the response
 		});
+
+		const notificationDto = new CreateNotificationDto();
+		if (user.username)
+			notificationDto.fromUser = user.username;
+
+		this.notificationService.addNotificationByUserId(friendId, notificationDto, NotificationType.FRIENDREQUEST_RECEIVED);
 
 		return user;
 	}

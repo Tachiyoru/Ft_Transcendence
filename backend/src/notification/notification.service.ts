@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { NotificationContentType, NotificationContentFunctions } from './content-notification';
+import { NotificationType, NotificationContentFunctions } from './content-notification';
 
 @Injectable()
 export class NotificationService
@@ -65,11 +65,11 @@ export class NotificationService
 
 	setContentInNotification(notifType: number, notificationDto: CreateNotificationDto)
 	{
-		const contentGenerator = NotificationContentFunctions[notifType as NotificationContentType];
+		const contentGenerator = NotificationContentFunctions[notifType as NotificationType];
 
-		if (notifType === NotificationContentType.FRIENDREQUEST_RECEIVED
-			|| notifType === NotificationContentType.FRIENDREQUEST_ACCEPTED
-			|| notifType === NotificationContentType.INVITED_TO_GAME)
+		if (notifType === NotificationType.FRIENDREQUEST_RECEIVED
+			|| notifType === NotificationType.FRIENDREQUEST_ACCEPTED
+			|| notifType === NotificationType.INVITED_TO_GAME)
 		{
 			if (!notificationDto.fromUser)
 				throw new Error('Missing fromUser in notificationDto');
@@ -77,7 +77,7 @@ export class NotificationService
 			console.log(content);
 			return (content);
 		}
-		else if (notifType === NotificationContentType.ACHIEVEMENT_UNLOCKED)
+		else if (notifType === NotificationType.ACHIEVEMENT_UNLOCKED)
 		{
 			if (!notificationDto.achievementName)
 				throw new Error('Missing achievementName in notificationDto');
@@ -85,8 +85,8 @@ export class NotificationService
 			console.log(content);
 			return (content);
 		}
-		else if (notifType === NotificationContentType.INVITED_TO_CHANNEL
-			|| notifType === NotificationContentType.INTEGRATED_TO_CHANNEL)
+		else if (notifType === NotificationType.INVITED_TO_CHANNEL
+			|| notifType === NotificationType.INTEGRATED_TO_CHANNEL)
 		{
 			if (!notificationDto.fromUser)
 				throw new Error('Missing fromUser in notificationDto');
@@ -96,7 +96,7 @@ export class NotificationService
 			console.log(content);
 			return (content);
 		}
-		else if (notifType === NotificationContentType.CHANNEL_PRIVILEGE_GRANTED)
+		else if (notifType === NotificationType.CHANNEL_PRIVILEGE_GRANTED)
 		{
 			if (!notificationDto.privilegeName)
 				throw new Error('Missing privilegeName in notificationDto');
