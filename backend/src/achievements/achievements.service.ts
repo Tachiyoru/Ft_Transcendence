@@ -2,11 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { AchievementCreateImput } from "./dto/create-achievements.dto";
 import { User } from "@prisma/client";
+import { NotificationService } from "src/notification/notification.service";
+import { NotificationType } from "src/notification/content-notification";
+import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
 
 @Injectable()
 export class AchievementsService
 {
-	constructor(private prismaService: PrismaService) {}
+	constructor(
+		private prismaService: PrismaService,
+		private notificationService: NotificationService) {}
 
 	async onModuleInit()
 	{
@@ -74,7 +79,7 @@ export class AchievementsService
 		return user.achievements;
 	}
 
-	async addAchievementToUser(userId: number, achievementId: number)
+	async addAchievementByUserId(userId: number, achievementId: number)
 	{
 		const user = await this.prismaService.user.findUnique({
 			where: {
@@ -108,6 +113,12 @@ export class AchievementsService
 				},
 			},
 		});
-		return updatedUser;
+
+		const notificationDto = new CreateNotificationDto();
+		notificationDto.achievementName = achievement.title;
+
+		this.notificationService.addNotificationByUserId(userId, notificationDto, NotificationType.ACHIEVEMENT_UNLOCKED);
+
+		return (updatedUser);
 	}
 }

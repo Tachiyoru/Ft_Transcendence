@@ -30,8 +30,8 @@ export class AchievementsController
 	}
 
 	@Post("/add/:userId/:achievementId")
-	async addAchievementToUser(@Param('userId', ParseIntPipe) userId: number, @Param('achievementId', ParseIntPipe) achievementId: number): Promise<User>
+	async addAchievementByUserId(@Param('userId', ParseIntPipe) userId: number, @Param('achievementId', ParseIntPipe) achievementId: number): Promise<User>
 	{
-		return (this.achievementsService.addAchievementToUser(userId, achievementId));
+		return (this.achievementsService.addAchievementByUserId(userId, achievementId));
 	}
 }
