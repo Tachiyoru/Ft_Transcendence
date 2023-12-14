@@ -36,14 +36,14 @@ export class NotificationService
 	}
 
 	// envoyer type de notification + dto contenant EVENTUELLEMENT les infos necessaires pour certaines notifs seulement, avec le type, retrouver le content de la notif, et rajouter la notif contenant le type (plus vraiment necesssaire a part pour cote front peut etre) et le content dans user.notifications
-	async addNotification(user: User, notificationDto: CreateNotificationDto, notifType: number)
+	async addNotificationByUserId(userId: number, notificationDto: CreateNotificationDto, notifType: number)
 	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
 			include: { notifications: true },
 		});
 
-		if (!me)
+		if (!user)
 			throw new Error('User not found');
 
 		const updatedContent = this.setContentInNotification(notifType, notificationDto);
@@ -110,14 +110,14 @@ export class NotificationService
 			throw new Error('Invalid notification type');
 	}
 
-	async setNotificationReadById(user: User, notificationId: number)
+	async setNotificationReadById(userId: number, notificationId: number)
 	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
 			include: { notifications: true },
 		});
 
-		if (!me)
+		if (!user)
 			throw new Error('User not found');
 
 		let updatedNotification = await this.prismaService.notification.findFirst({
@@ -142,14 +142,14 @@ export class NotificationService
 		return (notifications);
 	}
 
-	async deleteNotificationById(user: User, notificationId: number)
+	async deleteNotificationById(userId: number, notificationId: number)
 	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
 			include: { notifications: true },
 		});
 
-		if (!me)
+		if (!user)
 			throw new Error('User not found');
 
 		let deletedNotification = await this.prismaService.notification.findFirst({

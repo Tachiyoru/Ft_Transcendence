@@ -4,6 +4,7 @@ import { NotificationService } from './notification.service';
 import { GetUser } from 'src/auth/decorator';
 import { Notification, User } from '@prisma/client';
 import { CreateNotificationDto } from './dto/create-notification.dto';
+import { OPTIONAL_PROPERTY_DEPS_METADATA } from '@nestjs/common/constants';
 
 @Controller('notification')
 @UseGuards(TokenGuard)
@@ -24,22 +25,22 @@ export class NotificationController
 		return (this.notificationService.getAllNotifications());
 	}
 
-	@Post('add')
-	async addNotification(@GetUser() user: User, @Body() notificationDto: CreateNotificationDto, @Body('type', ParseIntPipe) notifType: number): Promise<Notification>
+	@Post('add/:id')
+	async addNotificationByUserId(@Param('id', ParseIntPipe) userId: number, @Body() notificationDto: CreateNotificationDto, @Body('type', ParseIntPipe) notifType: number): Promise<Notification>
 	{
-		return (this.notificationService.addNotification(user, notificationDto, notifType));
+		return (this.notificationService.addNotificationByUserId(userId, notificationDto, notifType));
 	}
 
-	@Delete('delete/:id')
-	async deleteNotificationById(@GetUser() user: User, @Param('id', ParseIntPipe) notificationId: number)
+	@Delete('delete/:userId/:id')
+	async deleteNotificationById(@Param('userId', ParseIntPipe) userId: number, @Param('id', ParseIntPipe) notificationId: number)
 	{
-		return (this.notificationService.deleteNotificationById(user, notificationId));
+		return (this.notificationService.deleteNotificationById(userId, notificationId));
 	}
 
-	@Patch('read/:id')
-	async setNotificationReadById(@GetUser() user: User, @Param('id', ParseIntPipe) notificationId: number): Promise<Notification>
+	@Patch('read/:userId/:id')
+	async setNotificationReadById(@Param('userId', ParseIntPipe) userId: number, @Param('id', ParseIntPipe) notificationId: number): Promise<Notification>
 	{
-		return (this.notificationService.setNotificationReadById(user, notificationId));
+		return (this.notificationService.setNotificationReadById(userId, notificationId));
 	}
 
 	@Get(':id')
