@@ -46,7 +46,7 @@ const AllFriends = () => {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const response = await axios.get<{ id: number; username: string }[]>('/friends-list/');
+				const response = await axios.get<{ id: number; username: string }[]>('/friends-list/mine');
 				console.log(response.data);
 				
 				setListUsers(response.data);
@@ -60,7 +60,7 @@ const AllFriends = () => {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const response = await axios.get<{ id: number; username: string }[]>('/friends-list/users-with-me-in-pending-list/');
+				const response = await axios.get<{ id: number; username: string }[]>('/friends-list/pending-request/');
 				setListUsersPending(response.data);	
 			} catch (error) {
 				console.error('Error fetching user list:', error);
@@ -72,7 +72,7 @@ const AllFriends = () => {
 	const rejectFriendRequest = async (userId: number) => {
         try {
 			console.log('ok');
-            await axios.delete(`/friends-list/friend-request/${userId}/reject`);
+            await axios.delete(`/friends-list/friend-request/reject/${userId}`);
 			const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
 			setListUsersPending(updateListUsersPending);
 		} catch (error) {
@@ -90,6 +90,7 @@ const AllFriends = () => {
         }
     };
 
+	// changer path
 	const blockUser = async (userId: number) => {
 		try {
 			await axios.post(`/friends-list/block/${userId}`);
@@ -165,7 +166,7 @@ const AllFriends = () => {
 								<div className="border-b border-b-lilac border-opacity-60 my-2"></div>
 								<div className="flex flex-row items-center hover:text-lilac" onClick={() => removeFriend(user.id)}>
 									<FaUserMinus size={12}/>
-									<p className="m-1">Delete from friend</p>
+									<p className="m-1">Delete friend</p>
 								</div>
 						</div>
 					)}

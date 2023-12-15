@@ -22,7 +22,7 @@ const Invitations = () => {
 
 	const acceptFriendRequest = async (userId: number) => {
         try {
-            await axios.post(`/friends-list/friend-request/${userId}/accept`);
+            await axios.post(`/friends-list/friend-request/accept/${userId}`);
             const updatedList = listUsers.filter(user => user.id !== userId);
             setListUsers(updatedList);
         } catch (error) {
@@ -33,7 +33,7 @@ const Invitations = () => {
 	const rejectFriendRequest = async (userId: number) => {
         try {
 			console.log(userId);
-            await axios.delete(`/friends-list/friend-request/${userId}/reject`);
+            await axios.delete(`/friends-list/friend-request/reject/${userId}/`);
         } catch (error) {
             console.error('Error accepting friend request:', error);
         }

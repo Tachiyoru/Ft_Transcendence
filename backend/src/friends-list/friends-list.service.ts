@@ -13,30 +13,109 @@ export class FriendsListService
 		private notificationService: NotificationService
 	) {}
 
-	async addFriend(user: User, friendId: number)
+	async pendingList(userId: number)
 	{
-		const friend = await this.prismaService.user.findUnique({
+		const user = await this.prismaService.user.findUnique(
+		{
+			where : {id: userId},
+			include: { pendingList: true},
+		}
+		)
+		if (user)
+			return user.pendingList;
+		return null;
+	}
+
+	async getUsersWithMeInPendingList(user: User) {
+		const users = await this.prismaService.user.findMany(
+		{
 			where: {
-				id: friendId,
-			},
-			include: {
-				friends: true,
-			},
-		});
-
-		if (!user || !friend) throw new Error("User not found");
-
-		user = await this.prismaService.user.update({
-			where: { id: user.id },
-			data: {
-				friends: {
-					connect: { id: friendId }, // connect existing friend
+			pendingList: {
+				some: {
+				id: user.id,
 				},
 			},
-			include: { friends: true }, // inlcude friends in the response
-		});
+			},
+	});
 
+	return users;
+	}
+
+	
+	async acceptRequest(user: User, friendId: number) 
+	{
+		await this.prismaService.user.update(
+			{
+				where: { id: user.id },
+				data: {pendingList: {disconnect: { id: friendId }}}
+			}
+		);
+		await this.prismaService.user.update(
+			{
+				where: { id: user.id },
+				include: { friends : true },
+				data: { friends: { connect: { id: friendId }}}
+			}
+		);
+		user = await this.prismaService.user.update(
+			{
+				where: { id: friendId },
+				include: { friends : true },
+				data: { 
+					friends: { connect: { id: user.id }}
+				}
+			}
+		);
+
+		const notificationDto = new CreateNotificationDto();
+		if (user.username)
+			notificationDto.fromUser = user.username;
+
+		await this.notificationService.addNotificationByUserId(
+			user.id,
+			notificationDto,
+			NotificationType.FRIENDREQUEST_ACCEPTED
+		);
+
+		return (user);
+	}
+
+	async rejectRequest(user: User, friendId: number) 
+	{
+		await this.prismaService.user.update(
+			{
+				where: { id: user.id },
+				data: {pendingList: {disconnect: { id: friendId }}}
+			}
+		);
+
+		user = await this.prismaService.user.update(
+		{
+			where: { id: friendId },
+			data: {pendingList: {disconnect: { id: user.id }}}
+		}
+		);
+
+		return user;
+	}
+
+	async friendRequest(user: User, friendId: number)
+	{
+		const friend = await this.prismaService.user.findUnique(
+		{
+			where: { id: friendId },
+			include: { pendingList: true },
+		}
+		);
+		if (!friend) {throw new Error('Friend not found.');}
 		
+		await this.prismaService.user.update(
+		{
+			where: { id: friendId },
+			data: { pendingList: {connect: { id: user.id },},},
+		}
+		);
+
 		const notificationDto = new CreateNotificationDto();
 		if (user.username) notificationDto.fromUser = user.username;
 
@@ -48,7 +127,7 @@ export class FriendsListService
 
 		return user;
 	}
-
+	
 	async removeFriend(user: User, friendId: number)
 	{
 		const friend = await this.prismaService.user.findUnique({

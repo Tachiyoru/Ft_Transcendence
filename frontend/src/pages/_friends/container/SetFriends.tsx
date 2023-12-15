@@ -41,18 +41,6 @@ const SetFriends: React.FC = () => {
   }, [loadingFriendsList]);
   
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get<{ id: number; username: string }[]>('/friends-list/users-with-me-in-pending-list/');
-        setFriendsList(response.data);
-      } catch (error) {
-        console.error('Error fetching user list:', error);
-      }
-    };
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = (event : MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
