@@ -131,9 +131,10 @@ export class chatService
 		}
 	}
 
+	// [username] of the user that is inviting, [targetId] of the user that is being invited
 	async inviteUserToChannel(
 		chanName: string,
-		userId: number,
+		targetId: number,
 		@Request() req: any
 	)
 	{
@@ -150,7 +151,7 @@ export class chatService
 			throw new Error("You are not allowed to invite a user to this channel");
 		}
 		const target = await this.prisma.user.findUnique({
-			where: { id: userId },
+			where: { id: targetId },
 		});
 		if (!target)
 		{
@@ -162,13 +163,74 @@ export class chatService
 		}
 		const updatedChannel = await this.prisma.channel.update({
 			where: { name: chanName },
-			data: { members: { connect: { id: target.id } } },
+			data: { invitedList: { connect: { id: target.id } } },
 		});
 
 		const notificationDto = new CreateNotificationDto();
+		notificationDto.fromUser = req.user.username;
 		notificationDto.channelName = chanName;
 
 		await this.notificationService.addNotificationByUserId(target.id, notificationDto, NotificationType.INVITED_TO_CHANNEL)
+
+		return (updatedChannel);
+	}
+
+	async acceptInvitationToChannel(
+		chanName: string,
+		@Request() req: any
+	)
+	{
+		const chan = await this.prisma.channel.findUnique({
+			where: { name: chanName },
+		});
+		if (!chan)
+		{
+			throw new Error("Could not find channel");
+		}
+		const updatedChannel = await this.prisma.channel.update({
+			where: { name: chanName },
+			data: { members: { connect: { id: req.user.id } } },
+		});
+		return updatedChannel;
+	}
+
+	async addUserToChannel(
+		chanName: string,
+		targetId: number,
+		@Request() req: any
+	)
+	{
+		const channel = await this.prisma.channel.findUnique({
+			where: { name: chanName },
+			include: { banned: true, invitedList: true },
+		});
+		if (!channel)
+		{
+			throw new Error("Could not find channel");
+		}
+		if (!channel.op.includes(req.user.username)) // verifier si l'owner fait une invite est dans la liste d'op
+		{
+			throw new Error("You are not allowed to invite a user to this channel");
+		}
+		const target = await this.prisma.user.findUnique({
+			where: { id: targetId },
+		});
+		if (!target)
+		{
+			throw new Error("Could not find user");
+		}
+		if (channel.banned.includes(target))
+		{
+			throw new Error("User has been banned from this channel");
+		}
+
+		const updatedChannel = await this.prisma.channel.update({
+			where: { name: chanName },
+			data: {
+				members: { connect: { id: target.id } },
+				invitedList: { disconnect: { id: target.id } },
+			},
+		});
 
 		return (updatedChannel);
 	}

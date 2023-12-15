@@ -16,53 +16,54 @@ export class FriendsListService
 	async pendingList(userId: number)
 	{
 		const user = await this.prismaService.user.findUnique(
-		{
-			where : {id: userId},
-			include: { pendingList: true},
-		}
+			{
+				where: { id: userId },
+				include: { pendingList: true },
+			}
 		)
-		if (user)
-			return user.pendingList;
-		return null;
+		if (!user)
+			throw new Error("User not found");
+		return user.pendingList;
 	}
 
-	async getUsersWithMeInPendingList(user: User) {
+	async getUsersWithMeInPendingList(user: User)
+	{
 		const users = await this.prismaService.user.findMany(
-		{
-			where: {
-			pendingList: {
-				some: {
-				id: user.id,
+			{
+				where: {
+					pendingList: {
+						some: {
+							id: user.id,
+						},
+					},
 				},
-			},
-			},
-	});
+			});
 
-	return users;
+		return users;
 	}
 
-	
+
 	async acceptRequest(user: User, friendId: number) 
 	{
 		await this.prismaService.user.update(
 			{
 				where: { id: user.id },
-				data: {pendingList: {disconnect: { id: friendId }}}
+				data: { pendingList: { disconnect: { id: friendId } } }
 			}
 		);
 		await this.prismaService.user.update(
 			{
 				where: { id: user.id },
-				include: { friends : true },
-				data: { friends: { connect: { id: friendId }}}
+				include: { friends: true },
+				data: { friends: { connect: { id: friendId } } }
 			}
 		);
 		user = await this.prismaService.user.update(
 			{
 				where: { id: friendId },
-				include: { friends : true },
-				data: { 
-					friends: { connect: { id: user.id }}
+				include: { friends: true },
+				data: {
+					friends: { connect: { id: user.id } }
 				}
 			}
 		);
@@ -85,15 +86,15 @@ export class FriendsListService
 		await this.prismaService.user.update(
 			{
 				where: { id: user.id },
-				data: {pendingList: {disconnect: { id: friendId }}}
+				data: { pendingList: { disconnect: { id: friendId } } }
 			}
 		);
 
 		user = await this.prismaService.user.update(
-		{
-			where: { id: friendId },
-			data: {pendingList: {disconnect: { id: user.id }}}
-		}
+			{
+				where: { id: friendId },
+				data: { pendingList: { disconnect: { id: user.id } } }
+			}
 		);
 
 		return user;
@@ -102,18 +103,19 @@ export class FriendsListService
 	async friendRequest(user: User, friendId: number)
 	{
 		const friend = await this.prismaService.user.findUnique(
-		{
-			where: { id: friendId },
-			include: { pendingList: true },
-		}
+			{
+				where: { id: friendId },
+				include: { pendingList: true },
+			}
 		);
-		if (!friend) {throw new Error('Friend not found.');}
-		
+		if (!friend)
+			throw new Error('Friend not found.');
+
 		await this.prismaService.user.update(
-		{
-			where: { id: friendId },
-			data: { pendingList: {connect: { id: user.id },},},
-		}
+			{
+				where: { id: friendId },
+				data: { pendingList: { connect: { id: user.id }, }, },
+			}
 		);
 
 		const notificationDto = new CreateNotificationDto();
@@ -127,7 +129,7 @@ export class FriendsListService
 
 		return user;
 	}
-	
+
 	async removeFriend(user: User, friendId: number)
 	{
 		const friend = await this.prismaService.user.findUnique({
@@ -154,11 +156,11 @@ export class FriendsListService
 		await this.prismaService.user.update({
 			where: { id: friendId },
 			data: {
-			friends: {
-			disconnect: { id: user.id },
+				friends: {
+					disconnect: { id: user.id },
+				},
 			},
-		},
-		include: { friends: true },
+			include: { friends: true },
 		});
 
 		return (user);
@@ -169,22 +171,22 @@ export class FriendsListService
 		user = await this.prismaService.user.update({
 			where: { id: user.id },
 			data: {
-			blockedList: {
-				connect: { id: blockedUserId },
-			},
+				blockedList: {
+					connect: { id: blockedUserId },
+				},
 			},
 		});
-			return (user);
+		return (user);
 	}
-		
+
 	async unblockUser(user: User, unblockedUserId: number)
 	{
-		user =await this.prismaService.user.update({
+		user = await this.prismaService.user.update({
 			where: { id: user.id },
 			data: {
-			blockedList: {
-				disconnect: { id: unblockedUserId },
-			},
+				blockedList: {
+					disconnect: { id: unblockedUserId },
+				},
 			},
 		});
 		return (user);
@@ -195,33 +197,36 @@ export class FriendsListService
 		const me = await this.prismaService.user.findUnique({
 			where: { id: user.id },
 			include: {
-			blockedList: true,
+				blockedList: true,
 			},
 		});
-		
-		if (!me) {
+
+		if (!me)
+		{
 			throw new Error('User not found');
 		}
-		
+
 		return me.blockedList;
 	}
 
-	async getMyFriends(user: User) {
+	async getMyFriends(user: User)
+	{
 		const me = await this.prismaService.user.findUnique({
 			where: { id: user.id },
 			include: {
-			friends: true,
-			blockedList: true,
+				friends: true,
+				blockedList: true,
 			},
 		});
-		
-		if (!me) {
+
+		if (!me)
+		{
 			throw new Error('User not found');
 		}
-		
+
 		const blockedUserIds = me.blockedList.map(user => user.id);
 		const filteredFriends = me.friends.filter(friend => !blockedUserIds.includes(friend.id));
-		
+
 		return filteredFriends;
 	}
 

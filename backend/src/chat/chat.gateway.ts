@@ -115,7 +115,9 @@ export class chatGateway
 	@SubscribeMessage("invite")
 	async inviteUserToChannel(
 		client: Socket,
-		@MessageBody() data: { chanName: string; userId: number },
+		@MessageBody() data: {
+			chanName: string, targetId: number
+		},
 		@Request() req: any
 	)
 	{
@@ -123,7 +125,7 @@ export class chatGateway
 		{
 			const result = await this.chatService.inviteUserToChannel(
 				data.chanName,
-				data.userId,
+				data.targetId,
 				req
 			);
 			client.emit("userInvited", result);
@@ -131,6 +133,30 @@ export class chatGateway
 		catch (error)
 		{
 			client.emit("inviteError", { message: error.message });
+		}
+	}
+
+	@SubscribeMessage("addUserToChannel")
+	async addUserToChannel(
+		client: Socket,
+		@MessageBody() data: {
+			chanName: string, targetId: number
+		},
+		@Request() req: any
+	)
+	{
+		try
+		{
+			const result = await this.chatService.addUserToChannel(
+				data.chanName,
+				data.targetId,
+				req
+			);
+			client.emit("userAdded", result);
+		}
+		catch (error)
+		{
+			client.emit("addUserError", { message: error.message });
 		}
 	}
 
