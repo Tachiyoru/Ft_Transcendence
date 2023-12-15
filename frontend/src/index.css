@@ -26,9 +26,19 @@ body {
 	border-radius: 1rem;
 	padding: 0.2em;
 	box-shadow: 0 0 .2rem #fff,
-			  0 0 .2rem #fff,
-			  0 0 2rem #EF1FEA,
-			  0 0 0.8rem #EF1FEA,
-			  0 0 1rem #EF1FEA,
-			  inset 0 0 1.1rem #EF1FEA; 
+				0 0 .2rem #fff,
+				0 0 2rem #EF1FEA,
+				0 0 0.8rem #EF1FEA,
+				0 0 1rem #EF1FEA,
+				inset 0 0 1.1rem #EF1FEA; 
 }
+
+.from-very-light-black {
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 1));
+}
+
+.relative:hover .popin {
+	opacity: 100;
+	scale: 100;
+	visibility: visible;
+  }

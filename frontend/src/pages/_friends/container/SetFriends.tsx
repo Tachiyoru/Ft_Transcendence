@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaArrowTurnUp, FaUser, FaUserPlus } from "react-icons/fa6";
 import AllFriends from './AllFriends';
 import Invitations from './Invitations';
 import Blocked from './Blocked';
 import axios from "../../../axios/api";
+import { Link } from 'react-router-dom';
 
 type FilterType = 'tous' | 'invitations' | 'blocked'; 
 
@@ -12,39 +13,88 @@ const SetFriends: React.FC = () => {
 
 	const [isTyping, setIsTyping] = useState(false);
   const [filtreActif, setFiltreActif] = useState<FilterType>('tous');
-	const [listUsers, setListUsers] = useState<{ id: number}[]>([]);
+  const [listUsers, setListUsers] = useState<{ id: number; username: string }[]>([]);
 	const [checkedItems, setCheckedItems] = useState<{ [key: string]: { id: number } }>({});
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [hoveredUser, setHoveredUser] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [loadingFriendsList, setLoadingFriendsList] = useState(true);
+  const [friendsList, setFriendsList] = useState<{ id: number; username: string }[]>([]);
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get<{ id: number; username: string }[]>('/friends-list/non-friends');
+        console.log(response.data);
+        setFriendsList(response.data);
+        setLoadingFriendsList(false); // Marque la fin du chargement
+      } catch (error) {
+        console.error('Error fetching user list:', error);
+        setLoadingFriendsList(false); // Arrête le chargement en cas d'erreur
+      }
+    };
+  
+    if (loadingFriendsList) {
+      fetchUserData();
+    }
+  }, [loadingFriendsList]);
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get<{ id: number; username: string }[]>('/friends-list/users-with-me-in-pending-list/');
+        setFriendsList(response.data);
+      } catch (error) {
+        console.error('Error fetching user list:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
-	useEffect(() => {
-		const fetchUserData = async () => {
-			try {
-				const response = await axios.get<{ id: number }[]>('/friends-list/non-friends');
-				console.log(response.data);
-				
-				setListUsers(response.data);
-				} catch (error) {
-				console.error('Error fetching user list:', error);
-				}
-			};
-		fetchUserData();
-	}, []);
+  useEffect(() => {
+    const handleClickOutside = (event : MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-  const handleCheckboxChange = (user: { id: number }) => {
-		setCheckedItems(prevCheckedItems => {
-			const newCheckedItems = { ...prevCheckedItems };
-			if (newCheckedItems[user.id]) {
-			delete newCheckedItems[user.id];
-			} else {
-			newCheckedItems[user.id] = user;
-			}
-			return newCheckedItems;
-		});
-	};
+    window.addEventListener('click', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get<{ id: number; username: string }[]>('/friends-list/non-friends');
+        console.log(response.data);
+        
+        setListUsers(response.data);
+      } catch (error) {
+        console.error('Error fetching user list:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
 
 	const handleInputChange = (e) => {
         const inputValue = e.target.value;
         setIsTyping(inputValue !== '');
+        setSearchText(e.target.value);
   };
+
+  const handleInputClick = () => {
+    setIsDropdownOpen(true);
+  };
+
+  const filteredUsers = listUsers.filter(user =>
+    user.username.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const handleFiltre = (type: FilterType) => {
     setFiltreActif(type);
@@ -58,85 +108,90 @@ const SetFriends: React.FC = () => {
   };
 
   useEffect(() => {
-    // Met à jour le filtre actif lorsque l'URL change
     const hash = window.location.hash.substr(1) as FilterType;
     if (hash && ['tous', 'invitations', 'blocked'].includes(hash)) {
       setFiltreActif(hash);
     }
   }, []);
 
-  const handleSubmit = async () => {
-		const selectedItems = Object.values(checkedItems);
-		console.log('Selection:', selectedItems);
-    console.log('Selection:', selectedItems[0].id);
+  const handleUserSelection = async (selectedUser: { id: number }) => {
+    setCheckedItems({ [selectedUser.id]: selectedUser });
     try {
-      const response = await axios.post(`/friends-list/add/${selectedItems[0].id}`);
+      const response = await axios.post(`/friends-list/friend-request/${selectedUser.id}`);
       console.log(response.data);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error adding friend:', error);
     }
+  };
+
+  const handleUserHover = (userId: number | null) => {
+    setHoveredUser(userId);
   };
 
   return (
       <div className="flex flex-row h-[80vh]">
 
         {/*NAV FRIENDS*/}
-        <div className="w-[260px] md:rounded-l-lg bg-violet-black">
+        <div className="w-[260px] md:rounded-l-lg bg-violet-black" ref={dropdownRef}>
           <div className='p-4'>
             <h1 className="font-outline-2 mt-6 m-2 text-white">Friends</h1>
               
-              <div className="relative m-2">
-                <div className="flex items-center">
-                  <input
-                    type='text'
-                    placeholder='Add friends'
-                    className="text-xs placeholder-lilac text-lilac py-2 pl-9 pr-2 w-full mt-4 rounded-md bg-purple focus:outline-none focus:border-fushia"
-                    onChange={handleInputChange}
-                  />
-                  <span className="absolute inset-y-0 left-0 pl-3 pt-3.5 flex items-center">
-                    {isTyping ? (
-                      <FaArrowTurnUp className="text-violet-black mt-1 w-3 h-3 transform rotate-90"/>
-                    ) : (
-                      <FaUserPlus className="text-violet-black w-4 h-4"/>
-                    )}
-                  </span>
+            <div className="relative m-2">
+              <div className="flex items-center relative">
+                <input
+                  type='text'
+                  placeholder='Add Friends'
+                  className={`text-xs placeholder-lilac py-2 pl-9 pr-2 w-full mt-4 focus:outline-none focus:border-fushia ${isDropdownOpen ? 'bg-lilac text-white rounded-t-lg' : 'bg-accent-violet rounded-md text-lilac' }`}
+                  onClick={handleInputClick}
+                  onChange={handleInputChange}
+                  value={searchText}
+                />
+                <span className="absolute inset-y-0 left-0 pl-3 pt-3.5 flex items-center">
+                  {isTyping || isDropdownOpen? (
+                    <FaArrowTurnUp className="text-accent-violet mt-1 w-3 h-3 transform rotate-90"/>
+                  ) : (
+                    <FaUserPlus className="text-lilac w-4 h-4"/>
+                  )}
+                </span>
+              </div>
+              
+              {isDropdownOpen && (
+                <div className='h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2'>
+                  {filteredUsers.length === 0 ? (
+                    <div className='pl-4'>
+                      <p className='text-xs font-regular text-lilac'>Nothing Found.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {filteredUsers.map((user, index) => (
+                        <div
+                          key={index}
+                          className={`flex flex-row justify-between items-center py-1 ${
+                            hoveredUser === user.id ? 'opacity-100' : 'opacity-40'
+                          }`}
+                          onClick={() => handleUserSelection(user)}
+                          onMouseEnter={() => handleUserHover(user.id)}
+                          onMouseLeave={() => handleUserHover(null)}
+                        >
+                          <div className="flex items-center mx-2">
+                            <div className="w-[20px] h-[20px] bg-purple border border-lilac rounded-full grid justify-items-center items-center">
+                              <FaUser className="w-[8px] h-[8px] text-lilac"/>
+                            </div>
+                            <p className='text-xs font-regular ml-2 text-lilac '>{user.username}</p>
+                          </div>
+                          <FaUserPlus className="text-lilac w-3 h-3 mr-4"/>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-            </div>
+              )}
           </div>
-          <div className='h-32 overflow-auto pr-3'>
-          {listUsers.map((user, index) => (
-            
-            <div key={index} className='flex flex-row justify-between items-center mt-2'>
-            <div className="flex items-center">
-            <div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
-              <FaUser className="w-[8px] h-[8px] text-lilac"/>
-            </div>
-            <p className='text-sm font-regular ml-2'>{user.id}</p>
-            </div>
-
-            <label className="inline-flex items-center space-x-2 cursor-pointer">
-              <input
-              type="checkbox"
-              checked={checkedItems[user.id] !== undefined}
-              onChange={() => handleCheckboxChange(user)} 
-              className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
-              />
-            </label>
-          </div>
-          ))}
-            <button
-            disabled={Object.keys(checkedItems).length === 0}
-            className={`mt-4 px-4 py-2 text-sm rounded-md 
-            ${Object.keys(checkedItems).length === 0 ? 'bg-purple opacity-50 text-lilac cursor-not-allowed' : 'bg-purple text-lilac cursor-pointer'}`}
-            onClick={handleSubmit}
-            >
-              Add friend
-            </button>
           </div>
 
             <nav>
-              <ul className='mt-2 ml-10'>
-                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'tous' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('tous')}>All Friends</li>
+              <ul className='ml-6'>
+                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'tous' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('tous')}>Friends</li>
                 <li className={`mb-2 text-sm text-lilac ${filtreActif === 'invitations' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('invitations')}>Invitations</li>
                 <li className={`mb-2 text-sm text-lilac ${filtreActif === 'blocked' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('blocked')}>Blocked</li>
               </ul>

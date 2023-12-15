@@ -37,6 +37,7 @@ enum NotificationType {
 enum Mode {
     CHAT // user to user
     GROUPCHAT // user to n users
+    PRIVATE // user to n users
     PROTECTED // user to n user with password
 }
 
@@ -59,7 +60,10 @@ model User {
     stats Stats? @relation("stats")
 
     friendsof User[] @relation("friendslist")
-    friends   User[] @relation("friendslist")
+    friends   User[] @relation("friendslist") 
+
+    pendingList User[] @relation("pendings")
+    pendingFrom User[] @relation("pendings")
 
     blockedBy   User[] @relation("blockedList")
     blockedList User[] @relation("blockedList")

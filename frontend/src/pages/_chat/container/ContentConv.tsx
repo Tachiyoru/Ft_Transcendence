@@ -13,7 +13,7 @@ const ContentConv = () => {
 	};
 
 	return (
-	<div className="flex-1 flex flex-col justify-between bg-dark-violet p-4 text-gray-300 text-xs relative p-8">
+	<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
 		{/*NAME*/}
 		<div>
 			<div className="flex flex-row justify-between">

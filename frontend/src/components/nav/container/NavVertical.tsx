@@ -56,7 +56,7 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 			)}
 		</ul>
 		<button className={`flex items-center ${navItemStyle} mb-12`} onClick={handleLogout}>
-			<FaArrowRightFromBracket className="text-accent-violet transform rotate-180" size={26}/>
+			<FaArrowRightFromBracket className="text-accent-violet" size={26}/>
 		</button>
 	</section>
 	)

@@ -143,8 +143,12 @@ export class chatService
       throw new Error("You are banned from this channel");
     }
     if (chan.modes === Mode.CHAT) {
-    } else if (chan.modes === Mode.GROUPCHAT) {
-    } else if (chan.modes === Mode.PROTECTED) {
+    } 
+    else if (chan.modes === Mode.GROUPCHAT) {
+    }
+    else if (chan.modes === Mode.PRIVATE) {
+    } 
+    else if (chan.modes === Mode.PROTECTED) {
       const hashedPassword: string = password ? await argon.hash(password) : "";
       if (hashedPassword !== chan.password) {
         throw new Error("Wrong password");
