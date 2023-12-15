@@ -37,7 +37,12 @@ const Blocked = () => {
 				<FaUser className="w-[30px] h-[30px] "/>
 			</div>
 			<p className="text-sm text-fushia bg-opacity-40 pt-2">{user.username}</p>
-			<p className="text-xs text-lilac pt-2 underline hover:text-white" onClick={() => unblockUser(user.id)}>Unblock Friend</p>
+			<p
+				className="text-xs text-lilac pt-2 underline hover:text-white"
+				onClick={() => unblockUser(user.id)}
+				style={{cursor: 'pointer'}}>
+				Unblock
+			</p>
 		</div>
 		))}
 	</div>

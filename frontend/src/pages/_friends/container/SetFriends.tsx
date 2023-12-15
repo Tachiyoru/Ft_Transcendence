@@ -191,9 +191,9 @@ const SetFriends: React.FC = () => {
 
             <nav>
               <ul className='ml-6'>
-                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'tous' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('tous')}>All Friends</li>
+                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'tous' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('tous')}>Friends</li>
                 <li className={`mb-2 text-sm text-lilac ${filtreActif === 'invitations' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('invitations')}>Invitations</li>
-                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'blocked' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('blocked')}>Blocked Friends</li>
+                <li className={`mb-2 text-sm text-lilac ${filtreActif === 'blocked' ? 'bg-violet-black-nav py-2 pl-4 rounded-l-md' : 'py-2 pl-4'}`} onClick={() => handleFiltre('blocked')}>Blocked</li>
               </ul>
             </nav>
       </div>
