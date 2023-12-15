@@ -8,7 +8,6 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
 import { StatusUser, User } from "@prisma/client";
 import { Request, Response } from "express";
-import { UserService } from "src/user/user.service";
 
 @Injectable({})
 export class AuthService
@@ -17,7 +16,6 @@ export class AuthService
 		private prisma: PrismaService,
 		private jwt: JwtService,
 		private config: ConfigService,
-		private user: UserService
 	) {}
 
 	async signup(dto: AuthDto, res: Response)
