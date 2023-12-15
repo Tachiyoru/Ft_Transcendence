@@ -10,7 +10,6 @@ import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list/friends-list.module";
 import { NotificationModule } from "./notification/notification.module";
 import { AchievementsModule } from "./achievements/achievements.module";
-import { AuthService } from "./auth/auth.service";
 import { StatsModule } from "./stats/stats.module";
 
 @Module({
@@ -19,13 +18,13 @@ import { StatsModule } from "./stats/stats.module";
     UserModule,
     AchievementsModule,
     AuthModule,
-	StatsModule,
-	FriendsListModule,
-	NotificationModule,
-	PrismaModule,
+    StatsModule,
+    FriendsListModule,
+    NotificationModule,
+    PrismaModule,
     chatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService ],
+  providers: [AppService, JwtService],
 })
 export class AppModule {}

@@ -24,8 +24,7 @@ export class FriendsListService
 			},
 		});
 
-		if (!user || !friend)
-			throw new Error("User not found");
+		if (!user || !friend) throw new Error("User not found");
 
 		user = await this.prismaService.user.update({
 			where: { id: user.id },
@@ -38,10 +37,13 @@ export class FriendsListService
 		});
 
 		const notificationDto = new CreateNotificationDto();
-		if (user.username)
-			notificationDto.fromUser = user.username;
+		if (user.username) notificationDto.fromUser = user.username;
 
-		await this.notificationService.addNotificationByUserId(friendId, notificationDto, NotificationType.FRIENDREQUEST_RECEIVED);
+		await this.notificationService.addNotificationByUserId(
+			friendId,
+			notificationDto,
+			NotificationType.FRIENDREQUEST_RECEIVED
+		);
 
 		return user;
 	}
@@ -78,8 +80,7 @@ export class FriendsListService
 			where: { id: user.id },
 			include: { friends: true },
 		});
-		if (!me)
-			throw new Error("User not found");
+		if (!me) throw new Error("User not found");
 		return me.friends;
 	}
 

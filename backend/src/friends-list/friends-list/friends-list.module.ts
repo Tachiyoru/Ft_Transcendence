@@ -6,7 +6,12 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { NotificationService } from "src/notification/notification.service";
 
 @Module({
-	controllers: [FriendsListController],
-	providers: [FriendsListService, JwtService, PrismaService, NotificationService],
+  controllers: [FriendsListController],
+  providers: [
+    FriendsListService,
+    JwtService,
+    PrismaService,
+    NotificationService,
+  ],
 })
 export class FriendsListModule {}

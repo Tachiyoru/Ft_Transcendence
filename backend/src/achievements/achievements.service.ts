@@ -11,7 +11,8 @@ export class AchievementsService
 {
 	constructor(
 		private prismaService: PrismaService,
-		private notificationService: NotificationService) {}
+		private notificationService: NotificationService
+	) {}
 
 	async onModuleInit()
 	{
@@ -59,8 +60,7 @@ export class AchievementsService
 			include: { achievements: true },
 		});
 
-		if (!me)
-			throw new Error("User not found");
+		if (!me) throw new Error("User not found");
 
 		return me.achievements;
 	}
@@ -117,8 +117,12 @@ export class AchievementsService
 		const notificationDto = new CreateNotificationDto();
 		notificationDto.achievementName = achievement.title;
 
-		await this.notificationService.addNotificationByUserId(userId, notificationDto, NotificationType.ACHIEVEMENT_UNLOCKED);
+		await this.notificationService.addNotificationByUserId(
+			userId,
+			notificationDto,
+			NotificationType.ACHIEVEMENT_UNLOCKED
+		);
 
-		return (updatedUser);
+		return updatedUser;
 	}
 }

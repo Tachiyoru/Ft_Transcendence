@@ -27,7 +27,6 @@ export class UserService {
       },
     });
     await this.createInitialUser({
-
       avatar: "/upload/Manu.png",
       username: "Mansha",
       email: "mansha@test.fr",
@@ -66,7 +65,7 @@ export class UserService {
       },
     });
     if (!user) {
-		await this.prisma.user.create({
+      await this.prisma.user.create({
         data: {
           username: userinput.username ?? "",
           avatar: userinput.avatar ?? "",
@@ -89,16 +88,15 @@ export class UserService {
   }
 
   async getUserById(userId: number) {
-	return this.prisma.user.findUnique({
-	  where: {
-		id: userId,
-	  },
-	});
+    return this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
   }
 
   async getAllUsers() {
-    return this.prisma.user.findMany({
-    });
+    return this.prisma.user.findMany({});
   }
 
   async getAllOnlineUsers() {
@@ -115,7 +113,7 @@ export class UserService {
     });
     if (user) {
       if (user.avatar && user.avatar.startsWith("/upload")) {
-        await unlink(user.avatar);//attention a la suppression de l'avatar
+        await unlink(user.avatar); //attention a la suppression de l'avatar
       }
       await this.prisma.user.delete({
         where: {
@@ -207,23 +205,23 @@ export class UserService {
     return rank;
   }
 
-    async getRankingFriends(userId:number){
-		const rank = await this.prisma.user.findMany({
-			include: {
-			  friends: true,
-			  stats: true,
-			},
-			where: {
-			  friends: {
-				some: {
-				  id: userId,
-				},
-			  },
-			},
-			orderBy: {
-			  stats: { lvl: "desc" },
-			},
-		  });
-		  return rank;
-	}
+  async getRankingFriends(userId: number) {
+    const rank = await this.prisma.user.findMany({
+      include: {
+        friends: true,
+        stats: true,
+      },
+      where: {
+        friends: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      orderBy: {
+        stats: { lvl: "desc" },
+      },
+    });
+    return rank;
+  }
 }
