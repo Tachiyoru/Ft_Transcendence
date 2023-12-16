@@ -37,36 +37,13 @@ const ContentConv = () => {
 		socket.on('connect', () => {
 			console.log('Connected to server content');
 			socket.emit('create-message', { content: message, chanName: channel.name});
-			setMessage('');	
-			});
+			setMessage('');
+
+		});
 		return () => {
 			socket.disconnect();
 		};
 	};
-
-
-	useEffect(() => {
-		console.log('ok');
-		if (!channel)
-			return;
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
-		socket.on('connect', () => {
-			console.log('Connected to server content');
-			socket.emit('recapMessages', {  chanName: channel.name });
-			console.log('channel name : ', channel.name)
-
-			socket.on('recapMessages', (messageList) => {
-				console.log('ok', messageList);
-				setMessageList(messageList);
-			});
-		});
-		return () => {
-			socket.disconnect();
-		};
-	}, []);
-
 
 	useEffect(() => {
 		const socket = io('http://localhost:5001/', {
@@ -76,18 +53,22 @@ const ContentConv = () => {
 		socket.on('connect', () => {
 			console.log('Connected to server content');
 			socket.emit('channel', {id : id.selectedChannelId});
-
+			console.log('1time');
 			socket.on('channel', (channelInfo, messageList) => {
-			console.log('Received channel:', channelInfo, messageList);
-			setMessageList(messageList);
-			setChannel(channelInfo);
+				console.log('Received channel:', channelInfo, messageList);
+				setMessageList(messageList);
+				setChannel(channelInfo);
+			});
+			socket.on('recapMessages', (newMessage: Message) => {
+				console.log('Received new message:', newMessage);
+				setMessageList((prevMessages) => [...prevMessages, newMessage]);
 			});
 		});
 
 		return () => {
 			socket.disconnect();
 		};
-	}, [messageList, id]);
+	}, [id]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);

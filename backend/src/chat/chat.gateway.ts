@@ -68,8 +68,6 @@ export class chatGateway {
       });
     }
   }
-
-
   //   @SubscribeMessage("addOp")
   //   async addOp(
   //     client: Socket,
@@ -313,7 +311,6 @@ export class chatGateway {
         // client.emit("findAllMessageError",  error.message );
       }
     }
-
     @SubscribeMessage("create-message")
     async createMessage(
       @ConnectedSocket() client: Socket,
@@ -328,14 +325,13 @@ export class chatGateway {
         );
 
         console.log(message);
-        const messagesList = await channel
-        .caller(this.prisma.channel.findMany({}))
-        .messages();
-        this.server.emit("recapMessages", messagesList);
+
+        this.server.emit("recapMessages", message);
       } catch (error) {
         client.emit("createMsgError", { message: error.message });
       }
     }
+
 
   //   @SubscribeMessage("updateMessage")
   //   async updateMessage(
