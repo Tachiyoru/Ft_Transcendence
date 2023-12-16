@@ -14,25 +14,38 @@ const Dashboard = () => {
   const currentPage = location.pathname;
 
   const [userData, setUserData] = useState<{username: string; avatar: string; createdAt: string}>();
+  const [userStats, setUserStats] = useState<{partyPlayed: number; partyWon: number; partyLost: number, lvl: number; exp: number}>({
+    partyPlayed: 0,
+    partyWon: 0,
+    partyLost: 0,
+    lvl: 0,
+    exp: 0,
+  });
+  const [userRankingGlobal, setUserRankingGlobal] = useState<{userId: number;}[]>([]);
+  const [userRankingFriends, setUserRankingFriends] = useState<{userId: number;}[]>([]);
+  const [userAchievements, setUserAchievements] = useState<{icon: string}[]>([]);
+
   const [loading, setLoading] = useState(true);
 
-  function highlightMiddle(event) {
-    const container = event.target;
+  function highlightMiddle(event: MouseEvent) {
+    const container = event.target as HTMLElement;
     const options = container.childNodes;
 
-    const scrollPosition = container.scrollTop;
     const middleIndex = Math.floor(options.length / 2);
 
     options.forEach((option, index) => {
       const distanceToMiddle = Math.abs(index - middleIndex);
       const paddingValue = middleIndex - distanceToMiddle > 0 ? (middleIndex - distanceToMiddle) * 5 : 0;
 
-      option.style.paddingLeft = `${paddingValue}px`;
+      if (option instanceof HTMLElement)
+      {
+        option.style.paddingLeft = `${paddingValue}px`;
 
-      if (index === middleIndex) {
-        option.classList.add('highlight');
-      } else {
-        option.classList.remove('highlight');
+        if (index === middleIndex) {
+          option.classList.add('highlight');
+        } else {
+          option.classList.remove('highlight');
+        }
       }
     });
   }
@@ -40,8 +53,21 @@ const Dashboard = () => {
     useEffect(() => {
       const fetchUserData = async () => {
         try {
-          const response = await axios.get('/users/me');
-          setUserData(response.data);
+          const userDataResponse = await axios.get('/users/me');
+          setUserData(userDataResponse.data);
+
+          const userStatResponse = await axios.get('/stats/mine');
+          setUserStats(userStatResponse.data);
+
+          const userRankingGlobals = await axios.get('/users/ranking-global');
+          setUserRankingGlobal(userRankingGlobals.data);
+
+          const userRankingFriends = await axios.get('/users/ranking-friends');
+          setUserRankingFriends(userRankingFriends.data);
+
+          const userAchievements = await axios.get('/achievements/list');
+          setUserAchievements(userAchievements.data);
+
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
@@ -96,33 +122,33 @@ const Dashboard = () => {
               <div className="mt-60 mb-10">
                 <div className='h-1 bg-white'>
                   <div
-                      style={{ width: 40}}
-                      className="h-full bg-purple">
+                    style={{ width: userStats.exp }}
+                    className="h-full bg-purple">
                   </div>
                 </div>
                 <div className="flex flex-row justify-between mt-2 text-sm text-lilac">
-                  <span>Level 1</span>
-                  <span>20/400</span>
+                  <span>Level {userStats.lvl}</span>
+                  <span>{userStats.exp}/400</span>
                 </div>
               </div>
 
               {/*Stats*/}
               <div className="flex flex-col justify-end">
-                <div className="bg-accent-violet font-kanit font-extrabold flex flex-row items-center p-4 font-audiowide mt-2 h-24 w-full rounded-md ">
-                  <p className="text-5xl text-lilac">127</p>
-                  <div className="pt-7 text-xl text-purple">
+                <div className="bg-accent-violet font-kanit font-extrabold flex flex-row items-center p-4 mt-2 h-24 w-full rounded-md ">
+                  <p className="text-5xl text-lilac">{userStats.partyPlayed}</p>
+                  <div className="pt-7 text-xl text-purple ml-2">
                     <p style={{ marginBottom: '-0.7rem' }}>matches</p>
                     <p>played</p>
                   </div>
                 </div>
                 <div className="flex mt-4 gap-4 flex-row">
                     <div className="font-kanit font-extrabold bg-accent-violet h-24 w-1/2 px-4 rounded-md">
-                      <p className="text-4xl text-fushia" style={{ marginTop: '-0.7rem' }}>90</p>
+                      <p className="text-4xl text-fushia" style={{ marginTop: '-0.7rem' }}>{userStats.partyWon}</p>
                       <p className="text-xl text-purple" style={{ marginTop: '-1.5rem' }}>victories</p>
                     </div>
 
                     <div className="font-kanit font-extrabold bg-accent-violet h-24 w-1/2 px-4 rounded-md">
-                      <p className="text-4xl text-violet-black" style={{ marginTop: '-0.7rem' }}>37</p>
+                      <p className="text-4xl text-violet-black" style={{ marginTop: '-0.7rem' }}>{userStats.partyLost}</p>
                       <p className="text-xl text-purple" style={{ marginTop: '-1.5rem' }}>defeats</p>
                     </div>
                 </div>
@@ -139,16 +165,17 @@ const Dashboard = () => {
                 <p><span className="text-2xl pl-2 font-audiowide absolute text-lilac my-4">Badges</span></p>
                 <div className="lg:w-60 h-40 my-5 p-2 rounded-lg mt-12">
                 <div className="flex flex-wrap">
-                {[1, 2, 3, 4].map((badge) => (
+                {userAchievements.map((user, index) => (
                     <div
-                        key={badge}
-                        className="w-12 h-12 bg-fushia rounded-full m-1"
-                    />
+                        key={index}
+                        className="w-12 h-12 m-1"
+                    >
+                      <img src={user.icon} />
+                    </div>
                 ))}
-        </div>
-
                 </div>
-              </div>
+                </div>
+            </div>
 
               <div className="sm:w-full relative lg:w-40">
                 <p><span className="text-4xl pl-2 absolute font-kanit font-extrabold text-fushia mix-blend-difference" style={{ marginTop: '-0.7rem' }}>4</span></p>
@@ -187,21 +214,18 @@ const Dashboard = () => {
                   <div className="overflow-x-auto">
                   <table className="w-full text-lilac">
                     <tbody className="text-xs">
-                      <tr className="bg-accent-violet">
-                        <td className="px-2">1-</td>
-                        <td className="px-2">2-</td>
-                        <td className="px-2">3-</td>
-                      </tr>
+                    {userRankingFriends.length === 0 ? (
                       <tr>
-                        <td className="px-2">4-</td>
-                        <td className="px-2">5-</td>
-                        <td className="px-2">6-</td>
+                        <td className="px-2" colSpan={3}>No friends for the moment.</td>
                       </tr>
-                      <tr className="bg-accent-violet">
-                        <td className="px-2">7-</td>
-                        <td className="px-2">8-</td>
-                        <td className="px-2">9-</td>
-                      </tr>
+                    ) : 
+                    (
+                      userRankingFriends.map((friend, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "bg-accent-violet" : ""}>
+                          <td className="px-2">{friend.userId}-</td>
+                        </tr>
+                      ))
+                    )}
                     </tbody>
                   </table>
                 </div>
@@ -220,14 +244,12 @@ const Dashboard = () => {
                 <div className="bg-purple lg:w-40 h-40 rounded-lg my-5 bg-opacity-70">
                   <div className="shadow-inner-custom px-4 py-4 h-40 rounded-lg">
                   <div className="h-20 py-2 overflow-y-scroll" onScroll={highlightMiddle}>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>1-Clem</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>2-Shanley</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>3-Manuel</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>4-Anne</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>5-Alex</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>6-Pat</div>
-                    <div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>7-Gus</div>
+                  {userRankingGlobal.map((user, index) => (
+                    <div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
+                      {`${index + 1}-${user.userId}`}
                     </div>
+                  ))}
+                  </div>
                   </div>
                   </div>
                 </div>
@@ -241,9 +263,9 @@ const Dashboard = () => {
                     <div className="flex flex-col justify-content mt-4">
                       {/*MATCH RESUME*/}
                       <div className="w-full overflow-x-auto">
+                        <p className="text-dark-violet mb-2">today</p>
                         <table className="w-full">
                           <tbody className="text-xs px-2">
-                            <p className="text-dark-violet mb-2">today</p>
                             <tr className="text-lilac">
                               <td>5-1</td>
                               <td>Thonthon</td>

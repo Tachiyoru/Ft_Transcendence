@@ -14,6 +14,7 @@ import Settings from './pages/_editProfile/EditProfile';
 
 import { useSelector } from "react-redux";
 import { RootState } from './store/store';
+import DashboardFriends from './pages/_users/DashboardFriends';
 
 //import socketIO from 'socket.io-client';
 
@@ -31,6 +32,7 @@ return (
 			<Route path="/sign-up" element={<SignupForm />} />
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={<Dashboard/>}/>
+			<Route path="/user/:userId" element={<DashboardFriends/>}/>
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>

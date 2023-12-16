@@ -116,6 +116,7 @@ export class chatGateway {
   //     }
   //   }
 
+
   @SubscribeMessage("find-all-channels")
   async findAllChannels(): Promise<void> {
     const chanlist = await this.prisma.channel.findMany();

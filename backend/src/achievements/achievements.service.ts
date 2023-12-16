@@ -19,14 +19,15 @@ export class AchievementsService
 		await this.createInitialAchievements({
 			title: "First steps",
 			description: "Complete your first quest",
-			icon: "/upload_permanent/first_steps.png",
+			icon: "https://imgs.search.brave.com/VaaA6X7NDX-e4PTyoa84OmkA-1rZ2EcwR6i1e-8REiM/rs:fit:860:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy9j/L2NiL0NpcmNsZS1p/Y29ucy10cm9waHku/c3Zn.svg",
 		});
 		await this.createInitialAchievements({
 			title: "Quests addict",
 			description: "Complete 10 quests",
-			icon: "/upload_permanent/quests_addict.png",
+			icon: "https://imgs.search.brave.com/VaaA6X7NDX-e4PTyoa84OmkA-1rZ2EcwR6i1e-8REiM/rs:fit:860:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy9j/L2NiL0NpcmNsZS1p/Y29ucy10cm9waHku/c3Zn.svg",
 		});
 	}
+
 
 	async createInitialAchievements(achievementInput: AchievementCreateImput)
 	{
@@ -50,6 +51,7 @@ export class AchievementsService
 	async getAchievementsList()
 	{
 		const achievementsList = await this.prismaService.achievement.findMany();
+		console.log('yo', achievementsList);
 		return achievementsList;
 	}
 

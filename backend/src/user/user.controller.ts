@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   UploadedFiles,
   UseGuards,
@@ -70,5 +71,11 @@ export class UserController {
   @Get("ranking-friends")
   getRankingFriends(@Body() userId: number) {
     return this.userService.getRankingFriends(userId);
+  }
+
+  
+  @Get("him/:name")
+  getHim(@Param('name') name: string) {
+    return this.userService.getHim(name);
   }
 }

@@ -224,4 +224,11 @@ export class UserService {
     });
     return rank;
   }
+
+  async getHim(name: string) {
+    console.log('ok')
+    return this.prisma.user.findUnique({
+      where:{ username: name }
+    });
+  }
 }

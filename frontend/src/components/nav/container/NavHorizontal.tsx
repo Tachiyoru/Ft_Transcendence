@@ -2,7 +2,7 @@ import { FaMagnifyingGlass, FaBell } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
-
+import axios from "../../../axios/api";
 
 interface NavItemProps {
 	name: string;
@@ -56,6 +56,30 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, name, onClick, selectedSe
 const NavHorizontal = () => {
 	const [selectedSection, setSelectedSection] = useState<string | null>(null);
 	const [prevSelectedSection, setPrevSelectedSection] = useState<string | null>(null)
+	const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
+	const [searchValue, setSearchValue] = useState<string>(""); // État pour la valeur de recherche
+	const [showUserList, setShowUserList] = useState<boolean>(false);
+	const [selectedUser, setSelectedUser] = useState<string>("");
+
+	useEffect(() => {
+	const fetchUserData = async () => {
+		try {
+		const response = await axios.get<{ username: string }[]>('/users/all');
+		setListUsers(response.data);
+		} catch (error) {
+		console.error('Error fetching user list:', error);
+		}
+	};
+	fetchUserData();
+	}, []);
+
+	const filteredUsers = listUsers.filter(user =>
+	user.username.toLowerCase().includes(searchValue.toLowerCase())
+	);
+
+	const handleUserClick = () => {
+		setShowUserList(false);
+	};
 
 	const toggleSection = (sectionName: string) => {
 		if (selectedSection === sectionName || prevSelectedSection == sectionName)
@@ -107,7 +131,28 @@ const NavHorizontal = () => {
 
 			{/* NAV */}
 			<div className="right-0">
-				<ul className="flex gap-x-1 font-semibold">
+				<ul className="flex gap-x-1 text-xs">
+				<div className="relative mt-2">
+				<input
+					type="text"
+					placeholder="Search..."
+					value={searchValue}
+					onChange={(e) => {
+					setSearchValue(e.target.value);
+					setShowUserList(true);
+					}}
+				/>
+				{showUserList && (
+					<ul className="absolute h-24 w-full bg-lilac z-10">
+					{filteredUsers.map((user, index) => (
+						<li key={index} className="px-2 py-1 hover:bg-purple cursor-pointer" onClick={() => handleUserClick()}>
+							<Link to={`/user/${user.username}`}>
+								{user.username}
+							</Link>
+						</li>
+					))}
+					</ul>)}
+					</div>
 				{navItemsInfo.map((item, index) => (
 					<div key={index}>
 					<li>
