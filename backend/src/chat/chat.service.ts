@@ -291,7 +291,7 @@ export class chatService
     createMessageDto: CreateMessageDto,
     @Request() req: any
   ): Promise<Message> {
-    const { content, chanName, author } = createMessageDto;
+    const { content, chanName } = createMessageDto;
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
       include: { banned: true },
