@@ -1,12 +1,93 @@
-import { useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { FaBan, FaPaperPlane, FaUserGroup, FaXmark } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { io } from "socket.io-client";
+import { RootState } from "../../../store/store";
+import TimeConverter from "../../../components/date/TimeConverter";
+
+interface Channel {
+	name: string;
+	modes: string;
+}
+
+interface Message {
+	content: string;
+	authorId: string,
+	createdAt: Date,
+}
 
 const ContentConv = () => {
 	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+	const [channel, setChannel] = useState<Channel | null>(null);
+	const [messageList, setMessageList] = useState<Message[]>([]);
+	const [message, setMessage] = useState<string>('')
+	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
+
+	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!channel)
+			return;
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		socket.on('connect', () => {
+			console.log('Connected to server content');
+			socket.emit('create-message', { content: message, chanName: channel.name});
+			setMessage('');	
+			});
+		return () => {
+			socket.disconnect();
+		};
+	};
+
+
+	useEffect(() => {
+		console.log('ok');
+		if (!channel)
+			return;
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		socket.on('connect', () => {
+			console.log('Connected to server content');
+			socket.emit('recapMessages', {  chanName: channel.name });
+			console.log('channel name : ', channel.name)
+
+			socket.on('recapMessages', (messageList) => {
+				console.log('ok', messageList);
+				setMessageList(messageList);
+			});
+		});
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
+
+
+	useEffect(() => {
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		console.log('id:', id.selectedChannelId);
+		socket.on('connect', () => {
+			console.log('Connected to server content');
+			socket.emit('channel', {id : id.selectedChannelId});
+
+			socket.on('channel', (channelInfo, messageList) => {
+			console.log('Received channel:', channelInfo, messageList);
+			setMessageList(messageList);
+			setChannel(channelInfo);
+			});
+		});
+
+		return () => {
+			socket.disconnect();
+		};
+	}, [messageList, id]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
@@ -15,35 +96,51 @@ const ContentConv = () => {
 	return (
 	<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
 		{/*NAME*/}
+		{!channel ? (
+		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">
+			No conversation selected
+		</div>
+		):(
+		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">
 		<div>
 			<div className="flex flex-row justify-between">
-				<h3 className="text-base text-lilac">Name</h3>
+				<h3 className="text-base text-lilac">{channel.name}</h3>
 				<button className="lg:hidden flex-end" onClick={toggleRightSidebar}>
 					<FaUserGroup className="w-4 h-4 text-lilac"/>
 				</button>
 			</div>
 			{/*CONTENT*/}
-			<div className="flex flex-row h-12 mt-6">
+			{messageList.map((message, index) => (
+			<div key={index} className="flex flex-row h-12 mt-6">
 				<div className="w-[45px] h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
 					<FaUser className="text-lilac"/>
 				</div>
 				<div className="pt-3">
-					<p className="text-base text-lilac">Name</p>
+					<p className="text-base text-lilac">{message.authorId}</p>
 					<div className="flex flex-row">
-						<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
-						<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+						<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>
+						<TimeConverter initialDate={message.createdAt.toLocaleString()}/>
 					</div>
 				</div>
 			</div>
+			))}
 		</div>
 
 		{/*SEND*/}
 		<div>
 			<div className="flex items-center relative">
-				<input className="py-2 bg-lilac w-full rounded-md"/>
-				<span className="absolute right-4">
+				<form onSubmit={handleInputSubmit} className="bg-lilac w-full rounded-md">
+				<input
+					type="text"
+					placeholder="Write message"
+					className="py-2 pl-2 bg-lilac placeholder:text-white w-full rounded-md"
+					value={message}
+					onChange={(e) => setMessage(e.target.value)}
+				/>
+				<button type="submit" className="absolute right-4 top-2">
 					<FaPaperPlane className="w-3 h-3 text-violet-dark"/>
-				</span>
+				</button>
+				</form>
 			</div>
 		</div>
 		<div className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs ${isRightSidebarOpen ? 'block' : 'hidden'}`}>
@@ -104,6 +201,8 @@ const ContentConv = () => {
 					</div>
 				</div>
 		</div>
+		</div>
+		)}
 	</div>
 	)
 }

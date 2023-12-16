@@ -27,7 +27,7 @@ const Chat = () => {
 
 			{/*MIDDLE*/}
 			<ContentConv/>
-
+			
 			{/*RIGHT SIDE BAR*/}
 			<SidebarRight/>
 

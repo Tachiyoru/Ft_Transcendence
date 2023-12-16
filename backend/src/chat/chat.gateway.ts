@@ -12,15 +12,16 @@ import {
   createChannel,
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
-import { Request, UseGuards } from "@nestjs/common";
+import { Controller, Param, ParseIntPipe, Request, UseGuards } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { channel } from "diagnostics_channel";
 import { SocketTokenGuard } from "src/auth/guard/sockettoken.guard";
+import { channel } from "diagnostics_channel";
 
 @WebSocketGateway({
   cors: { origin: "http://localhost:5173", credentials: true },
 })
+@UseGuards(SocketTokenGuard)
 export class chatGateway {
   @WebSocketServer()
   server: Server;
@@ -29,7 +30,24 @@ export class chatGateway {
     private readonly prisma: PrismaService
   ) {}
 
-  @UseGuards(SocketTokenGuard)
+  @SubscribeMessage("channel")
+  async getChannelById(@MessageBody('id') id: number) {
+    if (!id)
+      throw Error('id not found');
+    console.log("getChannelById ", id)
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: id },
+      include: {
+        messages: true,
+      }
+    });
+    if (!chan)
+      throw Error('Channel not found');
+    const messagesList = chan.messages;
+    console.log("channel", chan);
+    this.server.emit("channel", chan, messagesList);
+    }
+
   @SubscribeMessage("createChannel")
   async createchan(
     @ConnectedSocket() client: Socket,
@@ -50,6 +68,7 @@ export class chatGateway {
       });
     }
   }
+
 
   //   @SubscribeMessage("addOp")
   //   async addOp(
@@ -99,10 +118,10 @@ export class chatGateway {
   //     }
   //   }
 
-  @SubscribeMessage("findAllChannels")
+  @SubscribeMessage("find-all-channels")
   async findAllChannels(): Promise<void> {
     const chanlist = await this.prisma.channel.findMany();
-    this.server.emit("channelList", chanlist);
+    this.server.emit("channel-list", chanlist);
   }
 
   //   @SubscribeMessage("joinChan")
@@ -255,6 +274,7 @@ export class chatGateway {
     @MessageBody() data: { chanName: string }
   ) {
     try {
+
       const UserList = await this.prisma.user.findMany();
       client.emit("allUsers", UserList);
     } catch (error) {
@@ -277,37 +297,45 @@ export class chatGateway {
   //     }
   //   }
 
-  //   @SubscribeMessage("findAllMessages")
-  //   async findAllChanMessages(
-  //     client: Socket,
-  //     @MessageBody() data: { chanName: string }
-  //   ) {
-  //     try {
-  //       const messagesList = await channel
-  //         .caller(this.prisma.channel.findMany({}))
-  //         .messages();
-  //       client.emit("allMembers", messagesList);
-  //     } catch (error) {
-  //       client.emit("findAllMembersError", { message: error.message });
-  //     }
-  //   }
+    @SubscribeMessage("recapMessages")
+    async findAllChanMessages(
+      client: Socket,
+      @MessageBody() data: { chanName: string }
+    ) {
+      try {
+        console.log('chan name is', data.chanName)
+        const messagesList = await channel
+          .caller(this.prisma.channel.findMany({}))
+          .messages();
+        client.emit("findAllMessage", messagesList);
+        console.log('msglist', messagesList)
+      } catch (error) {
+        // client.emit("findAllMessageError",  error.message );
+      }
+    }
 
-  //   @SubscribeMessage("createMessage")
-  //   async createMessage(
-  //     @ConnectedSocket() client: Socket,
-  //     @MessageBody() createMessageDto: CreateMessageDto,
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       const message = await this.chatService.createMessage(
-  //         createMessageDto,
-  //         req
-  //       );
-  //       this.server.emit("newMessage", message);
-  //     } catch (error) {
-  //       client.emit("createMsgError", { message: error.message });
-  //     }
-  //   }
+    @SubscribeMessage("create-message")
+    async createMessage(
+      @ConnectedSocket() client: Socket,
+      @MessageBody() createMessageDto: CreateMessageDto,
+      @Request() req: any
+    ) {
+      console.log(createMessageDto);
+      try {
+        const message = await this.chatService.createMessage(
+          createMessageDto,
+          req
+        );
+
+        console.log(message);
+        const messagesList = await channel
+        .caller(this.prisma.channel.findMany({}))
+        .messages();
+        this.server.emit("recapMessages", messagesList);
+      } catch (error) {
+        client.emit("createMsgError", { message: error.message });
+      }
+    }
 
   //   @SubscribeMessage("updateMessage")
   //   async updateMessage(

@@ -9,7 +9,6 @@ export interface UserCreateInput {
   role: Role;
   stats: statsCreateInput;
 }
-
 export interface statsCreateInput {
   lvl?: number;
   exp?: number;
