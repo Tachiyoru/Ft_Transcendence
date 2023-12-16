@@ -40,6 +40,7 @@ export class chatGateway {
       include: {
         messages: true,
       }
+	  
     });
     if (!chan)
       throw Error('Channel not found');
