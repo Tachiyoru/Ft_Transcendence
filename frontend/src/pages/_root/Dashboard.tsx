@@ -37,28 +37,28 @@ const Dashboard = () => {
     });
   }
   
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     try {
-  //       const response = await axios.get('/users/me');
-  //       setUserData(response.data);
-  //     } catch (error) {
-  //       console.error('Error fetching user data:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get('/users/me');
+          setUserData(response.data);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  //   fetchUserData();
-  // }, []);
-  
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+      fetchUserData();
+    }, []);
+    
+    if (loading) {
+      return <div>Loading...</div>;
+    }
 
-  // if (!userData) {
-  //   return <div>Error loading user data</div>;
-  // }
+    if (!userData) {
+      return <div>Error loading user data</div>;
+    }
 
 
   return (
@@ -69,13 +69,17 @@ const Dashboard = () => {
           <div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs">
 
               {/*User*/}
-              <div className="flex flex-row mt-4 mb-10">
+              <div className="flex mt-4 mb-10 m-2">
+                {userData.avatar ? (
+                  <img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
+                ) : (
                   <div className="bg-purple rounded-full p-2 mt-2">
                     <FaUser className="w-[60px] h-[60px] p-3 text-lilac"/>
                   </div>
+                )}
                 <div className="pl-4 pt-4">
-                  <DateConverter initialDate='22/22/2222'/>
-                  <p className="text-base font-semibold text-lilac">Clem</p>
+                  <DateConverter initialDate={userData.createdAt}/>
+                  <p className="text-sm font-semibold text-lilac">{userData.username}</p>
                   <p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>
               </div>
