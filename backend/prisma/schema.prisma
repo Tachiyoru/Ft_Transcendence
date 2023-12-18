@@ -57,7 +57,7 @@ model User {
 
     achievements Achievement[]
 
-		notifications Notification[]
+	notifications Notification[]
 	
     messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")

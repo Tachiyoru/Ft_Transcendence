@@ -19,11 +19,13 @@ import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { SocketTokenGuard } from "src/auth/guard/sockettoken.guard";
 import { channel } from "diagnostics_channel";
+import { TokenGuard } from "src/auth/guard";
 
 @WebSocketGateway({
 	cors: { origin: "http://localhost:5173", credentials: true },
 })
-@UseGuards(SocketTokenGuard)
+// @UseGuards(TokenGuard)
+// @UseGuards(SocketTokenGuard)
 export class chatGateway
 {
 	@WebSocketServer()
@@ -61,7 +63,7 @@ export class chatGateway
       try {
         const userList = await this.chatService.getUsersNotInChannel(data.chanName);
         console.log("users-not-in-channel", userList);
-        client.emit("users-channel", userList);
+        client.emit("users-not-in-channel", userList);
       }
       catch (error)
       {

@@ -32,17 +32,16 @@ const AddUserConv: React.FC<ChannelProps> = ({channel}) => {
 		try {
 			const socket = io('http://localhost:5001/', {
 				withCredentials: true,
-			});	
+			});
 			console.log(channel);
 			socket.on('connect', () => {
 				console.log('Connected to server');
 				socket.emit('users-not-in-channel', {chanName: channel});
-		
-				socket.on("users-channel", (userList) => {
+
+				socket.on("users-not-in-channel", (userList) => {
 					console.log(userList);
 					setListUsers(userList);
 				});
-
 			});
 			} catch (error) {
 				console.error('Error fetching user list:', error);

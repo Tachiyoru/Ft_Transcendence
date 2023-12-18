@@ -232,6 +232,7 @@ export class chatService
 			throw new Error("You are not allowed to invite users to this channel");
 		}
 
+    
 		const targets = await this.prisma.user.findMany({
 			where: { id: { in: targetIds } },
 		});
