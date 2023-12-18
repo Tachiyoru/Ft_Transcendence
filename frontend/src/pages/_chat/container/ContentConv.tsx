@@ -71,9 +71,9 @@ const ContentConv = () => {
 		};
 	}, [id]);
 
-	const toggleRightSidebar = () => {
-		setIsRightSidebarOpen(!isRightSidebarOpen);
-	};
+  const toggleRightSidebar = () => {
+    setIsRightSidebarOpen(!isRightSidebarOpen);
+  };
 
 	return (
 	<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
@@ -132,44 +132,43 @@ const ContentConv = () => {
 				<FaXmark className="w-4 h-4 text-lilac"/>
 			</button>
 
-			{/*TEST USER FRIEND*/}
-			<div className="flex flex-col items-center">
-				<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
-					<FaUser className="w-[30px] h-[30px] text-lilac"/>
-				</div>
-				<p className="text-sm text-lilac pt-2">Name</p>
-			</div>
+        {/*TEST USER FRIEND*/}
+        <div className="flex flex-col items-center">
+          <div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
+            <FaUser className="w-[30px] h-[30px] text-lilac" />
+          </div>
+          <p className="text-sm text-lilac pt-2">Name</p>
+        </div>
 
-			{/*NAV PERSONNAL CONV*/}
-			<nav className="mt-4">
-				<ul className="text-lilac">
-					<li>
-						<Link to="/settings">
-							<div className="flex flex-row items-center">
-								<FaUser className="w-3 h-4 mr-2"/>
-								<p className="hover:underline">See Profile</p>
-							</div>
-						</Link>
-					</li>
-					<li>
-						<Link to="/settings">
-							<div className="flex flex-row items-center">
-								<RiGamepadFill className="w-3 h-4 mr-2"/>
-								<p className="hover:underline">Invite to play</p>
-							</div>
-						</Link>
-					</li>
-					<li>
-						<Link to="/settings">
-							<div className="flex flex-row items-center">
-								<FaBan className="w-3 h-4 mr-2"/>
-								<p className="hover:underline">Block</p>
-							</div>
-						</Link>
-					</li>
-
-				</ul>
-			</nav>
+        {/*NAV PERSONNAL CONV*/}
+        <nav className="mt-4">
+          <ul className="text-lilac">
+            <li>
+              <Link to="/settings">
+                <div className="flex flex-row items-center">
+                  <FaUser className="w-3 h-4 mr-2" />
+                  <p className="hover:underline">See Profile</p>
+                </div>
+              </Link>
+            </li>
+            <li>
+              <Link to="/settings">
+                <div className="flex flex-row items-center">
+                  <RiGamepadFill className="w-3 h-4 mr-2" />
+                  <p className="hover:underline">Invite to play</p>
+                </div>
+              </Link>
+            </li>
+            <li>
+              <Link to="/settings">
+                <div className="flex flex-row items-center">
+                  <FaBan className="w-3 h-4 mr-2" />
+                  <p className="hover:underline">Block</p>
+                </div>
+              </Link>
+            </li>
+          </ul>
+        </nav>
 
 			{/*NAV PERSONNAL CONV*/}
 			<div className="flex flex-col justify-end space-y-2 px-2 py-2 mt-4 rounded-lg bg-purple">
@@ -190,4 +189,4 @@ const ContentConv = () => {
 	)
 }
 
-export default ContentConv
+export default ContentConv;

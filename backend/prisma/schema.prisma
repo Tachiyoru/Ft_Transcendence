@@ -21,19 +21,6 @@ enum Role {
     BANNED
 }
 
-enum NotificationType {
-
-	FRIENDREQUEST_RECEIVED
-	FRIENDREQUEST_ACCEPTED
-	INVITED_TO_GAME
-	ACHIEVEMENT_UNLOCKED
-	INVITED_TO_CHANNEL
-	INTEGRATED_TO_CHANNEL
-	CHANNEL_PRIVILEGE_GRANTED
-	// RANKING (top 3 only for example)
-	// FRIEND_ACHIEVEMENT_UNLOCKED (optional)
-}
-
 enum Mode {
     CHAT // user to user
     GROUPCHAT // user to n users
@@ -70,12 +57,14 @@ model User {
 
     achievements Achievement[]
 
-	notifications Notification[]
+		notifications Notification[]
 	
     messages     Message[]     @relation("author")
     channel      Channel[]     @relation("chanMembers")
     banned       Channel[]     @relation("chanBanned")
     Channel      Channel[]     @relation("chanOwner")
+
+		invitationList	Channel[] @relation("invitationList")
 
     @@map("Users")
 }
@@ -137,6 +126,13 @@ model Channel {
     members   User[]    @relation("chanMembers")
     messages  Message[] @relation("chanMessages")
     banned    User[]    @relation("chanBanned")
+
+		invitedList		User[]    @relation("invitationList")
+
+		maxUsers	Int?		@default(10)
+
+		@@map("Channels")
+
 }
 
 model Message {
