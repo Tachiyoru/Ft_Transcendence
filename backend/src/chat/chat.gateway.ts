@@ -52,19 +52,28 @@ export class chatGateway
 		this.server.emit("channel", chan, messagesList);
 	}
 
-	@Get('users-no-in-channel/:chanName')
-	async getUsersNotInChannel(chanName: string)
+	@SubscribeMessage("users-not-in-channel")
+	async getUsersNotInChannel(
+		client: Socket,
+		@MessageBody() data: { chanName: string }
+	)
 	{
-		const chan = await this.prisma.channel.findUnique({
-			where: { name: chanName },
-		});
-		if (!chan)
-			throw Error('Channel not found');
-		const users = await this.prisma.user.findMany({
-			where: { channel: { none: { chanId: chan.chanId } } },
-		});
-		console.log("users not in channel", users);
-		return (users);
+		try
+		{
+			const chan = await this.prisma.channel.findUnique({
+				where: { name: data.chanName },
+			});
+			if (!chan)
+				throw Error('Channel not found');
+			const users = await this.prisma.user.findMany({
+				where: { channel: { none: { chanId: chan.chanId } } },
+			});
+			console.log("users not in channel", users);
+			client.emit("users-not-in-channel", users);
+		} catch (error)
+		{
+			client.emit("users-not-in-channel-error", error.message);
+		}
 	}
 
 	@SubscribeMessage("createChannel")
@@ -119,7 +128,7 @@ export class chatGateway
 	async addUserToChannel(
 		client: Socket,
 		@MessageBody() data: {
-			chanName: string, targetsId: number[]
+			chanName: string, targets: User[]
 		},
 		@Request() req: any
 	)
@@ -128,7 +137,7 @@ export class chatGateway
 		{
 			const result = await this.chatService.addUsersToChannel(
 				data.chanName,
-				data.targetsId,
+				data.targets,
 				req
 			);
 			client.emit("usersAdded", result);
