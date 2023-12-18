@@ -17,17 +17,17 @@ import { Server, Socket } from "socket.io";
 import { Controller, Get, Param, ParseIntPipe, Request, UseGuards } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { SocketTokenGuard } from "src/auth/guard/sockettoken.guard";
 import { channel } from "diagnostics_channel";
 import { TokenGuard } from "src/auth/guard";
+import { addUserToChannelDto } from "./dto/add-to-channel.dto";
 
 @WebSocketGateway({
 	cors: { origin: "http://localhost:5173", credentials: true },
 })
-// @UseGuards(TokenGuard)
-// @UseGuards(SocketTokenGuard)
+@UseGuards(TokenGuard)
 export class chatGateway
 {
+
 	@WebSocketServer()
 	server: Server;
 	constructor(
@@ -62,7 +62,6 @@ export class chatGateway
     {
       try {
         const userList = await this.chatService.getUsersNotInChannel(data.chanName);
-        console.log("users-not-in-channel", userList);
         client.emit("users-not-in-channel", userList);
       }
       catch (error)
@@ -97,7 +96,7 @@ export class chatGateway
 
 	@SubscribeMessage("invite-to-channel")
 	async inviteUserToChannel(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: {
 			chanName: string, targetId: number
 		},
@@ -119,20 +118,20 @@ export class chatGateway
 		}
 	}
 
+  
 	@SubscribeMessage("add-user")
 	async addUserToChannel(
-		client: Socket,
-		@MessageBody() data: {
-			chanName: string, targets: User[]
-		},
+		@ConnectedSocket() client: Socket,
+		@MessageBody("channelData") channelData: addUserToChannelDto,
 		@Request() req: any
 	)
 	{
+		console.log('lol', channelData);
 		try
 		{
 			const result = await this.chatService.addUsersToChannel(
-				data.chanName,
-				data.targets,
+				channelData.chanName,
+				channelData.targets,
 				req
 			);
 			client.emit("usersAdded", result);
@@ -142,7 +141,7 @@ export class chatGateway
 			client.emit("addUsersError", { message: error.message });
 		}
 	}
-  
+	
 	//   @SubscribeMessage("addOp")
 	//   async addOp(
 	//     client: Socket,

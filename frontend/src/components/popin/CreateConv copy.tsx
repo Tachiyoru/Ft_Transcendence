@@ -89,7 +89,6 @@ const CreateConv: React.FC = () => {
 	
 		socket.on('connect', () => {
 		console.log('Connected to server');
-		console.log(channelData);
 		socket.emit('createChannel', { settings: channelData });
 
 		socket.on("channelCreateError", (errorData) => {

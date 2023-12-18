@@ -56,6 +56,7 @@ export class chatService
 						...settings.members.map((user) => ({ id: user.id })),
 					],
 				},
+        
 			},
 		});
 		return channel;
@@ -217,6 +218,8 @@ export class chatService
 		@Request() req: any
 	)
 	{
+		//console.log("targets dans addUser... : ", {targets});
+		console.log("Channame dans addUser... : ", {chanName});
 		const channel = await this.prisma.channel.findUnique({
 			where: { name: chanName },
 			include: { banned: true, invitedList: true },
@@ -227,10 +230,11 @@ export class chatService
 			throw new Error("Could not find channel");
 		}
 
-		if (!channel.op.includes(req.user.username))
-		{
-			throw new Error("You are not allowed to invite users to this channel");
-		}
+
+		// if (!channel.op.includes(req.user.username))
+		// {
+		// 	throw new Error("You are not allowed to invite users to this channel");
+		// }
 
 		const targetIds = targets.map((target) => target.id);
 
@@ -258,6 +262,7 @@ export class chatService
 				members: { connect: users.map((user) => ({ id: user.id })) },
 			},
 		});
+
 
 		return (updatedChannel);
 	}

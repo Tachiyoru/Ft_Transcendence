@@ -69,22 +69,21 @@ const AddUserConv: React.FC<ChannelProps> = ({channel}) => {
 		console.log('Selection:', selectedItems);
 
 		const channelData = {
-			members: selectedItems,
-			mode: '',
-			password: '',
+			chanName: channel,
+			targets: selectedItems,
 		};
-	
+		console.log('yo', channelData);
 		const socket = io('http://localhost:5001/', {
 			withCredentials: true,
 			});
 	
 		socket.on('connect', () => {
-		console.log('Connected to server');
-		console.log(channelData);
-		socket.emit('createChannel', { settings: channelData });
+			console.log('Connected to server');
+			console.log('avant add_user', channelData.chanName);
+			socket.emit('add-user', { channelData: channelData} );
 
-		socket.on("channelCreateError", (errorData) => {
-			console.error("Channel creation error:", errorData);
+			socket.on("addUsersError", (errorData) => {
+				console.error("user creation error:", errorData);
 			});
 		});
 

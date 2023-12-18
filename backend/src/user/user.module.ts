@@ -25,5 +25,6 @@ import { extname } from "path";
   ],
   controllers: [UserController],
   providers: [UserService, JwtService],
+  
 })
 export class UserModule {}

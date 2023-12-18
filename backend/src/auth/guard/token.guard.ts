@@ -10,6 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Request, Response } from "express";
 import { PrismaService } from "src/prisma/prisma.service";
 import { User } from "@prisma/client";
+import { Socket } from "socket.io";
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -18,10 +19,20 @@ export class TokenGuard implements CanActivate {
     private config: ConfigService,
     private prisma: PrismaService
   ) {}
+  
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const response = context.switchToHttp().getResponse();
-    const request: Request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromCookie(request);
+    console.log("token called");
+	let token: any;
+	const request: Request = context.switchToHttp().getRequest();
+    if (context.getType() === "ws") {
+      const client: Socket = context.switchToWs().getClient();
+      token = client.handshake.headers.cookie
+        ?.split("=")[1]
+        .split(";")[0];
+    } else {
+		token = this.extractTokenFromCookie(request);
+    }
+	const response = context.switchToHttp().getResponse();
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -40,7 +51,7 @@ export class TokenGuard implements CanActivate {
     } catch (err) {
       try {
         console.log("refresher called");
-        const user = this.refresh(request, response);
+        const user = this.refresh(context, request, response);
         request.user = user;
         return true;
       } catch (err) {
@@ -50,26 +61,34 @@ export class TokenGuard implements CanActivate {
     return true;
   }
 
-  private async refresh(request: Request, response: Response) {
-    const refreshToken = request.cookies?.refresh_token;
-    if (!refreshToken) throw new ForbiddenException("No token provided");
+  private async refresh(context: ExecutionContext, request: Request, response: Response) {
+    let token;
+    if (context.getType() === "ws") {
+      const client: Socket = context.switchToWs().getClient();
+      token = client.handshake.headers.cookie?.split("; ")[1].split("=")[1];
+      console.log("aaaaaaaaa", token)
+    }else {
+      token = request.cookies?.refresh_token;
+    }
+    if (!token) throw new ForbiddenException("No token provided");
     try {
-      const payload = await this.jwt.verifyAsync(refreshToken, {
+      const payload = await this.jwt.verifyAsync(token, {
         secret: this.config.get<string>("JWT_SECRET_REFRESH"),
       });
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });
       if (!user) throw new ForbiddenException("Invalid token");
-      this.reForgeTokens(user, response);
+      this.reForgeTokens(context, user, response);
       return user;
     } catch (err) {
       throw new ForbiddenException();
     }
   }
 
-  private async reForgeTokens(user: User, response: Response) {
+  private async reForgeTokens(context: ExecutionContext, user: User, response: Response) {
     const payload = { username: user.username, sub: user.id };
+
     const accessToken = this.jwt.sign(
       { ...payload },
       {
@@ -77,9 +96,12 @@ export class TokenGuard implements CanActivate {
         expiresIn: "150sec",
       }
     );
-    response.cookie("access_token", accessToken, { httpOnly: true });
+    if (context.getType() !== "ws") { 
+      response.cookie("access_token", accessToken, { httpOnly: true });
     return { user };
   }
+}
+
 
   private extractTokenFromCookie(request: Request): string | undefined {
     const accessToken = request.cookies?.access_token;
