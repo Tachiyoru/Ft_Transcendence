@@ -189,14 +189,17 @@ export class chatService
 		}
 		const updatedChannel = await this.prisma.channel.update({
 			where: { name: chanName },
-			data: { members: { connect: { id: req.user.id } } },
+			data: {
+				members: { connect: { id: req.user.id } },
+				invitedList: { disconnect: { id: req.user.id } },
+			}
 		});
-		return updatedChannel;
+		return (updatedChannel);
 	}
 
-	async addUserToChannel(
+	async addUsersToChannel(
 		chanName: string,
-		targetId: number,
+		targetIds: number[],
 		@Request() req: any
 	)
 	{
@@ -204,31 +207,39 @@ export class chatService
 			where: { name: chanName },
 			include: { banned: true, invitedList: true },
 		});
+
 		if (!channel)
 		{
 			throw new Error("Could not find channel");
 		}
-		if (!channel.op.includes(req.user.username)) // verifier si l'owner fait une invite est dans la liste d'op
+
+		if (!channel.op.includes(req.user.username))
 		{
-			throw new Error("You are not allowed to invite a user to this channel");
+			throw new Error("You are not allowed to invite users to this channel");
 		}
-		const target = await this.prisma.user.findUnique({
-			where: { id: targetId },
+
+		const targets = await this.prisma.user.findMany({
+			where: { id: { in: targetIds } },
 		});
-		if (!target)
+
+		if (targets.length !== targetIds.length)
 		{
-			throw new Error("Could not find user");
+			throw new Error("Could not find all users");
 		}
-		if (channel.banned.includes(target))
+
+		const bannedUsers = targets.filter((user) =>
+			channel.banned.some((bannedUser) => bannedUser.id === user.id)
+		);
+
+		if (bannedUsers.length > 0)
 		{
-			throw new Error("User has been banned from this channel");
+			throw new Error("One or more users have been banned from this channel");
 		}
 
 		const updatedChannel = await this.prisma.channel.update({
 			where: { name: chanName },
 			data: {
-				members: { connect: { id: target.id } },
-				invitedList: { disconnect: { id: target.id } },
+				members: { connect: targets.map((target) => ({ id: target.id })) },
 			},
 		});
 
@@ -423,38 +434,43 @@ export class chatService
 		return updatedChannel;
 	}
 
-  async createMessage(
-    createMessageDto: CreateMessageDto,
-    @Request() req: any
-  ): Promise<Message> {
-    const { content, chanName } = createMessageDto;
-    const chan = await this.prisma.channel.findUnique({
-      where: { name: chanName },
-      include: { banned: true },
-    });
-    if (!chan) {
-      throw new Error("Could not find channel");
-    }
-    const target = await this.prisma.user.findUnique({
-      where: { username: req.user.username },
-    });
-    if (!target) {
-      throw new Error("Could not find user");
-    } else if (chan.banned.includes(target)) {
-      throw new Error("User has been banned from this channel");
-    } else {
-      const message = await this.prisma.message.create({
-        data: {
-          content: content,
-          channel: { connect: { name: chan.name } },
-          author: { connect: { id: target.id } },
-        },
-      });
-      return message;
-    }
-  }
-  // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
-  // si l'user est ban .some((user) => user.username === req.user.username)
+	async createMessage(
+		createMessageDto: CreateMessageDto,
+		@Request() req: any
+	): Promise<Message>
+	{
+		const { content, chanName } = createMessageDto;
+		const chan = await this.prisma.channel.findUnique({
+			where: { name: chanName },
+			include: { banned: true },
+		});
+		if (!chan)
+		{
+			throw new Error("Could not find channel");
+		}
+		const target = await this.prisma.user.findUnique({
+			where: { username: req.user.username },
+		});
+		if (!target)
+		{
+			throw new Error("Could not find user");
+		} else if (chan.banned.includes(target))
+		{
+			throw new Error("User has been banned from this channel");
+		} else
+		{
+			const message = await this.prisma.message.create({
+				data: {
+					content: content,
+					channel: { connect: { name: chan.name } },
+					author: { connect: { id: target.id } },
+				},
+			});
+			return message;
+		}
+	}
+	// si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
+	// si l'user est ban .some((user) => user.username === req.user.username)
 
 	async updateMessage(UpdateMessageDto: UpdateMessageDto, @Request() req: any)
 	{

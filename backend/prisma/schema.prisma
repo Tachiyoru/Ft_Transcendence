@@ -129,6 +129,8 @@ model Channel {
 
 		invitedList		User[]    @relation("invitationList")
 
+		maxUsers	Int?		@default(10)
+
 		@@map("Channels")
 
 }

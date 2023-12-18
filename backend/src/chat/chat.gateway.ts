@@ -14,7 +14,7 @@ import
 	createChannel,
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
-import { Controller, Param, ParseIntPipe, Request, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Request, UseGuards } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { SocketTokenGuard } from "src/auth/guard/sockettoken.guard";
@@ -24,75 +24,143 @@ import { channel } from "diagnostics_channel";
 	cors: { origin: "http://localhost:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
-export class chatGateway {
-  @WebSocketServer()
-  server: Server;
-  constructor(
-    private readonly chatService: chatService,
-    private readonly prisma: PrismaService
-  ) {}
+export class chatGateway
+{
+	@WebSocketServer()
+	server: Server;
+	constructor(
+		private readonly chatService: chatService,
+		private readonly prisma: PrismaService
+	) {}
 
-  @SubscribeMessage("channel")
-  async getChannelById(@MessageBody('id') id: number) {
-    if (!id)
-      throw Error('id not found');
-    console.log("getChannelById ", id)
-    const chan = await this.prisma.channel.findUnique({
-      where: { chanId: id },
-      include: {
-        messages: true,
-      }
-    });
-    if (!chan)
-      throw Error('Channel not found');
-    const messagesList = chan.messages;
-    console.log("channel", chan);
-    this.server.emit("channel", chan, messagesList);
-    }
+	@SubscribeMessage("channel")
+	async getChannelById(@MessageBody('id') id: number)
+	{
+		if (!id)
+			throw Error('id not found');
+		console.log("getChannelById ", id)
+		const chan = await this.prisma.channel.findUnique({
+			where: { chanId: id },
+			include: {
+				messages: true,
+			}
+		});
+		if (!chan)
+			throw Error('Channel not found');
+		const messagesList = chan.messages;
+		console.log("channel", chan);
+		this.server.emit("channel", chan, messagesList);
+	}
 
-  @SubscribeMessage("createChannel")
-  async createchan(
-    @ConnectedSocket() client: Socket,
-    @MessageBody("settings") settings: createChannel,
-    @MessageBody() data: { chanName: string; users: User[]; mode: Mode },
-    @Request() req: any
-  ) {
-    try {
-      const chan = await this.chatService.createChannel(settings, req);
-      client.emit("channelCreated", chan);
-      const chanlist = await this.prisma.channel.findMany();
-      console.log("chan list = ", chanlist);
-      client.join(chan.name);
-    } catch (error) {
-      client.emit("channelCreateError", {
-        error: "Could not create channel because :",
-        message: error.message,
-      });
-    }
-  }
-  //   @SubscribeMessage("addOp")
-  //   async addOp(
-  //     client: Socket,
-  //     @MessageBody() data: { chanName: string; username: string },
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       const owner = await channel
-  //         .caller(
-  //           this.prisma.channel.findUnique({ where: { name: data.chanName } })
-  //         )
-  //         .owner();
-  //       const result = await this.chatService.addOp(
-  //         data.chanName,
-  //         data.username,
-  //         owner,
-  //         req
-  //       );
-  //       client.emit("opAdded", result);
-  //     } catch (error) {
-  //       client.emit("addOpError", { message: error.message });
-  //     }
-  //   }
+	@Get('users-no-in-channel/:chanName')
+	async getUsersNotInChannel(chanName: string)
+	{
+		const chan = await this.prisma.channel.findUnique({
+			where: { name: chanName },
+		});
+		if (!chan)
+			throw Error('Channel not found');
+		const users = await this.prisma.user.findMany({
+			where: { channel: { none: { chanId: chan.chanId } } },
+		});
+		console.log("users not in channel", users);
+		return (users);
+	}
+
+	@SubscribeMessage("createChannel")
+	async createchan(
+		@ConnectedSocket() client: Socket,
+		@MessageBody("settings") settings: createChannel,
+		@MessageBody() data: { chanName: string; users: User[]; mode: Mode },
+		@Request() req: any
+	)
+	{
+		try
+		{
+			const chan = await this.chatService.createChannel(settings, req);
+			client.emit("channelCreated", chan);
+			const chanlist = await this.prisma.channel.findMany();
+			console.log("chan list = ", chanlist);
+			client.join(chan.name);
+		} catch (error)
+		{
+			client.emit("channelCreateError", {
+				error: "Could not create channel because :",
+				message: error.message,
+			});
+		}
+	}
+
+	@SubscribeMessage("invite-to-channel")
+	async inviteUserToChannel(
+		client: Socket,
+		@MessageBody() data: {
+			chanName: string, targetId: number
+		},
+		@Request() req: any
+	)
+	{
+		try
+		{
+			const result = await this.chatService.inviteUserToChannel(
+				data.chanName,
+				data.targetId,
+				req
+			);
+			client.emit("userInvited", result);
+		}
+		catch (error)
+		{
+			client.emit("inviteError", { message: error.message });
+		}
+	}
+
+	@SubscribeMessage("add-user")
+	async addUserToChannel(
+		client: Socket,
+		@MessageBody() data: {
+			chanName: string, targetsId: number[]
+		},
+		@Request() req: any
+	)
+	{
+		try
+		{
+			const result = await this.chatService.addUsersToChannel(
+				data.chanName,
+				data.targetsId,
+				req
+			);
+			client.emit("usersAdded", result);
+		}
+		catch (error)
+		{
+			client.emit("addUsersError", { message: error.message });
+		}
+	}
+	//   @SubscribeMessage("addOp")
+	//   async addOp(
+	//     client: Socket,
+	//     @MessageBody() data: { chanName: string; username: string },
+	//     @Request() req: any
+	//   ) {
+	//     try {
+	//       const owner = await channel
+	//         .caller(
+	//           this.prisma.channel.findUnique({ where: { name: data.chanName } })
+	//         )
+	//         .owner();
+	//       const result = await this.chatService.addOp(
+	//         data.chanName,
+	//         data.username,
+	//         owner,
+	//         req
+	//       );
+	//       client.emit("opAdded", result);
+	//     } catch (error) {
+	//       client.emit("addOpError", { message: error.message });
+	//     }
+	//   }
 
 	//   @SubscribeMessage("renameChan")
 	//   async renameChan(
@@ -118,11 +186,12 @@ export class chatGateway {
 	//     }
 	//   }
 
-  @SubscribeMessage("find-all-channels")
-  async findAllChannels(): Promise<void> {
-    const chanlist = await this.prisma.channel.findMany();
-    this.server.emit("channel-list", chanlist);
-  }
+	@SubscribeMessage("find-all-channels")
+	async findAllChannels(): Promise<void>
+	{
+		const chanlist = await this.prisma.channel.findMany();
+		this.server.emit("channel-list", chanlist);
+	}
 
 	//   @SubscribeMessage("joinChan")
 	//   async joinChan(
@@ -268,19 +337,22 @@ export class chatGateway {
 	//     }
 	//   }
 
-  @SubscribeMessage("findAllUsers")
-  async findAllUsers(
-    client: Socket,
-    @MessageBody() data: { chanName: string }
-  ) {
-    try {
+	@SubscribeMessage("findAllUsers")
+	async findAllUsers(
+		client: Socket,
+		@MessageBody() data: { chanName: string }
+	)
+	{
+		try
+		{
 
-      const UserList = await this.prisma.user.findMany();
-      client.emit("allUsers", UserList);
-    } catch (error) {
-      client.emit("findAllUsersError", { message: error.message });
-    }
-  }
+			const UserList = await this.prisma.user.findMany();
+			client.emit("allUsers", UserList);
+		} catch (error)
+		{
+			client.emit("findAllUsersError", { message: error.message });
+		}
+	}
 
 	//   @SubscribeMessage("findAllBannedMembers")
 	//   async findAllBannedMembers(
@@ -297,42 +369,48 @@ export class chatGateway {
 	//     }
 	//   }
 
-    @SubscribeMessage("recapMessages")
-    async findAllChanMessages(
-      client: Socket,
-      @MessageBody() data: { chanName: string }
-    ) {
-      try {
-        console.log('chan name is', data.chanName)
-        const messagesList = await channel
-          .caller(this.prisma.channel.findMany({}))
-          .messages();
-        client.emit("findAllMessage", messagesList);
-        console.log('msglist', messagesList)
-      } catch (error) {
-        // client.emit("findAllMessageError",  error.message );
-      }
-    }
-    @SubscribeMessage("create-message")
-    async createMessage(
-      @ConnectedSocket() client: Socket,
-      @MessageBody() createMessageDto: CreateMessageDto,
-      @Request() req: any
-    ) {
-      console.log(createMessageDto);
-      try {
-        const message = await this.chatService.createMessage(
-          createMessageDto,
-          req
-        );
+	@SubscribeMessage("recapMessages")
+	async findAllChanMessages(
+		client: Socket,
+		@MessageBody() data: { chanName: string }
+	)
+	{
+		try
+		{
+			console.log('chan name is', data.chanName)
+			const messagesList = await channel
+				.caller(this.prisma.channel.findMany({}))
+				.messages();
+			client.emit("findAllMessage", messagesList);
+			console.log('msglist', messagesList)
+		} catch (error)
+		{
+			// client.emit("findAllMessageError",  error.message );
+		}
+	}
+	@SubscribeMessage("create-message")
+	async createMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() createMessageDto: CreateMessageDto,
+		@Request() req: any
+	)
+	{
+		console.log(createMessageDto);
+		try
+		{
+			const message = await this.chatService.createMessage(
+				createMessageDto,
+				req
+			);
 
-        console.log(message);
+			console.log(message);
 
-        this.server.emit("recapMessages", message);
-      } catch (error) {
-        client.emit("createMsgError", { message: error.message });
-      }
-    }
+			this.server.emit("recapMessages", message);
+		} catch (error)
+		{
+			client.emit("createMsgError", { message: error.message });
+		}
+	}
 
 
 	//   @SubscribeMessage("updateMessage")
