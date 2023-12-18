@@ -102,7 +102,7 @@ model Notification {
 	createdAt DateTime @default(now())
 
 	user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-	userId Int // unique ?
+	userId Int 
 
 	type	Int
 
@@ -137,8 +137,8 @@ model Message {
     id          Int      @id @default(autoincrement())
     channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade, onUpdate: Cascade)
     channelName String
-    author      User     @relation("author", fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    authorId    Int      @unique
+    author      User     @relation("author", fields: [authorId], references: [username], onDelete: Cascade, onUpdate: Cascade)
+    authorId    String      
     content     String
     createdAt   DateTime @default(now())
 }

@@ -27,12 +27,16 @@ export default {
         xl: '1.15rem',
         '2xl': '1.563rem',
         '3xl': '1.953rem',
-        '4xl': '2.441rem',
-        '5xl': '3.052rem',
+        '4xl': '3.7rem',
+        '5xl': '5.3rem',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         audiowide: ['Audiowide', 'sans-serif'],
+        kanit: ['Kanit', 'sans-serif'],
+      },
+      fontWeight: {
+        'extrabold': 800,
       },
       boxShadow: {
         'inner-custom': 'inset 0 -40px 30px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.3)',

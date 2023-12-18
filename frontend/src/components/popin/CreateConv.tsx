@@ -32,7 +32,7 @@ const CreateConv: React.FC = () => {
 	useEffect(() => {
 	const fetchUserData = async () => {
 		try {
-			const response = await axios.get<{ username: string }[]>('/friends-list/mine');
+			const response = await axios.get<{ username: string }[]>('/users/all');
 			console.log(response.data);
 			
 			setListUsers(response.data);
@@ -80,7 +80,7 @@ const CreateConv: React.FC = () => {
 				channelData.mode = 'PROTECTED';
 				channelData.password = '';
 			}
- 
+
 		}
 		
 		const socket = io('http://localhost:5001/', {

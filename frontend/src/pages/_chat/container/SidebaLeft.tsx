@@ -4,6 +4,7 @@ import AllConv from '../filtre/AllConv';
 import PersoConv from '../filtre/PersoConv';
 import ChannelConv from '../filtre/ChannelConv';
 import CreateConv from '../../../components/popin/CreateConv';
+import ContentConv from './ContentConv';
 
 interface SidebarLeftProps {
 	handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -77,7 +78,6 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 		<div className="flex-1"> 
 			{contenuFiltre[filtreActif]}
 		</div>
-
 	</div>
 	);
 };

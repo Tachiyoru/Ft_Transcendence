@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { FaUser, FaUserGroup } from 'react-icons/fa6'
+import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
+import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
 
 interface Channel {
 	name: string;
 	modes: string;
+	chanId: number;
 }
 
 const AllConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const socket = io('http://localhost:5001/', {
@@ -16,12 +20,13 @@ const AllConv = () => {
 		});
 
 		socket.on('connect', () => {
-			console.log('Connected to server');
-			socket.emit('findAllChannels');
+			console.log('Connected to server allconv');
+			socket.emit('find-all-channels');
 
-			socket.on('channelList', (channelList) => {
+			socket.on('channel-list', (channelList) => {
 			console.log('Received channel list:', channelList);
 			setAllChannel(channelList);
+			console.log("list:", channelList);
 			});
 		});
 
@@ -30,12 +35,21 @@ const AllConv = () => {
 		};
 	},[]);
 
+	const handleChannelClick = (channelId: number) => {
+		dispatch(setSelectedChannelId(channelId));
+	};
+	
 
 	return (
 	<div>
 		{/*USER*/}
 		{allChannel.map((channel, index) => (
-		<div key={index} className="flex flex-row h-12 mt-2 md:mx-2">
+		<div
+			key={index} 
+			className="flex flex-row h-12 mt-2 md:mx-2"
+			onClick={() => handleChannelClick(channel.chanId)}
+			style={{cursor: 'pointer'}}
+		>
 			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 				<FaUser className="text-lilac"/>
 			</div>
