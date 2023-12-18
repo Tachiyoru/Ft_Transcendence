@@ -48,6 +48,24 @@ export class chatGateway {
     this.server.emit("channel", chan, messagesList);
     }
 
+    @SubscribeMessage("users-not-in-channel")
+    async getUsersNotInChannel(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() data: { chanName: string }
+    )
+    {
+      try {
+        const userList = await this.chatService.getUsersNotInChannel(data.chanName);
+        console.log("users-not-in-channel", userList);
+        client.emit("users-channel", userList);
+      }
+      catch (error)
+      {
+        client.emit("users-not-in-channel-error", error.message);
+      }
+    }
+
+
   @SubscribeMessage("createChannel")
   async createchan(
     @ConnectedSocket() client: Socket,
@@ -68,6 +86,7 @@ export class chatGateway {
       });
     }
   }
+  
   //   @SubscribeMessage("addOp")
   //   async addOp(
   //     client: Socket,

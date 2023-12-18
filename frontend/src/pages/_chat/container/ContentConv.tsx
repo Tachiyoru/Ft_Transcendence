@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
-import { FaBan, FaPaperPlane, FaUserGroup, FaXmark } from "react-icons/fa6";
+import { FaBan, FaPaperPlane, FaUserGroup, FaUserPlus, FaXmark } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { io } from "socket.io-client";
 import { RootState } from "../../../store/store";
 import TimeConverter from "../../../components/date/TimeConverter";
+import AddUserConv from "../../../components/popin/AddUserConv";
 
 interface Channel {
 	name: string;
@@ -84,11 +85,12 @@ const ContentConv = () => {
 		):(
 		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">
 		<div>
-			<div className="flex flex-row justify-between">
-				<h3 className="text-base text-lilac">{channel.name}</h3>
+			<div className="flex flex-row justify-between items-center relative">
+				<h3 className="text-base text-lilac mt-2">{channel.name}</h3>
 				<button className="lg:hidden flex-end" onClick={toggleRightSidebar}>
 					<FaUserGroup className="w-4 h-4 text-lilac"/>
 				</button>
+				<AddUserConv channel={channel.name}/>
 			</div>
 			{/*CONTENT*/}
 			{messageList.map((message, index) => (

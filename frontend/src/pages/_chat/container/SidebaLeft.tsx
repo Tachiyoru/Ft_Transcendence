@@ -3,8 +3,7 @@ import { FaArrowTurnUp, FaMagnifyingGlass, FaRegPenToSquare } from 'react-icons/
 import AllConv from '../filtre/AllConv';
 import PersoConv from '../filtre/PersoConv';
 import ChannelConv from '../filtre/ChannelConv';
-import CreateConv from '../../../components/popin/CreateConv';
-import ContentConv from './ContentConv';
+import CreateConv from '../../../components/popin/CreateConv copy';
 
 interface SidebarLeftProps {
 	handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

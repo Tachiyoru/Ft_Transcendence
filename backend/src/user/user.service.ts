@@ -202,6 +202,8 @@ export class UserService {
         stats: { lvl: "desc" },
       },
     });
+
+    console.log("raaaaaaaaaaaaaaaaaaaaaank = ",rank)
     return rank;
   }
 
@@ -226,7 +228,6 @@ export class UserService {
   }
 
   async getHim(name: string) {
-    console.log('ok')
     return this.prisma.user.findUnique({
       where:{ username: name }
     });

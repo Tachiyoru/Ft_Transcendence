@@ -4,11 +4,12 @@ import { FaUser } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import axios from "../../axios/api";
 import DateConverter from "../../components/date/DateConverter";
+import { IoSettingsSharp } from "react-icons/io5";
 
 const DashboardFriends = () => {
   const location = useLocation();
   const currentPage = location.pathname;
-  const [userData, setUserData] = useState<{username: string; avatar: string; createdAt: string}>();
+  const [userData, setUserData] = useState<{id:number ;username: string; avatar: string; createdAt: string}>();
 
   const { userId } = useParams();
 
@@ -29,10 +30,10 @@ const DashboardFriends = () => {
   
   return (
     <MainLayout currentPage={currentPage}>
-        <div className="flex-1 md:flex flex-row">
+        <div className="flex-1 flex flex-row">
 
           {/*leftSideBar*/}
-          <div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs grid grid-rows-[auto,1fr,auto]">
+          <div className="w-[260px] rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs grid grid-rows-[auto,1fr,auto]">
           {userData ? (
               <div className="flex mt-4 mb-10 m-2">
                 {userData.avatar ? (
@@ -48,13 +49,14 @@ const DashboardFriends = () => {
                   <p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
                 </div>
               </div>
+              
             ) : (
               <p className="text-lilac">User not found</p>
             )}
           </div>
 
           {/*Dashboard*/}
-          <div className="flex-1 bg-black bg-opacity-40 p-4 md:rounded-r-lg">
+          <div className="flex-1 bg-black bg-opacity-40 p-4 rounded-r-lg">
 
           </div>
         </div>

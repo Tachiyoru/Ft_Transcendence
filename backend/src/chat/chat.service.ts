@@ -58,6 +58,20 @@ export class chatService
     return channel;
   }
 
+  async getUsersNotInChannel(chanName: string)
+  {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan)
+      throw Error('Channel not found');
+
+    const users = await this.prisma.user.findMany({
+      where: { channel: { none: { chanId: chan.chanId } } },
+    });
+    return (users);
+  }
+  
 	async addOp(
 		chanName: string,
 		username: string,

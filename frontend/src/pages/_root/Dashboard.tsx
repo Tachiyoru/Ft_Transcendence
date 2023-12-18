@@ -246,7 +246,7 @@ const Dashboard = () => {
                   <div className="h-20 py-2 overflow-y-scroll" onScroll={highlightMiddle}>
                   {userRankingGlobal.map((user, index) => (
                     <div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
-                      {`${index + 1}-${user.userId}`}
+                      {`${index + 1}-${user.username}`}
                     </div>
                   ))}
                   </div>
