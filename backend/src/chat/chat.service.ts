@@ -213,7 +213,7 @@ export class chatService
 
 	async addUsersToChannel(
 		chanName: string,
-		targetIds: number[],
+		targets: User[],
 		@Request() req: any
 	)
 	{
@@ -232,17 +232,18 @@ export class chatService
 			throw new Error("You are not allowed to invite users to this channel");
 		}
 
-    
-		const targets = await this.prisma.user.findMany({
+		const targetIds = targets.map((target) => target.id);
+
+		const users = await this.prisma.user.findMany({
 			where: { id: { in: targetIds } },
 		});
 
-		if (targets.length !== targetIds.length)
+		if (users.length !== targetIds.length)
 		{
 			throw new Error("Could not find all users");
 		}
 
-		const bannedUsers = targets.filter((user) =>
+		const bannedUsers = users.filter((user) =>
 			channel.banned.some((bannedUser) => bannedUser.id === user.id)
 		);
 
@@ -254,7 +255,7 @@ export class chatService
 		const updatedChannel = await this.prisma.channel.update({
 			where: { name: chanName },
 			data: {
-				members: { connect: targets.map((target) => ({ id: target.id })) },
+				members: { connect: users.map((user) => ({ id: user.id })) },
 			},
 		});
 

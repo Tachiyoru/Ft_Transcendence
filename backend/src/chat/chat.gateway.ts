@@ -123,7 +123,7 @@ export class chatGateway
 	async addUserToChannel(
 		client: Socket,
 		@MessageBody() data: {
-			chanName: string, targetsId: number[]
+			chanName: string, targets: User[]
 		},
 		@Request() req: any
 	)
@@ -132,7 +132,7 @@ export class chatGateway
 		{
 			const result = await this.chatService.addUsersToChannel(
 				data.chanName,
-				data.targetsId,
+				data.targets,
 				req
 			);
 			client.emit("usersAdded", result);
