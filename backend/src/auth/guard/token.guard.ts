@@ -77,7 +77,7 @@ export class TokenGuard implements CanActivate {
         expiresIn: "150sec",
       }
     );
-    response.cookie("access_token", accessToken, { httpOnly: true });
+    // response.cookie("access_token", accessToken, { httpOnly: true });
     return { user };
   }
 
