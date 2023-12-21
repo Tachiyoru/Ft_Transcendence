@@ -65,14 +65,12 @@ export class chatService
 
 	async getChannelsByUserId(userId: number): Promise<Channel[]>
 	{
-		const user = await this.prisma.user.findUnique({
-			where: { id: userId },
-			include: { channel: true },
+		const channels = await this.prisma.channel.findMany({
+			where: { members: { some: { id: userId } } },
 		});
-		if (!user)
-			throw Error('user not found');
-		console.log("chanlist in user", user.username, user.channel);
-		return (user.channel);
+		if (!channels)
+			return ([]);
+		return (channels);
 	}
 
 	async getUsersNotInChannel(chanName: string)

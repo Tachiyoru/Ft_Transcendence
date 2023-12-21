@@ -18,13 +18,13 @@ import { Controller, Get, Param, ParseIntPipe, Request, UseGuards } from "@nestj
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { channel } from "diagnostics_channel";
-import { TokenGuard } from "src/auth/guard";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
+import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 
 @WebSocketGateway({
 	cors: { origin: "http://localhost:5173", credentials: true },
 })
-@UseGuards(TokenGuard)
+@UseGuards(SocketTokenGuard)
 export class chatGateway
 {
 
@@ -44,11 +44,12 @@ export class chatGateway
 		const chan = await this.prisma.channel.findUnique({
 			where: { chanId: id },
 			include: {
-				messages: true,
+				messages: true
 			}
 		});
+		console.log("channel", chan);
 		if (!chan)
-			throw Error('Channel not found');
+			return null;
 		const messagesList = chan.messages;
 		console.log("channel", chan);
 		this.server.emit("channel", chan, messagesList);
@@ -203,8 +204,7 @@ export class chatGateway
 		@ConnectedSocket() client: Socket,
 	): Promise<void>
 	{
-		console.log(" CLIENT +_____________________________________________", client);
-		const chanlist = await this.chatService.getChannelsByUserId(4);
+		const chanlist = await this.chatService.getChannelsByUserId(client.handshake.auth.id);
 		client.emit("my-channel-list", chanlist);
 	}
 

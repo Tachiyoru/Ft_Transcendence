@@ -28,7 +28,6 @@ const AllConv = () => {
       socket.on("my-channel-list", (channelList) => {
         console.log("Received my channel list:", channelList);
         setAllChannel(channelList);
-        console.log("list:", channelList);
       });
     });
 
