@@ -192,6 +192,7 @@ export class chatGateway
 	//     }
 	//   }
 
+	
 	@SubscribeMessage("find-all-channels")
 	async findAllChannels(): Promise<void>
 	{

@@ -44,7 +44,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
         console.log(channel);
         socket.on("connect", () => {
           console.log("Connected to server");
-          socket.emit("users-not-in-channel", { chanName: channel });
+          socket.emit("users-not-in-channel", { chanName: channel }); //need to change to users not in channels and friend with me
 
           socket.on("users-not-in-channel", (userList) => {
             console.log(userList);
