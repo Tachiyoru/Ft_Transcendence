@@ -17,8 +17,8 @@ import { Server, Socket } from "socket.io";
 import { Controller, Get, Param, ParseIntPipe, Request, UseGuards } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { SocketTokenGuard } from "src/auth/guard/sockettoken.guard";
 import { channel } from "diagnostics_channel";
+import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 
 @WebSocketGateway({
 	cors: { origin: "http://localhost:5173", credentials: true },

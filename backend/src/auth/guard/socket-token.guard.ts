@@ -8,7 +8,6 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { PrismaService } from "src/prisma/prisma.service";
-import { verify } from "jsonwebtoken";
 
 @Injectable()
 export class SocketTokenGuard implements CanActivate {
@@ -41,8 +40,10 @@ export class SocketTokenGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException("User not found");
     }
-    request.user = user;
-    return false;
+// client.handshake.headers.cookie = `token=${token}`;
+	client.handshake.auth = user ;
+	request.user = user;
+    return true;
   }
 
   static verifyToken(token: string, jwt: JwtService, config: ConfigService) {
@@ -61,6 +62,4 @@ export class SocketTokenGuard implements CanActivate {
     console.log("token : ", token);
     return SocketTokenGuard.verifyToken(token, new JwtService, new ConfigService);
   }
-
-
 }
