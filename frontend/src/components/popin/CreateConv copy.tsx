@@ -66,7 +66,7 @@ const CreateConv: React.FC = () => {
 			mode: '',
 			password: '',
 		};
-		
+
 		if (Object.keys(checkedItems).length === 1) {
 			channelData.mode = 'CHAT';
 		} else {

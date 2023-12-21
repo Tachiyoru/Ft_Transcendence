@@ -12,6 +12,7 @@ import { channel } from "diagnostics_channel";
 import { NotificationService } from "src/notification/notification.service";
 import { NotificationType } from "src/notification/content-notification";
 import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
+import { Server, Socket } from "socket.io";
 
 @Injectable()
 export class chatService
@@ -56,26 +57,38 @@ export class chatService
 						...settings.members.map((user) => ({ id: user.id })),
 					],
 				},
-        
+
 			},
 		});
 		return channel;
 	}
 
-  async getUsersNotInChannel(chanName: string)
-  {
-    const chan = await this.prisma.channel.findUnique({
-      where: { name: chanName },
-    });
-    if (!chan)
-      throw Error('Channel not found');
+	async getChannelsByUserId(userId: number): Promise<Channel[]>
+	{
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+			include: { channel: true },
+		});
+		if (!user)
+			throw Error('user not found');
+		console.log("chanlist in user", user.username, user.channel);
+		return (user.channel);
+	}
 
-    const users = await this.prisma.user.findMany({
-      where: { channel: { none: { chanId: chan.chanId } } },
-    });
-    return (users);
-  }
-  
+	async getUsersNotInChannel(chanName: string)
+	{
+		const chan = await this.prisma.channel.findUnique({
+			where: { name: chanName },
+		});
+		if (!chan)
+			throw Error('Channel not found');
+
+		const users = await this.prisma.user.findMany({
+			where: { channel: { none: { chanId: chan.chanId } } },
+		});
+		return (users);
+	}
+
 	async addOp(
 		chanName: string,
 		username: string,
@@ -219,7 +232,7 @@ export class chatService
 	)
 	{
 		//console.log("targets dans addUser... : ", {targets});
-		console.log("Channame dans addUser... : ", {chanName});
+		console.log("Channame dans addUser... : ", { chanName });
 		const channel = await this.prisma.channel.findUnique({
 			where: { name: chanName },
 			include: { banned: true, invitedList: true },

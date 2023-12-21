@@ -54,21 +54,22 @@ export class chatGateway
 		this.server.emit("channel", chan, messagesList);
 	}
 
-    @SubscribeMessage("users-not-in-channel")
-    async getUsersNotInChannel(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() data: { chanName: string }
-    )
-    {
-      try {
-        const userList = await this.chatService.getUsersNotInChannel(data.chanName);
-        client.emit("users-not-in-channel", userList);
-      }
-      catch (error)
-      {
-        client.emit("users-not-in-channel-error", error.message);
-      }
-    }
+	@SubscribeMessage("users-not-in-channel")
+	async getUsersNotInChannel(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { chanName: string }
+	)
+	{
+		try
+		{
+			const userList = await this.chatService.getUsersNotInChannel(data.chanName);
+			client.emit("users-not-in-channel", userList);
+		}
+		catch (error)
+		{
+			client.emit("users-not-in-channel-error", error.message);
+		}
+	}
 
 	@SubscribeMessage("createChannel")
 	async createchan(
@@ -118,7 +119,7 @@ export class chatGateway
 		}
 	}
 
-  
+
 	@SubscribeMessage("add-user")
 	async addUserToChannel(
 		@ConnectedSocket() client: Socket,
@@ -141,7 +142,7 @@ export class chatGateway
 			client.emit("addUsersError", { message: error.message });
 		}
 	}
-	
+
 	//   @SubscribeMessage("addOp")
 	//   async addOp(
 	//     client: Socket,
@@ -166,35 +167,45 @@ export class chatGateway
 	//     }
 	//   }
 
-  //   @SubscribeMessage("renameChan")
-  //   async renameChan(
-  //     client: Socket,
-  //     @MessageBody() data: { chanName: string; newName: string },
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       const owner = await channel
-  //         .caller(
-  //           this.prisma.channel.findUnique({ where: { name: data.chanName } })
-  //         )
-  //         .owner();
-  //       const result = await this.chatService.renameChan(
-  //         data.chanName,
-  //         data.newName,
-  //         owner,
-  //         req
-  //       );
-  //       client.emit("channelRenamed", result);
-  //     } catch (error) {
-  //       client.emit("renameChanError", { message: error.message });
-  //     }
-  //   }
+	//   @SubscribeMessage("renameChan")
+	//   async renameChan(
+	//     client: Socket,
+	//     @MessageBody() data: { chanName: string; newName: string },
+	//     @Request() req: any
+	//   ) {
+	//     try {
+	//       const owner = await channel
+	//         .caller(
+	//           this.prisma.channel.findUnique({ where: { name: data.chanName } })
+	//         )
+	//         .owner();
+	//       const result = await this.chatService.renameChan(
+	//         data.chanName,
+	//         data.newName,
+	//         owner,
+	//         req
+	//       );
+	//       client.emit("channelRenamed", result);
+	//     } catch (error) {
+	//       client.emit("renameChanError", { message: error.message });
+	//     }
+	//   }
 
 	@SubscribeMessage("find-all-channels")
 	async findAllChannels(): Promise<void>
 	{
 		const chanlist = await this.prisma.channel.findMany();
 		this.server.emit("channel-list", chanlist);
+	}
+
+	@SubscribeMessage("find-my-channels")
+	async getMyChannels(
+		@ConnectedSocket() client: Socket,
+	): Promise<void>
+	{
+		console.log(" CLIENT +_____________________________________________", client);
+		const chanlist = await this.chatService.getChannelsByUserId(4);
+		client.emit("my-channel-list", chanlist);
 	}
 
 	//   @SubscribeMessage("joinChan")
@@ -340,6 +351,7 @@ export class chatGateway
 	//       client.emit("findAllMembersError", { message: error.message });
 	//     }
 	//   }
+
 
 	@SubscribeMessage("findAllUsers")
 	async findAllUsers(

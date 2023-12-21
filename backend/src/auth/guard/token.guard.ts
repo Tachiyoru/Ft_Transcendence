@@ -96,10 +96,10 @@ export class TokenGuard implements CanActivate {
         expiresIn: "150sec",
       }
     );
-    if (context.getType() !== "ws") { 
-      response.cookie("access_token", accessToken, { httpOnly: true });
+    // if (context.getType() !== "ws") { 
+    //   response.cookie("access_token", accessToken, { httpOnly: true });
+		// }
     return { user };
-  }
 }
 
 
