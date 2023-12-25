@@ -11,6 +11,7 @@ import { FriendsListModule } from "./friends-list/friends-list.module";
 import { NotificationModule } from "./notification/notification.module";
 import { AchievementsModule } from "./achievements/achievements.module";
 import { StatsModule } from "./stats/stats.module";
+import { SocketModule } from "./socket/socket.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { StatsModule } from "./stats/stats.module";
     NotificationModule,
     PrismaModule,
     chatModule,
+	SocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

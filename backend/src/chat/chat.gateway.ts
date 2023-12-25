@@ -15,6 +15,7 @@ import { Server, Socket } from "socket.io";
 import {
   Controller,
   Get,
+  OnModuleInit,
   Param,
   ParseIntPipe,
   Request,
@@ -30,18 +31,16 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
   cors: { origin: "http://localhost:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
-export class chatGateway {
+export class chatGateway implements OnModuleInit{
   @WebSocketServer()
   server: Server;
   constructor(
     private readonly chatService: chatService,
     private readonly prisma: PrismaService
   ) {}
-
   onModuleInit() {
     this.server.on("connection", (socket) => {
-      console.log(socket.id);
-      console.log("connected");
+      console.log("connected as socket :", socket.id);
     });
   }
 
@@ -327,8 +326,10 @@ export class chatGateway {
   ) {
     try {
       console.log("chan name is", data.chanName);
-	  const messagesList = await this.chatService.findAllChanMessages(data.chanName)
-	  client.emit("findAllMessage", messagesList);
+      const messagesList = await this.chatService.findAllChanMessages(
+        data.chanName
+      );
+      client.emit("findAllMessage", messagesList);
       console.log("msglist", messagesList);
     } catch (error) {
       // client.emit("findAllMessageError",  error.message );
@@ -355,37 +356,33 @@ export class chatGateway {
     }
   }
 
-    @SubscribeMessage("updateMessage")
-    async updateMessage(
-      client: Socket,
-      @MessageBody() UpdateMessageDto: UpdateMessageDto,
-      @Request() req: any
-    ) {
-      try {
-        this.chatService.updateMessage(UpdateMessageDto, req);
-        this.server.emit("messageUpdated");
-      } catch (error) {
-        client.emit("createMsgError", { message: error.message });
-      }
+  @SubscribeMessage("updateMessage")
+  async updateMessage(
+    client: Socket,
+    @MessageBody() UpdateMessageDto: UpdateMessageDto,
+    @Request() req: any
+  ) {
+    try {
+      this.chatService.updateMessage(UpdateMessageDto, req);
+      this.server.emit("messageUpdated");
+    } catch (error) {
+      client.emit("createMsgError", { message: error.message });
     }
+  }
 
-    @SubscribeMessage("removeMessage")
-    async removeMessages(
-      client: Socket,
-      @MessageBody() data: { chanName: string; msgId: number },
-      @Request() req: any
-    ) {
-      try {
-        await this.chatService.removeMessages(
-          data.chanName,
-          data.msgId,
-          req
-        );
-        client.emit("allMembers", { message: "Message removed" });
-      } catch (error) {
-        client.emit("findAllMembersError", { message: error.message });
-      }
+  @SubscribeMessage("removeMessage")
+  async removeMessages(
+    client: Socket,
+    @MessageBody() data: { chanName: string; msgId: number },
+    @Request() req: any
+  ) {
+    try {
+      await this.chatService.removeMessages(data.chanName, data.msgId, req);
+      client.emit("allMembers", { message: "Message removed" });
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
     }
+  }
 
   //   @SubscribeMessage("typing")
   //   async typing(

@@ -42,7 +42,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
           withCredentials: true,
         });
         console.log(channel);
-        socket.on("connect", () => {
           console.log("Connected to server");
           socket.emit("users-not-in-channel", { chanName: channel }); //need to change to users not in channels and friend with me
 
@@ -50,7 +49,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             console.log(userList);
             setListUsers(userList);
           });
-        });
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
