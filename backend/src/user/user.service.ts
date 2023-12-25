@@ -94,9 +94,8 @@ export class UserService
 	async getUserById(userId: number)
 	{
 		return this.prisma.user.findUnique({
-			where: {
-				id: userId,
-			},
+			where: { id: userId },
+			include: { friends: true, stats: true, achievements: true },
 		});
 	}
 
@@ -225,8 +224,6 @@ export class UserService
 				stats: { lvl: "desc" },
 			},
 		});
-
-		console.log("raaaaaaaaaaaaaaaaaaaaaank = ", rank)
 		return rank;
 	}
 
