@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
@@ -9,6 +9,7 @@ import {
 import axios from "../../axios/api";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
+import { WebSocketContext } from "../../socket/socket";
 
 interface ChannelProps {
   channel: string;
@@ -22,6 +23,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     [key: string]: { username: string };
   }>({});
   const [searchText, setSearchText] = useState("");
+  const socket = useContext(WebSocketContext);
 
   const handleCheckboxChange = (user: { username: string }) => {
     setCheckedItems((prevCheckedItems) => {
@@ -38,9 +40,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const socket = io("http://localhost:5001/", {
-          withCredentials: true,
-        });
         console.log(channel);
           console.log("Connected to server");
           socket.emit("users-not-in-channel", { chanName: channel }); //need to change to users not in channels and friend with me
@@ -79,11 +78,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       targets: selectedItems,
     };
     console.log("yo", channelData);
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
-    });
 
-    socket.on("connect", () => {
       console.log("Connected to server");
       console.log("avant add_user", channelData.chanName);
       socket.emit("add-user", { channelData: channelData });
@@ -91,7 +86,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       socket.on("addUsersError", (errorData) => {
         console.error("user creation error:", errorData);
       });
-    });
 
     socket.on("disconnect", () => {
       console.log("Disconnected from server");

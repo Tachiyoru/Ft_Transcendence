@@ -23,7 +23,6 @@ import {
 } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { channel } from "diagnostics_channel";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 
@@ -31,21 +30,23 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
   cors: { origin: "http://localhost:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
-export class chatGateway implements OnModuleInit{
+export class chatGateway{
   @WebSocketServer()
   server: Server;
   constructor(
     private readonly chatService: chatService,
     private readonly prisma: PrismaService
   ) {}
-  onModuleInit() {
-    this.server.on("connection", (socket) => {
-      console.log("connected as socket :", socket.id);
-    });
-  }
+//   onModuleInit() {
+//     this.server.on("connection", (socket) => {
+//       console.log("connected as socket :", socket.id);
+//     });
+//   }
 
   @SubscribeMessage("channel")
-  async getChannelById(@MessageBody("id") id: number) {
+  async getChannelById(
+    @ConnectedSocket() client: Socket,
+	@MessageBody("id") id: number) {
     if (!id) throw Error("id not found");
     console.log("getChannelById ", id);
     const chan = await this.prisma.channel.findUnique({
@@ -107,6 +108,7 @@ export class chatGateway implements OnModuleInit{
     @Request() req: any
   ) {
     try {
+
       const result = await this.chatService.inviteUserToChannel(
         data.chanName,
         data.targetId,
