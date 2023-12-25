@@ -34,7 +34,7 @@ const AllConv = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [allChannel]);
 
   const handleChannelClick = (channelId: number) => {
     dispatch(setSelectedChannelId(channelId));

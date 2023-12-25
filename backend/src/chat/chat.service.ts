@@ -157,6 +157,7 @@ export class chatService
 		}
 	}
 
+
 	// [username] of the user that is inviting, [targetId] of the user that is being invited
 	async inviteUserToChannel(
 		chanName: string,
