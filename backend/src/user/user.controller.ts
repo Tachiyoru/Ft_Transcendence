@@ -53,6 +53,7 @@ export class UserController {
     @GetUser("id") userId: number,
     @UploadedFiles() file: Express.Multer.File[]
   ) {
+    console.log("file : ");
     const filepath = file[0].path;
     this.userService.editAvatar(userId, filepath);
   }
@@ -73,9 +74,8 @@ export class UserController {
     return this.userService.getRankingFriends(userId);
   }
 
-  
   @Get("him/:name")
-  getHim(@Param('name') name: string) {
+  getHim(@Param("name") name: string) {
     return this.userService.getHim(name);
   }
 }

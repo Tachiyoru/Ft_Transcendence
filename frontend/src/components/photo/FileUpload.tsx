@@ -16,7 +16,7 @@ const FileUpload = () => {
 		formData.append('image', selectedFile[0]);
 
 		try {
-		const response = await axios.patch('/users/addAvatar', formData, {
+		const response = await axios.patch('/users/add-avatar', formData, {
 			headers: {
 			'Content-Type': 'multipart/form-data'
 			}
