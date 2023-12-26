@@ -252,6 +252,28 @@ export class FriendsListService
 		return nonFriends;
 	}
 
+	async getFriendsInCommon(userId: number, friendId: number)
+	{
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
+			include: { friends: true },
+		});
+		if (!user)
+			throw new Error("User not found");
+
+		const friend = await this.prismaService.user.findUnique({
+			where: { id: friendId },
+			include: { friends: true },
+		});
+		if (!friend)
+			throw new Error("Friend not found");
+
+		const friendIds = friend.friends.map((friend) => friend.id);
+		const friendsInCommon = user.friends.filter((friend) => friendIds.includes(friend.id));
+
+		return (friendsInCommon);
+	}
+
 	async getFriendsFrom(userId: number)
 	{
 		const user = await this.prismaService.user.findUnique({

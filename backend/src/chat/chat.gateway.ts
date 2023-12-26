@@ -236,6 +236,19 @@ export class chatGateway
 		client.emit("my-channel-list", chanlist);
 	}
 
+	@SubscribeMessage("channel-in-common")
+	async getChannelsInCommon(
+		@ConnectedSocket() client: Socket,
+		@MessageBody("friendId") friendId: number
+	): Promise<void>
+	{
+		const chanlist = await this.chatService.getChannelsInCommon(
+			client.handshake.auth.id,
+			friendId
+		);
+		client.emit("channel-in-common", chanlist);
+	}
+
 	//   @SubscribeMessage("joinChan")
 	//   async joinChan(
 	//     client: Socket,
