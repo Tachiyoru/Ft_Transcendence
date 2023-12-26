@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
+import { IconType } from "react-icons";
 
 interface NavItemProps {
   name: string;
@@ -42,7 +43,7 @@ const NavItem: React.FC<NavItemProps> = ({
     );
 
   return (
-    <div className="relative group">
+    <div className="relative group" style={{ cursor: "pointer" }}>
       {/* ICON */}
       <div
         className="px-3 py-2 flex items-center text-purple relative hover:text-fuchsia"
@@ -199,11 +200,13 @@ const NavHorizontal = () => {
         <div
           ref={menuRef}
           className="shadow-md bg-dark-violet rounded-lg py-2 px-4 absolute right-2 mt-1"
+          style={{ cursor: "default" }}
         >
           <div className="text-xs font-normal text-param">Notifications</div>
           <ul>
             {notifications.map((notification) => (
               <li
+                style={{ cursor: "pointer" }}
                 key={notification.id}
                 className={`border ${
                   notification.read ? "border-gray-500" : "border-white"

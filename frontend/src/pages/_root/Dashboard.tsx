@@ -105,7 +105,7 @@ const Dashboard = () => {
 
   return (
     <MainLayout currentPage={currentPage}>
-      <div className="flex-1 md:flex flex-row">
+      <div className="flex-1 md:flex flex-row" style={{ cursor: "default" }}>
         {/*leftSideBar*/}
         <div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs">
           {/*User*/}

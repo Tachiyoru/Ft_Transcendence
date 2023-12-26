@@ -70,7 +70,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           </div>
         </div>
         {/*NAV*/}
-        <div className="flex w-full">
+        <div className="flex w-full" style={{ cursor: "pointer" }}>
           <ul className="flex flex-row m-2 flex-between">
             <li
               className={`text-sm text-lilac ${

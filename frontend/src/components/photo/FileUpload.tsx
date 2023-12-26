@@ -15,22 +15,26 @@ const FileUpload = () => {
       const formData = new FormData();
       formData.append("image", selectedFile[0]);
 
-		try {
-		const response = await axios.patch('/users/add-avatar', formData, {
-			headers: {
-			'Content-Type': 'multipart/form-data'
-			}
-		});
-		console.log('File uploaded successfully:', response.data);
-		} catch (error) {
-		console.error('Error uploading file:', error);
-		}
-	}
-	};
+      try {
+        const response = await axios.patch("/users/add-avatar", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log("File uploaded successfully:", response.data);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    }
+  };
 
   return (
     <div>
-      <input className="text-sm" type="file" onChange={handleFileChange} />
+      <input
+        className="text-sm custom-file-upload"
+        type="file"
+        onChange={handleFileChange}
+      />
       <button className="text-sm" onClick={handleUpload}>
         Upload
       </button>

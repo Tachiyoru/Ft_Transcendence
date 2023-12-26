@@ -112,3 +112,7 @@ body {
     font-size: 0.8rem;
     color: #EF1FEA;
   }
+	
+	input::file-selector-button {
+  cursor: pointer;
+}
