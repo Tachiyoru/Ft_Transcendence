@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
@@ -8,6 +8,7 @@ import {
 import axios from "../../axios/api";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
+import { WebSocketContext } from "../../socket/socket";
 
 const CreateConv: React.FC = () => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
@@ -21,6 +22,7 @@ const CreateConv: React.FC = () => {
   >("public");
   const [password, setPassword] = useState("");
   const [searchText, setSearchText] = useState("");
+  const socket = useContext(WebSocketContext);
 
   const handleCheckboxChange = (user: { username: string }) => {
     setCheckedItems((prevCheckedItems) => {
@@ -88,23 +90,11 @@ const CreateConv: React.FC = () => {
         channelData.password = "";
       }
     }
+    console.log("createChannel", channelData);
+    socket.emit("createChannel", { settings: channelData });
 
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
-    });
-
-    socket.on("connect", () => {
-      console.log("Connected to server");
-      socket.emit("createChannel", { settings: channelData });
-
-      socket.on("channelCreateError", (errorData) => {
-        console.error("Channel creation error:", errorData);
-      });
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      socket.disconnect();
+    socket.on("channelCreateError", (errorData) => {
+      console.error("Channel creation error:", errorData);
     });
 
     setCheckedItems({});

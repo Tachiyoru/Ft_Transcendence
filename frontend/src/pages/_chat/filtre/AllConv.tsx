@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
-import { io } from "socket.io-client";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
-import axios from "axios";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface Channel {
   name: string;
@@ -15,26 +14,16 @@ const AllConv = () => {
   const [allChannel, setAllChannel] = useState<Channel[]>([]);
   const dispatch = useDispatch();
 
+  const socket = useContext(WebSocketContext);
+
   useEffect(() => {
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
+    console.log("Connected to server allconv");
+    socket.emit("find-my-channels");
+    socket.on("my-channel-list", (channelList) => {
+      console.log("Received my channel list:", channelList);
+      setAllChannel(channelList);
     });
-
-    socket.on("connect", () => {
-      console.log("Connected to server allconv");
-
-      socket.emit("find-my-channels");
-
-      socket.on("my-channel-list", (channelList) => {
-        console.log("Received my channel list:", channelList);
-        setAllChannel(channelList);
-      });
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  }, [allChannel]);
 
   const handleChannelClick = (channelId: number) => {
     dispatch(setSelectedChannelId(channelId));

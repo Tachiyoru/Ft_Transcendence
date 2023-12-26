@@ -37,11 +37,11 @@ export class chatGateway{
     private readonly chatService: chatService,
     private readonly prisma: PrismaService
   ) {}
-//   onModuleInit() {
-//     this.server.on("connection", (socket) => {
-//       console.log("connected as socket :", socket.id);
-//     });
-//   }
+  onModuleInit() {
+    this.server.on("connection", (socket) => {
+      console.log("connected as socket :", socket.id);
+    });
+  }
 
   @SubscribeMessage("channel")
   async getChannelById(
@@ -85,10 +85,10 @@ export class chatGateway{
   ) {
     try {
       const chan = await this.chatService.createChannel(settings, req);
+      client.join(chan.name);
       client.emit("channelCreated", chan);
       const chanlist = await this.prisma.channel.findMany();
       console.log("chan list = ", chanlist);
-      client.join(chan.name);
     } catch (error) {
       client.emit("channelCreateError", {
         error: "Could not create channel because :",
@@ -189,28 +189,28 @@ export class chatGateway{
     client.emit("my-channel-list", chanlist);
   }
 
-  //   @SubscribeMessage("joinChan")
-  //   async joinChan(
-  //     client: Socket,
-  //     @MessageBody()
-  //     data: { chanName: string; password?: string; invited?: boolean },
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       if (!data.invited) {
-  //         data.invited = false;
-  //       }
-  //       const result = await this.chatService.joinChannel(
-  //         data.chanName,
-  //         data.invited,
-  //         req,
-  //         data.password
-  //       );
-  //       client.emit("channelJoined", result);
-  //     } catch (error) {
-  //       client.emit("renameChanError", { message: error.message });
-  //     }
-  //   }
+    @SubscribeMessage("joinChan")
+    async joinChan(
+      client: Socket,
+      @MessageBody()
+      data: { chanName: string; password?: string; invited?: boolean },
+      @Request() req: any
+    ) {
+      try {
+        if (!data.invited) {
+          data.invited = false;
+        }
+        const result = await this.chatService.joinChannel(
+          data.chanName,
+          data.invited,
+          req,
+          data.password
+        );
+        client.emit("channelJoined", result);
+      } catch (error) {
+        client.emit("renameChanError", { message: error.message });
+      }
+    }
 
   @SubscribeMessage("leaveChan")
   async leaveChan(
@@ -334,7 +334,7 @@ export class chatGateway{
       client.emit("findAllMessage", messagesList);
       console.log("msglist", messagesList);
     } catch (error) {
-      // client.emit("findAllMessageError",  error.message );
+    //   client.emit("findAllMessageError",  error.message );
     }
   }
   @SubscribeMessage("create-message")

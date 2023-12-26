@@ -52,9 +52,7 @@ const ContentConv = () => {
 
   useEffect(() => {
     console.log("id:", id.selectedChannelId);
-      console.log("Connected to server content");
       socket.emit("channel", { id: id.selectedChannelId });
-      console.log("1time");
       socket.on("channel", (channelInfo, messageList) => {
         console.log("Received channel:", channelInfo, messageList);
         setMessageList(messageList);
