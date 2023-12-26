@@ -17,9 +17,9 @@ const CreateConv: React.FC = () => {
 		setCheckedItems(prevCheckedItems => {
 			const newCheckedItems = { ...prevCheckedItems };
 			if (newCheckedItems[user.username]) {
-			delete newCheckedItems[user.username];
+				delete newCheckedItems[user.username];
 			} else {
-			newCheckedItems[user.username] = user;
+				newCheckedItems[user.username] = user;
 			}
 			return newCheckedItems;
 		});
@@ -34,7 +34,6 @@ const CreateConv: React.FC = () => {
 		try {
 			const response = await axios.get<{ username: string }[]>('/friends-list/mine');
 			console.log(response.data);
-			
 			setListUsers(response.data);
 			} catch (error) {
 			console.error('Error fetching user list:', error);

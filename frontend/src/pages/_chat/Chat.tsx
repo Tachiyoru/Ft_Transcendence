@@ -2,7 +2,7 @@ import MainLayout from "../../components/nav/MainLayout"
 import { useLocation } from 'react-router-dom';
 import { ChangeEvent, useState } from "react";
 import SidebarLeft from "./container/SidebaLeft";
-import ContentConv from "./container/ContentConv";
+import ContentConv2 from "./container/ContentConv2";
 import SidebarRight from "./container/SidebarRight";
 
 const Chat = () => {
@@ -26,7 +26,7 @@ const Chat = () => {
 			/>
 
 			{/*MIDDLE*/}
-			<ContentConv/>
+			<ContentConv2/>
 
 			{/*RIGHT SIDE BAR*/}
 			<SidebarRight/>
