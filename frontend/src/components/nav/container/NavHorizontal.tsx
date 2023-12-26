@@ -121,7 +121,6 @@ const NavHorizontal = () => {
   }, [menuRef]);
 
   const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
-    console.log("getLoggedInUserInfo");
     try {
       const response = await axios.get<{ id: number }>("/users/me");
       return response.data;
@@ -147,16 +146,10 @@ const NavHorizontal = () => {
   const [notificationVisible, setNotificationVisible] = useState(false);
 
   const handleNotificationClick = useCallback(async () => {
-    console.log("handleNotificationClick, selectedSection : ", selectedSection);
     if (selectedSection === "Notifications") {
       try {
         const { id: userId } = await getLoggedInUserInfo();
-        console.log("userId in handleNotificationClick : ", userId);
         const fetchedNotifications = await getNotifications(userId);
-        console.log(
-          "fetchedNotifications in handleNotificationClick : ",
-          fetchedNotifications
-        );
         setNotifications(fetchedNotifications);
         // Déplacer la logique de toggleSection ici
         setNotificationVisible(true);
@@ -192,7 +185,6 @@ const NavHorizontal = () => {
         );
 
         setNotifications(updatedNotifications);
-        console.log("updatedNotifications : ", updatedNotifications);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
@@ -202,7 +194,6 @@ const NavHorizontal = () => {
   };
 
   const getContent = () => {
-    console.log("getContent, selectedSection : ", selectedSection);
     if (selectedSection === "Notifications") {
       return (
         <div

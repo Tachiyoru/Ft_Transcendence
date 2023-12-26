@@ -21,7 +21,6 @@ export class TokenGuard implements CanActivate {
   ) {}
   
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log("token called");
 	let token: any;
 	const request: Request = context.switchToHttp().getRequest();
     if (context.getType() === "ws") {
@@ -37,7 +36,6 @@ export class TokenGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      console.log("token traitement");
       const payload = await this.jwt.verifyAsync(token, {
         secret: this.config.get<string>("JWT_SECRET_ACCESS"),
       });
@@ -50,7 +48,6 @@ export class TokenGuard implements CanActivate {
       request.user = user;
     } catch (err) {
       try {
-        console.log("refresher called");
         const user = this.refresh(context, request, response);
         request.user = user;
         return true;

@@ -68,7 +68,6 @@ export class chatGateway
 		});
 		if (!chan) return null;
 		const messagesList = chan.messages;
-		console.log("channel", chan);
 		this.server.emit("channel", chan, messagesList);
 	}
 
@@ -414,7 +413,6 @@ export class chatGateway
 		@Request() req: any
 	)
 	{
-		console.log(createMessageDto);
 		try
 		{
 			const message = await this.chatService.createMessage(

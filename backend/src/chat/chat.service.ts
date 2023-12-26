@@ -201,8 +201,6 @@ export class chatService {
     targets: User[],
     @Request() req: any
   ) {
-    //console.log("targets dans addUser... : ", {targets});
-    console.log("Channame dans addUser... : ", { chanName });
     const channel = await this.prisma.channel.findUnique({
       where: { name: chanName },
       include: { banned: true, invitedList: true },

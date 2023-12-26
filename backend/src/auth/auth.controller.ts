@@ -36,7 +36,6 @@ export class AuthController {
   ) {
     const user = await this.authService.signin(dto, res);
     console.log(req.cookies.access_token);
-    console.log("token post singin = ", req.cookies.refresh_token);
     return { user };
   }
 
@@ -68,7 +67,6 @@ export class AuthController {
       raw._json.image.versions.small
     );
     await this.authService.callForgeTokens(user2, res);
-    // console.log("fortyTwoCallback --> access_token", req.cookies.access_token);
     res.redirect("http://localhost:5173/");
     return user2;
   }
@@ -79,14 +77,12 @@ export class AuthController {
     if (req.user === undefined) throw new UnauthorizedException();
     const user: User = req.user as User;
     let raw = req.user as any;
-    console.log("raw = ", raw._json.avatar_url);
     user.username = user.username + "_git";
     const user2 = await this.authService.authExtUserCreate(
       user,
       raw._json.avatar_url
     );
     await this.authService.callForgeTokens(user2, res);
-    // console.log(req.cookies.access_token);
     res.redirect(`http://localhost:5173/`);
     return user2;
   }

@@ -41,13 +41,10 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
         const socket = io("http://localhost:5001/", {
           withCredentials: true,
         });
-        console.log(channel);
         socket.on("connect", () => {
-          console.log("Connected to server");
           socket.emit("users-not-in-channel", { chanName: channel }); //need to change to users not in channels and friend with me
 
           socket.on("users-not-in-channel", (userList) => {
-            console.log(userList);
             setListUsers(userList);
           });
         });
@@ -80,14 +77,12 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       chanName: channel,
       targets: selectedItems,
     };
-    console.log("yo", channelData);
     const socket = io("http://localhost:5001/", {
       withCredentials: true,
     });
 
     socket.on("connect", () => {
       console.log("Connected to server");
-      console.log("avant add_user", channelData.chanName);
       socket.emit("add-user", { channelData: channelData });
 
       socket.on("addUsersError", (errorData) => {
