@@ -4,7 +4,6 @@ import { FaUser } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import axios from "../../axios/api";
 import DateConverter from "../../components/date/DateConverter";
-import { IoSettingsSharp } from "react-icons/io5";
 
 const DashboardFriends = () => {
   const location = useLocation();

@@ -71,7 +71,6 @@ const AllFriends = () => {
 
 	const rejectFriendRequest = async (userId: number) => {
         try {
-			console.log('ok');
             await axios.delete(`/friends-list/friend-request/reject/${userId}`);
 			const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
 			setListUsersPending(updateListUsersPending);

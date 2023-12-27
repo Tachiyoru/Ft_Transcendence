@@ -3,7 +3,6 @@ import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
-import axios from "axios";
 
 interface Channel {
   name: string;
@@ -21,12 +20,8 @@ const AllConv = () => {
     });
 
     socket.on("connect", () => {
-      console.log("Connected to server allconv");
-
       socket.emit("find-my-channels");
-
       socket.on("my-channel-list", (channelList) => {
-        console.log("Received my channel list:", channelList);
         setAllChannel(channelList);
       });
     });

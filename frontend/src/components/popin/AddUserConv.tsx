@@ -2,11 +2,9 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
-  FaRegPenToSquare,
   FaUser,
   FaUserPlus,
 } from "react-icons/fa6";
-import axios from "../../axios/api";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
 
@@ -80,7 +78,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       chanName: channel,
       targets: selectedItems,
     };
-    console.log("yo", channelData);
     const socket = io("http://localhost:5001/", {
       withCredentials: true,
     });
@@ -108,7 +105,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   return (
     <div>
       <button onClick={togglePopin}>
-        <FaUserPlus size={16} className="text-lilac" />
+        <FaUserPlus size={16} className="text-lilac mr-6 mt-1" />
       </button>
 
       {/*POPIN*/}
