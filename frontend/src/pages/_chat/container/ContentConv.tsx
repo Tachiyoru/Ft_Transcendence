@@ -83,7 +83,7 @@ const ContentConv = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8 hover:text-lilac">
+    <div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
       {/*NAME*/}
       {!channel ? (
         <div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">

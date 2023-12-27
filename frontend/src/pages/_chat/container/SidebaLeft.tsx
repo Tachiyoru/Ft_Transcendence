@@ -83,31 +83,22 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
               All
             </li>
             <li
-              className={`text-sm text-lilac ${
-                filtreActif === "personnal"
-                  ? "bg-purple py-1 p-3 rounded-md"
-                  : "py-1 p-3"
-              }`}
+              className={`text-sm text-lilac hover:bg-purple hover:bg-opacity-30 ml-1 rounded-md py-1 p-3 
+							${filtreActif === "personnal" ? "bg-purple" : ""}`}
               onClick={() => handleFiltre("personnal")}
             >
               Direct
             </li>
             <li
-              className={`text-sm text-lilac ${
-                filtreActif === "channel"
-                  ? "bg-purple py-1 p-3 rounded-md"
-                  : "py-1 p-3"
-              }`}
+              className={`text-sm text-lilac hover:bg-purple hover:bg-opacity-30 ml-1 rounded-md py-1 p-3 
+							${filtreActif === "channel" ? "bg-purple" : ""}`}
               onClick={() => handleFiltre("channel")}
             >
               Group
             </li>
             <li
-              className={`text-sm text-lilac ${
-                filtreActif === "spam"
-                  ? "bg-purple py-1 p-3 rounded-md"
-                  : "py-1 p-3"
-              }`}
+              className={`text-sm text-lilac hover:bg-purple hover:bg-opacity-30 ml-1 rounded-md py-1 p-3 
+							${filtreActif === "spam" ? "bg-purple" : ""}`}
               onClick={() => handleFiltre("spam")}
             >
               Spam

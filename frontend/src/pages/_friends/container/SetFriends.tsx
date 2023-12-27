@@ -178,6 +178,7 @@ const SetFriends: React.FC = () => {
                     {filteredUsers.map((user, index) => (
                       <div
                         key={index}
+                        style={{ cursor: "pointer" }}
                         className={`flex flex-row justify-between items-center py-1 ${
                           hoveredUser === user.id ? "opacity-100" : "opacity-40"
                         }`}
@@ -206,7 +207,7 @@ const SetFriends: React.FC = () => {
         <nav>
           <ul className="ml-6" style={{ cursor: "pointer" }}>
             <li
-              className={`mb-2 text-sm text-lilac ${
+              className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "tous"
                   ? "bg-violet-black-nav py-2 pl-4 rounded-l-md"
                   : "py-2 pl-4"
@@ -216,7 +217,7 @@ const SetFriends: React.FC = () => {
               Friends
             </li>
             <li
-              className={`mb-2 text-sm text-lilac ${
+              className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "invitations"
                   ? "bg-violet-black-nav py-2 pl-4 rounded-l-md"
                   : "py-2 pl-4"
@@ -226,7 +227,7 @@ const SetFriends: React.FC = () => {
               Invitations
             </li>
             <li
-              className={`mb-2 text-sm text-lilac ${
+              className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "blocked"
                   ? "bg-violet-black-nav py-2 pl-4 rounded-l-md"
                   : "py-2 pl-4"
