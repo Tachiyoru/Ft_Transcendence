@@ -260,7 +260,7 @@ const NavHorizontal = () => {
             </div>
             {navItemsInfo.map((item, index) => (
               <div key={index}>
-                <li>
+                <li className="transition duration-300 ease-in-out hover:scale-125">
                   <NavItem
                     icon={item.icon}
                     name={item.name}
