@@ -4,12 +4,15 @@ import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
+import { io } from "socket.io-client";
+import { set } from "react-hook-form";
 
 interface NavItemProps {
   name: string;
   icon: IconType;
   onClick: () => void;
   selectedSection?: string | null;
+  unreadNotifications: number | 0;
 }
 
 interface Notification {
@@ -30,6 +33,7 @@ const NavItem: React.FC<NavItemProps> = ({
   name,
   onClick,
   selectedSection,
+  unreadNotifications,
 }) => {
   const [showDescription, setShowDescription] = useState(false);
 
@@ -39,7 +43,16 @@ const NavItem: React.FC<NavItemProps> = ({
         <Icon size={16} />
       </Link>
     ) : (
-      <Icon size={14} />
+      <>
+        <Icon size={14} />
+        {name === "Notifications" && unreadNotifications > 0 && (
+          <div className="absolute top-0 right-0 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+            <span className="text-white text-xss font-semibold">
+              {unreadNotifications}
+            </span>
+          </div>
+        )}
+      </>
     );
 
   return (
@@ -131,6 +144,25 @@ const NavHorizontal = () => {
     }
   };
 
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+
+  useEffect(() => {
+    const socket = io("http://localhost:5001/", {
+      withCredentials: true,
+    });
+    socket.on("connect", () => {
+      socket.emit("unread-notification");
+      socket.on("unread-notification-array", (notification) => {
+        if (notification) setUnreadNotifications(notification.length);
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+      socket.disconnect();
+    });
+  }, []);
+
   const getNotifications = async (userId: number): Promise<Notification[]> => {
     try {
       const response = await axios.get<Notification[]>(
@@ -152,6 +184,7 @@ const NavHorizontal = () => {
         const { id: userId } = await getLoggedInUserInfo();
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
+
         setHasNewNotifications(true);
         setNotificationVisible(true);
       } catch (error) {
@@ -179,6 +212,8 @@ const NavHorizontal = () => {
         await axios.patch(`notification/read/${userId}/${notificationId}`, {
           read: true,
         });
+        setUnreadNotifications(unreadNotifications - 1);
+        console.log("test", unreadNotifications);
         const updatedNotifications = notifications.map((notification) =>
           notification.id === notificationId
             ? { ...notification, read: true }
@@ -269,6 +304,7 @@ const NavHorizontal = () => {
                       handleNotificationClick();
                     }}
                     selectedSection={selectedSection}
+                    unreadNotifications={unreadNotifications}
                   />
                 </li>
 

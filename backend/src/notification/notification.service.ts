@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { User } from "@prisma/client";
+import { Notification, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
 import
@@ -7,11 +7,14 @@ import
 	NotificationType,
 	NotificationContentFunctions,
 } from "./content-notification";
+import { NotificationGateway } from "./notification.gateway";
 
 @Injectable()
 export class NotificationService
 {
-	constructor(private prismaService: PrismaService) {}
+	constructor(
+		private prismaService: PrismaService,
+	) {}
 
 	async getMyNotifications(user: User)
 	{
@@ -37,7 +40,7 @@ export class NotificationService
 		return user.notifications;
 	}
 
-	async getUnreadNotifications(userId: number)
+	async getUnreadNotifications(userId: number): Promise<Notification[]>
 	{
 		const user = await this.prismaService.user.findUnique({
 			where: { id: userId },
@@ -54,7 +57,6 @@ export class NotificationService
 		return (unreadNotifications);
 	}
 
-	// envoyer type de notification + dto contenant EVENTUELLEMENT les infos necessaires pour certaines notifs seulement, avec le type, retrouver le content de la notif, et rajouter la notif contenant le type (plus vraiment necesssaire a part pour cote front peut etre) et le content dans user.notifications
 	async addNotificationByUserId(
 		userId: number,
 		notificationDto: CreateNotificationDto,
@@ -84,7 +86,7 @@ export class NotificationService
 				content: updatedContent,
 			},
 		});
-		// console.log(notification);
+
 		return notification;
 	}
 
@@ -151,18 +153,21 @@ export class NotificationService
 			include: { notifications: true },
 		});
 
-		if (!user) throw new Error("User not found");
+		if (!user)
+			throw new Error("User not found");
 
 		let updatedNotification = await this.prismaService.notification.findFirst({
 			where: { id: notificationId },
 		});
-		if (!updatedNotification) throw new Error("Notification not found");
+		if (!updatedNotification)
+			throw new Error("Notification not found");
 
 		updatedNotification = await this.prismaService.notification.update({
 			where: { id: notificationId },
 			data: { read: true },
 		});
 
+		this.deleteNotificationById(userId, notificationId);
 		return updatedNotification;
 	}
 
