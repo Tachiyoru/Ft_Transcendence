@@ -14,6 +14,9 @@ import {
   UpdateMessageDto,
   createChannel,
 } from "./dto/create-message.dto";
+import {
+  ParseIntPipe,
+} from "@nestjs/common";
 import { Server, Socket } from "socket.io";
 import { Request, UseGuards } from "@nestjs/common";
 import { Mode, User } from "@prisma/client";
@@ -116,9 +119,9 @@ export class chatGateway
   @SubscribeMessage("channel")
   async getChannelById(
     @ConnectedSocket() client: Socket,
-    @MessageBody("id") id: number
+	@MessageBody("id", ParseIntPipe) id: number
   ) {
-    if (!id) return;
+    if (!id) throw Error("id not found");
     console.log("getChannelById ", id);
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: id },

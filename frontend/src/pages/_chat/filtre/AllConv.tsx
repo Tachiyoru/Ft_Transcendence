@@ -3,6 +3,7 @@ import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { WebSocketContext } from "../../../socket/socket";
 import { useDispatch } from "react-redux";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
+import { Link } from "react-router-dom";
 
 
 interface Channel {
@@ -44,9 +45,11 @@ const AllConv = () => {
           onClick={() => handleChannelClick(channel.chanId)}
           style={{ cursor: "pointer" }}
         >
-          <div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
-            <FaUser className="text-lilac" />
-          </div>
+          <Link to={`/chat/${channel.chanId}`}>
+            <div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
+              <FaUser className="text-lilac" />
+            </div>
+          </Link>
           <div className="pt-3 hidden md:block">
             <div className="flex flex-row justify-between">
               <p className="text-base text-lilac">

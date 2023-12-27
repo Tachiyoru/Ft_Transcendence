@@ -42,10 +42,9 @@ const App: React.FC = () => {
             path="/game"
             element={user ? <Game /> : <Navigate to="/sign-in" />}
           />
-          <Route
-            path="/chat"
-            element={user ? <Chat /> : <Navigate to="/sign-in" />}
-          />
+          <Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />}>
+            <Route path="/chat/:chanId" element={<Chat />} />
+          </Route>
           <Route
             path="/friends"
             element={user ? <Friends /> : <Navigate to="/sign-in" />}

@@ -4,19 +4,15 @@ import {
   FaBan,
   FaPaperPlane,
   FaUserGroup,
-  FaUserPlus,
   FaXmark,
 } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { RootState } from "../../../store/store";
 import TimeConverter from "../../../components/date/TimeConverter";
 import AddUserConv from "../../../components/popin/AddUserConv";
 import { WebSocketContext } from "../../../socket/socket";
-import { useDispatch } from "react-redux";
 
 interface Channel {
   name: string;
@@ -35,9 +31,10 @@ const ContentConv = () => {
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>("");
   const socket = useContext(WebSocketContext);
-  const id = useSelector((state: RootState) => state.selectedChannelId);
 
-  const namesapce = io("http://localhost:5001/user-${socket.id}");
+  const namespace = io("http://localhost:5001/user-${socket.id}");
+
+  const { chanId } = useParams();
 
   const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,15 +48,13 @@ const ContentConv = () => {
   };
 
   useEffect(() => {
-    console.log("id:", id.selectedChannelId);
-    if (id.selectedChannelId !== null) {
-      socket.emit("channel", { id: id.selectedChannelId });
+
+      socket.emit("channel", { id: chanId });
       socket.on("channel", (channelInfo, messageList) => {
         console.log("Received channel:", channelInfo, messageList);
         setMessageList(messageList);
         setChannel(channelInfo);
       });
-    }
     console.log("connected as socket :", socket.id);
     socket.on("recapMessages", (newMessage: Message) => {
       console.log(
@@ -74,7 +69,7 @@ const ContentConv = () => {
       socket.off("channel");
       socket.off("recapMessages");
     };
-  }, [id]);
+  }, [chanId, socket]);
 
   const toggleRightSidebar = () => {
     setIsRightSidebarOpen(!isRightSidebarOpen);
