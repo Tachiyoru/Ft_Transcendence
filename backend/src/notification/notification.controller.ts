@@ -62,12 +62,6 @@ export class NotificationController
 		);
 	}
 
-	@Get(":userId/unread")
-	async getUnreadNotifications(@Param("userId", ParseIntPipe) userId: number): Promise<Notification[]>
-	{
-		return this.notificationService.getUnreadNotifications(userId);
-	}
-
 	@Patch("read/:userId/:id")
 	async setNotificationReadById(
 		@Param("userId", ParseIntPipe) userId: number,

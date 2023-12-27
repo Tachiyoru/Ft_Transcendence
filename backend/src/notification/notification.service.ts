@@ -37,23 +37,6 @@ export class NotificationService
 		return user.notifications;
 	}
 
-	async getUnreadNotifications(userId: number)
-	{
-		const user = await this.prismaService.user.findUnique({
-			where: { id: userId },
-			include: { notifications: true },
-		});
-
-		if (!user)
-			throw new Error("User not found");
-
-		const unreadNotifications = user.notifications.filter(
-			(notification) => !notification.read
-		);
-
-		return (unreadNotifications);
-	}
-
 	// envoyer type de notification + dto contenant EVENTUELLEMENT les infos necessaires pour certaines notifs seulement, avec le type, retrouver le content de la notif, et rajouter la notif contenant le type (plus vraiment necesssaire a part pour cote front peut etre) et le content dans user.notifications
 	async addNotificationByUserId(
 		userId: number,
