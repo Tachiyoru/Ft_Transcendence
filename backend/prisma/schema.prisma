@@ -102,13 +102,13 @@ model Notification {
 	createdAt DateTime @default(now())
 
 	user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-	userId Int 
+	userId Int
 
 	type	Int
 
 	content String
 	read    Boolean @default(false)
-// Rajouter delai avant suppression ?
+
 	@@map("Notifications")
 }
 

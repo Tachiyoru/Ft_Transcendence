@@ -4,18 +4,22 @@ import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
+import { io } from "socket.io-client";
+import { set } from "react-hook-form";
 
 interface NavItemProps {
   name: string;
   icon: IconType;
   onClick: () => void;
   selectedSection?: string | null;
+  unreadNotifications: number | 0;
 }
 
 interface Notification {
   id: number;
   content: string;
   read: boolean;
+  type: number;
   // Ajoutez d'autres propriétés de notification si nécessaire
 }
 
@@ -30,6 +34,7 @@ const NavItem: React.FC<NavItemProps> = ({
   name,
   onClick,
   selectedSection,
+  unreadNotifications,
 }) => {
   const [showDescription, setShowDescription] = useState(false);
 
@@ -39,7 +44,16 @@ const NavItem: React.FC<NavItemProps> = ({
         <Icon size={16} />
       </Link>
     ) : (
-      <Icon size={14} />
+      <>
+        <Icon size={14} />
+        {name === "Notifications" && unreadNotifications > 0 && (
+          <div className="absolute top-0 right-0 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+            <span className="text-white text-xss font-semibold">
+              {unreadNotifications}
+            </span>
+          </div>
+        )}
+      </>
     );
 
   return (
@@ -65,6 +79,28 @@ const NavItem: React.FC<NavItemProps> = ({
   );
 };
 
+export const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
+  try {
+    const response = await axios.get<{ id: number }>("/users/me");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching logged-in user info:", error);
+    return { id: -1 }; // Retourne un ID par défaut (vous pouvez ajuster selon vos besoins)
+  }
+};
+
+export const getNotifications = async (
+  userId: number
+): Promise<Notification[]> => {
+  try {
+    const response = await axios.get<Notification[]>(`/notification/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return [];
+  }
+};
+
 const NavHorizontal = () => {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [prevSelectedSection, setPrevSelectedSection] = useState<string | null>(
@@ -74,6 +110,9 @@ const NavHorizontal = () => {
   const [searchValue, setSearchValue] = useState<string>(""); // État pour la valeur de recherche
   const [showUserList, setShowUserList] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationVisible, setNotificationVisible] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -121,30 +160,24 @@ const NavHorizontal = () => {
     };
   }, [menuRef]);
 
-  const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
-    try {
-      const response = await axios.get<{ id: number }>("/users/me");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching logged-in user info:", error);
-      return { id: -1 }; // Retourne un ID par défaut (vous pouvez ajuster selon vos besoins)
-    }
-  };
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
 
-  const getNotifications = async (userId: number): Promise<Notification[]> => {
-    try {
-      const response = await axios.get<Notification[]>(
-        `/notification/${userId}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      return [];
-    }
-  };
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationVisible, setNotificationVisible] = useState(false);
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  useEffect(() => {
+    const socket = io("http://localhost:5001/", {
+      withCredentials: true,
+    });
+    socket.on("connect", () => {
+      socket.emit("unread-notification");
+      socket.on("unread-notification-array", (notification) => {
+        if (notification) setUnreadNotifications(notification.length);
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+      socket.disconnect();
+    });
+  }, []);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
@@ -152,6 +185,7 @@ const NavHorizontal = () => {
         const { id: userId } = await getLoggedInUserInfo();
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
+
         setHasNewNotifications(true);
         setNotificationVisible(true);
       } catch (error) {
@@ -179,6 +213,8 @@ const NavHorizontal = () => {
         await axios.patch(`notification/read/${userId}/${notificationId}`, {
           read: true,
         });
+        setUnreadNotifications(unreadNotifications - 1);
+        console.log("test", unreadNotifications);
         const updatedNotifications = notifications.map((notification) =>
           notification.id === notificationId
             ? { ...notification, read: true }
@@ -269,6 +305,7 @@ const NavHorizontal = () => {
                       handleNotificationClick();
                     }}
                     selectedSection={selectedSection}
+                    unreadNotifications={unreadNotifications}
                   />
                 </li>
 
