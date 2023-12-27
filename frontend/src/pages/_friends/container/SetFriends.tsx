@@ -5,6 +5,11 @@ import Invitations from "./Invitations";
 import Blocked from "./Blocked";
 import axios from "../../../axios/api";
 import { Link } from "react-router-dom";
+import { NavHorizontal } from "../../../components/nav/NavHorizontal";
+import {
+  getLoggedInUserInfo,
+  getNotifications,
+} from "../../../components/nav/container/NavHorizontal";
 
 type FilterType = "tous" | "invitations" | "blocked";
 
@@ -84,6 +89,28 @@ const SetFriends: React.FC = () => {
     setIsTyping(inputValue !== "");
     setSearchText(e.target.value);
   };
+
+  const hasNewInvitations = async () => {
+    const { id: userId } = await getLoggedInUserInfo();
+    const fetchedNotifications = await getNotifications(userId);
+    const invitationNotification = fetchedNotifications.filter(
+      (notification) => notification.type === 0
+    );
+    console.log("invitationNotification", invitationNotification);
+    return invitationNotification.length;
+  };
+
+  const [hasNewInvitationsCount, setHasNewInvitationsCount] =
+    useState<number>(0);
+
+  useEffect(() => {
+    const updateNewInvitationsCount = async () => {
+      const count = await hasNewInvitations();
+      setHasNewInvitationsCount(count);
+    };
+
+    updateNewInvitationsCount();
+  }, [filtreActif]);
 
   const handleInputClick = () => {
     setIsDropdownOpen(true);
@@ -217,14 +244,23 @@ const SetFriends: React.FC = () => {
               Friends
             </li>
             <li
-              className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
+              className={`mb-2 relative text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "invitations"
-                  ? "bg-violet-black-nav py-2 pl-4 rounded-l-md"
+                  ? "bg-violet-black-nav py-2 pl-4 rounded-l-md" // Assurez-vous que cette classe relative est présente
                   : "py-2 pl-4"
               }`}
               onClick={() => handleFiltre("invitations")}
             >
               Invitations
+              {hasNewInvitationsCount > 0 && (
+                <div className="absolute top-0 right-0 mt-1 mr-2">
+                  <div className="absolute top-0 right-0 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+                    <span className="text-white text-xss font-semibold">
+                      {hasNewInvitationsCount}
+                    </span>
+                  </div>
+                </div>
+              )}
             </li>
             <li
               className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${

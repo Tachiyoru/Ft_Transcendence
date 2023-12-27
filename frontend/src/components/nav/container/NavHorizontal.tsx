@@ -19,6 +19,7 @@ interface Notification {
   id: number;
   content: string;
   read: boolean;
+  type: number;
   // Ajoutez d'autres propriétés de notification si nécessaire
 }
 
@@ -78,6 +79,28 @@ const NavItem: React.FC<NavItemProps> = ({
   );
 };
 
+export const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
+  try {
+    const response = await axios.get<{ id: number }>("/users/me");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching logged-in user info:", error);
+    return { id: -1 }; // Retourne un ID par défaut (vous pouvez ajuster selon vos besoins)
+  }
+};
+
+export const getNotifications = async (
+  userId: number
+): Promise<Notification[]> => {
+  try {
+    const response = await axios.get<Notification[]>(`/notification/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return [];
+  }
+};
+
 const NavHorizontal = () => {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [prevSelectedSection, setPrevSelectedSection] = useState<string | null>(
@@ -87,6 +110,9 @@ const NavHorizontal = () => {
   const [searchValue, setSearchValue] = useState<string>(""); // État pour la valeur de recherche
   const [showUserList, setShowUserList] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationVisible, setNotificationVisible] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -134,16 +160,6 @@ const NavHorizontal = () => {
     };
   }, [menuRef]);
 
-  const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
-    try {
-      const response = await axios.get<{ id: number }>("/users/me");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching logged-in user info:", error);
-      return { id: -1 }; // Retourne un ID par défaut (vous pouvez ajuster selon vos besoins)
-    }
-  };
-
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
 
   useEffect(() => {
@@ -162,21 +178,6 @@ const NavHorizontal = () => {
       socket.disconnect();
     });
   }, []);
-
-  const getNotifications = async (userId: number): Promise<Notification[]> => {
-    try {
-      const response = await axios.get<Notification[]>(
-        `/notification/${userId}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      return [];
-    }
-  };
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationVisible, setNotificationVisible] = useState(false);
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
