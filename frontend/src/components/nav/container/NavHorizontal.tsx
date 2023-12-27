@@ -46,7 +46,7 @@ const NavItem: React.FC<NavItemProps> = ({
     <div className="relative group" style={{ cursor: "pointer" }}>
       {/* ICON */}
       <div
-        className="px-3 py-2 flex items-center text-purple relative hover:text-fuchsia"
+        className="px-3 py-2 flex items-center text-purple relative hover:text-fuchsia transition duration-300 ease-in-out hover:scale-125"
         onMouseEnter={() => setShowDescription(true)}
         onMouseLeave={() => setShowDescription(false)}
         onClick={() => onClick()}
@@ -143,8 +143,8 @@ const NavHorizontal = () => {
     }
   };
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationClicked, setNotificationClicked] = useState(false);
   const [notificationVisible, setNotificationVisible] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
@@ -152,7 +152,7 @@ const NavHorizontal = () => {
         const { id: userId } = await getLoggedInUserInfo();
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
-        // Déplacer la logique de toggleSection ici
+        setHasNewNotifications(true);
         setNotificationVisible(true);
       } catch (error) {
         console.error("Error fetching and setting notifications:", error);
@@ -200,7 +200,7 @@ const NavHorizontal = () => {
         <div
           ref={menuRef}
           className="shadow-md bg-dark-violet rounded-lg py-2 px-4 absolute right-2 mt-1"
-          style={{ cursor: "default" }}
+          style={{ cursor: "default", zIndex: 1 }}
         >
           <div className="text-xs font-normal text-param">Notifications</div>
           <ul>
@@ -260,7 +260,7 @@ const NavHorizontal = () => {
             </div>
             {navItemsInfo.map((item, index) => (
               <div key={index}>
-                <li className="transition duration-300 ease-in-out hover:scale-125">
+                <li>
                   <NavItem
                     icon={item.icon}
                     name={item.name}

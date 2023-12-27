@@ -28,6 +28,7 @@ export class NotificationController
 		return this.notificationService.getMyNotifications(user);
 	}
 
+
 	// test only, delete after
 	@Get("all")
 	async getAllNotifications(): Promise<Notification[]>
@@ -59,6 +60,12 @@ export class NotificationController
 			userId,
 			notificationId
 		);
+	}
+
+	@Get(":userId/unread")
+	async getUnreadNotifications(@Param("userId", ParseIntPipe) userId: number): Promise<Notification[]>
+	{
+		return this.notificationService.getUnreadNotifications(userId);
 	}
 
 	@Patch("read/:userId/:id")
