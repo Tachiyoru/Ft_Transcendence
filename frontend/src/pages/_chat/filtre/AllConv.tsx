@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { FaUser, FaUserGroup } from "react-icons/fa6";
+import { WebSocketContext } from "../../../socket/socket";
 import { useDispatch } from "react-redux";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
-import { WebSocketContext } from "../../../socket/socket";
+
 
 interface Channel {
   name: string;
@@ -17,13 +18,17 @@ const AllConv = () => {
   const socket = useContext(WebSocketContext);
 
   useEffect(() => {
-    console.log("Connected to server allconv");
-    socket.emit("find-my-channels");
+    console.log("Connected to server :", socket, socket.id);
+	socket.emit("find-my-channels");
     socket.on("my-channel-list", (channelList) => {
       console.log("Received my channel list:", channelList);
       setAllChannel(channelList);
     });
-  }, [allChannel]);
+	// socket.on("my-channel-list", (channel: Channel) => {
+	// 	console.log("Received my channel list :", channel);
+	// 	setAllChannel((prevchan) => [...prevchan, channel]);
+	//   });
+  }, []);
 
   const handleChannelClick = (channelId: number) => {
     dispatch(setSelectedChannelId(channelId));
@@ -64,7 +69,6 @@ const AllConv = () => {
           </div>
         </div>
       ))}
-
       {/*CHANNEL
 		<div className="flex flex-row h-12 md:m-2">
 		<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">

@@ -10,12 +10,12 @@ export class SocketClient implements OnModuleInit {
   }
 
   onModuleInit() {
-	this.registerConsumerEvents();
+    this.registerConsumerEvents();
   }
 
   private registerConsumerEvents() {
     this.socketCLient.on("connect", () => {
-		console.log("Connected to socket server");
-	  });
+      console.log("Connected to socket server", this.socketCLient.id);
+    });
   }
 }

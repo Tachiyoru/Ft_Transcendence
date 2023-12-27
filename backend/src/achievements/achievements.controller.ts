@@ -18,7 +18,7 @@ export class AchievementsController {
 
   @Get("list")
   async getAchievementsList(): Promise<Achievement[]> {
-    console.log("getAchievementsList");
+    // console.log("getAchievementsList");
     return this.achievementsService.getAchievementsList();
   }
 

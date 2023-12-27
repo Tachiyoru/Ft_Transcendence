@@ -23,7 +23,7 @@ export class UserController {
 
   @Get("me")
   getMe(@GetUser() user: User) {
-    console.log("users/me", user);
+    // console.log("users/me", user);
     return user;
   }
 

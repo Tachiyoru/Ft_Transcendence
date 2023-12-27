@@ -4,6 +4,9 @@ import {
   MessageBody,
   WebSocketServer,
   ConnectedSocket,
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { chatService } from "./chat.service";
 import {
@@ -12,16 +15,8 @@ import {
   createChannel,
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
-import {
-  Controller,
-  Get,
-  OnModuleInit,
-  Param,
-  ParseIntPipe,
-  Request,
-  UseGuards,
-} from "@nestjs/common";
-import { Channel, Mode, User } from "@prisma/client";
+import { Request, UseGuards } from "@nestjs/common";
+import { Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
@@ -29,25 +24,101 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 @WebSocketGateway({
   cors: { origin: "http://localhost:5173", credentials: true },
 })
+// ptet utiliser un namespace pour les channels ou les notifications
 @UseGuards(SocketTokenGuard)
-export class chatGateway{
-  @WebSocketServer()
-  server: Server;
+export class chatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  @WebSocketServer() server: Server;
   constructor(
     private readonly chatService: chatService,
     private readonly prisma: PrismaService
   ) {}
-  onModuleInit() {
+
+  
+  afterInit() {
     this.server.on("connection", (socket) => {
       console.log("connected as socket :", socket.id);
     });
   }
 
+  handleConnection(client: Socket, ...args: any[]) {
+    console.log("client connected");
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log("client disconnected");
+  }
+
+  @SubscribeMessage("create-message")
+  async createMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @Request() req: any
+  ) {
+	const namespace = this.server.of(`/user-${client.id}`);
+
+    try {
+      const message = await this.chatService.createMessage(
+        createMessageDto,
+        req
+      );
+      console.log("connected as socket :", client.id);
+      console.log("server is  :", this.server.sockets.adapter.rooms);
+      console.log("server is  :", this.server.sockets.adapter.sids);
+      console.log("message is : ", message);
+      namespace.emit("recapMessages", message);
+    } catch (error) {
+      client.emit("createMsgError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("joinChan")
+  async joinChan(
+    client: Socket,
+    @MessageBody()
+    data: { chanName: string; password?: string; invited?: boolean },
+    @Request() req: any
+  ) {
+    try {
+      if (!data.invited) {
+        data.invited = false;
+      }
+      const result = await this.chatService.joinChannel(
+        data.chanName,
+        data.invited,
+        req,
+        data.password
+      );
+      client.join(result.name);
+	  this.server.to(data.chanName).emit("userJoined", result);
+    //   client.emit("channelJoined", result);
+    } catch (error) {
+      client.emit("renameChanError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("leaveChan")
+  async leaveChan(
+    client: Socket,
+    @MessageBody() data: { chanName: string },
+    @Request() req: any
+  ) {
+    try {
+      const result = await this.chatService.leaveChannel(data.chanName, req);
+      client.leave(data.chanName);
+      client.emit("channelLeft", result);
+    } catch (error) {
+      client.emit("chanLeftError", { message: error.message });
+    }
+  }
+
   @SubscribeMessage("channel")
   async getChannelById(
     @ConnectedSocket() client: Socket,
-	@MessageBody("id") id: number) {
-    if (!id) throw Error("id not found");
+    @MessageBody("id") id: number
+  ) {
+    if (!id) return;
     console.log("getChannelById ", id);
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: id },
@@ -108,7 +179,6 @@ export class chatGateway{
     @Request() req: any
   ) {
     try {
-
       const result = await this.chatService.inviteUserToChannel(
         data.chanName,
         data.targetId,
@@ -186,44 +256,12 @@ export class chatGateway{
     const chanlist = await this.chatService.getChannelsByUserId(
       client.handshake.auth.id
     );
+    const chanlist2 = chanlist;
+    for (const channel of chanlist2) {
+      client.join(channel.name);
+      console.log("joined channel : ", channel.name);
+    }
     client.emit("my-channel-list", chanlist);
-  }
-
-    @SubscribeMessage("joinChan")
-    async joinChan(
-      client: Socket,
-      @MessageBody()
-      data: { chanName: string; password?: string; invited?: boolean },
-      @Request() req: any
-    ) {
-      try {
-        if (!data.invited) {
-          data.invited = false;
-        }
-        const result = await this.chatService.joinChannel(
-          data.chanName,
-          data.invited,
-          req,
-          data.password
-        );
-        client.emit("channelJoined", result);
-      } catch (error) {
-        client.emit("renameChanError", { message: error.message });
-      }
-    }
-
-  @SubscribeMessage("leaveChan")
-  async leaveChan(
-    client: Socket,
-    @MessageBody() data: { chanName: string },
-    @Request() req: any
-  ) {
-    try {
-      const result = await this.chatService.leaveChannel(data.chanName, req);
-      client.emit("channelLeft", result);
-    } catch (error) {
-      client.emit("chanLeftError", { message: error.message });
-    }
   }
 
   @SubscribeMessage("banUser")
@@ -334,27 +372,7 @@ export class chatGateway{
       client.emit("findAllMessage", messagesList);
       console.log("msglist", messagesList);
     } catch (error) {
-    //   client.emit("findAllMessageError",  error.message );
-    }
-  }
-  @SubscribeMessage("create-message")
-  async createMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() createMessageDto: CreateMessageDto,
-    @Request() req: any
-  ) {
-    console.log(createMessageDto);
-    try {
-      const message = await this.chatService.createMessage(
-        createMessageDto,
-        req
-      );
-
-      console.log(message);
-
-      this.server.emit("recapMessages", message);
-    } catch (error) {
-      client.emit("createMsgError", { message: error.message });
+      //   client.emit("findAllMessageError",  error.message );
     }
   }
 
@@ -386,19 +404,19 @@ export class chatGateway{
     }
   }
 
-  //   @SubscribeMessage("typing")
-  //   async typing(
-  //     @MessageBody("isTyping") isTyping: boolean,
-  //     @MessageBody("user") username: string,
-  //     @ConnectedSocket() client: Socket
-  //   ) {
-  //     const user = await this.prisma.user.findUnique({
-  //       where: { username: username },
-  //     });
-  //     if (!user) {
-  //       return;
-  //     }
-  //     const name = user.username;
-  //     client.broadcast.emit("typing", { name, isTyping });
-  //   }
+  @SubscribeMessage("typing")
+  async typing(
+    @MessageBody("isTyping") isTyping: boolean,
+    @MessageBody("user") username: string,
+    @ConnectedSocket() client: Socket
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!user) {
+      return;
+    }
+    const name = user.username;
+    client.broadcast.emit("typing", { name, isTyping });
+  }
 }

@@ -51,7 +51,7 @@ export class AchievementsService
 	async getAchievementsList()
 	{
 		const achievementsList = await this.prismaService.achievement.findMany();
-		console.log('yo', achievementsList);
+		// console.log('yo', achievementsList);
 		return achievementsList;
 	}
 

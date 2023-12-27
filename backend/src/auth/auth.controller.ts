@@ -14,6 +14,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { GetUser } from "./decorator";
+import { TokenGuard } from "./guard";
 
 @Controller("auth")
 export class AuthController {
@@ -31,21 +32,20 @@ export class AuthController {
   @Post("signin")
   async signin(
     @Body() dto: AuthDto2,
-    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
     const user = await this.authService.signin(dto, res);
-    console.log(req.cookies.access_token);
-    console.log("token post singin = ", req.cookies.refresh_token);
     return { user };
   }
 
+  @UseGuards(TokenGuard)
   @Post("logout")
   async logout(
-    @GetUser("id") userid: number,
+    @GetUser() user: User,
     @Res({ passthrough: true }) res: Response
   ) {
-    return await this.authService.logout(userid, res);
+	  await this.authService.logout(user, res);
+	  return res.redirect(`http://localhost:5173/sign-in`);
   }
 
   @Get("refresh")
@@ -68,7 +68,6 @@ export class AuthController {
       raw._json.image.versions.small
     );
     await this.authService.callForgeTokens(user2, res);
-    // console.log("fortyTwoCallback --> access_token", req.cookies.access_token);
     res.redirect("http://localhost:5173/");
     return user2;
   }
@@ -86,7 +85,6 @@ export class AuthController {
       raw._json.avatar_url
     );
     await this.authService.callForgeTokens(user2, res);
-    // console.log(req.cookies.access_token);
     res.redirect(`http://localhost:5173/`);
     return user2;
   }

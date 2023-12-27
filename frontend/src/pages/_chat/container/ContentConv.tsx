@@ -16,6 +16,7 @@ import { RootState } from "../../../store/store";
 import TimeConverter from "../../../components/date/TimeConverter";
 import AddUserConv from "../../../components/popin/AddUserConv";
 import { WebSocketContext } from "../../../socket/socket";
+import { useDispatch } from "react-redux";
 
 interface Channel {
   name: string;
@@ -33,39 +34,46 @@ const ContentConv = () => {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>("");
-  const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
   const socket = useContext(WebSocketContext);
+  const id = useSelector((state: RootState) => state.selectedChannelId);
+
+  const namesapce = io("http://localhost:5001/user-${socket.id}");
 
   const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!channel) return;
-      console.log("Connected to server content");
-      socket.emit("create-message", {
-        content: message,
-        chanName: channel.name,
-      });
-      setMessage("");
-	  return () => {
-		socket.off("create-message");
-	  }
+    console.log("Connected to server content");
+    socket.emit("create-message", {
+      content: message,
+      chanName: channel.name,
+    });
+    setMessage("");
   };
 
   useEffect(() => {
     console.log("id:", id.selectedChannelId);
+    if (id.selectedChannelId !== null) {
       socket.emit("channel", { id: id.selectedChannelId });
       socket.on("channel", (channelInfo, messageList) => {
         console.log("Received channel:", channelInfo, messageList);
         setMessageList(messageList);
         setChannel(channelInfo);
       });
-      socket.on("recapMessages", (newMessage: Message) => {
-        console.log("Received new message:", newMessage);
-        setMessageList((prevMessages) => [...prevMessages, newMessage]);
-      });
-	  return () => {
-		socket.off("channel");
-		socket.off("recapMessages");
-	  }
+    }
+    console.log("connected as socket :", socket.id);
+    socket.on("recapMessages", (newMessage: Message) => {
+      console.log(
+        "Received new message:",
+        newMessage,
+        "from socket",
+        socket.id
+      );
+      setMessageList((prevMessages) => [...prevMessages, newMessage]);
+    });
+    return () => {
+      socket.off("channel");
+      socket.off("recapMessages");
+    };
   }, [id]);
 
   const toggleRightSidebar = () => {
