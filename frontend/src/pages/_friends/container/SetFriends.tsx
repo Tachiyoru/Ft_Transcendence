@@ -6,10 +6,7 @@ import Blocked from "./Blocked";
 import axios from "../../../axios/api";
 import { Link } from "react-router-dom";
 import { NavHorizontal } from "../../../components/nav/NavHorizontal";
-import {
-  getLoggedInUserInfo,
-  getNotifications,
-} from "../../../components/nav/container/NavHorizontal";
+import { getLoggedInUserInfo } from "../../../components/nav/container/NavHorizontal";
 
 type FilterType = "tous" | "invitations" | "blocked";
 
@@ -90,14 +87,22 @@ const SetFriends: React.FC = () => {
     setSearchText(e.target.value);
   };
 
+  const getPendingList = async () => {
+    try {
+      const response = await axios.get(`/friends-list/pending-list`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user pending list:", error);
+      return [];
+    }
+  };
+
   const hasNewInvitations = async () => {
     const { id: userId } = await getLoggedInUserInfo();
-    const fetchedNotifications = await getNotifications(userId);
-    const invitationNotification = fetchedNotifications.filter(
-      (notification) => notification.type === 0
-    );
-    console.log("invitationNotification", invitationNotification);
-    return invitationNotification.length;
+    const fetchedPendingList = await getPendingList();
+    console.log("fetchedPendingList", fetchedPendingList);
+    return fetchedPendingList.length;
   };
 
   const [hasNewInvitationsCount, setHasNewInvitationsCount] =
