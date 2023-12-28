@@ -112,7 +112,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
           className="w-5/12 p-4 text-lilac rounded-md bg-accent-violet absolute top-full right-0 mt-1"
           style={{ zIndex: 1 }}
         >
-          <p className="text-base mb-1">Select Friends</p>
+          <p className="text-base mb-1 ">Select Friends</p>
           <p className="text-xs">You can add 5 more friends</p>
 
           {/*RESEARCH BAR*/}
@@ -136,7 +136,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
           </div>
 
           {listUsers.length === 0 ? (
-            <div className="text-center mt-4">
+            <div className="text-center mt-4" style={{ cursor: "pointer" }}>
               <p className="text-sm font-regular">No friends found</p>
               <Link to="/friends">
                 <p className="text-xs my-1 underline">
@@ -161,6 +161,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
                     <input
                       type="checkbox"
                       checked={checkedItems[user.username] !== undefined}
+                      style={{ cursor: "pointer" }}
                       onChange={() => handleCheckboxChange(user)}
                       className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
                     />

@@ -31,3 +31,4 @@ export class joinChannel extends Channel {
   name: string;
   password: string;
 }
+

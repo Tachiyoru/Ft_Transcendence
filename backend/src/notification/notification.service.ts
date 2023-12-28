@@ -186,13 +186,15 @@ export class NotificationService
 			include: { notifications: true },
 		});
 
-		if (!user) throw new Error("User not found");
+		if (!user)
+			throw new Error("User not found");
 
 		let deletedNotification = await this.prismaService.notification.findFirst({
 			where: { id: notificationId },
 		});
 
-		if (!deletedNotification) throw new Error("Notification not found");
+		if (!deletedNotification)
+			throw new Error("Notification not found");
 
 		deletedNotification = await this.prismaService.notification.delete({
 			where: { id: notificationId },

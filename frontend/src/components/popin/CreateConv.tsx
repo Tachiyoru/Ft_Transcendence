@@ -173,6 +173,7 @@ const CreateConv: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={checkedItems[user.username] !== undefined}
+                      style={{ cursor: "pointer" }}
                       onChange={() => handleCheckboxChange(user)}
                       className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
                     />
@@ -188,6 +189,7 @@ const CreateConv: React.FC = () => {
                       value={channelType}
                       onChange={handleChangeChannelType}
                       className="rounded-md px-1 text-sm bg-lilac text-accent-violet"
+                      style={{ cursor: "pointer" }}
                     >
                       <option value="public">Public</option>
                       <option value="private">Private</option>
@@ -210,16 +212,15 @@ const CreateConv: React.FC = () => {
               <div className="flex flex-col items-center">
                 <button
                   disabled={Object.keys(checkedItems).length === 0}
-                  className={`mt-4 px-4 py-2 text-sm rounded-md 
+                  className={`mt-4 px-4 py-2 text-sm rounded-md
 										${
                       Object.keys(checkedItems).length === 0
                         ? "bg-purple opacity-50 text-lilac cursor-not-allowed"
-                        : "bg-purple text-lilac cursor-pointer"
+                        : "bg-purple text-lilac cursor-pointer hover:bg-violet-black"
                     }`}
                   onClick={handleSubmit}
                 >
-                  {Object.keys(checkedItems).length === 1 ||
-                  Object.keys(checkedItems).length === 0
+                  {Object.keys(checkedItems).length <= 1
                     ? "Create a conversation"
                     : "Create a channel"}
                 </button>

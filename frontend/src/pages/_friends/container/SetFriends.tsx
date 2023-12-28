@@ -6,10 +6,7 @@ import Blocked from "./Blocked";
 import axios from "../../../axios/api";
 import { Link } from "react-router-dom";
 import { NavHorizontal } from "../../../components/nav/NavHorizontal";
-import {
-  getLoggedInUserInfo,
-  getNotifications,
-} from "../../../components/nav/container/NavHorizontal";
+import { getLoggedInUserInfo } from "../../../components/nav/container/NavHorizontal";
 
 type FilterType = "tous" | "invitations" | "blocked";
 
@@ -90,14 +87,22 @@ const SetFriends: React.FC = () => {
     setSearchText(e.target.value);
   };
 
+  const getPendingList = async () => {
+    try {
+      const response = await axios.get(`/friends-list/pending-list`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user pending list:", error);
+      return [];
+    }
+  };
+
   const hasNewInvitations = async () => {
     const { id: userId } = await getLoggedInUserInfo();
-    const fetchedNotifications = await getNotifications(userId);
-    const invitationNotification = fetchedNotifications.filter(
-      (notification) => notification.type === 0
-    );
-    console.log("invitationNotification", invitationNotification);
-    return invitationNotification.length;
+    const fetchedPendingList = await getPendingList();
+    console.log("fetchedPendingList", fetchedPendingList);
+    return fetchedPendingList.length;
   };
 
   const [hasNewInvitationsCount, setHasNewInvitationsCount] =
@@ -193,7 +198,10 @@ const SetFriends: React.FC = () => {
             </div>
 
             {isDropdownOpen && (
-              <div className="h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2">
+              <div
+                className="h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2"
+                style={{ zIndex: 1 }}
+              >
                 {filteredUsers.length === 0 ? (
                   <div className="pl-4">
                     <p className="text-xs font-regular text-lilac">
@@ -253,12 +261,10 @@ const SetFriends: React.FC = () => {
             >
               Invitations
               {hasNewInvitationsCount > 0 && (
-                <div className="absolute top-0 right-0 mt-1 mr-2">
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
-                    <span className="text-white text-xss font-semibold">
-                      {hasNewInvitationsCount}
-                    </span>
-                  </div>
+                <div className="absolute top-2.5 left-20  w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+                  <span className="text-white text-xss font-semibold">
+                    {hasNewInvitationsCount}
+                  </span>
                 </div>
               )}
             </li>

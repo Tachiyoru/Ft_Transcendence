@@ -39,7 +39,7 @@ export class FriendsListController
 	}
 
 	@Get('/pending-list')
-	pendingList(@GetUser() user: User)
+	async pendingList(@GetUser() user: User)
 	{
 		return this.friendListService.pendingList(user.id);
 	}
