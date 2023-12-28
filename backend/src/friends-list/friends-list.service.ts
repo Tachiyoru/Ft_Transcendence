@@ -81,23 +81,30 @@ export class FriendsListService
 		return (user);
 	}
 
-	async rejectRequest(user: User, friendId: number) 
+	async rejectRequest(user: User, friendId: number, notificationId?: number) 
 	{
-		await this.prismaService.user.update(
-			{
-				where: { id: user.id },
-				data: { pendingList: { disconnect: { id: friendId } } }
-			}
-		);
-
 		user = await this.prismaService.user.update(
 			{
 				where: { id: friendId },
-				data: { pendingList: { disconnect: { id: user.id } } }
+				data: {
+					pendingList: { disconnect: { id: user.id } },
+				}
 			}
 		);
 
-		return user;
+		if (notificationId)
+		{
+			console.log('notificationId', notificationId);
+			const updatedUser = await this.prismaService.user.findUnique({
+				where: { id: user.id },
+				include: { notifications: true },
+			});
+			if (updatedUser)
+				console.log('updatedUser notification list : ', updatedUser.notifications);
+			return (updatedUser);
+		}
+
+		return (user);
 	}
 
 	async friendRequest(user: User, friendId: number)

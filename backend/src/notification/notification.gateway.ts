@@ -17,9 +17,7 @@ export class NotificationGateway implements OnGatewayConnection
 	@WebSocketServer() server: Server;
 
 	handleConnection(client: Socket)
-	{
-		console.log(`Client connected: ${client.id}`);
-	}
+	{}
 
 	@SubscribeMessage('unread-notification')
 	async sendUnreadNotification(@ConnectedSocket() client: Socket)
