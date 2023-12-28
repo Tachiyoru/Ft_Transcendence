@@ -192,7 +192,10 @@ const ContentConv = () => {
             </nav>
 
             {/*NAV PERSONNAL CONV*/}
-            <div className="flex flex-col justify-end space-y-2 px-2 py-2 mt-4 rounded-lg bg-purple">
+            <div
+              className="flex flex-col justify-end space-y-2 px-2 py-2 mt-4 rounded-lg bg-purple"
+              style={{ cursor: "pointer" }}
+            >
               <div className="flex flex-row justify-between items-center">
                 <div className="text-xs text-lilac">Invite friends</div>
                 <IoIosArrowForward className="w-2 h-2 text-lilac" />

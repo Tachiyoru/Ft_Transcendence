@@ -193,7 +193,10 @@ const SetFriends: React.FC = () => {
             </div>
 
             {isDropdownOpen && (
-              <div className="h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2">
+              <div
+                className="h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2"
+                style={{ zIndex: 1 }}
+              >
                 {filteredUsers.length === 0 ? (
                   <div className="pl-4">
                     <p className="text-xs font-regular text-lilac">
@@ -253,12 +256,10 @@ const SetFriends: React.FC = () => {
             >
               Invitations
               {hasNewInvitationsCount > 0 && (
-                <div className="absolute top-0 right-0 mt-1 mr-2">
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
-                    <span className="text-white text-xss font-semibold">
-                      {hasNewInvitationsCount}
-                    </span>
-                  </div>
+                <div className="absolute top-2.5 left-20  w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+                  <span className="text-white text-xss font-semibold">
+                    {hasNewInvitationsCount}
+                  </span>
                 </div>
               )}
             </li>
