@@ -5,6 +5,8 @@ import { Link } from "react-router-dom"
 import { useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import { io } from "socket.io-client";
+import { SlOptions } from "react-icons/sl";
+import UserConvOptions from "../../../components/popin/UserConvOptions";
 
 interface Member {
     username: string;
@@ -20,6 +22,8 @@ interface RightSidebarProps {
 		modes: string;
 		id: number;
 		name: string;
+		owner: Owner;
+		op: string[];
 	}
 }
 
@@ -29,21 +33,33 @@ interface Users {
 	id: number;
 }
 
+interface Owner {
+    username: string;
+	avatar: string;
+	id: number;
+}
+
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
+	owner: Owner;
+	members: Member[];
+	op: string[]
 }
 
 const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, toggleRightSidebar, channel }) => {
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
 	const [commonChannelCount, setCommonChannelCount] = useState(0);
+	const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<Users[]>([]);
 	const [usersInChannel, setUsersInChannel] = useState<Users[]>([]);
+	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
 	const [commonFriendsCount, setCommonFriendsCount] = useState(0);
 	const [usersInFriends, setUsersInFriends] = useState<Users[]>([]);
     const [showCommonFriends, setShowCommonFriends] = useState(false);
 	const [showCommonChannel, setShowCommonChannel] = useState(false);
+    const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 
 
     const toggleCommonFriends = () => {
@@ -59,16 +75,19 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 			withCredentials: true,
 		});
 
-		socket.emit('users-in-channel', { chanName: channel.name });
-		socket.on('users-in-channel', (users) => {
+		socket.emit('users-in-channel-except-him', { chanName: channel.name });
+		socket.on('users-in-channel-except-him', (users) => {
+			setUsersInChannelExceptHim(users);
+		});
+
+		socket.emit('findAllMembers', { chanName: channel.name });
+		socket.on('allMembers', (users) => {
 			setUsersInChannel(users);
-			console.log(users);
 		});
 		
-		socket.emit('channel-in-common');
-		socket.on('channel-in-common', (channelCommon) => {
-			setChannelInCommon(channelCommon);
-			setCommonChannelCount(channelCommon.length);
+		socket.emit('check-user-in-channel', { chanName: channel.name });
+		socket.on('user-in-channel', (boolean) => {
+			setCheckUserInChannel(boolean)
 		});
 
 		return () => {
@@ -77,9 +96,9 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 	}, [channel.name]);
 
 	useEffect(() => {
-		if (Array.isArray(usersInChannel) && usersInChannel.length > 0 && usersInChannel[0]?.id) {
+		if (Array.isArray(usersInChannelExceptHim) && usersInChannelExceptHim.length > 0 && usersInChannelExceptHim[0]?.id) {
 			axios
-			.get(`friends-list/in-common/${usersInChannel[0].id}`)
+			.get(`friends-list/in-common/${usersInChannelExceptHim[0].id}`)
 			.then((response) => {
 					setCommonFriendsCount(response.data.length)
 					setUsersInFriends(response.data);
@@ -88,7 +107,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 				console.error('Error fetching data:', error);
 			});
 		}
-	}, [usersInChannel]);		
+	}, [usersInChannelExceptHim]);		
 
 	const handleBlockUser = async (userId: number) => {
         try {
@@ -100,7 +119,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
                 setIsBlocked(true); 
             }
         } catch (error) {
-            console.error('Erreur lors du blocage ou déblocage de l\'utilisateur :', error);
+            console.error('Erreur lors du blocage ou dÃ©blocage de l\'utilisateur :', error);
         }
     };
 
@@ -129,7 +148,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 
 			{channel.modes === 'CHAT' && (
 			<div>
-				{usersInChannel.map((member, index) => {
+				{usersInChannelExceptHim.map((member, index) => {
                 if (member.username !== null) {
                     return (
 					<div key={index}>
@@ -224,32 +243,43 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 			)}
 
 				{/*GROUP*/}
-				{channel.modes !== 'CHAT' && (
+				{channel.modes === 'GROUPCHAT' && (
 				<div>
 					<div className="flex flex-col items-center">
 						<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
 							<FaUserGroup className="w-[30px] h-[30px] text-lilac"/>
 						</div>
-						<p className="text-sm text-lilac pt-2">GROUP NAME</p>
-						<p className="text-xs text-lilac pt-2">Public - 5 members</p>
+						<p className="text-sm text-lilac pt-2">{channel.name}</p>
+						<p className="text-xs text-lilac pt-2">Public - {channel.members.length} members</p>
 					</div>
+					{checkUserInChannel && (
 					<div className="flex flex-col justify-end p-2 mt-4 mx-4 rounded-lg bg-purple">
 						<div className="flex flex-row justify-between items-center w-full">
 							<div className="text-xs text-lilac">Join group</div>
 							<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 						</div>
 					</div>
-
-					<div className="flex items-center mx-4 mt-4">
-						<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
-							<FaUser className="w-[8px] h-[8px] text-lilac"/>
-						</div>
-						<p className='text-xs text-lilac ml-2'>Name</p>
+					)}
+					<div className="mt-6">
+					{usersInChannel.map((member, index) => {
+						return (
+							<div key={index} className="relative flex justify-between items-center mx-4 mt-2">
+								<div className="flex items-center">
+									<div className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
+									${channel.owner.username === member.username ? 'border border-fushia' : ''}
+									${opMembers.find(opMember => opMember.username === member.username) ? 'border border-red-orange' : ''}
+									`}>
+										<FaUser className="w-[8px] h-[8px] text-lilac"/>
+									</div>
+									<p className='text-xs text-lilac ml-2'>{member.username}</p>
+								</div>
+								<UserConvOptions channel={channel} username={member.username} />
+							</div>
+						);
+					})}
 					</div>
-					</div>
+				</div>
 				)}
-
-
 		</div>	
 	)
 }

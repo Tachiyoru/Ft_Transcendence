@@ -40,15 +40,12 @@ export class chatGateway {
 
 	onModuleInit() {
 		this.server.on("connection", (socket) => {
-		console.log(socket.id);
-		console.log("connected");
 		});
 	}
 
 	@SubscribeMessage("channel")
 	async getChannelById(@MessageBody("id") id: number) {
 		if (!id) throw Error("id not found");
-		console.log("getChannelById ", id);
 		const chan = await this.prisma.channel.findUnique({
 		where: { chanId: id },
 		include: {
@@ -78,7 +75,7 @@ export class chatGateway {
 		}
 	}
 
-	@SubscribeMessage("users-in-channel")
+	@SubscribeMessage("users-in-channel-except-him")
 	async getUsersNotInChannelExceptUser(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string},
@@ -88,9 +85,9 @@ export class chatGateway {
 			const userList = await this.chatService.getUsersInChannelExceptUser(
 				data.chanName, req
 			);
-			client.emit("users-in-channel", userList);
+			client.emit("users-in-channel-except-him", userList);
 		} catch (error) {
-			client.emit("users-in-channel-error", error.message);
+			client.emit("users-in-channel-except-him-error", error.message);
 		}
 	}
 
@@ -105,7 +102,6 @@ export class chatGateway {
 		const chan = await this.chatService.createChannel(settings, req);
 		client.emit("channelCreated", chan);
 		const chanlist = await this.prisma.channel.findMany();
-		console.log("chan list = ", chanlist);
 		client.join(chan.name);
 		} catch (error) {
 		client.emit("channelCreateError", {
@@ -157,7 +153,7 @@ export class chatGateway {
 
 	@SubscribeMessage("addOp")
 	async addOp(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; username: string },
 		@Request() req: any
 	) {
@@ -167,6 +163,7 @@ export class chatGateway {
 			data.username,
 			req
 		);
+		console.log('OOOOOOK')
 		client.emit("opAdded", result);
 		} catch (error) {
 		client.emit("addOpError", { message: error.message });
@@ -243,7 +240,7 @@ export class chatGateway {
 
 	@SubscribeMessage("leaveChan")
 	async leaveChan(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string },
 		@Request() req: any
 	) {
@@ -257,7 +254,7 @@ export class chatGateway {
 
 	@SubscribeMessage("banUser")
 	async banUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; username: string },
 		@Request() req: any
 	) {
@@ -275,7 +272,7 @@ export class chatGateway {
 
 	@SubscribeMessage("unBanUser")
 	async unBanUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; username: string },
 		@Request() req: any
 	) {
@@ -293,7 +290,7 @@ export class chatGateway {
 
 	@SubscribeMessage("kickUser")
 	async kickUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; username: string },
 		@Request() req: any
 	) {
@@ -311,10 +308,11 @@ export class chatGateway {
 
 	@SubscribeMessage("findAllMembers")
 	async findAllMembers(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string }
 	) {
 		try {
+		console.log('teeeeest')
 		const memberList = await this.chatService.findAllMembers(data.chanName);
 		client.emit("allMembers", memberList);
 		} catch (error) {
@@ -324,7 +322,7 @@ export class chatGateway {
 
 	@SubscribeMessage("findAllUsers")
 	async findAllUsers(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string }
 	) {
 		try {
@@ -356,10 +354,8 @@ export class chatGateway {
 		@MessageBody() data: { chanName: string }
 	) {
 		try {
-		console.log("chan name is", data.chanName);
 		const messagesList = await this.chatService.findAllChanMessages(data.chanName)
 		client.emit("findAllMessage", messagesList);
-		console.log("msglist", messagesList);
 		} catch (error) {
 		// client.emit("findAllMessageError",  error.message );
 		}
@@ -370,7 +366,6 @@ export class chatGateway {
 		@MessageBody() createMessageDto: CreateMessageDto,
 		@Request() req: any
 	) {
-		console.log(createMessageDto);
 		try {
 		const message = await this.chatService.createMessage(
 			createMessageDto,

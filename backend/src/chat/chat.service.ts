@@ -78,6 +78,22 @@ export class chatService {
 		return users;
 	}
 
+	async getUsersInChannel(chanName: string, @Request() req: any) {
+		const usersInChannel = await this.prisma.user.findMany({
+			where: {
+				channel: {
+					some: {
+						name: chanName,
+					},
+				},
+
+			},
+		});
+	
+		return usersInChannel;
+	}
+
+
 	async getUsersInChannelExceptUser(chanName: string, @Request() req: any) {
 		const usersInChannel = await this.prisma.user.findMany({
 			where: {
@@ -141,7 +157,7 @@ export class chatService {
 		if (!chan) {
 		throw new Error("Could not find channel");
 		}
-		if (req.user !== chan.owner) {
+		if (req.user.username !== chan.owner.username) {
 		throw new Error("You are not allowed to add an op to this channel");
 		}
 		if (chan.op.includes(username)) {
