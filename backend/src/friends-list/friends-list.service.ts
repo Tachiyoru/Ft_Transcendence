@@ -42,7 +42,6 @@ export class FriendsListService
 		return users;
 	}
 
-
 	async acceptRequest(user: User, friendId: number) 
 	{
 		await this.prismaService.user.update(

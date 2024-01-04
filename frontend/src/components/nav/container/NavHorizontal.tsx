@@ -113,6 +113,9 @@ const NavHorizontal = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -200,11 +203,30 @@ const NavHorizontal = () => {
     }
   }, [selectedSection, handleNotificationClick]);
 
-  const [selectedNotificationId, setSelectedNotificationId] = useState<
-    number | null
-  >(null);
+  const [notificationRedirect, setNotificationRedirect] = useState<string>("/");
+  0;
+  const getNotificationRedirect = (type: number) => {
+		if (type == 0)
+			return "/friends#invitations";
+		else if (type == 1)
+			return "/friends#tous"
+		else if (type == 2)
+			return "/game"
+		else if (type == 3)
+			return "/"
+		else if (type == 4)
+			return "/chat"
+		else if (type == 5)
+			return "/chat"
+		else if (type == 6)
+			return "/chat"
+    else return "/";
+  };
 
-  const handleNotificationItemClick = (notificationId: number) => {
+  const handleNotificationItemClick = (
+    notificationId: number,
+    notificationType: number
+  ) => {
     setSelectedNotificationId(notificationId);
 
     const markNotificationAsRead = async () => {
@@ -214,14 +236,13 @@ const NavHorizontal = () => {
           read: true,
         });
         setUnreadNotifications(unreadNotifications - 1);
-        console.log("test", unreadNotifications);
         const updatedNotifications = notifications.map((notification) =>
           notification.id === notificationId
             ? { ...notification, read: true }
             : notification
         );
-
         setNotifications(updatedNotifications);
+
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
@@ -247,9 +268,16 @@ const NavHorizontal = () => {
                 className={`border ${
                   notification.read ? "border-gray-500" : "border-white"
                 }`}
-                onClick={() => handleNotificationItemClick(notification.id)}
+                onClick={() =>
+                  handleNotificationItemClick(
+                    notification.id,
+                    notification.type
+                  )
+                }
               >
-                <span className="text-white">{notification.content}</span>
+                <a href={getNotificationRedirect(notification.type)}>
+                  <span className="text-white">{notification.content}</span>
+                </a>
               </li>
             ))}
           </ul>
