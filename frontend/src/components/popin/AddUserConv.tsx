@@ -111,7 +111,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       {/*POPIN*/}
       {isPopinOpen && (
         <div
-          className="w-5/12 p-4 text-lilac rounded-md bg-accent-violet absolute top-full right-0 mt-1"
+          className="w-[180px] p-4 text-lilac rounded-md bg-accent-violet absolute top-full right-0 mt-1"
           style={{ zIndex: 1 }}
         >
           <p className="text-base mb-1">Select Friends</p>
@@ -122,16 +122,16 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             <div className="flex items-center">
               <input
                 type="text"
-                placeholder="Research friends"
-                className="text-xs placeholder-accent-violet text-accent-violet pt-1.5 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia hidden md:block"
+                placeholder="Research"
+                className="text-xs placeholder-accent-violet text-accent-violet pt-1 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
                 onChange={handleInputChange}
                 value={searchText}
               />
               <span className="absolute left-0 pl-1 pt-1 items-center">
                 {isTyping ? (
-                  <FaArrowTurnUp className="text-violet-black mt-1 w-3 h-3 transform rotate-90 m-2" />
+                  <FaArrowTurnUp className="text-purple mt-1 w-3 h-3 transform rotate-90 m-2" />
                 ) : (
-                  <FaMagnifyingGlass className="text-violet-black w-3 h-3 m-2 mt-1" />
+                  <FaMagnifyingGlass className="text-purple w-3 h-3 m-2 mt-1" />
                 )}
               </span>
             </div>
@@ -173,7 +173,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
               <div className="flex flex-col items-center">
                 <button
                   disabled={Object.keys(checkedItems).length === 0}
-                  className={`mt-4 px-4 py-2 text-sm rounded-md 
+                  className={`mt-4 px-4 py-1 text-xs rounded-md 
 										${
                       Object.keys(checkedItems).length === 0
                         ? "bg-purple opacity-50 text-lilac cursor-not-allowed"

@@ -48,6 +48,9 @@ interface Channel {
 	op: string[]
 }
 
+
+
+
 const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, toggleRightSidebar, channel }) => {
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
@@ -60,7 +63,28 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
     const [showCommonFriends, setShowCommonFriends] = useState(false);
 	const [showCommonChannel, setShowCommonChannel] = useState(false);
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
+	type ChannelEquivalents = {
+		[key: string]: string;
+	};
+	  
+	const channelEquivalents: ChannelEquivalents = {
+		'GROUPCHAT': 'Public',
+		'PRIVATE': 'Private',
+	};
 
+	const channelName: string = channel.modes;
+	console.log(channel.modes)
+	const displayText: string = channelEquivalents[channelName];
+
+	usersInChannel.sort((a, b) => {
+		if (channel.owner.username === a.username) {
+		  return -1;
+		} else if (channel.owner.username === b.username) {
+		  return 1;
+		} else {
+		  return 0;
+		}
+	});
 
     const toggleCommonFriends = () => {
         setShowCommonFriends(!showCommonFriends);
@@ -243,16 +267,16 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 			)}
 
 				{/*GROUP*/}
-				{channel.modes === 'GROUPCHAT' && (
+				{channel.modes !== 'CHAT' && (
 				<div>
 					<div className="flex flex-col items-center">
 						<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
 							<FaUserGroup className="w-[30px] h-[30px] text-lilac"/>
 						</div>
 						<p className="text-sm text-lilac pt-2">{channel.name}</p>
-						<p className="text-xs text-lilac pt-2">Public - {channel.members.length} members</p>
+						<p className="text-xs text-lilac pt-2">{displayText} - {channel.members.length} members</p>
 					</div>
-					{checkUserInChannel && (
+					{checkUserInChannel && channel.modes === 'GROUPCHAT' && (
 					<div className="flex flex-col justify-end p-2 mt-4 mx-4 rounded-lg bg-purple">
 						<div className="flex flex-row justify-between items-center w-full">
 							<div className="text-xs text-lilac">Join group</div>
@@ -267,13 +291,15 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 								<div className="flex items-center">
 									<div className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
 									${channel.owner.username === member.username ? 'border border-fushia' : ''}
-									${opMembers.find(opMember => opMember.username === member.username) ? 'border border-red-orange' : ''}
+									${opMembers.find(opMember => opMember.username === member.username) ? 'border border-green-500' : ''}
 									`}>
 										<FaUser className="w-[8px] h-[8px] text-lilac"/>
 									</div>
 									<p className='text-xs text-lilac ml-2'>{member.username}</p>
 								</div>
+								{usersInChannelExceptHim.find(userMember => userMember.username === member.username) && (
 								<UserConvOptions channel={channel} username={member.username} />
+							)}
 							</div>
 						);
 					})}

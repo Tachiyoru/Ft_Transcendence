@@ -102,6 +102,8 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 						<p className="ml-2">Invite to play</p>
 					</div>
 
+					{username !== channel.owner.username && (
+					<>
 					<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 					
 					<div className="grid grid-cols-2 gap-2">
@@ -122,6 +124,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 							<p className="ml-2">Ban</p>
 						</div>
 					</div>
+					
 
 					{username !== channel.owner.username && (
 						<div>
@@ -129,13 +132,15 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 							<div className="flex flex-row items-center cursor-pointer" onClick={handleClick}>
 								<LuBadgePlus size={11} />
 								{opMembers.find(opMember => opMember.username === username) ? (
-									<p className="ml-2">Remove</p>
+									<p className="ml-2 text-red-orange">Remove</p>
 								) : (
 									<p className="ml-2">Add from admin</p>
 								)}
 						</div>
 						</div>
 					)}
+				</>	
+				)}
 				</div>
 			</div>
 		</div>

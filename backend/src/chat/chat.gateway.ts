@@ -163,7 +163,6 @@ export class chatGateway {
 			data.username,
 			req
 		);
-		console.log('OOOOOOK')
 		client.emit("opAdded", result);
 		} catch (error) {
 		client.emit("addOpError", { message: error.message });
@@ -312,7 +311,6 @@ export class chatGateway {
 		@MessageBody() data: { chanName: string }
 	) {
 		try {
-		console.log('teeeeest')
 		const memberList = await this.chatService.findAllMembers(data.chanName);
 		client.emit("allMembers", memberList);
 		} catch (error) {

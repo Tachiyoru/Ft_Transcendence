@@ -90,28 +90,28 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 					<div className='mt-6 flex flex-row'>
 						<div className='w-40 border-y border-l rounded-l-md p-4'>
 							<h3 className='mb-4 text-base font-semibold'>Owner</h3>
-							<p>Owner can add and remove users and manage organization-level settings</p>
+							<p>Owner can add and remove admins and can manage channel's settings</p>
 						</div>
 						<div className='w-full border rounded-r-md p-6'>
 							<div className='flex flex-col w-[45px] items-center'>
 								<MemberAvatar avatar={channel.owner.avatar}/>
-								<p className='ml-2'>{channel.owner.username}</p>
+								<p className='mt-1'>{channel.owner.username}</p>
 							</div>
 						</div>
 					</div>
 
 				<div className='mt-6 flex flex-row'>
 					<div className='w-40 border-y border-l rounded-l-md p-4'>
-						<h3 className='mb-4 text-base font-semibold'>Administrators</h3>
-						<p>Administrator can add and remove users and manage organization-level settings</p>
+						<h3 className='mb-4 text-base font-semibold'>Admins</h3>
+						<p>Admins can add and remove administrators except the channel owner</p>
 					</div>
 					<div className='w-full border rounded-r-md p-6'>
 					{opMembers.length > 0 ? (
 						<div className='flex flex-col w-[45px] items-center'>
-							{opMembers.map((opMember) => (
-								<div>
+							{opMembers.map((opMember,index) => (
+								<div key={index}  className='flex flex-col items-center'>
 									<MemberAvatar avatar={opMember.avatar}/>
-									<p className='ml-2'>{opMember.username}</p>
+									<p className='mt-1'>{opMember.username}</p>
 								</div>
 							))}
 						</div>
@@ -151,9 +151,9 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						<p className='text-sm mr-2'>Channel Name:</p>
 							<input
 							type="password"
-							placeholder="Change name"
+							placeholder={channel.name}
 							onChange={(e) => setChannelName(e.target.value)}
-							className="rounded-md w-24 px-2 py-0.2 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet"
+							className="rounded-md w-24 px-2 py-0.2 text-sm bg-lilac placeholder:text-accent-violet placeholder:text-opacity-40 text-accent-violet"
 							/>
 					</div>
 					<button

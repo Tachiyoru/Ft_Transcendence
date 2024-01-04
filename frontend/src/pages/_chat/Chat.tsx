@@ -17,7 +17,7 @@ const Chat = () => {
 
 	return (
 	<MainLayout currentPage={currentPage}>
-		<div className="flex flex-row h-[80vh]">
+		<div className="flex flex-row h-[80vh] relative">
 		
 			{/*LEFT SIDE BAR*/}
 			<SidebarLeft

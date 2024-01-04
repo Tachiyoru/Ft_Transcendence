@@ -23,13 +23,12 @@ export class UserController {
 
   @Get("me")
   getMe(@GetUser() user: User) {
-    console.log("users/me", user);
     return user;
   }
 
   @Get("all")
-  getAllUsers() {
-    return this.userService.getAllUsers();
+  getAllUsers(@GetUser() user: User) {
+    return this.userService.getAllUsers(user.id);
   }
 
   @Get("all-online")

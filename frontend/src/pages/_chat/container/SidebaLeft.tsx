@@ -45,7 +45,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
     <div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black p-2 md:p-4 text-gray-300 flex-col space-y-3">
       <div>
         {/*TITLE*/}
-        <div className="relative flex flew-row justify-between items-center mt-6">
+        <div className="relative flex flex-col md:flex-row justify-between items-center mt-6">
           <h1 className="hidden md:block font-outline-2 text-white m-2">
             Chat
           </h1>
@@ -70,7 +70,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           </div>
         </div>
         {/*NAV*/}
-        <div className="flex w-full">
+        <div className="hidden md:block flex w-full">
           <ul className="flex flex-row m-2 flex-between">
             <li
               className={`text-sm text-lilac ${
@@ -116,8 +116,10 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         </div>
       </div>
 
+	<div className="h-80 overflow-y-scroll">
       <div className="flex-1">{contenuFiltre[filtreActif]}</div>
-    </div>
+	  </div>
+	</div>
   );
 };
 

@@ -42,8 +42,6 @@ const CreateConv: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get<{ username: string }[]>("/users/all");
-        console.log(response.data);
-
         setListUsers(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -121,7 +119,7 @@ const CreateConv: React.FC = () => {
       {/*POPIN*/}
       {isPopinOpen && (
         <div
-          className="w-11/12 p-4 text-lilac rounded-md bg-accent-violet absolute top-full right-0 mt-1"
+          className="w-[200px] p-4 text-lilac rounded-md bg-accent-violet absolute top-17 md:left-10 left-4 mt-1"
           style={{ zIndex: 1 }}
         >
           <p className="text-base mb-1">Select Friends</p>
@@ -133,7 +131,7 @@ const CreateConv: React.FC = () => {
               <input
                 type="text"
                 placeholder="Research friends"
-                className="text-xs placeholder-accent-violet text-accent-violet pt-1.5 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia hidden md:block"
+                className="text-xs placeholder-accent-violet text-accent-violet pt-1.5 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
                 onChange={handleInputChange}
                 value={searchText}
               />
