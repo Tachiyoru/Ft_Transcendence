@@ -74,13 +74,13 @@ export class chatGateway
 	@SubscribeMessage("users-not-in-channel")
 	async getUsersNotInChannel(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() data: { chanName: string }
+		@MessageBody() data: { chanId: string; }
 	)
 	{
 		try
 		{
 			const userList = await this.chatService.getUsersNotInChannel(
-				data.chanName
+				data.chanId
 			);
 			client.emit("users-not-in-channel", userList);
 		} catch (error)
@@ -93,7 +93,7 @@ export class chatGateway
 	async createchan(
 		@ConnectedSocket() client: Socket,
 		@MessageBody("settings") settings: createChannel,
-		@MessageBody() data: { chanName: string; users: User[]; mode: Mode },
+		@MessageBody() data: { chanName: string; users: User[]; mode: Mode; },
 		@Request() req: any
 	)
 	{
@@ -118,7 +118,7 @@ export class chatGateway
 		@ConnectedSocket() client: Socket,
 		@MessageBody()
 		data: {
-			chanName: string;
+			chanId: number;
 			targetId: number;
 		},
 		@Request() req: any
@@ -127,7 +127,7 @@ export class chatGateway
 		try
 		{
 			const result = await this.chatService.inviteUserToChannel(
-				data.chanName,
+				data.chanId,
 				data.targetId,
 				req
 			);
@@ -148,7 +148,7 @@ export class chatGateway
 		try
 		{
 			const result = await this.chatService.addUsersToChannel(
-				channelData.chanName,
+				channelData.chanId,
 				channelData.targets,
 				req
 			);
@@ -160,7 +160,7 @@ export class chatGateway
 
 			const notificationDto = new CreateNotificationDto();
 			notificationDto.fromUser = me.username;
-			notificationDto.channelName = channelData.chanName;
+			notificationDto.channelName = result.name;
 
 			for (let i = 0; i < channelData.targets.length; i++)
 			{
@@ -181,14 +181,14 @@ export class chatGateway
 	@SubscribeMessage("addOp")
 	async addOp(
 		client: Socket,
-		@MessageBody() data: { chanName: string; username: string },
+		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
 	{
 		try
 		{
 			const result = await this.chatService.addOp(
-				data.chanName,
+				data.chanId,
 				data.username,
 				req
 			);
@@ -202,14 +202,14 @@ export class chatGateway
 	@SubscribeMessage("renameChan")
 	async renameChan(
 		client: Socket,
-		@MessageBody() data: { chanName: string; newName: string },
+		@MessageBody() data: { chanId: number; newName: string; },
 		@Request() req: any
 	)
 	{
 		try
 		{
 			const result = await this.chatService.renameChan(
-				data.chanName,
+				data.chanId,
 				data.newName,
 				req
 			);
@@ -275,13 +275,13 @@ export class chatGateway
 	@SubscribeMessage("leaveChan")
 	async leaveChan(
 		client: Socket,
-		@MessageBody() data: { chanName: string },
+		@MessageBody() data: { chanId: number; },
 		@Request() req: any
 	)
 	{
 		try
 		{
-			const result = await this.chatService.leaveChannel(data.chanName, req);
+			const result = await this.chatService.leaveChannel(data.chanId, req);
 			client.emit("channelLeft", result);
 		} catch (error)
 		{
@@ -292,14 +292,14 @@ export class chatGateway
 	@SubscribeMessage("banUser")
 	async banUser(
 		client: Socket,
-		@MessageBody() data: { chanName: string; username: string },
+		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
 	{
 		try
 		{
 			const result = await this.chatService.banUser(
-				data.chanName,
+				data.chanId,
 				data.username,
 				req
 			);
@@ -313,14 +313,14 @@ export class chatGateway
 	@SubscribeMessage("unBanUser")
 	async unBanUser(
 		client: Socket,
-		@MessageBody() data: { chanName: string; username: string },
+		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
 	{
 		try
 		{
 			const result = await this.chatService.unBanUser(
-				data.chanName,
+				data.chanId,
 				data.username,
 				req
 			);
@@ -334,14 +334,14 @@ export class chatGateway
 	@SubscribeMessage("kickUser")
 	async kickUser(
 		client: Socket,
-		@MessageBody() data: { chanName: string; username: string },
+		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
 	{
 		try
 		{
 			const result = await this.chatService.kickUser(
-				data.chanName,
+				data.chanId,
 				data.username,
 				req
 			);
@@ -355,12 +355,12 @@ export class chatGateway
 	@SubscribeMessage("findAllMembers")
 	async findAllMembers(
 		client: Socket,
-		@MessageBody() data: { chanName: string }
+		@MessageBody() data: { chanId: number; }
 	)
 	{
 		try
 		{
-			const memberList = await this.chatService.findAllMembers(data.chanName);
+			const memberList = await this.chatService.findAllMembers(data.chanId);
 			client.emit("allMembers", memberList);
 		} catch (error)
 		{
@@ -371,7 +371,7 @@ export class chatGateway
 	@SubscribeMessage("findAllUsers")
 	async findAllUsers(
 		client: Socket,
-		@MessageBody() data: { chanName: string }
+		@MessageBody() data: { chanId: number; }
 	)
 	{
 		try
@@ -387,13 +387,13 @@ export class chatGateway
 	@SubscribeMessage("findAllBannedMembers")
 	async findAllBannedMembers(
 		client: Socket,
-		@MessageBody() data: { chanName: string }
+		@MessageBody() data: { chanId: number; }
 	)
 	{
 		try
 		{
 			const bannedList = await this.chatService.findAllBannedMembers(
-				data.chanName
+				data.chanId
 			);
 			client.emit("allMembers", bannedList);
 		} catch (error)
@@ -405,13 +405,13 @@ export class chatGateway
 	@SubscribeMessage("recapMessages")
 	async findAllChanMessages(
 		client: Socket,
-		@MessageBody() data: { chanName: string }
+		@MessageBody() data: { chanName: string; }
 	)
 	{
 		try
 		{
 			console.log("chan name is", data.chanName);
-			const messagesList = await this.chatService.findAllChanMessages(data.chanName)
+			const messagesList = await this.chatService.findAllChanMessages(data.chanName);
 			client.emit("findAllMessage", messagesList);
 			console.log("msglist", messagesList);
 		} catch (error)
@@ -462,7 +462,7 @@ export class chatGateway
 	@SubscribeMessage("removeMessage")
 	async removeMessages(
 		client: Socket,
-		@MessageBody() data: { chanName: string; msgId: number },
+		@MessageBody() data: { chanName: string; msgId: number; },
 		@Request() req: any
 	)
 	{

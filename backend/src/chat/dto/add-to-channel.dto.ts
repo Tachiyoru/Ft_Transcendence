@@ -2,6 +2,6 @@ import { User } from "@prisma/client"
 
 export class addUserToChannelDto
 {
-	chanName: string
+	chanId: number
 	targets: User[]
 }

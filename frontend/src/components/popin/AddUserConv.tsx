@@ -11,10 +11,11 @@ import io from "socket.io-client";
 import { Link } from "react-router-dom";
 
 interface ChannelProps {
-  channel: string;
+	channel: string;
+	chanId: number;
 }
 
-const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
+const AddUserConv: React.FC<ChannelProps> = ({ chanId }) => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
@@ -41,8 +42,10 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
         const socket = io("http://localhost:5001/", {
           withCredentials: true,
         });
-        socket.on("connect", () => {
-          socket.emit("users-not-in-channel", { chanName: channel }); //need to change to users not in channels and friend with me
+				socket.on("connect", () =>
+				{
+					console.log("ChanId : ", chanId)
+          socket.emit("users-not-in-channel", { chanId: chanId }); //need to change to users not in channels and friend with me
 
           socket.on("users-not-in-channel", (userList) => {
             setListUsers(userList);
@@ -136,7 +139,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
           </div>
 
           {listUsers.length === 0 ? (
-            <div className="text-center mt-4" style={{ cursor: "pointer" }}>
+            <div className="text-center mt-4">
               <p className="text-sm font-regular">No friends found</p>
               <Link to="/friends">
                 <p className="text-xs my-1 underline">
