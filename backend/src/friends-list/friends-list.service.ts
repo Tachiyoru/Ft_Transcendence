@@ -42,7 +42,6 @@ export class FriendsListService
 		return users;
 	}
 
-
 	async acceptRequest(user: User, friendId: number) 
 	{
 		await this.prismaService.user.update(
@@ -81,23 +80,30 @@ export class FriendsListService
 		return (user);
 	}
 
-	async rejectRequest(user: User, friendId: number) 
+	async rejectRequest(user: User, friendId: number, notificationId?: number) 
 	{
-		await this.prismaService.user.update(
-			{
-				where: { id: user.id },
-				data: { pendingList: { disconnect: { id: friendId } } }
-			}
-		);
-
 		user = await this.prismaService.user.update(
 			{
 				where: { id: friendId },
-				data: { pendingList: { disconnect: { id: user.id } } }
+				data: {
+					pendingList: { disconnect: { id: user.id } },
+				}
 			}
 		);
 
-		return user;
+		if (notificationId)
+		{
+			console.log('notificationId', notificationId);
+			const updatedUser = await this.prismaService.user.findUnique({
+				where: { id: user.id },
+				include: { notifications: true },
+			});
+			if (updatedUser)
+				console.log('updatedUser notification list : ', updatedUser.notifications);
+			return (updatedUser);
+		}
+
+		return (user);
 	}
 
 	async friendRequest(user: User, friendId: number)
@@ -243,7 +249,6 @@ export class FriendsListService
 		if (!me) throw new Error("User not found");
 
 		const friendIds = me.friends.map((friend) => friend.id);
-		console.log(friendIds);
 
 		const nonFriends = await this.prismaService.user.findMany({
 			where: {
@@ -251,6 +256,28 @@ export class FriendsListService
 			},
 		});
 		return nonFriends;
+	}
+
+	async getFriendsInCommon(userId: number, friendId: number)
+	{
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId },
+			include: { friends: true },
+		});
+		if (!user)
+			throw new Error("User not found");
+
+		const friend = await this.prismaService.user.findUnique({
+			where: { id: friendId },
+			include: { friends: true },
+		});
+		if (!friend)
+			throw new Error("Friend not found");
+
+		const friendIds = friend.friends.map((friend) => friend.id);
+		const friendsInCommon = user.friends.filter((friend) => friendIds.includes(friend.id));
+
+		return (friendsInCommon);
 	}
 
 	async getFriendsFrom(userId: number)

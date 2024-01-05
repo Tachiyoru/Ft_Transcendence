@@ -73,9 +73,8 @@ export class AuthService {
             },
           },
         });
-        console.log({ user2 });
         return user2;
-      } // console.log("info in real user= ", user)
+      }
       user.status = StatusUser.ONLINE;
       return user;
     }

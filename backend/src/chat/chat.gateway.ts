@@ -23,6 +23,10 @@ import { Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
+import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
+import { NotificationType } from "src/notification/content-notification";
+import { NotificationService } from "src/notification/notification.service";
+import { TokenGuard } from "src/auth/guard";
 
 @WebSocketGateway({
   cors: { origin: "http://localhost:5173", credentials: true },
@@ -35,7 +39,8 @@ export class chatGateway
   @WebSocketServer() server: Server;
   constructor(
     private readonly chatService: chatService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService
   ) {}
 
   
@@ -122,7 +127,6 @@ export class chatGateway
 	@MessageBody("id", ParseIntPipe) id: number
   ) {
     if (!id) throw Error("id not found");
-    console.log("getChannelById ", id);
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: id },
       include: {
@@ -131,8 +135,7 @@ export class chatGateway
     });
     if (!chan) return null;
     const messagesList = chan.messages;
-    console.log("channel", chan);
-    this.server.emit("channel", chan, messagesList);
+    client.emit("channel", chan, messagesList);
   }
 
   @SubscribeMessage("users-not-in-channel")
@@ -199,13 +202,28 @@ export class chatGateway
     @MessageBody("channelData") channelData: addUserToChannelDto,
     @Request() req: any
   ) {
-    console.log("lol", channelData);
     try {
       const result = await this.chatService.addUsersToChannel(
         channelData.chanName,
         channelData.targets,
         req
       );
+      const me = await this.prisma.user.findUnique({
+        where: { id: client.handshake.auth.id },
+      });
+      if (!me || !me.username) throw Error("user not found");
+
+      const notificationDto = new CreateNotificationDto();
+      notificationDto.fromUser = me.username;
+      notificationDto.channelName = channelData.chanName;
+
+      for (let i = 0; i < channelData.targets.length; i++) {
+        await this.notificationService.addNotificationByUserId(
+          channelData.targets[i].id,
+          notificationDto,
+          NotificationType.INTEGRATED_TO_CHANNEL
+        );
+      }
       client.emit("usersAdded", result);
     } catch (error) {
       client.emit("addUsersError", { message: error.message });
@@ -259,13 +277,49 @@ export class chatGateway
     const chanlist = await this.chatService.getChannelsByUserId(
       client.handshake.auth.id
     );
-    const chanlist2 = chanlist;
+	const chanlist2 = chanlist;
     for (const channel of chanlist2) {
       client.join(channel.name);
       console.log("joined channel : ", channel.name);
-    }
+	}
     client.emit("my-channel-list", chanlist);
   }
+
+  @SubscribeMessage("channel-in-common")
+  async getChannelsInCommon(
+    @ConnectedSocket() client: Socket,
+    @MessageBody("friendId") friendId: number
+  ): Promise<void> {
+
+    const chanlist = await this.chatService.getChannelsInCommon(
+      client.handshake.auth.id,
+      friendId
+    );
+    client.emit("channel-in-common", chanlist);
+  }
+
+  //   @SubscribeMessage("joinChan")
+  //   async joinChan(
+  //     client: Socket,
+  //     @MessageBody()
+  //     data: { chanName: string; password?: string; invited?: boolean },
+  //     @Request() req: any
+  //   ) {
+  //     try {
+  //       if (!data.invited) {
+  //         data.invited = false;
+  //       }
+  //       const result = await this.chatService.joinChannel(
+  //         data.chanName,
+  //         data.invited,
+  //         req,
+  //         data.password
+  //       );
+  //       client.emit("channelJoined", result);
+  //     } catch (error) {
+  //       client.emit("renameChanError", { message: error.message });
+  //     }
+  //   }
 
   @SubscribeMessage("banUser")
   async banUser(

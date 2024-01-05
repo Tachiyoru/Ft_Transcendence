@@ -35,7 +35,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const user = await this.authService.signin(dto, res);
-    return { user };
+	return { user };
   }
 
   @UseGuards(TokenGuard)
@@ -78,7 +78,6 @@ export class AuthController {
     if (req.user === undefined) throw new UnauthorizedException();
     const user: User = req.user as User;
     let raw = req.user as any;
-    console.log("raw = ", raw._json.avatar_url);
     user.username = user.username + "_git";
     const user2 = await this.authService.authExtUserCreate(
       user,
