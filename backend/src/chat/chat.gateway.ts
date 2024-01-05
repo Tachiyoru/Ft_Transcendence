@@ -201,6 +201,14 @@ export class chatGateway {
 		client.emit("my-channel-list", chanlist);
 	}
 
+	@SubscribeMessage("find-channels-public")
+	async getChannelsPublic(@ConnectedSocket() client: Socket): Promise<void> {
+		const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
+		client.handshake.auth.id
+		);
+		client.emit("channel-public-list", chanlist);
+	}
+
 	@SubscribeMessage("channel-in-common")
 	async getChannelsInCommon(
 		@ConnectedSocket() client: Socket,

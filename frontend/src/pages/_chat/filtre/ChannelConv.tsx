@@ -11,6 +11,7 @@ interface Channel {
   }
 const ChannelConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
+	const [publicChannel, setPublicChannel] = useState<Channel[]>([]);
 	const dispatch = useDispatch();
 
 	useEffect(() => {
@@ -22,6 +23,11 @@ const ChannelConv = () => {
 		socket.emit("find-my-channels");
 		socket.on("my-channel-list", (channelList) => {
 		setAllChannel(channelList);
+		});
+
+		socket.emit("find-channels-public");
+		socket.on("channel-public-list", (channelList) => {
+		setPublicChannel(channelList);
 		});
 	});
 
@@ -35,7 +41,7 @@ const ChannelConv = () => {
   };
 
   return (
-    <div className=''>
+    <div>
       {allChannel
 		.filter(channel => channel.modes !== "CHAT")
 		.map((channel, index) => (
@@ -76,18 +82,27 @@ const ChannelConv = () => {
 
 		{/*OTHER CHANNEL*/}
 		<div className='mt-10 mb-2 px-2'>
-			<div className="border-t w-full border-lilac "></div>
-			<p className='text-xs text-lilac mt-4 pl-2'>Other groups you can join</p>
+		{publicChannel.length > 0 ? (
+			<>
+				<div className="border-t w-full border-lilac "></div>
+				<p className='text-xs text-lilac mt-4 pl-2'>Other public groups you can join</p>
+			</>
+		) :
+			<>
+				<div className="border-t w-full border-lilac "></div>
+				<p className='text-xs text-lilac mt-4 pl-2'>No channel available at the moment</p>
+			</>
+		}
 		</div>
-
-		<div className="flex flex-row h-12 md:m-2">
+		{publicChannel.map((channel, index) => (
+		<div key={index} className="flex flex-row h-12 md:m-2">
 			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 				<FaUserGroup className="text-lilac"/>
 			</div>
 			<div className="pt-3 hidden md:block">
 				<div className="flex flex-row justify-between">
-					<p className="text-base text-lilac">Channel</p>
-					<p className="text-sm text-lilac text-opacity-60">Public</p>
+					<p className="text-base text-lilac">{channel.name}</p>
+					<p className="text-sm text-lilac text-opacity-60">{channel.modes}</p>
 				</div>
 				<div className="flex flex-row">
 					<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
@@ -95,6 +110,7 @@ const ChannelConv = () => {
 				</div>
 			</div>
 		</div>
+		))}
     </div>
   );
 };

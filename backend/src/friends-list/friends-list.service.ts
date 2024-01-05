@@ -248,8 +248,7 @@ export class FriendsListService
 		if (!me) throw new Error("User not found");
 
 		const friendIds = me.friends.map((friend) => friend.id);
-		console.log(friendIds);
-
+		
 		const nonFriends = await this.prismaService.user.findMany({
 			where: {
 				id: { notIn: [user.id, ...friendIds] },

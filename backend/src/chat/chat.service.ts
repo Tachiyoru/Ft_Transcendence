@@ -66,6 +66,25 @@ export class chatService {
 		return channels;
 	}
 
+	async getGroupChatChannelsUserIsNotIn(userId: number): Promise<Channel[]> {
+		const channels = await this.prisma.channel.findMany({
+			where: {
+				AND: [
+					{
+						modes: 'CHAT'
+					},
+					{
+						NOT: {
+							members: { some: { id: userId } }
+						}
+					}
+				]
+			}
+		});
+		return channels;
+	}
+	
+	
 	async getUsersNotInChannel(chanName: string) {
 		const chan = await this.prisma.channel.findUnique({
 		where: { name: chanName },
@@ -349,13 +368,13 @@ export class chatService {
 		@Request() @Request() req: any
 	) {
 		const chan = await this.prisma.channel.findUnique({
-		where: { name: chanName },
-		include: { owner: true },
+			where: { name: chanName },
+			include: { owner: true },
 		});
 		if (!chan) {
 		throw new Error("Could not find channel");
 		}
-		if (req.user === chan.owner) {
+		if (req.user.username === chan.owner.username) {
 		await this.prisma.channel.delete({
 			where: { name: chanName },
 		});

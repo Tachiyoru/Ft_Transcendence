@@ -8,6 +8,7 @@ import AllConv from "../filtre/AllConv";
 import PersoConv from "../filtre/PersoConv";
 import ChannelConv from "../filtre/ChannelConv";
 import CreateConv from "../../../components/popin/CreateConv";
+import SpamConv from "../filtre/SpamConv";
 
 interface SidebarLeftProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -38,7 +39,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
     all: <AllConv />,
     personnal: <PersoConv />,
     channel: <ChannelConv />,
-    spam: <ChannelConv />,
+    spam: <SpamConv />,
   };
 
   return (
@@ -116,7 +117,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         </div>
       </div>
 
-	<div className="h-80 overflow-y-scroll">
+	<div className="h-80">
       <div className="flex-1">{contenuFiltre[filtreActif]}</div>
 	  </div>
 	</div>
