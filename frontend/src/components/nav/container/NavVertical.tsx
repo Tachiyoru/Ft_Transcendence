@@ -49,16 +49,16 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 	const navItemStyle = "px-3 py-3 flex items-center bg-violet-black mb-4 mr-4 rounded-lg transition duration-300 ease-in-out hover:bg-purple hover:scale-110";
 
 	return (
-	<section className="flex flex-col h-full">
+	<div className="flex flex-col justify-between">
 		<ul className="flex-col flex-grow mt-12">
 			{navItemsInfo.map((item, index) => (
 				<NavItem key={index} lien={item.lien} icon={item.icon} currentPage={currentPage}/>)
 			)}
 		</ul>
-		<button className={`flex items-center ${navItemStyle} mb-12`} onClick={handleLogout}>
+		<button className={`flex items-center ${navItemStyle}`} onClick={handleLogout}>
 			<FaArrowRightFromBracket className="text-accent-violet" size={26}/>
 		</button>
-	</section>
+	</div>
 	)
 }
 

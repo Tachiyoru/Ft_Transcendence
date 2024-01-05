@@ -14,6 +14,7 @@ import Settings from './pages/_editProfile/EditProfile';
 
 import { useSelector } from "react-redux";
 import { RootState } from './store/store';
+import AboutToPlay from './pages/_game/container/AboutToPlay';
 
 //import socketIO from 'socket.io-client';
 
@@ -32,6 +33,7 @@ return (
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={<Dashboard/>}/>
 			<Route path="/game" element={<Game />} />
+			<Route path="/gamestart" element={<AboutToPlay />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>
 				<Route path="/friends" element={user ? <SetFriends /> : <Navigate to="/sign-in" />}/>
