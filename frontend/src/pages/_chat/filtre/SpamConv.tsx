@@ -3,14 +3,22 @@ import { FaUser } from 'react-icons/fa6'
 import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
 import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
+import axios from '../../../axios/api';
 
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
-  }
+	owner: User;
+}
 
-const PersoConv = () => {
+interface User {
+	username: string;
+	avatar: string;
+	id: number;
+}
+
+const SpamConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
 	const dispatch = useDispatch();
 
@@ -26,15 +34,25 @@ const PersoConv = () => {
 		socket.on("connect", () => {
 			socket.emit("find-my-channels");
 			socket.on("my-channel-list", (channelList) => {
-			setAllChannel(channelList);
+				axios.get<User[]>('friends-list/non-friends')
+					.then((response) => {
+						const nonFriends = response.data;
+						console.log('ok', nonFriends)
+						const nonFriendChannels = channelList.filter((channel: Channel) => (nonFriend => nonFriend.id === channel.owner.id));
+						console.log('ok');
+						setAllChannel(nonFriendChannels);
+					})
+					.catch((error) => {
+						console.error('Erreur lors de la récupération des non-amis:', error);
+					});
 			});
-	
 		});
 	
 		return () => {
-		  socket.disconnect();
+			socket.disconnect();
 		};
-	  }, []);
+	}, []);
+	
 	
 	  return (
 		<div>
@@ -72,4 +90,4 @@ const PersoConv = () => {
 	  );
 }	  
 
-export default PersoConv
+export default SpamConv

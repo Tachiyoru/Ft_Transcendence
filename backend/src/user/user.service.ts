@@ -99,9 +99,16 @@ export class UserService
 		});
 	}
 
-	async getAllUsers()
+	async getAllUsers(userId: number)
 	{
-		return this.prisma.user.findMany({});
+		console.log(userId);
+		return this.prisma.user.findMany({
+			where: {
+			  NOT: {
+				id: userId,
+			  },
+			},
+		  });
 	}
 
 	async getAllOnlineUsers()

@@ -72,18 +72,68 @@ export class chatService
 		return channels;
 	}
 
-	async getUsersNotInChannel(chanId: number)
-	{
+	async getGroupChatChannelsUserIsNotIn(userId: number): Promise<Channel[]> {
+		const channels = await this.prisma.channel.findMany({
+			where: {
+				AND: [
+					{
+						modes: 'CHAT'
+					},
+					{
+						NOT: {
+							members: { some: { id: userId } }
+						}
+					}
+				]
+			}
+		});
+		return channels;
+	}
+	
+	
+	async getUsersNotInChannel(chanId: number) {
 		const chan = await this.prisma.channel.findUnique({
 			where: { chanId: chanId },
 		});
 		if (!chan) throw Error("Channel not found");
 
 		const users = await this.prisma.user.findMany({
-			where: { channel: { none: { chanId: chan.chanId } } },
+		where: { channel: { none: { chanId: chan.chanId } } },
 		});
 		return users;
 	}
+
+	async getUsersInChannel(chanName: string, @Request() req: any) {
+		const usersInChannel = await this.prisma.user.findMany({
+			where: {
+				channel: {
+					some: {
+						name: chanName,
+					},
+				},
+
+			},
+		});
+	
+		return usersInChannel;
+	}
+
+
+	async getUsersInChannelExceptUser(chanName: string, @Request() req: any) {
+		const usersInChannel = await this.prisma.user.findMany({
+			where: {
+				channel: {
+					some: {
+						name: chanName,
+					},
+				},
+				NOT: { id: req.user.id }
+			},
+		});
+	
+		return usersInChannel;
+	}
+
 
 	async getChannelsInCommon(userId: number, friendId: number)
 	{
@@ -103,6 +153,9 @@ export class chatService
 					some: {
 						id: friendId,
 					},
+				},
+				NOT: {
+					modes: 'CHAT',
 				},
 			},
 		});
@@ -156,6 +209,8 @@ export class chatService
 			NotificationType.CHANNEL_PRIVILEGE_GRANTED
 		);
 
+		return updatedChannel;
+	}
 		return updatedChannel;
 	}
 
@@ -230,6 +285,8 @@ export class chatService
 
 		return updatedChannel;
 	}
+		return updatedChannel;
+	}
 
 	async acceptInvitationToChannel(chanId: number, @Request() req: any)
 	{
@@ -270,7 +327,12 @@ export class chatService
 		// {
 		// 	throw new Error("You are not allowed to invite users to this channel");
 		// }
+		// if (!channel.op.includes(req.user.username))
+		// {
+		// 	throw new Error("You are not allowed to invite users to this channel");
+		// }
 
+		const targetIds = targets.map((target) => target.id);
 		const targetIds = targets.map((target) => target.id);
 
 		const users = await this.prisma.user.findMany({
@@ -298,6 +360,8 @@ export class chatService
 			},
 		});
 
+		return updatedChannel;
+	}
 		return updatedChannel;
 	}
 
@@ -560,6 +624,8 @@ export class chatService
 		return (messages);
 	}
 
+	// si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
+	// si l'user est ban .some((user) => user.username === req.user.username)
 	// si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
 	// si l'user est ban .some((user) => user.username === req.user.username)
 

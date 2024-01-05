@@ -8,7 +8,7 @@ const UserNameField = ({ register, errors, showUsernameErrors, resStatus, setSho
 			<input
 			type="text"
 			id="name"
-
+			
 			{...register("username" , {
 				minLength: {
 				value: 1,
@@ -20,7 +20,7 @@ const UserNameField = ({ register, errors, showUsernameErrors, resStatus, setSho
 				}
 			})}
 			placeholder='Enter name'
-			className={`px-5 py-4 text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none ${errors.username ? "border-red-500" : "outline-none"}`}
+			className={`input px-5 py-4 text-lilac text-sm placeholder-lilac placeholder-opacity-40 bg-transparent outline-none ${errors.username ? "border-red-500" : "outline-none"}`}
 			/>
 		</div>
 

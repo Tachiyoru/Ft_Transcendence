@@ -27,8 +27,8 @@ export class UserController {
   }
 
   @Get("all")
-  getAllUsers() {
-    return this.userService.getAllUsers();
+  getAllUsers(@GetUser() user: User) {
+    return this.userService.getAllUsers(user.id);
   }
 
   @Get("all-online")

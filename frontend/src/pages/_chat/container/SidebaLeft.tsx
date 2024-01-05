@@ -8,6 +8,7 @@ import AllConv from "../filtre/AllConv";
 import PersoConv from "../filtre/PersoConv";
 import ChannelConv from "../filtre/ChannelConv";
 import CreateConv from "../../../components/popin/CreateConv";
+import SpamConv from "../filtre/SpamConv";
 
 interface SidebarLeftProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -38,14 +39,14 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
     all: <AllConv />,
     personnal: <PersoConv />,
     channel: <ChannelConv />,
-    spam: <ChannelConv />,
+    spam: <SpamConv />,
   };
 
   return (
     <div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black p-2 md:p-4 text-gray-300 flex-col space-y-3">
       <div>
         {/*TITLE*/}
-        <div className="relative flex flew-row justify-between items-center mt-6">
+        <div className="relative flex flex-col md:flex-row justify-between items-center mt-6">
           <h1 className="hidden md:block font-outline-2 text-white m-2">
             Chat
           </h1>
@@ -70,7 +71,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           </div>
         </div>
         {/*NAV*/}
-        <div className="flex w-full" style={{ cursor: "pointer" }}>
+        <div className="hidden md:block flex w-full" style={{ cursor: "pointer" }}>
           <ul className="flex flex-row m-2 flex-between">
             <li
               className={`text-sm text-lilac ${
@@ -107,8 +108,10 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         </div>
       </div>
 
+	<div className="h-80">
       <div className="flex-1">{contenuFiltre[filtreActif]}</div>
-    </div>
+	  </div>
+	</div>
   );
 };
 

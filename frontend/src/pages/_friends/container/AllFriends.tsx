@@ -87,17 +87,15 @@ const AllFriends = () => {
     fetchUserData();
   }, []);
 
-  const rejectFriendRequest = async (userId: number) => {
-    try {
-      await axios.delete(`/friends-list/friend-request/reject/${userId}`);
-      const updateListUsersPending = listUsersPending.filter(
-        (user) => user.id !== userId
-      );
-      setListUsersPending(updateListUsersPending);
-    } catch (error) {
-      console.error("Error accepting friend request:", error);
-    }
-  };
+	const rejectFriendRequest = async (userId: number) => {
+        try {
+            await axios.delete(`/friends-list/friend-request/reject/${userId}`);
+			const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
+			setListUsersPending(updateListUsersPending);
+		} catch (error) {
+            console.error('Error accepting friend request:', error);
+        }
+    };
 
   const removeFriend = async (userId: number) => {
     try {

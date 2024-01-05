@@ -1,11 +1,70 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { IoIosArrowForward } from "react-icons/io";
-
+import { useState } from "react";
+import { FaUser } from "react-icons/fa6";
+import { RiTriangleFill } from "react-icons/ri";
+import { useRef, useEffect } from "react";
 
 const Game = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
+	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const [showBackIndex, setShowBackIndex] = useState<number | null>(null);
+	const cardsRef = useRef<HTMLDivElement>(null);
+	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
+
+	const names = ['Shan', 'Manu', 'Bob'];
+
+    const toggleCard = (index: number) => {
+        if (showBackIndex === index) {
+            setShowBackIndex(null); // Retourner la carte si elle est déjà retournée
+        } else {
+            setShowBackIndex(index); // Retourner la carte cliquée
+        }
+    };
+
+	const setClickedIndex = (index: number) => {
+		let updatedIndexes = [...selectedIndexes];
+		
+		// Vérifier si l'index est déjà sélectionné
+		const indexExists = updatedIndexes.indexOf(index);
+	  
+		if (indexExists === -1) {
+		  updatedIndexes.push(index);
+		} else {
+		  updatedIndexes = updatedIndexes.filter((i) => i !== index);
+		}
+	  
+		setSelectedIndexes(updatedIndexes);
+	  };
+	  
+
+
+	const [showSecondDiv, setShowSecondDiv] = useState(
+		localStorage.getItem('showSecondDiv') === 'true'
+	  );
+
+	  useEffect(() => {
+		if (selectedIndexes.length === 1) {
+		  const timer = setTimeout(() => {
+			setShowSecondDiv(true);
+			localStorage.setItem('showSecondDiv', 'true');
+		  }, 10000);
+	  
+		  return () => clearTimeout(timer);
+		} else {
+		  setShowSecondDiv(false);
+		  localStorage.removeItem('showSecondDiv');
+		}
+	  }, [selectedIndexes]);
+
+	const handleCrossClick = () => {
+	setShowSecondDiv(false);
+	setSelectedIndexes([]);
+	localStorage.removeItem('showSecondDiv');
+	};
+
 
 	return (
 	<MainLayout currentPage={currentPage}>
@@ -22,22 +81,22 @@ const Game = () => {
 
 			{/*GAME*/}
 			<div className="mt-12">
-				<div className="flex flex-row space-x-8">
+				<div className="flex flex-row space-x-4">
 					
 					{/*GAME 1*/}
-					<div className="flex w-full h-96 p-4 rounded-lg grid grid-rows-[2fr,auto] bg-filter bg-opacity-75">
+					<div className={`flex w-full h-96 p-4 rounded-lg grid grid-rows-[2fr,auto] bg-filter bg-opacity-75 ${showBackIndex === 0 ? 'hidden' : ''}`}>
 						<div className="relative">
-						<img src="votre_image.jpg" className="w-full h-60"/>
+						<img src="src/game.png" alt='img' className="w-full h-60"/>
 							<div className="absolute inset-0 flex items-center justify-center">
-								<p className="text-3xl text-center font-audiowide text-lilac mix-blend-difference">1 vs 1</p>
+								<p className="text-4xl text-center font-audiowide text-lilac mix-blend-difference">1 vs 1</p>
 							</div>	
 						</div>
-						<div className="px-2 pb-6">
+						<div className="px-2 pb-4">
 						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-md bg-purple">
-							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Invite friends</div>
+							<button className="flex flex-row justify-between items-center hover" onClick={() => toggleCard(0)}>
+								<div  className="text-xs text-lilac">Invite friends</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
-							</div>
+							</button>
 							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
 								<div className="text-xs text-lilac">Random player</div>
@@ -45,40 +104,227 @@ const Game = () => {
 							</div>
 						</div>
 						</div>
+					</div>
+					<div
+					ref={cardsRef}
+					className={`flex h-96 w-full rounded-md bg-violet-black border-container grid grid-rows-[2fr,auto] p-2 ${showBackIndex === 0 ? '' : 'hidden'}`}
+						>
+	  				{selectedIndexes.length === 0 ? (
+						<div className="relative">
+						{/*LIST*/}
+						<div className="w-full h-2/3 bg-filter my-4">
+							<h3 className='absolute top-0 text-lilac text-xl font-audiowide pl-2'>choose a player</h3>
+							<div className="py-4">
+							{names.map((name, index) => (
+									<div>
+										<div
+											key={index}
+											className="flex flex-row justify-content items-center px-2 py-1"
+											onMouseEnter={() => setHoveredIndex(index)}
+											onMouseLeave={() => setHoveredIndex(null)}
+											onClick={() => setClickedIndex(index)}
+										>
+											<div className="mr-2">
+											{index === selectedIndexes.length || index === hoveredIndex ? (
+												<RiTriangleFill className="w-[8px] h-[8px] text-lilac transform rotate-90" />
+												) : ( <div className="w-[8px] h-[8px]"></div> )}
+											</div>
+											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
+												<FaUser className="w-[8px] h-[8px] text-lilac" />
+											</div>
+										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex || index === selectedIndexes.length ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
+										</div>
+									
+								</div>
+							))}
+							<p className="absolute bottom-24 text-lilac pl-2 font-audiowide">0/1</p>
+							</div>
+							</div>
+								<div className="flex flex-col justify-end mb-6">
+									<div className="flex flex-row items-center my-2 m-auto ">
+									<div className="border-t w-12 border-lilac"></div>
+									<span className="mx-4 text-sm text-lilac">OR</span>
+									<div className="border-t w-12 border-lilac"></div>
+									</div>
+									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
+									<div className="text-xs text-lilac">Random player</div>
+									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
+									</div>
+							</div>
+						</div>
+					) : (
+						<div className="relative text-lilac">
+							{!showSecondDiv ? (
+							<>
+							<div className="pb-6">
+								<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+									&#x2715;
+								</div>
+							</div>
+							<div className="flex justify-center h-5/6">
+								<h3 className="absolute font-audiowide text-xl">Waiting for...</h3>
+								<div className="w-full h-5/6 bg-filter my-4 p-4 flex flex-col justify-center items-center">
+									<div className="element-to-animate rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
+										<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+									</div>
+									<p>Name</p>
+									<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
+										<div className="h-full bg-fushia" style={{ width: '50%' }} />
+									</div>
+								</div>
+							</div>
+							<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+							</>
+							) : (
+								<>
+								<div className="pb-6">
+									<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+										&#x2715;
+									</div>
+								</div>
+								<div className="flex justify-center h-5/6">
+									<h3 className="absolute font-audiowide text-xl z-50">Unavailable</h3>
+									<div className="w-full h-5/6 bg-filter opacity-50 my-4 p-4 flex flex-col justify-center items-center">
+										<div className="bg-purple rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
+											<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+										</div>
+										<p>Name</p>
+										<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
+											<div className="h-full" style={{ width: '50%' }} />
+										</div>
+									</div>
+								</div>
+								<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+								</>
+							)}
+							</div>
+					)}
 					</div>
 
-					{/*GAME 2*/}
-					<div className="flex w-full h-96 p-8 rounded-lg grid grid-rows-[auto,1fr,auto] bg-filter bg-opacity-75">
-						<div></div>
-						<div></div>
-						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-purple">
-							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Invite friends</div>
+					{/*GAME 1*/}
+					<div className={`flex w-full h-96 p-4 rounded-lg grid grid-rows-[2fr,auto] bg-filter bg-opacity-75 ${showBackIndex === 1 ? 'hidden' : ''}`}>
+						<div className="relative">
+						<img src="src/game.png" alt='img' className="w-full h-60"/>
+							<div className="absolute inset-0 flex items-center justify-center">
+								<p className="text-4xl text-center font-audiowide text-lilac mix-blend-difference">1 vs 1</p>
+							</div>	
+						</div>
+						<div className="px-2 pb-4">
+						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-md bg-purple">
+							<button className="flex flex-row justify-between items-center hover" onClick={() => toggleCard(1)}>
+								<div  className="text-xs text-lilac">Invite friends</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
-							</div>
+							</button>
 							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
 								<div className="text-xs text-lilac">Random player</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
+						</div>
 					</div>
+					<div
+					ref={cardsRef}
+					className={`flex h-96 w-full rounded-md bg-violet-black border-container grid grid-rows-[2fr,auto] p-2 ${showBackIndex === 1 ? '' : 'hidden'}`}
+						>
+	  				{selectedIndexes.length !== 3 ? (
+						<div className="relative">
+						{/*LIST*/}
+						<div className="w-full h-2/3 bg-filter my-4">
+							<h3 className='absolute top-0 text-lilac text-xl font-audiowide pl-2'>choose a player</h3>
+							<div className="py-4">
+							{names.map((name, index) => (
+									<div>
+										<div
+											key={index}
+											className="flex flex-row justify-content items-center px-2 py-1"
+											onMouseEnter={() => setHoveredIndex(index)}
+											onMouseLeave={() => setHoveredIndex(null)}
+											onClick={() => setClickedIndex(index)}
+										>
+											<div className="mr-2">
+											{index === selectedIndexes.length || index === hoveredIndex ? (
+												<RiTriangleFill className="w-[8px] h-[8px] text-lilac transform rotate-90" />
+												) : ( <div className="w-[8px] h-[8px]"></div> )}
+											</div>
+											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
+												<FaUser className="w-[8px] h-[8px] text-lilac" />
+											</div>
+										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex || index === selectedIndexes.length ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
+										</div>
+									
+								</div>
+							))}
+							<p className="absolute bottom-24 text-lilac pl-2 font-audiowide">0/1</p>
+							</div>
+							</div>
+								<div className="flex flex-col justify-end mb-6">
+									<div className="flex flex-row items-center my-2 m-auto ">
+									<div className="border-t w-12 border-lilac"></div>
+									<span className="mx-4 text-sm text-lilac">OR</span>
+									<div className="border-t w-12 border-lilac"></div>
+									</div>
+									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
+									<div className="text-xs text-lilac">Random player</div>
+									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
+									</div>
+							</div>
+						</div>
+					) : (
+						<div className="relative text-lilac">
+							{!showSecondDiv ? (
+							<>
+							<div className="pb-6">
+								<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+									&#x2715;
+								</div>
+							</div>
+							<div className="flex justify-center h-5/6">
+								<h3 className="absolute font-audiowide text-xl">Waiting for...</h3>
+								<div className="w-full h-5/6 bg-filter my-4 p-4 flex flex-col justify-center items-center">
+									<div className="element-to-animate rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
+										<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+									</div>
+									<p>Name</p>
+									<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
+										<div className="h-full bg-fushia" style={{ width: '50%' }} />
+									</div>
+								</div>
+							</div>
+							<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+							</>
+							) : (
+								<>
+								<div className="pb-6">
+									<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+										&#x2715;
+									</div>
+								</div>
+								<div className="flex justify-center h-5/6">
+									<h3 className="absolute font-audiowide text-xl z-50">Unavailable</h3>
+									<div className="w-full h-5/6 bg-filter opacity-50 my-4 p-4 flex flex-col justify-center items-center">
+										<div className="bg-purple rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
+											<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+										</div>
+										<p>Name</p>
+										<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
+											<div className="h-full" style={{ width: '50%' }} />
+										</div>
+									</div>
+								</div>
+								<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+								</>
+							)}
+							</div>
+					)}
+					</div>
+
+					
+
+
 
 					{/*GAME 3*/}
 					<div className="flex w-full p-8 rounded-lg grid grid-rows-[auto,1fr,auto] bg-filter bg-opacity-75">
-						<div></div>
-						<div></div>
-						<div className="flex flex-col justify-end space-y-2 px-2 py-2 rounded-lg bg-purple">
-							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Invite friends</div>
-								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
-							</div>
-							<div className="border-t border-lilac"></div>
-							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Random player</div>
-								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
-							</div>
-						</div>
 					</div>
 					
 				</div>

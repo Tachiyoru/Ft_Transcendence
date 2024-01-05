@@ -111,8 +111,8 @@ const SignupForm = () => {
   return (
     <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
       <section className="w-full max-w-sm border-container">
-        <div className="mx-auto p-8">
-          <h1 className="text-xl font-outline-2 text-white text-center mb-8">SIGN UP</h1>
+        <div className="mx-auto px-16 py-10">
+          <h1 className="text-xl font-audiowide font-outline-2 text-white text-center mb-8">SIGN UP</h1>
           <form onSubmit={handleSubmit(SubmitHandler)}>
             {/*Form name*/}
             <UserNameField
@@ -133,7 +133,7 @@ const SignupForm = () => {
             />
 
             {/*Form Password*/}
-            <div className="mb-4 w-full">
+            <div className="mb-2 w-full">
               <div className="flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
@@ -216,7 +216,7 @@ const SignupForm = () => {
               )}
             </div>
 
-            <div className="mb-6 w-full">
+            <div className="mb-10 w-full">
               <div className="flex flex-row items-center border-lilac border-b">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
@@ -264,11 +264,11 @@ const SignupForm = () => {
               )}
             </div>
             
-            <div className='flex flex-col items-center'>
+            <div className='flex flex-col items-center mb-6'>
               <button
                 type="submit"
                 disabled={!isValid || !confirmPassword}
-                className="bg-purple text-lilac text-1xl py-2 px-10 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
+                className="bg-purple text-lilac text-base py-1 px-6 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
               >
                 Create an account
               </button>

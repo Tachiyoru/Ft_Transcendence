@@ -44,12 +44,11 @@ export class FriendsListController
 		return this.friendListService.pendingList(user.id);
 	}
 
-	@Get('in-common/:userId/:friendId')
+	@Get('in-common/:friendId')
 	async getFriendsInCommon(
-		@Param('userId', ParseIntPipe) userId: number,
-		@Param('friendId', ParseIntPipe) friendId: number): Promise<User[]>
+		@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number)
 	{
-		return (this.friendListService.getFriendsInCommon(userId, friendId));
+		return this.friendListService.getFriendsInCommon(user.id, friendId);
 	}
 
 	@Post('/friend-request/accept/:id')
@@ -71,8 +70,7 @@ export class FriendsListController
 	}
 
 	@Get("from/:id")
-	async getFriendsFrom(@Param("id", ParseIntPipe) id: number): Promise<User[]>
-	{
+	async getFriendsFrom(@Param("id", ParseIntPipe) id: number): Promise<User[]> {
 		return this.friendListService.getFriendsFrom(id);
 	}
 
@@ -80,16 +78,20 @@ export class FriendsListController
 	removeFriend(
 		@GetUser() user: User,
 		@Param("friendId", ParseIntPipe) friendId: number
-	): Promise<User>
-	{
+	): Promise<User> {
 		return this.friendListService.removeFriend(user, friendId);
 	}
 
 	@Get('/blocked-users')
-	getBlockedUsers(@GetUser() user: User): Promise<User[]>
-	{
+	getBlockedUsers(@GetUser() user: User): Promise<User[]> {
 		return (this.friendListService.getBlockedUsers(user));
 	}
+
+	@Get('/blocked-users/:userId')
+    async checkIfUserIsBlocked(@Param('userId') userId: number, @GetUser() user: User): Promise<{ isBlocked: boolean }> {
+        const isBlocked = await this.friendListService.isUserBlockedById(userId, user);
+        return { isBlocked };
+    }
 
 	@Post('block/:userId')
 	blockUser(@GetUser() user: User, @Param('userId', ParseIntPipe) userId: number): Promise<User>

@@ -1,24 +1,24 @@
 import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
-  WebSocketServer,
-  ConnectedSocket,
+	WebSocketGateway,
+	SubscribeMessage,
+	MessageBody,
+	WebSocketServer,
+	ConnectedSocket,
 } from "@nestjs/websockets";
 import { chatService } from "./chat.service";
 import {
-  CreateMessageDto,
-  UpdateMessageDto,
-  createChannel,
-} from "./dto/create-message.dto";
+	CreateMessageDto,
+	UpdateMessageDto,
+	createChannel,
+	} from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Request,
-  UseGuards,
+	Controller,
+	Get,
+	Param,
+	ParseIntPipe,
+	Request,
+	UseGuards,
 } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -31,7 +31,7 @@ import { NotificationService } from "src/notification/notification.service";
 import { TokenGuard } from "src/auth/guard";
 
 @WebSocketGateway({
-  cors: { origin: "http://localhost:5173", credentials: true },
+	cors: { origin: "http://localhost:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
 export class chatGateway {
@@ -43,12 +43,10 @@ export class chatGateway {
     private readonly notificationService: NotificationService
   ) {}
 
-  onModuleInit() {
-    this.server.on("connection", (socket) => {
-      console.log(socket.id);
-      console.log("connected");
-    });
-  }
+	onModuleInit() {
+		this.server.on("connection", (socket) => {
+		});
+	}
 
   @SubscribeMessage("channel")
   async getChannelById(
@@ -82,6 +80,22 @@ export class chatGateway {
 		} catch (error)
 		{
 			client.emit("users-not-in-channel-error", error.message);
+		}
+	}
+
+	@SubscribeMessage("users-in-channel-except-him")
+	async getUsersNotInChannelExceptUser(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { chanName: string},
+		@Request() req: any
+	) {
+		try {
+			const userList = await this.chatService.getUsersInChannelExceptUser(
+				data.chanName, req
+			);
+			client.emit("users-in-channel-except-him", userList);
+		} catch (error) {
+			client.emit("users-in-channel-except-him-error", error.message);
 		}
 	}
 
@@ -173,7 +187,7 @@ export class chatGateway {
 
 	@SubscribeMessage("addOp")
 	async addOp(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
@@ -213,76 +227,81 @@ export class chatGateway {
 		}
 	}
 
-  @SubscribeMessage("find-all-channels")
-  async findAllChannels(): Promise<void> {
-    const chanlist = await this.prisma.channel.findMany();
-    this.server.emit("channel-list", chanlist);
-  }
+	@SubscribeMessage("find-all-channels")
+	async findAllChannels(): Promise<void> {
+		const chanlist = await this.prisma.channel.findMany();
+		this.server.emit("channel-list", chanlist);
+	}
 
-  @SubscribeMessage("find-my-channels")
-  async getMyChannels(@ConnectedSocket() client: Socket): Promise<void> {
-    const chanlist = await this.chatService.getChannelsByUserId(
-      client.handshake.auth.id
-    );
-    client.emit("my-channel-list", chanlist);
-  }
+	@SubscribeMessage("find-my-channels")
+	async getMyChannels(@ConnectedSocket() client: Socket): Promise<void> {
+		const chanlist = await this.chatService.getChannelsByUserId(
+		client.handshake.auth.id
+		);
+		client.emit("my-channel-list", chanlist);
+	}
 
-  @SubscribeMessage("channel-in-common")
-  async getChannelsInCommon(
-    @ConnectedSocket() client: Socket,
-    @MessageBody("friendId") friendId: number
-  ): Promise<void> {
+	@SubscribeMessage("find-channels-public")
+	async getChannelsPublic(@ConnectedSocket() client: Socket): Promise<void> {
+		const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
+		client.handshake.auth.id
+		);
+		client.emit("channel-public-list", chanlist);
+	}
 
-    const chanlist = await this.chatService.getChannelsInCommon(
-      client.handshake.auth.id,
-      friendId
-    );
-    client.emit("channel-in-common", chanlist);
-  }
+	@SubscribeMessage("channel-in-common")
+	async getChannelsInCommon(
+		@ConnectedSocket() client: Socket,
+		@MessageBody("friendId") friendId: number
+	): Promise<void>
+	{
+		const chanlist = await this.chatService.getChannelsInCommon(
+		client.handshake.auth.id,
+		friendId
+		);
+		client.emit("channel-in-common", chanlist);
+	}
 
-  //   @SubscribeMessage("joinChan")
-  //   async joinChan(
-  //     client: Socket,
-  //     @MessageBody()
-  //     data: { chanName: string; password?: string; invited?: boolean },
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       if (!data.invited) {
-  //         data.invited = false;
-  //       }
-  //       const result = await this.chatService.joinChannel(
-  //         data.chanName,
-  //         data.invited,
-  //         req,
-  //         data.password
-  //       );
-  //       client.emit("channelJoined", result);
-  //     } catch (error) {
-  //       client.emit("renameChanError", { message: error.message });
-  //     }
-  //   }
+	//   @SubscribeMessage("joinChan")
+	//   async joinChan(
+	//     client: Socket,
+	//     @MessageBody()
+	//     data: { chanName: string; password?: string; invited?: boolean },
+	//     @Request() req: any
+	//   ) {
+	//     try {
+	//       if (!data.invited) {
+	//         data.invited = false;
+	//       }
+	//       const result = await this.chatService.joinChannel(
+	//         data.chanName,
+	//         data.invited,
+	//         req,
+	//         data.password
+	//       );
+	//       client.emit("channelJoined", result);
+	//     } catch (error) {
+	//       client.emit("renameChanError", { message: error.message });
+	//     }
+	//   }
 
 	@SubscribeMessage("leaveChan")
 	async leaveChan(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; },
 		@Request() req: any
-	)
-	{
-		try
-		{
-			const result = await this.chatService.leaveChannel(data.chanId, req);
-			client.emit("channelLeft", result);
-		} catch (error)
-		{
-			client.emit("chanLeftError", { message: error.message });
+	) {
+		try {
+		const result = await this.chatService.leaveChannel(data.chanId, req);
+		client.emit("channelLeft", result);
+		} catch (error) {
+		client.emit("chanLeftError", { message: error.message });
 		}
 	}
 
 	@SubscribeMessage("banUser")
 	async banUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
@@ -303,7 +322,7 @@ export class chatGateway {
 
 	@SubscribeMessage("unBanUser")
 	async unBanUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
@@ -324,7 +343,7 @@ export class chatGateway {
 
 	@SubscribeMessage("kickUser")
 	async kickUser(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; username: string; },
 		@Request() req: any
 	)
@@ -345,7 +364,7 @@ export class chatGateway {
 
 	@SubscribeMessage("findAllMembers")
 	async findAllMembers(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; }
 	)
 	{
@@ -361,7 +380,7 @@ export class chatGateway {
 
 	@SubscribeMessage("findAllUsers")
 	async findAllUsers(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; }
 	)
 	{
@@ -377,7 +396,7 @@ export class chatGateway {
 
 	@SubscribeMessage("findAllBannedMembers")
 	async findAllBannedMembers(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanId: number; }
 	)
 	{
@@ -395,7 +414,7 @@ export class chatGateway {
 
 	@SubscribeMessage("recapMessages")
 	async findAllChanMessages(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; }
 	)
 	{
@@ -424,7 +443,7 @@ export class chatGateway {
 				req
 			);
 
-      console.log(message);
+		console.log(message);
 
       this.server.to(message.channelName).emit("recapMessages", message);
     } catch (error) {
@@ -434,7 +453,7 @@ export class chatGateway {
 
   @SubscribeMessage("updateMessage")
   async updateMessage(
-    client: Socket,
+	@ConnectedSocket() client: Socket,
     @MessageBody() UpdateMessageDto: UpdateMessageDto,
     @Request() req: any
   ) {
@@ -448,7 +467,7 @@ export class chatGateway {
 
 	@SubscribeMessage("removeMessage")
 	async removeMessages(
-		client: Socket,
+		@ConnectedSocket() client: Socket,
 		@MessageBody() data: { chanName: string; msgId: number; },
 		@Request() req: any
 	)
@@ -467,19 +486,19 @@ export class chatGateway {
 		}
 	}
 
-  //   @SubscribeMessage("typing")
-  //   async typing(
-  //     @MessageBody("isTyping") isTyping: boolean,
-  //     @MessageBody("user") username: string,
-  //     @ConnectedSocket() client: Socket
-  //   ) {
-  //     const user = await this.prisma.user.findUnique({
-  //       where: { username: username },
-  //     });
-  //     if (!user) {
-  //       return;
-  //     }
-  //     const name = user.username;
-  //     client.broadcast.emit("typing", { name, isTyping });
-  //   }
-}
+	//   @SubscribeMessage("typing")
+	//   async typing(
+	//     @MessageBody("isTyping") isTyping: boolean,
+	//     @MessageBody("user") username: string,
+	//     @ConnectedSocket() client: Socket
+	//   ) {
+	//     const user = await this.prisma.user.findUnique({
+	//       where: { username: username },
+	//     });
+	//     if (!user) {
+	//       return;
+	//     }
+	//     const name = user.username;
+	//     client.broadcast.emit("typing", { name, isTyping });
+	//   }
+	}
