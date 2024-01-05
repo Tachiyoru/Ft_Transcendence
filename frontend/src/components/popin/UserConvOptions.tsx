@@ -21,7 +21,7 @@ interface ChannelProps {
 	channel: {
 		members: Member[];
 		modes: string;
-		id: number;
+		chanId: number;
 		name: string;
 		owner: Owner;
 		op: string[];

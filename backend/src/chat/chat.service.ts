@@ -211,8 +211,6 @@ export class chatService
 
 		return updatedChannel;
 	}
-		return updatedChannel;
-	}
 
 	async renameChan(chanId: number, newName: string, @Request() req: any)
 	{
@@ -285,8 +283,7 @@ export class chatService
 
 		return updatedChannel;
 	}
-		return updatedChannel;
-	}
+
 
 	async acceptInvitationToChannel(chanId: number, @Request() req: any)
 	{
@@ -333,7 +330,6 @@ export class chatService
 		// }
 
 		const targetIds = targets.map((target) => target.id);
-		const targetIds = targets.map((target) => target.id);
 
 		const users = await this.prisma.user.findMany({
 			where: { id: { in: targetIds } },
@@ -360,8 +356,6 @@ export class chatService
 			},
 		});
 
-		return updatedChannel;
-	}
 		return updatedChannel;
 	}
 

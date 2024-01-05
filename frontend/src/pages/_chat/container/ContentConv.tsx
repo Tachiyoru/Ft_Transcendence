@@ -1,14 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
-import {
-  FaBan,
-  FaPaperPlane,
-  FaUserGroup,
-  FaUserPlus,
-  FaXmark,
-} from "react-icons/fa6";
-import { IoIosArrowForward } from "react-icons/io";
-import { RiGamepadFill } from "react-icons/ri";
+import { FaPaperPlane, FaUserGroup } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { RootState } from "../../../store/store";
@@ -16,46 +8,58 @@ import TimeConverter from "../../../components/date/TimeConverter";
 import AddUserConv from "../../../components/popin/AddUserConv";
 import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
-import axios from "../../../axios/api";
 
 interface Channel {
-  name: string;
+	name: string;
 	modes: string;
 	chanId: number;
-	
+	owner: Owner;
+	members: Member[];
+	op: string[]
+}
+
+interface Owner {
+    username: string;
+	avatar: string;
+	id: number;
+}
+
+interface Member {
+    username: string;
+	avatar: string;
+	id: number;
 }
 
 interface Message {
-  content: string;
-  authorId: string;
-  createdAt: Date;
+	content: string;
+	authorId: string,
+	createdAt: Date,
 }
 
 const ContentConv = () => {
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-  const [channel, setChannel] = useState<Channel | null>(null);
-  const [messageList, setMessageList] = useState<Message[]>([]);
-  const [message, setMessage] = useState<string>("");
-  const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
+	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+	const [channel, setChannel] = useState<Channel | null>(null);
+	const [messageList, setMessageList] = useState<Message[]>([]);
+	const [message, setMessage] = useState<string>('');
 
-  const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!channel) return;
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
-    });
-    socket.on("connect", () => {
-      console.log("Connected to server content");
-      socket.emit("create-message", {
-        content: message,
-        chanName: channel.name,
-      });
-      setMessage("");
-    });
-    return () => {
-      socket.disconnect();
-    };
-  };
+	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
+
+	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!channel)
+			return;
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		socket.on('connect', () => {
+			socket.emit('create-message', { content: message, chanName: channel.name});
+			setMessage('');
+
+		});
+		return () => {
+			socket.disconnect();
+		};
+	};
 
 	useEffect(() => {
 		const socket = io('http://localhost:5001/', {
@@ -64,6 +68,7 @@ const ContentConv = () => {
 		socket.on('connect', () => {
 			socket.emit('channel', {id : id.selectedChannelId});
 			socket.on('channel', (channelInfo, messageList) => {
+				console.log(channelInfo);
 				setMessageList(messageList);
 				setChannel(channelInfo);
 			});
@@ -72,31 +77,31 @@ const ContentConv = () => {
 			});
 		});
 
-    return () => {
-      socket.disconnect();
-    };
-  }, [id]);
+		return () => {
+			socket.disconnect();
+		};
+	}, [id]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
 	};
 
 	return (
-	<div className="flex-1 flex flex-col justify-between bg-filter bg-opacity-60 text-xs relative p-8">
+	<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
 
 		{!channel ? (
-		<div className="flex-1 flex flex-col justify-between text-xs relative">
+		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">
 			No conversation selected
 		</div>
 		):(
-		<div className="flex-1 flex flex-col justify-between text-xs">
+		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs">
 		<div>
 			<div className="flex flex-row justify-between items-center relative">
 				<h3 className="text-base text-lilac">{channel.name}</h3>
 				<div className="flex-end flex">
 					{channel.modes !== 'CHAT' && (
 						<div className="flex flex-row">
-							<AddUserConv channel={channel.name}/>
+							<AddUserConv channel={channel}/>
 							<ChannelOptions channel={channel}/>
 						</div>
 					)}

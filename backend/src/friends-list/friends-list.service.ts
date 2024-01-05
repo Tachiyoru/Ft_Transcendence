@@ -220,11 +220,6 @@ export class FriendsListService
         return blockedUsers.some(user => user.id === userId);
     }
 
-	async isUserBlockedById(userId: number, loggedInUser: User): Promise<boolean> {
-        const blockedUsers = await this.getBlockedUsers(loggedInUser);
-        return blockedUsers.some(user => user.id === userId);
-    }
-
 	async getMyFriends(user: User)
 	{
 		const me = await this.prismaService.user.findUnique({

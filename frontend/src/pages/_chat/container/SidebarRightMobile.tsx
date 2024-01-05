@@ -20,7 +20,7 @@ interface RightSidebarProps {
 	channel: {
 		members: Member[];
 		modes: string;
-		id: number;
+		chanId: number;
 		name: string;
 		owner: Owner;
 		op: string[];
@@ -104,11 +104,12 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 			setUsersInChannelExceptHim(users);
 		});
 
-		socket.emit('findAllMembers', { chanName: channel.name });
+		socket.emit('findAllMembers', { chanId: channel.chanId });
 		socket.on('allMembers', (users) => {
 			setUsersInChannel(users);
 		});
 		
+		// existe pas dans le back
 		socket.emit('check-user-in-channel', { chanName: channel.name });
 		socket.on('user-in-channel', (boolean) => {
 			setCheckUserInChannel(boolean)

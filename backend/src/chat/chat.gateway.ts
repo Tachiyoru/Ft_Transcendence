@@ -58,6 +58,8 @@ export class chatGateway {
       where: { chanId: id },
       include: {
         messages: true,
+		members: true,
+		owner: true,
       },
     });
     if (!chan) return null;
