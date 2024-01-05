@@ -27,7 +27,14 @@ export class SocketTokenGuard implements CanActivate
 		}
 		const request = context.switchToHttp().getRequest();
 		const client: Socket = context.switchToWs().getClient();
-		const token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
+		let token;
+		if (client.handshake.headers.cookie?.split("=")[0] === "io"){
+			token = client.handshake.headers.cookie?.split("=")[3].split(";")[0];
+		} else {
+			token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
+		}
+		if (request.user)
+			return true;
 		if (!token)
 		{
 			throw new UnauthorizedException();
