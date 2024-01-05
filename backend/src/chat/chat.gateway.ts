@@ -74,7 +74,7 @@ export class chatGateway
 	@SubscribeMessage("users-not-in-channel")
 	async getUsersNotInChannel(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() data: { chanId: string; }
+		@MessageBody() data: { chanId: number; }
 	)
 	{
 		try

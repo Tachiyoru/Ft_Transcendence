@@ -11,11 +11,14 @@ import io from "socket.io-client";
 import { Link } from "react-router-dom";
 
 interface ChannelProps {
-	channel: string;
-	chanId: number;
+	channel: {
+		name: string;
+		modes: string;
+		chanId: number;
+	}
 }
 
-const AddUserConv: React.FC<ChannelProps> = ({ chanId }) => {
+const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
@@ -44,8 +47,8 @@ const AddUserConv: React.FC<ChannelProps> = ({ chanId }) => {
         });
 				socket.on("connect", () =>
 				{
-					console.log("ChanId : ", chanId)
-          socket.emit("users-not-in-channel", { chanId: chanId }); //need to change to users not in channels and friend with me
+					console.log("ChanId : ", channel.chanId)
+          socket.emit("users-not-in-channel", { chanId: channel.chanId }); //need to change to users not in channels and friend with me
 
           socket.on("users-not-in-channel", (userList) => {
             setListUsers(userList);
@@ -77,7 +80,8 @@ const AddUserConv: React.FC<ChannelProps> = ({ chanId }) => {
     console.log("Selection:", selectedItems);
 
     const channelData = {
-      chanName: channel,
+			chanName: channel.name,
+			chanId: channel.chanId,
       targets: selectedItems,
     };
     const socket = io("http://localhost:5001/", {

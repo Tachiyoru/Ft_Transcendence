@@ -18,7 +18,9 @@ import AddUserConv from "../../../components/popin/AddUserConv";
 
 interface Channel {
   name: string;
-  modes: string;
+	modes: string;
+	chanId: number;
+	
 }
 
 interface Message {
@@ -100,7 +102,7 @@ const ContentConv = () => {
               >
                 <FaUserGroup className="w-4 h-4 text-lilac" />
               </button>
-              <AddUserConv channel={channel.name} />
+              <AddUserConv channel={channel} />
             </div>
             {/*CONTENT*/}
             {messageList.map((message, index) => (
