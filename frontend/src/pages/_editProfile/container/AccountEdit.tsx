@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { AiOutlineMail, AiOutlineUser } from "react-icons/ai";
 import { FaUser } from "react-icons/fa6";
 import axios from "../../../axios/api";
-import Cookies from "js-cookie";
 import FileUpload from "../../../components/photo/FileUpload";
 
 interface IdataRegister {
@@ -13,6 +12,12 @@ interface IdataRegister {
 
 const AccountEdit = () => {
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<{
+	username: string;
+	avatar: string;
+	email: string;
+	createdAt: string;
+  } | undefined>();
 
   const {
     register,
@@ -22,6 +27,19 @@ const AccountEdit = () => {
   } = useForm<IdataRegister>();
 
   const { username, email } = watch();
+
+  useEffect(() => {
+	const fetchData = async () => {
+	  try {
+		const userDataResponse = await axios.get('/users/me');
+		setUserData(userDataResponse.data);
+	  } catch (error) {
+		console.error('Error fetching user data:', error);
+	  }
+	};
+	fetchData();
+  }, []);
+  
 
   const submitHandler = async () => {
     try {
@@ -58,9 +76,13 @@ const AccountEdit = () => {
 
       {/*PHOTO*/}
       <div className="text-lilac mt-4 flex flex-row items-center">
-        <div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
-          <FaUser className="w-[30px] h-[30px] text-lilac" />
-        </div>
+	  	{userData && userData.avatar ? (
+			<img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
+			) : (
+			<div className="bg-purple rounded-full p-2 mt-2">
+				<FaUser className="w-[60px] h-[60px] p-3 text-lilac"/>
+			</div>
+		)}
         <div>
           <FileUpload />
         </div>
@@ -79,7 +101,7 @@ const AccountEdit = () => {
                 message: "Name length must be at least 1 character:",
               },
             })}
-            placeholder="Enter name"
+            placeholder={userData?.username}
             className="px-5 py-3 text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
           />
         </div>
@@ -96,14 +118,14 @@ const AccountEdit = () => {
                 message: "Please enter a valid email",
               },
             })}
-            placeholder="Email"
+            placeholder={userData?.email}
             className="px-5 py-3 text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
           />
         </div>
         <button
           type="submit"
           disabled={!isValid}
-          className="mt-4 border text-sm bg-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
+          className="mt-4 text-sm bg-dark-violet py-2 px-5 rounded mb-6 disabled:opacity-40"
         >
           Save changes
         </button>

@@ -255,6 +255,27 @@ export class UserService
 		return rank;
 	}
 
+	async getRankingFriendsHim(name: string)
+	{
+		const rank = await this.prisma.user.findMany({
+			include: {
+				friends: true,
+				stats: true,
+			},
+			where: {
+				friends: {
+					some: {
+						username: name,
+					},
+				},
+			},
+			orderBy: {
+				stats: { lvl: "desc" },
+			},
+		});
+		return rank;
+	}
+
 	async getHim(name: string)
 	{
 		return this.prisma.user.findUnique({

@@ -29,14 +29,14 @@ const FileUpload = () => {
   };
 
   return (
-    <div>
+    <div className="file-upload">
       <input
         className="text-sm custom-file-upload"
         type="file"
         onChange={handleFileChange}
       />
       <button className="text-sm" onClick={handleUpload}>
-        Upload
+        Upload file
       </button>
     </div>
   );

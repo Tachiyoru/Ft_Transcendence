@@ -70,6 +70,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 	const channelEquivalents: ChannelEquivalents = {
 		'GROUPCHAT': 'Public',
 		'PRIVATE': 'Private',
+		'PROTECTED': 'Protected',
 	};
 
 	const channelName: string = channel.modes;
@@ -165,12 +166,12 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 	};
 
 	return (
-	<div className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs ${isRightSidebarOpen ? 'block' : 'hidden'}`}>
+
+		<div className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs ${isRightSidebarOpen ? 'block' : 'hidden'}`}>
 			{/*CLOSE*/}
 			<button className="lg:hidden flex-end" onClick={toggleRightSidebar}>
 				<FaXmark className="w-4 h-4 text-lilac"/>
 			</button>
-
 			{channel.modes === 'CHAT' && (
 			<div>
 				{usersInChannelExceptHim.map((member, index) => {
@@ -299,7 +300,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 									<p className='text-xs text-lilac ml-2'>{member.username}</p>
 								</div>
 								{usersInChannelExceptHim.find(userMember => userMember.username === member.username) && (
-								<UserConvOptions channel={channel} username={member.username} />
+								<UserConvOptions channel={channel} username={member.username} id={member.id} />
 							)}
 							</div>
 						);

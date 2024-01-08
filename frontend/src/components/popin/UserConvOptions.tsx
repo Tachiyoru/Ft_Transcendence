@@ -4,6 +4,9 @@ import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
 import { io } from 'socket.io-client';
+import { Link } from 'react-router-dom';
+import { setSelectedChannelId } from '../../services/selectedChannelSlice';
+import { useDispatch } from 'react-redux';
 
 interface Member {
     username: string;
@@ -27,12 +30,14 @@ interface ChannelProps {
 		op: string[];
 	}
 	username: string;
+	id: number;
 }
 
-const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
+const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
+	const dispatch = useDispatch();
 
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
@@ -74,7 +79,38 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 		document.removeEventListener("mousedown", handleClickOutside);
 	};
 	}, []);
+
+	const handleClickSendMessage = () => {
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
 		console.log(username)
+		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
+		socket.on('chatChannelCreated', (data) => {
+			console.log('Chat channel created:', data);
+			dispatch(setSelectedChannelId(data.channelId));
+		  });
+	}
+
+	const handleClickBan = () => {
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		socket.emit('banUser', { chanId: channel.chanId, username: username }); 
+		socket.on('userBanned', (data) => {
+			console.log('Ban', data);
+		});
+	}
+
+	const handleClickKick = () => {
+		const socket = io('http://localhost:5001/', {
+			withCredentials: true,
+		});
+		socket.emit('kickUser', { chanId: channel.chanId, username: username }); 
+		socket.on('userKicked', (data) => {
+			console.log('Kick', data);
+		});
+	}
 
 	return (
 	<div>
@@ -89,11 +125,17 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"></div>
 			<div ref={cardRef} className="absolute top-4 right-0 z-50">
 				<div className="bg-dark-violet text-lilac rounded-lg px-6 py-5">
-					<div className="flex flex-row items-center pb-1">
-						<FaUser size={10}/>
-						<p className="ml-2">See profile</p>
-					</div>
-					<div className="flex flex-row items-center pb-1">
+					<Link to={`/user/${username}`}>
+						<div className="flex flex-row items-center pb-1">
+							<FaUser size={10}/>
+							<p className="ml-2">See profile</p>
+						</div>
+					</Link>
+					<div
+						style={{ cursor: "pointer" }} 
+						className="flex flex-row items-center pb-1"
+						onClick={handleClickSendMessage}
+					>
 						<FaRegPenToSquare size={11}/>
 						<p className="ml-2">Send a message</p>
 					</div>
@@ -111,7 +153,11 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 							<FaUser size={10} />
 							<p className="ml-2">Mute</p>
 						</div>
-						<div className="flex flex-row items-center">
+						<div
+							style={{ cursor: "pointer" }} 
+							onClick={handleClickKick}
+							className="flex flex-row items-center"
+						>
 							<FaRegPenToSquare size={11} />
 							<p className="ml-2">Kick</p>
 						</div>
@@ -119,7 +165,11 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username }) => {
 							<RiGamepadFill size={11} />
 							<p className="ml-2">Block</p>
 						</div>
-						<div className="flex flex-row items-center">
+						<div 
+							style={{ cursor: "pointer" }} 
+							onClick={handleClickBan}
+							className="flex flex-row items-center"
+						>
 							<RiGamepadFill size={11} />
 							<p className="ml-2">Ban</p>
 						</div>

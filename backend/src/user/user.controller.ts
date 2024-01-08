@@ -68,8 +68,13 @@ export class UserController {
   }
 
   @Get("ranking-friends")
-  getRankingFriends(@Body() userId: number) {
+  getRankingFriendsHim(@Body() userId: number) {
     return this.userService.getRankingFriends(userId);
+  }
+
+  @Get("ranking-friends/:name")
+  getRankingFriends(@Param("name") name: string) {
+    return this.userService.getRankingFriendsHim(name);
   }
 
   @Get("him/:name")

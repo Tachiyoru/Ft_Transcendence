@@ -63,6 +63,86 @@ export class chatService
 		return channel;
 	}
 
+	async editChannel(channelId: number, updatedSettings: Partial<createChannel>, @Request() req: any) {
+		const existingChannel = await this.prisma.channel.findUnique({
+			where: { chanId: channelId },
+			include: { owner: true, members: true },
+		});
+	
+		if (!existingChannel) {
+			throw new Error("Channel not found");
+		}
+	
+		if (existingChannel.owner.id !== req.user.id) {
+			throw new Error("You don't have permission to edit this channel");
+		}
+	
+		const updatedData: Record<string, any> = {};
+	
+		if (updatedSettings.name) {
+			updatedData.name = updatedSettings.name;
+		}
+	
+		if (updatedSettings.mode) {
+			updatedData.modes = updatedSettings.mode;
+		}
+	
+		if (updatedSettings.password) {
+			updatedData.password = await argon.hash(updatedSettings.password);
+		}
+		
+		const updatedChannel = await this.prisma.channel.update({
+			where: { chanId: channelId },
+			data: updatedData,
+		});
+	
+		return updatedChannel;
+	}
+
+	async getOrCreateChatChannel(@Request() req: any, username2: string, id: number): Promise<number> {
+		;
+	
+		const existingChannel = await this.prisma.channel.findFirst({
+		  where: {
+			AND: [
+			  {
+				members: { some: { id: req.user.id } },
+			  },
+			  {
+				members: { some: { id: id } },
+			  },
+			  {
+				modes: 'CHAT',
+			  },
+			],
+		  },
+		  select: {
+			chanId: true,
+		  },
+		});
+	
+		if (existingChannel) {
+		  return existingChannel.chanId;
+		}
+	
+		const newChannel = await this.prisma.channel.create({
+		  data: {
+			name: `${req.user.username}, ${username2}`,
+			modes: 'CHAT',
+			owner: { connect: { id: req.user.id } }, 
+			members: {
+			  connect: [
+				{ id: req.user.id },
+				{ id: id },
+			  ],
+			},
+		  },
+		});
+	
+		return newChannel.chanId;
+	}
+	
+
 	async getChannelsByUserId(userId: number): Promise<Channel[]>
 	{
 		const channels = await this.prisma.channel.findMany({
@@ -443,7 +523,7 @@ export class chatService
 		{
 			throw new Error("Could not find channel");
 		}
-		if (req.user !== chan.owner && !chan.op.includes(req.user.username))
+		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
 		{
 			throw new Error("You are not allowed to ban a user from this channel");
 		}
@@ -520,7 +600,7 @@ export class chatService
 		{
 			throw new Error("Could not find channel");
 		}
-		if (req.user !== chan.owner && !chan.op.includes(req.user.username))
+		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
 		{
 			throw new Error("You are not allowed to ban a user from this channel");
 		}
