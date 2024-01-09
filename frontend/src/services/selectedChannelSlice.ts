@@ -5,7 +5,7 @@ interface SelectedChannelState {
 }
 
 const initialState: SelectedChannelState = {
-	selectedChannelId: null,
+	selectedChannelId: null as number | null,
 };
 
 const selectedChannelSlice = createSlice({

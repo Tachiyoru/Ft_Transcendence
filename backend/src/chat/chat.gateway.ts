@@ -446,7 +446,7 @@ export class chatGateway {
 			const bannedList = await this.chatService.findAllBannedMembers(
 				data.chanId
 			);
-			client.emit("allMembers", bannedList);
+			client.emit("allMembersBan", bannedList);
 		} catch (error)
 		{
 			client.emit("findAllMembersError", { message: error.message });

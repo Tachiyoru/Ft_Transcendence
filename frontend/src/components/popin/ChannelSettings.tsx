@@ -65,11 +65,11 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 		const chanelId = channel.chanId;
 
 		socket.emit('editChannel', {
-		  id: chanelId,
-		  updatedSettings: {
+			id: chanelId,
+			updatedSettings: {
 			mode: channelType,
-			password: channelType === 'PROTECTED' ? password : undefined, // Include password only if channelType is 'protected'
-		  },
+			password: channelType === 'PROTECTED' ? password : undefined,
+			},
 		});
 	};
 

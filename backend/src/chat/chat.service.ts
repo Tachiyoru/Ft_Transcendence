@@ -146,7 +146,12 @@ export class chatService
 	async getChannelsByUserId(userId: number): Promise<Channel[]>
 	{
 		const channels = await this.prisma.channel.findMany({
-			where: { members: { some: { id: userId } } },
+			where: { members: { some: { id: userId } }},       
+			include: {
+				messages: true,
+				members: true,
+				owner: true,
+		},
 		});
 		if (!channels) return [];
 		return channels;
@@ -264,7 +269,7 @@ export class chatService
 		{
 			throw new Error("Could not find channel");
 		}
-		if (req.user !== chan.owner)
+		if (req.user.username !== chan.owner.username)
 		{
 			throw new Error("You are not allowed to add an op to this channel");
 		}
@@ -562,7 +567,7 @@ export class chatService
 		{
 			throw new Error("Could not find channel");
 		}
-		if (req.user !== chan.owner && !chan.op.includes(req.user.username))
+		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
 		{
 			throw new Error("You are not allowed to unban a user from this channel");
 		}
@@ -573,10 +578,13 @@ export class chatService
 		{
 			throw new Error("Could not find user");
 		}
-		if (!chan.banned.includes(target))
+		const banned = chan.banned.some((user) => user.username === target.username)
+		if (!banned)
 		{
+			console.log('pas ok', chan.banned, target)
 			throw new Error("User is not banned from this channel");
-		}
+	}
+		console.log('ok')
 		const updatedChannel = await this.prisma.channel.update({
 			where: { chanId: chanId },
 			data: {

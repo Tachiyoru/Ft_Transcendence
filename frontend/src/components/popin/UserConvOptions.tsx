@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
+import { FaMinusCircle } from 'react-icons/fa';
 
 interface Member {
     username: string;
@@ -38,6 +39,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	const cardRef = useRef<HTMLDivElement>(null);
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
+	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
@@ -89,7 +91,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		socket.on('chatChannelCreated', (data) => {
 			console.log('Chat channel created:', data);
 			dispatch(setSelectedChannelId(data.channelId));
-		  });
+		});
 	}
 
 	const handleClickBan = () => {
@@ -162,8 +164,8 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 							<p className="ml-2">Kick</p>
 						</div>
 						<div className="flex flex-row items-center">
-							<RiGamepadFill size={11} />
-							<p className="ml-2">Block</p>
+							<FaMinusCircle size={11} />
+							<p className={`ml-2 hover:underline ${isBlocked ? 'text-red-500' : ''}`}>{isBlocked ? 'Unblock' : 'Block'}</p>
 						</div>
 						<div 
 							style={{ cursor: "pointer" }} 

@@ -31,7 +31,7 @@ return (
 			<Route path="/sign-in" element={<SigninForm />} />
 			<Route path="/sign-up" element={<SignupForm />} />
 			<Route path="/forget-password" element={<ForgetPassword />} />
-			<Route index element={<Dashboard/>}/>
+			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />}/>
 			<Route path="/user/:userId" element={<DashboardFriends/>}/>
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />

@@ -132,12 +132,13 @@ export class AuthService {
     return this.forgeTokens(user, res);
   }
 
-  async logout(userid: number, response: Response) {
-    let user = await this.prisma.user.findFirst({
-      where: { id: userid },
-    });
-    if (!user) throw new ForbiddenException("User not found");
-    user.status = StatusUser.OFFLINE;
+  async logout(userA: User, response: Response) {
+    if (!userA) throw new ForbiddenException("User not found");
+    await this.prisma.user.update({
+      where : { id : userA.id },
+      data : {status : 'OFFLINE'}
+    })
+    userA.status = StatusUser.OFFLINE;
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
     return "Successfully logged out";

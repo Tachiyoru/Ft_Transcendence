@@ -87,16 +87,16 @@ const ContentConv = () => {
 	};
 
 	return (
-	<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative p-8">
+	<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
 
 		{!channel ? (
-		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs relative">
+		<div className="flex-1 flex flex-col justify-between text-xs relative">
 			No conversation selected
 		</div>
 		):(
-		<div className="flex-1 flex flex-col justify-between bg-dark-violet text-gray-300 text-xs">
+		<div className="flex-1 flex flex-col justify-between text-xs">
 		<div>
-			<div className="flex flex-row justify-between items-center relative">
+			<div className="flex flex-row justify-between items-center relative mt-4">
 				<h3 className="text-base text-lilac">{channel.name}</h3>
 				<div className="flex-end flex">
 					{channel.modes !== 'CHAT' && (
@@ -110,6 +110,8 @@ const ContentConv = () => {
 					</button>
 				</div>
 			</div>
+
+			<div className="border border-t-lilac border-opacity-40 mt-6"></div>
 
 			{/*CONTENT*/}
 			{messageList.map((message, index) => (
@@ -131,16 +133,16 @@ const ContentConv = () => {
 			{/*SEND*/}
 			<div>
 				<div className="flex items-center relative">
-					<form onSubmit={handleInputSubmit} className="bg-lilac w-full rounded-md">
+					<form onSubmit={handleInputSubmit} className="bg-dark-violet w-full rounded-md">
 					<input
 						type="text"
 						placeholder="Write message"
-						className="py-2 pl-2 bg-lilac placeholder:text-white w-full rounded-md"
+						className="py-2 pl-4 bg-dark-violet placeholder:text-lilac w-full rounded-md"
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 					/>
-					<button type="submit" className="absolute right-4 top-2">
-						<FaPaperPlane className="w-3 h-3 text-violet-dark"/>
+					<button type="submit" className="absolute right-2 top-2">
+						<FaPaperPlane className="w-3.5 h-3.5 text-purple"/>
 					</button>
 					</form>
 				</div>
