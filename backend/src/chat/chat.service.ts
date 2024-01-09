@@ -61,9 +61,15 @@ export class chatService {
   async getChannelsByUserId(userId: number): Promise<Channel[]> {
     const channels = await this.prisma.channel.findMany({
       where: { members: { some: { id: userId } } },
+      include: {
+        messages: true,
+        owner: true,
+        members: true,
+        invitedList: true,
+        banned: true,
+      },
       orderBy: { updatedAt: "desc" },
     });
-    console.log("aaaaaaaaaaaaaaa", channels);
     if (!channels) return [];
     return channels;
   }
@@ -480,36 +486,37 @@ export class chatService {
   }
 
   async muteMember(chanId: number, userId: number) {
-	const chan = await this.prisma.channel.findUnique({
-	  where: { chanId: chanId }
-	});
-	if (!chan) {
-	  throw new Error("Could not find channel");
-	}
-	if (chan.muted.includes(userId)) {
-	  throw new Error("User is already muted in this channel");
-	}
-	const updatedChannel = await this.prisma.channel.update({
-	  where: { chanId: chan.chanId },
-	  data: { muted: { set: [...chan.muted, userId] } },
-	});
-	return updatedChannel;
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (chan.muted.includes(userId)) {
+      throw new Error("User is already muted in this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chan.chanId },
+      data: { muted: { set: [...chan.muted, userId] } },
+    });
+    return updatedChannel;
   }
 
   async unMuteMember(chanId: number, userId: number) {
-	const chan = await this.prisma.channel.findUnique({
-	  where: { chanId: chanId }});
-	if (!chan) {
-		throw new Error("Could not find channel");
-	}
-	if (!chan.muted.includes(userId)) {
-		throw new Error("User is not muted in this channel");
-	  }
-	const updatedChannel = await this.prisma.channel.update({
-		where: { chanId: chan.chanId },
-		data: { muted: { set: chan.muted.filter(id => id !== userId) } },
-	  });
-	  return updatedChannel;
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (!chan.muted.includes(userId)) {
+      throw new Error("User is not muted in this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chan.chanId },
+      data: { muted: { set: chan.muted.filter((id) => id !== userId) } },
+    });
+    return updatedChannel;
   }
 
   async findAllMutedMembers(chanId: number) {

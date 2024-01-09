@@ -43,7 +43,6 @@ const ContentConv = () => {
 	const [channel, setChannel] = useState<Channel | null>(null);
 	const [messageList, setMessageList] = useState<Message[]>([]);
 	const [message, setMessage] = useState<string>('');
-	let [message2, setMessage2] = useState<string>('');
 	const socket = useContext(WebSocketContext);
 
 	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
