@@ -364,6 +364,37 @@ export class chatGateway {
     }
   }
 
+  @SubscribeMessage("muteMember")
+  async muteMember(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() data: { chanId: number; userId: number },
+  ) {
+	try {
+	  const result = await this.chatService.muteMember(
+		data.chanId,
+		data.userId,
+	  );
+	  client.emit("memberMuted", result);
+	} catch (error) {
+	  client.emit("muteMemberError", { message: error.message });
+	}
+  }
+
+  @SubscribeMessage("findAllMutedMembers")
+  async findAllMutedMembers(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number }
+  ) {
+    try {
+      const mutedList = await this.chatService.findAllMutedMembers(
+        data.chanId
+      );
+      client.emit("allMuted", mutedList);
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
+
   @SubscribeMessage("findAllBannedMembers")
   async findAllBannedMembers(
     @ConnectedSocket() client: Socket,

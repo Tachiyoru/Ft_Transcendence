@@ -122,6 +122,7 @@ model Channel {
     mentions  Int       @default(0)
     modes     Mode      @default(CHAT)
     password  String?
+	muted	  Int[]		@default([])
     updatedAt DateTime  @default(now())
     members   User[]    @relation("chanMembers")
     messages  Message[] @relation("chanMessages")
