@@ -80,7 +80,7 @@ const ContentConv = () => {
 		return () => {
 			socket.disconnect();
 		};
-	}, [id]);
+	}, [id, messageList]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
