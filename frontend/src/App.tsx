@@ -15,6 +15,8 @@ import Settings from './pages/_editProfile/EditProfile';
 import { useSelector } from "react-redux";
 import { RootState } from './store/store';
 import DashboardFriends from './pages/_users/DashboardFriends';
+import { WebSocketContext, socket } from './socket/socket';
+import { Websocket } from './components/Websocket';
 
 //import socketIO from 'socket.io-client';
 
@@ -25,6 +27,8 @@ const App:React.FC = () => {
 const {user} = useSelector((state: RootState) => state.user)
 
 return (
+	<WebSocketContext.Provider value={socket}>
+		<Websocket />
 		<Router>
 		{/*public routes */}
 		<Route element={<AuthLayout />}>
@@ -46,6 +50,7 @@ return (
 
 		{/*private routes */}
 	</Router>
+	</WebSocketContext.Provider>
   )
 }
 

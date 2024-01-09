@@ -101,7 +101,6 @@ export class UserService
 
 	async getAllUsers(userId: number)
 	{
-		console.log(userId);
 		return this.prisma.user.findMany({
 			where: {
 			  NOT: {

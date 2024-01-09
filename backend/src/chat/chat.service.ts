@@ -67,7 +67,9 @@ export class chatService
 	{
 		const channels = await this.prisma.channel.findMany({
 			where: { members: { some: { id: userId } } },
+			orderBy: { updatedAt: 'desc' },
 		});
+		console.log("aaaaaaaaaaaaaaa", channels);
 		if (!channels) return [];
 		return channels;
 	}
@@ -597,6 +599,10 @@ export class chatService
 					channel: { connect: { name: chan.name } },
 					author: { connect: { id: target.id } },
 				},
+			});
+			await this.prisma.channel.update({
+				where: { name: chanName },
+				data: { updatedAt: new Date() },
 			});
 			return message;
 		}

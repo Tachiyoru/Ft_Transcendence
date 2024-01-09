@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { FaPaperPlane, FaUserGroup } from "react-icons/fa6";
 import { useSelector } from "react-redux";
@@ -8,6 +8,8 @@ import TimeConverter from "../../../components/date/TimeConverter";
 import AddUserConv from "../../../components/popin/AddUserConv";
 import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
+import { set } from "react-hook-form";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface Channel {
 	name: string;
@@ -41,6 +43,8 @@ const ContentConv = () => {
 	const [channel, setChannel] = useState<Channel | null>(null);
 	const [messageList, setMessageList] = useState<Message[]>([]);
 	const [message, setMessage] = useState<string>('');
+	let [message2, setMessage2] = useState<string>('');
+	const socket = useContext(WebSocketContext);
 
 	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
 
@@ -48,24 +52,17 @@ const ContentConv = () => {
 		e.preventDefault();
 		if (!channel)
 			return;
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
-		socket.on('connect', () => {
 			socket.emit('create-message', { content: message, chanName: channel.name});
+			socket.on('recapMessages', (newMessage: Message) => {
+				console.log("newMessage = ", newMessage);});
+			console.log("messagelist la = ", messageList);
 			setMessage('');
-
-		});
-		return () => {
-			socket.disconnect();
-		};
+			return () => {
+				socket.off('recapMessages');
+			};
 	};
 
 	useEffect(() => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
-		socket.on('connect', () => {
 			socket.emit('channel', {id : id.selectedChannelId});
 			socket.on('channel', (channelInfo, messageList) => {
 				console.log(channelInfo);
@@ -75,12 +72,13 @@ const ContentConv = () => {
 			socket.on('recapMessages', (newMessage: Message) => {
 				setMessageList((prevMessages) => [...prevMessages, newMessage]);
 			});
-		});
+			console.log("messagelist la2 = ", messageList);
 
 		return () => {
-			socket.disconnect();
+			socket.off('channel');
+			socket.off('recapMessages');
 		};
-	}, [id, messageList]);
+	}, [id]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);

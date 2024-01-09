@@ -13,13 +13,10 @@ const ChannelConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
 	const [publicChannel, setPublicChannel] = useState<Channel[]>([]);
 	const dispatch = useDispatch();
+	const socket = useContext(WebSocketContext);
 
 	useEffect(() => {
-	const socket = io("http://localhost:5001/", {
-		withCredentials: true,
-	});
 
-	socket.on("connect", () => {
 		socket.emit("find-my-channels");
 		socket.on("my-channel-list", (channelList) => {
 		setAllChannel(channelList);
@@ -29,12 +26,12 @@ const ChannelConv = () => {
 		socket.on("channel-public-list", (channelList) => {
 		setPublicChannel(channelList);
 		});
-	});
 
     return () => {
-      socket.disconnect();
+      socket.off("my-channel-list");
+      socket.off("channel-public-list");
     };
-  }, []);
+  }, [allChannel, publicChannel, socket]);
 
   const handleChannelClick = (channelId: number) => {
     dispatch(setSelectedChannelId(channelId));

@@ -14,6 +14,8 @@ import { AuthGuard } from "@nestjs/passport";
 import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { GetUser } from "./decorator";
+import { use } from "passport";
+import { TokenGuard } from "./guard";
 
 @Controller("auth")
 export class AuthController {
@@ -35,16 +37,19 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const user = await this.authService.signin(dto, res);
-    console.log(req.cookies.access_token);
     return { user };
   }
 
+  @UseGuards(TokenGuard)
   @Post("logout")
   async logout(
-    @GetUser("id") userid: number,
+    @GetUser() user: User,
     @Res({ passthrough: true }) res: Response
   ) {
-    return await this.authService.logout(userid, res);
+	console.log("logout", user);
+    await this.authService.logout(user, res);
+	console.log("logout", user);
+	return;
   }
 
   @Get("refresh")

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Res } from "@nestjs/common";
+import { ForbiddenException, Injectable, Redirect, Res } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -132,12 +132,9 @@ export class AuthService {
     return this.forgeTokens(user, res);
   }
 
-  async logout(userid: number, response: Response) {
-    let user = await this.prisma.user.findFirst({
-      where: { id: userid },
-    });
-    if (!user) throw new ForbiddenException("User not found");
-    user.status = StatusUser.OFFLINE;
+  async logout(userA: User, response: Response) {
+    if (!userA) throw new ForbiddenException("User not found");
+    userA.status = StatusUser.OFFLINE;
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
     return "Successfully logged out";

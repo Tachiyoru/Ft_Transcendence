@@ -63,7 +63,6 @@ export class TokenGuard implements CanActivate {
     if (context.getType() === "ws") {
       const client: Socket = context.switchToWs().getClient();
       token = client.handshake.headers.cookie?.split("; ")[2].split("=")[1];
-      console.log("aaaaaaaaa", token)
     }else {
       token = request.cookies?.refresh_token;
     }
