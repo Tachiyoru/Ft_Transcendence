@@ -1,15 +1,14 @@
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { FaPaperPlane, FaUserGroup } from "react-icons/fa6";
 import { useSelector } from "react-redux";
-import { io } from "socket.io-client";
 import { RootState } from "../../../store/store";
 import TimeConverter from "../../../components/date/TimeConverter";
 import AddUserConv from "../../../components/popin/AddUserConv";
 import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
-import { set } from "react-hook-form";
 import { WebSocketContext } from "../../../socket/socket";
+import axios from "../../../axios/api";
 
 interface Channel {
 	name: string;
@@ -44,7 +43,32 @@ const ContentConv = () => {
 	const [messageList, setMessageList] = useState<Message[]>([]);
 	const [message, setMessage] = useState<string>('');
 	const socket = useContext(WebSocketContext);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const messageContainerRef = useRef(null);
 
+
+	const scrollToBottom = () => {
+		if (messageContainerRef.current) {
+			messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+		}
+	};
+
+	useEffect(() => {
+		scrollToBottom();
+	}, [messageList]);
+	
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, []);
+	
 	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
 
 	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
@@ -87,14 +111,18 @@ const ContentConv = () => {
 	<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
 
 		{!channel ? (
-		<div className="flex-1 flex flex-col justify-between text-xs relative">
+		<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
 			No conversation selected
 		</div>
 		):(
 		<div className="flex-1 flex flex-col justify-between text-xs">
 		<div>
 			<div className="flex flex-row justify-between items-center relative mt-4">
-				<h3 className="text-base text-lilac">{channel.name}</h3>
+				{channel.modes === "CHAT" ? (
+					<h3 className="text-base text-lilac">{channel.members.filter(member => member.username !== userData.username)[0].username}</h3>) 
+				: (
+					<h3 className="text-base text-lilac">{channel.name}</h3>
+				)}
 				<div className="flex-end flex">
 					{channel.modes !== 'CHAT' && (
 						<div className="flex flex-row">
@@ -111,20 +139,22 @@ const ContentConv = () => {
 			<div className="border border-t-lilac border-opacity-40 mt-6"></div>
 
 			{/*CONTENT*/}
-			{messageList.map((message, index) => (
-			<div key={index} className="flex flex-row h-12 mt-6">
-				<div className="w-[45px] h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
-					<FaUser className="text-lilac"/>
-				</div>
-				<div className="pt-3">
-					<p className="text-base text-lilac">{message.authorId}</p>
-					<div className="flex flex-row">
-						<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>
-						<TimeConverter initialDate={message.createdAt.toLocaleString()}/>
+			<div className="h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter " ref={messageContainerRef}>
+				{messageList.map((message, index) => (
+				<div key={index} className="flex flex-row h-12 mt-6 mr-2">
+					<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
+						<FaUser className="text-lilac w-3 h-3"/>
+					</div>
+					<div className="pt-3 flex-1">
+						<p className="text-base text-lilac">{message.authorId}</p>
+						<div className="flex flex-row justify-between">
+							<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>
+							<TimeConverter initialDate={message.createdAt.toLocaleString()}/>
+						</div>
 					</div>
 				</div>
+				))}
 			</div>
-			))}
 			</div>
 
 			{/*SEND*/}
@@ -134,7 +164,7 @@ const ContentConv = () => {
 					<input
 						type="text"
 						placeholder="Write message"
-						className="py-2 pl-4 bg-dark-violet placeholder:text-lilac w-full rounded-md"
+						className="py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac w-full rounded-md"
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 					/>

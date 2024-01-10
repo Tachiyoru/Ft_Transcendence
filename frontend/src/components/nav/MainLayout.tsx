@@ -13,7 +13,7 @@ const MainLayout = ({ children, currentPage }) => {
 					<div className="flex"> 
 						<NavVertical currentPage={currentPage} />
 					</div>
-					<div className="flex-1 ml-2"> 
+					<div className="flex-1 ml-2 h-full"> 
 						{children}
 					</div>
 				</div>

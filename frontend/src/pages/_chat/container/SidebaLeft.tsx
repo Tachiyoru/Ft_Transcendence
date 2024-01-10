@@ -43,7 +43,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   };
 
   return (
-    <div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black flex-col space-y-3">
+    <div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black space-y-3 ">
       <div className="px-2 md:px-4 pt-4 pb-0.5">
         {/*TITLE*/}
         <div className="relative flex flex-col md:flex-row justify-between items-center mt-6">
@@ -108,9 +108,9 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         </div>
       </div>
 
-	<div className="h-80">
-      <div className="flex-1">{contenuFiltre[filtreActif]}</div>
-	</div>
+    <div className="h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter">
+        <div>{contenuFiltre[filtreActif]}</div>
+    </div>
 	</div>
   );
 };

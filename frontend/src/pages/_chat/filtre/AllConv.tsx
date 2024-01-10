@@ -8,7 +8,6 @@ import { RootState } from "../../../store/store";
 import axios from "../../../axios/api";
 import { RiGamepadFill } from "react-icons/ri";
 import { WebSocketContext } from "../../../socket/socket";
-import { all } from "axios";
 import { Message } from "react-hook-form";
 import TimeConverter from "../../../components/date/TimeConverter";
 
@@ -19,26 +18,29 @@ interface Member {
 	status: string;
 }
 
+
+interface Message {
+	content: string;
+	createdAt: string;
+	authorId: string;
+}
+
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
 	members: Member[];
-  messages: Message[];
+	messages: Message[];
 }
 
-interface User {
-  username: string;
-  avatar: string;
-}
 
 const AllConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
-	const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<{ [idchan: number]: User[] }>({});
 	const dispatch = useDispatch();
-  const socket = useContext(WebSocketContext);
+	const socket = useContext(WebSocketContext);
 	const id = useSelector((state: RootState) => state.selectedChannelId);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	
 	useEffect(() => {
 		const fetchData = async () => {
 		try {
@@ -51,56 +53,56 @@ const AllConv = () => {
 		fetchData();
 	}, []);
 
-  useEffect(() => {
-    socket.emit("find-my-channels");
-    socket.on("my-channel-list", (channelList) => {
-      setAllChannel(channelList);
+	useEffect(() => {
+		socket.emit("find-my-channels");
+		socket.on("my-channel-list", (channelList) => {
+		setAllChannel(channelList);
+		});
+
+		return () => {
+		socket.off("my-channel-list");
+		};
+	}, [allChannel, socket]);
+
+	useEffect(() => {
+		socket.emit("last-message", allChannel);
+		socket.on("last-channel-mesage", (channelList) => {
+		setAllChannel(channelList);
     });
-    console.log(allChannel);
 
-    return () => {
-      socket.off("my-channel-list");
-    };
-  }, [socket]);
+		return () => {
+		socket.off("my-channel-list");
+		};
+	}, [allChannel, socket]);
 
-  useEffect(() => {
-    socket.emit("last-message", allChannel);
-    socket.on("last-channel-mesage", (channelList) => {
-      setAllChannel(channelList);
-    });
+		const handleChannelClick = (channelId: number) => {
+			dispatch(setSelectedChannelId(channelId));
+		};
 
-    return () => {
-      socket.off("my-channel-list");
-    };
-  }, [socket]);
-
-	const handleChannelClick = (channelId: number) => {
-		dispatch(setSelectedChannelId(channelId));
+	const renderLastMessage = (channel: Channel) => {
+		if (channel.messages.length > 0) {
+		const lastMessage = channel.messages[channel.messages.length - 1];
+		const chanName = (lastMessage.authorId === userData.username) ? 'me' :  lastMessage.authorId;
+		return (
+			<>
+				
+				<p className="text-sm pt-1 text-lilac text-opacity-60">
+					{(chanName.length + lastMessage.content.length) > 16
+					? chanName + ': ' + lastMessage.content.slice(0, 10) + "..."
+					: chanName + ': ' + lastMessage.content}
+				</p>
+				<TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
+			</>
+		);
+		} else {
+		return (
+			<p className="text-sm pt-1 text-lilac text-opacity-60">No messages</p>
+		);
+		}
 	};
 
-  const renderLastMessage = (channel) => {
-    if (channel.messages.length > 0) {
-      const lastMessage = channel.messages[channel.messages.length - 1];
-
-      return (
-        <>
-          <p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">
-            {lastMessage.content.length > 16
-              ? lastMessage.content.slice(0, 16) + "..."
-              : lastMessage.content}
-          </p>
-          <TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
-        </>
-      );
-    } else {
-      return (
-        <p className="text-sm pt-1 text-lilac text-opacity-60">Aucun message</p>
-      );
-    }
-  };
-
 return (
-	<div className="pl-1 md:pl-6">
+	<div className="pl-1 md:pl-5">
 		
 	{allChannel.map((channel, index) => (
 		<div
@@ -111,18 +113,21 @@ return (
 		onClick={() => handleChannelClick(channel.chanId)}
 		style={{ cursor: "pointer" }}
 		>
-		<div className="flex flex-row h-12 mb-2 pl-1 pr-2 md:pl-0 md:pr-0 md:mx-2 ">
+		<div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
 		{channel.modes === "CHAT" ? (
-			<div className="relative w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
+			<div className="relative mt-2 h-full rounded-full grid justify-items-center items-center md:mr-4">
 					{channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].avatar ? (
-					<>
+					<div>
 						<img
 							src={channel.members.filter(member => member.username !== userData.username)[0].avatar}
-							className="h-[45px] w-[45px] object-cover rounded-full text-lilac"
+							className="h-[48px] w-[48px] object-cover rounded-full text-lilac"
 						/>
-					</>			
+					</div>			
 					) : (
+						<div className="relative w-full h-full md:w-[45px] md:h-[45px] mt-2 rounded-full grid justify-items-center items-center md:mr-4">
+
 						<FaUser className="text-lilac" />
+						</div>
 					)
 				}
 			{channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].status === 'ONLINE' ? (
@@ -137,31 +142,33 @@ return (
 			</div>
 		) : (
 			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
-				<FaUserGroup className="text-lilac" />
+				<FaUserGroup className="text-lilac w-5 h-5" />
 			</div>
 		)
 		}
 		<div className="pt-3 hidden md:block">
-			<div className="flex flex-row justify-between">
+			<div className="flex flex-row justify-between items-center">
 			<p className="text-base text-lilac">
-				{channel.name.length > 12
-				? `${channel.name.slice(0, 12)}...`
-				: channel.name}
+			{/*CHAN NAME*/}
+			{channel.modes === "CHAT" ? (
+				channel.members.filter(member => member.username !== userData.username)[0].username
+			) : channel.name.length > 10 ? 
+				`${channel.name.slice(0, 10)}...` : channel.name
+			}
 			</p>
+			{/*CHAN PROPERTY*/}
 			{channel.modes === "PRIVATE" ? (
-				<p className="text-sm text-lilac text-opacity-60">Private</p>
+				<p className="text-xs text-lilac text-opacity-60 ml-4">Private</p>
 			) : channel.modes === "GROUPCHAT" ? (
-				<p className="text-sm text-lilac text-opacity-60">Public</p>
+				<p className="text-xs text-lilac text-opacity-60 ml-4">Public</p>
 			) : channel.modes === "PROTECTED" ? (
-				<p className="text-sm text-lilac text-opacity-60">Protected</p>
+				<p className="text-xs text-lilac text-opacity-60 ml-4">Protected</p>
 			) 
 			: null}
 			</div>
-			<div className="flex flex-row">
-			  <p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">
-        {renderLastMessage(channel)}
-        </p>
-			<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+			{/*LAST MESSAGE*/}
+			<div className="flex flex-row justify-between w-[140px]">
+				{renderLastMessage(channel)}
 			</div>
 		</div>
 		</div>

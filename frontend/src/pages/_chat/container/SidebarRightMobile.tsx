@@ -54,7 +54,7 @@ interface Channel {
 
 
 const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, toggleRightSidebar, channel }) => {
-	const [isBlocked, setIsBlocked] = useState<boolean>(false);
+	const [isBlocked, setIsBlocked] = useState<boolean>();
 	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
 	const [commonChannelCount, setCommonChannelCount] = useState(0);
 	const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<Users[]>([]);
@@ -158,21 +158,34 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 				console.error('Error fetching data:', error);
 			});
 		}
-	}, [usersInChannelExceptHim]);		
+		if (Array.isArray(usersInChannelExceptHim) && usersInChannelExceptHim.length > 0 && usersInChannelExceptHim[0]?.id) {
+			axios
+			.get(`friends-list/blocked-users/${usersInChannelExceptHim[0].id}`)
+			.then((response) => {
+				setIsBlocked(response.data.isBlocked);
+			})
+			.catch((error) => {
+				console.error('Error fetching data:', error);
+			});
+		}
+	}, [usersInChannelExceptHim]);	
 
 	const handleBlockUser = async (userId: number) => {
         try {
             if (isBlocked) {
                 await unblockUser(userId);
-                setIsBlocked(false); 
+				setIsBlocked(false);
+
             } else {
                 await blockUser(userId);
-                setIsBlocked(true); 
-            }
+				setIsBlocked(true);
+			}
         } catch (error) {
             console.error('Erreur lors du blocage ou dÃ©blocage de l\'utilisateur :', error);
         }
     };
+
+	console.log(isBlocked)
 
 	const blockUser = async (userId: number) => {
 		try {
@@ -247,16 +260,24 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 
 						<nav className="mt-4">
 							<ul className="text-lilac">
-								<li>
+								<li 
+									className="hover:opacity-40"
+									onClick={() => handleBlockUser(member.id)}
+									style={{ cursor: "pointer" }}
+								>
 									<Link to={`/user/${member.username}`}>
-										<div className="flex flex-row items-center mt-1">
-											<FaUser className="w-3 h-4 mr-2"/>
-											<p className="hover:underline">See Profile</p>
+										<div className="flex flex-row items-center">
+											<FaUser className="w-3 h-3 mr-2"/>
+											<p className="pt-1">See Profile</p>
 										</div>
 									</Link>
 								</li>
 								{!isBlocked && (
-								<li>
+								<li 
+								className="hover:opacity-40"
+								onClick={() => handleBlockUser(member.id)}
+								style={{ cursor: "pointer" }}
+							>
 									<Link to="">
 										<div className="flex flex-row items-center mt-1">
 											<RiGamepadFill className="w-3 h-4 mr-2"/>
@@ -265,10 +286,14 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({ isRightSidebarOpen, t
 									</Link>
 								</li>
 								)}
-								<li>
-									<div className="flex flex-row items-center mt-1" onClick={() => handleBlockUser(member.id)}>
-										<FaBan className="w-3 h-4 mr-2"/>
-										<p className={`hover:underline ${isBlocked ? 'text-red-500' : ''}`}>{isBlocked ? 'Unblock' : 'Block'}</p>
+								<li 
+									className="hover:opacity-40 mt-1"
+									onClick={() => handleBlockUser(member.id)}
+									style={{ cursor: "pointer" }}
+								>
+									<div className="flex flex-row items-center mt-1">
+										<FaBan className={`w-3 h-3 mr-2 ${isBlocked ? 'text-red-500' : ''}`}/>
+										<p className={` ${isBlocked ? 'text-red-500' : ''}`}>{isBlocked ? 'Unblock' : 'Block'}</p>
 									</div>
 								</li>
 			

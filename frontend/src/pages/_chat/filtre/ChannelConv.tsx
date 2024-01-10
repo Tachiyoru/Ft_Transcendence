@@ -29,25 +29,25 @@ const ChannelConv = () => {
 		});
 
     return () => {
-      socket.off("my-channel-list");
-      socket.off("channel-public-list");
-    };
-  }, [allChannel, publicChannel, socket]);
+		socket.off("my-channel-list");
+		socket.off("channel-public-list");
+		};
+	}, [allChannel, publicChannel, socket]);
 
-  const handleChannelClick = (channelId: number) => {
-    dispatch(setSelectedChannelId(channelId));
-  };
+	const handleChannelClick = (channelId: number) => {
+		dispatch(setSelectedChannelId(channelId));
+	};
 
-  return (
-    <div>
-      {allChannel
+	return (
+		<div>
+		{allChannel
 		.filter(channel => channel.modes !== "CHAT")
 		.map((channel, index) => (
         <div
-          key={index}
-          className="flex flex-row h-12 mt-2 md:mx-2"
-          onClick={() => handleChannelClick(channel.chanId)}
-          style={{ cursor: "pointer" }}
+			key={index}
+			className="flex flex-row h-12 mt-2 md:mx-2"
+			onClick={() => handleChannelClick(channel.chanId)}
+			style={{ cursor: "pointer" }}
         >
 			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 				<FaUserGroup className="text-lilac" />
@@ -110,7 +110,7 @@ const ChannelConv = () => {
 		</div>
 		))}
     </div>
-  );
+	);
 };
 
 export default ChannelConv;
