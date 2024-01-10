@@ -158,10 +158,8 @@ return (
 			: null}
 			</div>
 			<div className="flex flex-row">
-			  <p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">
+			  <p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2"></p>
         {renderLastMessage(channel)}
-        </p>
-			<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
 			</div>
 		</div>
 		</div>

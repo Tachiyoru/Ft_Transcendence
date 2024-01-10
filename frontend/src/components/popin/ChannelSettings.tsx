@@ -1,8 +1,9 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useRef, useState } from 'react';
 import { FaUser } from 'react-icons/fa6';
 import { MdSettings } from 'react-icons/md';
 import MemberAvatar from '../photo/MemberAvatar';
 import { io } from 'socket.io-client';
+import { WebSocketContext } from '../../socket/socket';
 
 interface Member {
     username: string;
@@ -34,6 +35,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	const [channelType, setChannelType] = useState<"GROUPCHAT" | "PRIVATE" | "PROTECTED">(channel.modes === "GROUPCHAT" ? "GROUPCHAT" : channel.modes === "PRIVATE" ? "PRIVATE" : "PROTECTED");
 	const [password, setPassword] = useState("");
 	const [channelName, setChannelName] = useState("");
+	const socket = useContext(WebSocketContext);
 
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
@@ -58,9 +60,6 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	}, []);
 
 	const editChannel = () => {
-		const socket = io("http://localhost:5001/", {
-			withCredentials: true,
-		});
 		console.log(channelType)
 		const chanelId = channel.chanId;
 
@@ -75,12 +74,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 
 	const handleSubmit = () => {
 		try {
-			const socket = io("http://localhost:5001/", {
-				withCredentials: true,
-			});
-			socket.on("connect", () => {
 				socket.emit("renameChan", { chanName: channel.name, newName: channelName });
-		});
 		} catch (error) {
 		console.error("Error fetching user list:", error);
 		}

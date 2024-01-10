@@ -13,13 +13,13 @@ import {
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import {
-	Controller,
-	Get,
-	Put,
-	Param,
-	ParseIntPipe,
-	Request,
-	UseGuards,
+  Controller,
+  Get,
+  Put,
+  Param,
+  ParseIntPipe,
+  Request,
+  UseGuards,
 } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -68,43 +68,57 @@ export class chatGateway {
     client.emit("channel", chan, messagesList);
   }
 
-  @SubscribeMessage('editChannel')
+  @SubscribeMessage("editChannel")
   async editChannel(
     @ConnectedSocket() client: Socket,
-    @MessageBody('id') id: number,
-    @MessageBody('updatedSettings') updatedSettings: Partial<createChannel>,
-	@Request() req: any
-	) {
+    @MessageBody("id") id: number,
+    @MessageBody("updatedSettings") updatedSettings: Partial<createChannel>,
+    @Request() req: any
+  ) {
     try {
-      if (!id) throw new Error('id not found');
+      if (!id) throw new Error("id not found");
 
-      const updatedChannel = await this.chatService.editChannel(id, updatedSettings, req);
+      const updatedChannel = await this.chatService.editChannel(
+        id,
+        updatedSettings,
+        req
+      );
 
-      client.emit('edit-channel', updatedChannel);
-
+      client.emit("edit-channel", updatedChannel);
     } catch (error) {
-      console.error('Error editing channel:', error.message);
-      client.emit('channelError', { message: 'Error editing channel', error: error.message });
+      console.error("Error editing channel:", error.message);
+      client.emit("channelError", {
+        message: "Error editing channel",
+        error: error.message,
+      });
     }
   }
 
-  @SubscribeMessage('getOrCreateChatChannel')
+  @SubscribeMessage("getOrCreateChatChannel")
   async handleGetOrCreateChatChannel(
-	@ConnectedSocket() client: Socket, 
-	@MessageBody('username2') username2: string,
-	@MessageBody('id') id: number,
-	@Request() req: any,
-	) {
+    @ConnectedSocket() client: Socket,
+    @MessageBody("username2") username2: string,
+    @MessageBody("id") id: number,
+    @Request() req: any
+  ) {
     try {
-      const channelId = await this.chatService.getOrCreateChatChannel(req, username2, id);
-		console.log("channelId = ", channelId)
-	  	client.emit('chatChannelCreated', { channelId });
+      const channelId = await this.chatService.getOrCreateChatChannel(
+        req,
+        username2,
+        id
+      );
+      console.log("channelId = ", channelId);
+      client.emit("chatChannelCreated", { channelId });
     } catch (error) {
-      console.error(`Error creating or retrieving chat channel: ${error.message}`);
-      client.emit('chatChannelError', { message: 'Error creating or retrieving chat channel', error: error.message });
+      console.error(
+        `Error creating or retrieving chat channel: ${error.message}`
+      );
+      client.emit("chatChannelError", {
+        message: "Error creating or retrieving chat channel",
+        error: error.message,
+      });
     }
-	}
-
+  }
 
   @SubscribeMessage("users-not-in-channel")
   async getUsersNotInChannel(
@@ -261,9 +275,9 @@ export class chatGateway {
       client.handshake.auth.id
     );
     client.emit("my-channel-list", chanlist);
-	chanlist.forEach((channel) => {
-		client.join(channel.name);
-	  });
+    chanlist.forEach((channel) => {
+      client.join(channel.name);
+    });
   }
 
   @SubscribeMessage("find-channels-public")
@@ -286,28 +300,28 @@ export class chatGateway {
     client.emit("channel-in-common", chanlist);
   }
 
-  //   @SubscribeMessage("joinChan")
-  //   async joinChan(
-  //     client: Socket,
-  //     @MessageBody()
-  //     data: { chanName: string; password?: string; invited?: boolean },
-  //     @Request() req: any
-  //   ) {
-  //     try {
-  //       if (!data.invited) {
-  //         data.invited = false;
-  //       }
-  //       const result = await this.chatService.joinChannel(
-  //         data.chanName,
-  //         data.invited,
-  //         req,
-  //         data.password
-  //       );
-  //       client.emit("channelJoined", result);
-  //     } catch (error) {
-  //       client.emit("renameChanError", { message: error.message });
-  //     }
-  //   }
+  @SubscribeMessage("joinChan")
+  async joinChan(
+    client: Socket,
+    @MessageBody()
+    data: { chanId: number; password?: string; invited?: boolean },
+    @Request() req: any
+  ) {
+    try {
+      if (!data.invited) {
+        data.invited = false;
+      }
+      const result = await this.chatService.joinChannel(
+        data.chanId,
+        data.invited,
+        req,
+        data.password
+      );
+      client.emit("channelJoined", result);
+    } catch (error) {
+      client.emit("renameChanError", { message: error.message });
+    }
+  }
 
   @SubscribeMessage("leaveChan")
   async leaveChan(
@@ -405,18 +419,18 @@ export class chatGateway {
 
   @SubscribeMessage("muteMember")
   async muteMember(
-	@ConnectedSocket() client: Socket,
-	@MessageBody() data: { chanId: number; userId: number },
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number; userId: number }
   ) {
-	try {
-	  const result = await this.chatService.muteMember(
-		data.chanId,
-		data.userId,
-	  );
-	  client.emit("memberMuted", result);
-	} catch (error) {
-	  client.emit("muteMemberError", { message: error.message });
-	}
+    try {
+      const result = await this.chatService.muteMember(
+        data.chanId,
+        data.userId
+      );
+      client.emit("memberMuted", result);
+    } catch (error) {
+      client.emit("muteMemberError", { message: error.message });
+    }
   }
 
   @SubscribeMessage("findAllMutedMembers")
@@ -425,32 +439,27 @@ export class chatGateway {
     @MessageBody() data: { chanId: number }
   ) {
     try {
-      const mutedList = await this.chatService.findAllMutedMembers(
-        data.chanId
-      );
+      const mutedList = await this.chatService.findAllMutedMembers(data.chanId);
       client.emit("allMuted", mutedList);
     } catch (error) {
       client.emit("findAllMembersError", { message: error.message });
     }
   }
 
-	@SubscribeMessage("findAllBannedMembers")
-	async findAllBannedMembers(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() data: { chanId: number; }
-	)
-	{
-		try
-		{
-			const bannedList = await this.chatService.findAllBannedMembers(
-				data.chanId
-			);
-			client.emit("allMembersBan", bannedList);
-		} catch (error)
-		{
-			client.emit("findAllMembersError", { message: error.message });
-		}
-	}
+  @SubscribeMessage("findAllBannedMembers")
+  async findAllBannedMembers(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number }
+  ) {
+    try {
+      const bannedList = await this.chatService.findAllBannedMembers(
+        data.chanId
+      );
+      client.emit("allMembersBan", bannedList);
+    } catch (error) {
+      client.emit("findAllMembersError", { message: error.message });
+    }
+  }
 
   @SubscribeMessage("recapMessages")
   async findAllChanMessages(
@@ -463,9 +472,8 @@ export class chatGateway {
         data.chanName
       );
       client.emit("findAllMessage", messagesList);
-      console.log("msglist", messagesList);
     } catch (error) {
-      // client.emit("findAllMessageError",  error.message );
+      client.emit("findAllMessageError", error.message);
     }
   }
   @SubscribeMessage("create-message")
@@ -513,19 +521,19 @@ export class chatGateway {
     }
   }
 
-  //   @SubscribeMessage("typing")
-  //   async typing(
-  //     @MessageBody("isTyping") isTyping: boolean,
-  //     @MessageBody("user") username: string,
-  //     @ConnectedSocket() client: Socket
-  //   ) {
-  //     const user = await this.prisma.user.findUnique({
-  //       where: { username: username },
-  //     });
-  //     if (!user) {
-  //       return;
-  //     }
-  //     const name = user.username;
-  //     client.broadcast.emit("typing", { name, isTyping });
-  //   }
+  @SubscribeMessage("typing")
+  async typing(
+    @MessageBody("isTyping") isTyping: boolean,
+    @ConnectedSocket() client: Socket
+  ) {
+    const username = client.handshake.auth.username;
+    const user = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!user) {
+      return;
+    }
+    const name = user.username;
+    this.server.emit("typing", { name, isTyping });
+  }
 }

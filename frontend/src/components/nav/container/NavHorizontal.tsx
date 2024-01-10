@@ -1,11 +1,12 @@
 import { FaMagnifyingGlass, FaBell } from "react-icons/fa6";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
 import { io } from "socket.io-client";
 import { set } from "react-hook-form";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface NavItemProps {
   name: string;
@@ -117,6 +118,8 @@ const NavHorizontal = () => {
     number | null
   >(null);
 
+const socket = useContext(WebSocketContext);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -166,20 +169,15 @@ const NavHorizontal = () => {
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
 
   useEffect(() => {
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
-    });
-    socket.on("connect", () => {
       socket.emit("unread-notification");
       socket.on("unread-notification-array", (notification) => {
         if (notification) setUnreadNotifications(notification.length);
       });
-    });
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      socket.disconnect();
-    });
+    // socket.on("disconnect", () => {
+    //   console.log("Disconnected from server");
+    //   socket.disconnect();
+    // });
   }, []);
 
   const handleNotificationClick = useCallback(async () => {

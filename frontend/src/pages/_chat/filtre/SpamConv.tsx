@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FaUser } from 'react-icons/fa6'
 import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
 import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
 import axios from '../../../axios/api';
+import { WebSocketContext } from '../../../socket/socket';
 
 interface Channel {
 	name: string;
@@ -17,21 +18,16 @@ interface User {
 	avatar: string;
 	id: number;
 }
-
 const SpamConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
 	const dispatch = useDispatch();
+	const socket = useContext(WebSocketContext);
 
 	const handleChannelClick = (channelId: number) => {
 		dispatch(setSelectedChannelId(channelId));
 	};
 
-	useEffect(() => {
-		const socket = io("http://localhost:5001/", {
-			withCredentials: true,
-		});
-	
-		socket.on("connect", () => {
+	useEffect(() => {	
 			socket.emit("find-my-channels");
 			socket.on("my-channel-list", (channelList) => {
 				axios.get<User[]>('friends-list/non-friends')
@@ -46,10 +42,9 @@ const SpamConv = () => {
 						console.error('Erreur lors de la récupération des non-amis:', error);
 					});
 			});
-		});
 	
 		return () => {
-			socket.disconnect();
+			socket.off("my-channel-list");
 		};
 	}, []);
 	

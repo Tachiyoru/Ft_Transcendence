@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FaUser, FaUserGroup } from 'react-icons/fa6'
 import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
 import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
+import { WebSocketContext } from '../../../socket/socket';
 
 interface Channel {
 	name: string;
