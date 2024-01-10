@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
@@ -7,13 +7,14 @@ import {
 } from "react-icons/fa6";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
+import { WebSocketContext } from "../../socket/socket";
 
 interface ChannelProps {
-	channel: {
-		name: string;
-		modes: string;
-		chanId: number;
-	}
+  channel: {
+    name: string;
+    modes: string;
+    chanId: number;
+  };
 }
 
 const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
@@ -24,6 +25,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     [key: string]: { username: string };
   }>({});
   const [searchText, setSearchText] = useState("");
+  const socket = useContext(WebSocketContext);
 
   const handleCheckboxChange = (user: { username: string }) => {
     setCheckedItems((prevCheckedItems) => {
@@ -37,21 +39,20 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     });
   };
 
+  //modifier des trucs pour fix les socket qi etaient redefini a chaque changement de page
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const socket = io("http://localhost:5001/", {
-          withCredentials: true,
-        });
-				socket.on("connect", () =>
-				{
-					console.log("ChanId : ", channel.chanId)
-          socket.emit("users-not-in-channel", { chanId: channel.chanId }); //need to change to users not in channels and friend with me
+        console.log("ChanId : ", channel.chanId);
+        socket.emit("users-not-in-channel", { chanId: channel.chanId }); //need to change to users not in channels and friend with me
 
-          socket.on("users-not-in-channel", (userList) => {
-            setListUsers(userList);
-          });
+        socket.on("users-not-in-channel", (userList) => {
+          setListUsers(userList);
         });
+        return () => {
+          socket.off("users-not-in-channel");
+        };
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
@@ -78,27 +79,21 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     console.log("Selection:", selectedItems);
 
     const channelData = {
-			chanName: channel.name,
-			chanId: channel.chanId,
+      chanName: channel.name,
+      chanId: channel.chanId,
       targets: selectedItems,
     };
-    const socket = io("http://localhost:5001/", {
-      withCredentials: true,
+    console.log("Connected to server");
+    socket.emit("add-user", { channelData: channelData });
+
+    socket.on("addUsersError", (errorData) => {
+      console.error("user creation error:", errorData);
     });
 
-    socket.on("connect", () => {
-      console.log("Connected to server");
-      socket.emit("add-user", { channelData: channelData });
-
-      socket.on("addUsersError", (errorData) => {
-        console.error("user creation error:", errorData);
-      });
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      socket.disconnect();
-    });
+    // socket.on("disconnect", () => {
+    //   console.log("Disconnected from server");
+    //   socket.disconnect();
+    // });
 
     setCheckedItems({});
     console.log("vide", checkedItems);

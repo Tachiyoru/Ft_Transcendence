@@ -25,118 +25,112 @@ export class chatService {
       settings.members.map((user) => user.username).join(", ") +
       ", " +
       req.user.username;
-
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: channelName },
     });
     if (!channelName) {
       throw new Error("Invalid channel name");
     }
-
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-
     const hashedPassword: string = settings.password
       ? await argon.hash(settings.password)
       : "";
+    const channel: Channel = await this.prisma.channel.create({
+      data: {
+        name: channelName,
+        modes: settings.mode,
+        password: hashedPassword,
+        owner: { connect: { id: req.user.id } },
+        members: {
+          connect: [
+            { id: req.user.id },
+            ...settings.members.map((user) => ({ id: user.id })),
+          ],
+        },
+      },
+    });
+    return channel;
+  }
 
-		const channel: Channel = await this.prisma.channel.create({
-			data: {
-				name: channelName,
-				modes: settings.mode,
-				password: hashedPassword,
-				owner: { connect: { id: req.user.id } },
-				members: {
-					connect: [
-						{ id: req.user.id },
-						...settings.members.map((user) => ({ id: user.id })),
-					],
-				},
-			},
-		});
-		return channel;
-	}
+  async editChannel(
+    channelId: number,
+    updatedSettings: Partial<createChannel>,
+    @Request() req: any
+  ) {
+    const existingChannel = await this.prisma.channel.findUnique({
+      where: { chanId: channelId },
+      include: { owner: true, members: true },
+    });
+    if (!existingChannel) {
+      throw new Error("Channel not found");
+    }
+    if (existingChannel.owner.id !== req.user.id) {
+      throw new Error("You don't have permission to edit this channel");
+    }
 
-	async editChannel(channelId: number, updatedSettings: Partial<createChannel>, @Request() req: any) {
-		const existingChannel = await this.prisma.channel.findUnique({
-			where: { chanId: channelId },
-			include: { owner: true, members: true },
-		});
-	
-		if (!existingChannel) {
-			throw new Error("Channel not found");
-		}
-	
-		if (existingChannel.owner.id !== req.user.id) {
-			throw new Error("You don't have permission to edit this channel");
-		}
-	
-		const updatedData: Record<string, any> = {};
-	
-		if (updatedSettings.name) {
-			updatedData.name = updatedSettings.name;
-		}
-	
-		if (updatedSettings.mode) {
-			updatedData.modes = updatedSettings.mode;
-		}
-	
-		if (updatedSettings.password) {
-			updatedData.password = await argon.hash(updatedSettings.password);
-		}
-		
-		const updatedChannel = await this.prisma.channel.update({
-			where: { chanId: channelId },
-			data: updatedData,
-		});
-	
-		return updatedChannel;
-	}
+    const updatedData: Record<string, any> = {};
 
-	async getOrCreateChatChannel(@Request() req: any, username2: string, id: number): Promise<number> {
-		;
-	
-		const existingChannel = await this.prisma.channel.findFirst({
-		  where: {
-			AND: [
-			  {
-				members: { some: { id: req.user.id } },
-			  },
-			  {
-				members: { some: { id: id } },
-			  },
-			  {
-				modes: 'CHAT',
-			  },
-			],
-		  },
-		  select: {
-			chanId: true,
-		  },
-		});
-	
-		if (existingChannel) {
-		  return existingChannel.chanId;
-		}
-	
-		const newChannel = await this.prisma.channel.create({
-		  data: {
-			name: `${req.user.username}, ${username2}`,
-			modes: 'CHAT',
-			owner: { connect: { id: req.user.id } }, 
-			members: {
-			  connect: [
-				{ id: req.user.id },
-				{ id: id },
-			  ],
-			},
-		  },
-		});
-	
-		return newChannel.chanId;
-	}
-	
+    if (updatedSettings.name) {
+      updatedData.name = updatedSettings.name;
+    }
+    if (updatedSettings.mode) {
+      updatedData.modes = updatedSettings.mode;
+    }
+    if (updatedSettings.password) {
+      updatedData.password = await argon.hash(updatedSettings.password);
+    }
+
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: channelId },
+      data: updatedData,
+    });
+
+    return updatedChannel;
+  }
+
+  async getOrCreateChatChannel(
+    @Request() req: any,
+    username2: string,
+    id: number
+  ): Promise<number> {
+    const existingChannel = await this.prisma.channel.findFirst({
+      where: {
+        AND: [
+          {
+            members: { some: { id: req.user.id } },
+          },
+          {
+            members: { some: { id: id } },
+          },
+          {
+            modes: "CHAT",
+          },
+        ],
+      },
+      select: {
+        chanId: true,
+      },
+    });
+
+    if (existingChannel) {
+      return existingChannel.chanId;
+    }
+
+    const newChannel = await this.prisma.channel.create({
+      data: {
+        name: `${req.user.username}, ${username2}`,
+        modes: "CHAT",
+        owner: { connect: { id: req.user.id } },
+        members: {
+          connect: [{ id: req.user.id }, { id: id }],
+        },
+      },
+    });
+
+    return newChannel.chanId;
+  }
 
   async getChannelsByUserId(userId: number): Promise<Channel[]> {
     const channels = await this.prisma.channel.findMany({
@@ -248,44 +242,36 @@ export class chatService {
     return channelsInCommon;
   }
 
-	async addOp(
-		chanId: number,
-		username: string,
-		@Request() req: any
-	)
-	{
-		const chan = await this.prisma.channel.findUnique({
-			where: { chanId: chanId },
-			include: { owner: true },
-		});
-		if (!chan)
-		{
-			throw new Error("Could not find channel");
-		}
-		if (req.user.username !== chan.owner.username)
-		{
-			throw new Error("You are not allowed to add an op to this channel");
-		}
-		if (chan.op.includes(username))
-		{
-			throw new Error("User is already an op in this channel");
-		}
-		const updatedChannel = await this.prisma.channel.update({
-			where: { chanId: chanId },
-			data: { op: { push: username } },
-		});
-		const userTarget = await this.prisma.user.findUnique({
-			where: { username: username },
-		});
-		if (!userTarget) throw new Error("User not found");
-		const notificationDto = new CreateNotificationDto();
-		notificationDto.privilegeName = "operator";
-		notificationDto.channelName = updatedChannel.name;
-		await this.notificationService.addNotificationByUserId(
-			userTarget.id,
-			notificationDto,
-			NotificationType.CHANNEL_PRIVILEGE_GRANTED
-		);
+  async addOp(chanId: number, username: string, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+      include: { owner: true },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (req.user.username !== chan.owner.username) {
+      throw new Error("You are not allowed to add an op to this channel");
+    }
+    if (chan.op.includes(username)) {
+      throw new Error("User is already an op in this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chanId },
+      data: { op: { push: username } },
+    });
+    const userTarget = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!userTarget) throw new Error("User not found");
+    const notificationDto = new CreateNotificationDto();
+    notificationDto.privilegeName = "operator";
+    notificationDto.channelName = updatedChannel.name;
+    await this.notificationService.addNotificationByUserId(
+      userTarget.id,
+      notificationDto,
+      NotificationType.CHANNEL_PRIVILEGE_GRANTED
+    );
 
     return updatedChannel;
   }
@@ -331,6 +317,12 @@ export class chatService {
     });
     if (!target) {
       throw new Error("Could not find user");
+    }
+    const banned = channel.banned.some(
+      (user) => user.username === target.username
+    );
+    if (banned) {
+      throw new Error("User is banned from this channel");
     }
     if (channel.banned.includes(target)) {
       throw new Error("User has been banned from this channel");
@@ -379,38 +371,22 @@ export class chatService {
       where: { chanId: chanId },
       include: { banned: true, invitedList: true },
     });
-
     if (!channel) {
       throw new Error("Could not find channel");
     }
-
-    // if (!channel.op.includes(req.user.username))
-    // {
-    // 	throw new Error("You are not allowed to invite users to this channel");
-    // }
-    // if (!channel.op.includes(req.user.username))
-    // {
-    // 	throw new Error("You are not allowed to invite users to this channel");
-    // }
-
     const targetIds = targets.map((target) => target.id);
-
     const users = await this.prisma.user.findMany({
       where: { id: { in: targetIds } },
     });
-
     if (users.length !== targetIds.length) {
       throw new Error("Could not find all users");
     }
-
     const bannedUsers = users.filter((user) =>
       channel.banned.some((bannedUser) => bannedUser.id === user.id)
     );
-
     if (bannedUsers.length > 0) {
       throw new Error("One or more users have been banned from this channel");
     }
-
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: {
@@ -434,7 +410,10 @@ export class chatService {
     if (!chan) {
       throw new Error("Could not find channel");
     }
-    if (chan.banned.includes(req.user)) {
+    const banned = chan.banned.some(
+      (user) => user.username === req.user.username
+    );
+    if (banned) {
       throw new Error("You are banned from this channel");
     }
     if (chan.modes === Mode.CHAT) {
@@ -477,119 +456,107 @@ export class chatService {
     return updatedChannel;
   }
 
-	async banUser(
-		chanId: number,
-		username: string,
-		@Request() req: any
-	)
-	{
-		const chan = await this.prisma.channel.findUnique({
-			where: { chanId: chanId },
-			include: { owner: true, banned: true },
-		});
-		if (!chan)
-		{
-			throw new Error("Could not find channel");
-		}
-		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
-		{
-			throw new Error("You are not allowed to ban a user from this channel");
-		}
-		const target = await this.prisma.user.findUnique({
-			where: { username: username },
-		});
-		if (!target)
-		{
-			throw new Error("Could not find user");
-		}
-		if (chan.banned.includes(target))
-		{
-			throw new Error("User is already banned from this channel");
-		}
-		const updatedChannel = await this.prisma.channel.update({
-			where: { chanId: chanId },
-			data: {
-				banned: { connect: { id: target.id } },
-				members: { disconnect: { id: target.id } },
-			},
-		});
-		return updatedChannel;
-	}
+  async banUser(chanId: number, username: string, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+      include: { owner: true, banned: true },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (
+      req.user.username !== chan.owner.username &&
+      !chan.op.includes(req.user.username)
+    ) {
+      throw new Error("You are not allowed to ban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    const banned = chan.banned.some(
+      (user) => user.username === target.username
+    );
+    if (banned) {
+      throw new Error("User is already banned from this channel");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chanId },
+      data: {
+        banned: { connect: { id: target.id } },
+        members: { disconnect: { id: target.id } },
+      },
+    });
+    return updatedChannel;
+  }
 
-	async unBanUser(
-		chanId: number,
-		username: string,
-		@Request() req: any
-	)
-	{
-		const chan = await this.prisma.channel.findUnique({
-			where: { chanId: chanId },
-			include: { owner: true, banned: true },
-		});
-		if (!chan)
-		{
-			throw new Error("Could not find channel");
-		}
-		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
-		{
-			throw new Error("You are not allowed to unban a user from this channel");
-		}
-		const target = await this.prisma.user.findUnique({
-			where: { username: username },
-		});
-		if (!target)
-		{
-			throw new Error("Could not find user");
-		}
-		const banned = chan.banned.some((user) => user.username === target.username)
-		if (!banned)
-		{
-			console.log('pas ok', chan.banned, target)
-			throw new Error("User is not banned from this channel");
-	}
-		console.log('ok')
-		const updatedChannel = await this.prisma.channel.update({
-			where: { chanId: chanId },
-			data: {
-				banned: { disconnect: { id: target.id } },
-			},
-		});
-		return (updatedChannel);
-	}
+  async unBanUser(chanId: number, username: string, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+      include: { owner: true, banned: true },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (
+      req.user.username !== chan.owner.username &&
+      !chan.op.includes(req.user.username)
+    ) {
+      throw new Error("You are not allowed to unban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    const banned = chan.banned.some(
+      (user) => user.username === target.username
+    );
+    if (!banned) {
+      console.log("pas ok", chan.banned, target);
+      throw new Error("User is not banned from this channel");
+    }
+    console.log("ok");
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chanId },
+      data: {
+        banned: { disconnect: { id: target.id } },
+      },
+    });
+    return updatedChannel;
+  }
 
-	async kickUser(
-		chanId: number,
-		username: string,
-		@Request() req: any
-	)
-	{
-		const chan = await this.prisma.channel.findUnique({
-			where: { chanId: chanId },
-			include: { owner: true },
-		});
-		if (!chan)
-		{
-			throw new Error("Could not find channel");
-		}
-		if (req.user.username !== chan.owner.username && !chan.op.includes(req.user.username))
-		{
-			throw new Error("You are not allowed to ban a user from this channel");
-		}
-		const target = await this.prisma.user.findUnique({
-			where: { username: username },
-		});
-		if (!target)
-		{
-			throw new Error("Could not find user");
-		}
-		const updatedChannel = await this.prisma.channel.update({
-			where: { chanId: chanId },
-			data: {
-				members: { disconnect: { id: target.id } },
-			},
-		});
-		return (updatedChannel);
-	}
+  async kickUser(chanId: number, username: string, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+      include: { owner: true },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    if (
+      req.user.username !== chan.owner.username &&
+      !chan.op.includes(req.user.username)
+    ) {
+      throw new Error("You are not allowed to ban a user from this channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chanId },
+      data: {
+        members: { disconnect: { id: target.id } },
+      },
+    });
+    return updatedChannel;
+  }
 
   async findAllMembers(chanId: number) {
     const chan = await this.prisma.channel.findUnique({
@@ -677,7 +644,7 @@ export class chatService {
     });
     if (!target) {
       throw new Error("Could not find user");
-    } else if (chan.banned.includes(target)) {
+    } else if (chan.banned.some((user) => user.username === target.username)) {
       throw new Error("User has been banned from this channel");
     } else {
       const message = await this.prisma.message.create({
@@ -708,11 +675,6 @@ export class chatService {
     });
     return messages;
   }
-
-  // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
-  // si l'user est ban .some((user) => user.username === req.user.username)
-  // si chan.banned ne fonctionne pas utiliser la fonction interne au service pour vérifier
-  // si l'user est ban .some((user) => user.username === req.user.username)
 
   async updateMessage(UpdateMessageDto: UpdateMessageDto, @Request() req: any) {
     const { content, chanName, msgId } = UpdateMessageDto;

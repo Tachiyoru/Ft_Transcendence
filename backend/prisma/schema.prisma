@@ -37,7 +37,7 @@ model User {
     username String? @unique
     avatar   String?
     tittle   String?
-    hash     String
+    hash     String?
 
     twoFASecret String? @unique
 

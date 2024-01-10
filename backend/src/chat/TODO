@@ -15,3 +15,6 @@
 - Add notifications there is a new message (if not in the chat room)
 - Add notifications when the user is mentioned (with count of mentions)
 
+DANS CHAT GATEWAY :
+verifier toute les comparaison entre user car ne semble pas fonctionner utiliser par exemple : 
+channel.banned.some((bannedUser) => bannedUser.id === user.id) au lieu des includes merci futur moi

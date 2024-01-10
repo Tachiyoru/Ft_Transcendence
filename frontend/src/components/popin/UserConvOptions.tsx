@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { FaRegPenToSquare, FaUser } from 'react-icons/fa6';
 import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
+import { WebSocketContext } from '../../socket/socket';
 
 interface Member {
     username: string;
@@ -40,23 +41,18 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
+	const socket = useContext(WebSocketContext);
 
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleAddOp = () => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
 		console.log('ok')
 		socket.emit('addOp', { chanName: channel.name, username: username });
 	};
 
 	const handleRemoveOp = () => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
 		console.log('okk')
 		socket.emit('removeOp', { chanName: channel.name, username: username });
 	};
@@ -83,9 +79,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	}, []);
 
 	const handleClickSendMessage = () => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
 		console.log(username)
 		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
 		socket.on('chatChannelCreated', (data) => {
@@ -95,9 +88,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	}
 
 	const handleClickBan = () => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
 		socket.emit('banUser', { chanId: channel.chanId, username: username }); 
 		socket.on('userBanned', (data) => {
 			console.log('Ban', data);
@@ -105,9 +95,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	}
 
 	const handleClickKick = () => {
-		const socket = io('http://localhost:5001/', {
-			withCredentials: true,
-		});
 		socket.emit('kickUser', { chanId: channel.chanId, username: username }); 
 		socket.on('userKicked', (data) => {
 			console.log('Kick', data);

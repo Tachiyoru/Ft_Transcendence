@@ -107,6 +107,19 @@ const ContentConv = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
 	};
 
+	const handleTyping = (e) => {
+		const typedMessage = e.target.value;
+	
+		// Mettez à jour l'état du message
+		setMessage(typedMessage);
+		let typing = true;
+		// Émettez l'événement 'typing' avec le message tapé
+		socket.emit('typing', typing, );
+		socket.on('typing', (data) => {
+			console.log("typing = ", data);
+		});
+	  };
+
 	return (
 	<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
 
@@ -166,7 +179,7 @@ const ContentConv = () => {
 						placeholder="Write message"
 						className="py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac w-full rounded-md"
 						value={message}
-						onChange={(e) => setMessage(e.target.value)}
+						onChange={handleTyping}
 					/>
 					<button type="submit" className="absolute right-2 top-2">
 						<FaPaperPlane className="w-3.5 h-3.5 text-purple"/>

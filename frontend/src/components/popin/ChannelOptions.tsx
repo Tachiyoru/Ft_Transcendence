@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { IoSettingsSharp } from 'react-icons/io5';
 import ChannelSettings from './ChannelSettings';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
 import { io } from 'socket.io-client';
 import { useDispatch } from 'react-redux';
 import { setSelectedChannelId } from '../../services/selectedChannelSlice';
+import { WebSocketContext } from '../../socket/socket';
 
 interface Member {
     username: string;
@@ -33,7 +34,7 @@ const ChannelOptions: React.FC<ChannelProps> = ({ channel }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const dispatch = useDispatch();
-
+	const socket = useContext(WebSocketContext);
 
 	const togglePopin = () => {
 	setPopinOpen(!popinOpen);
@@ -52,17 +53,12 @@ const ChannelOptions: React.FC<ChannelProps> = ({ channel }) => {
 	}, []);
 
 	const handleQuitChannel = () => {
-        const socket = io('http://localhost:5001/', {
-            withCredentials: true,
-        });
 
-		socket.on("connect", () => {
 			socket.emit('leaveChan', { chanName: channel.name });
-		})
 
-		socket.on("disconnect", () => {
-			socket.disconnect();
-		});
+		// socket.on("disconnect", () => {
+		// 	socket.disconnect();
+		// });
     };
 
 	return (
