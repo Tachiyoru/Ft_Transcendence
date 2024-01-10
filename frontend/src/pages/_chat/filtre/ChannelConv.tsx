@@ -8,7 +8,8 @@ interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
-  }
+}
+
 const ChannelConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
 	const [publicChannel, setPublicChannel] = useState<Channel[]>([]);

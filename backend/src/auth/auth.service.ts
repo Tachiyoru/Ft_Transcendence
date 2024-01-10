@@ -134,6 +134,10 @@ export class AuthService {
 
   async logout(userA: User, response: Response) {
     if (!userA) throw new ForbiddenException("User not found");
+    await this.prisma.user.update({
+      where : { id : userA.id },
+      data : {status : 'OFFLINE'}
+    })
     userA.status = StatusUser.OFFLINE;
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");

@@ -13,12 +13,13 @@ import {
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Request,
-  UseGuards,
+	Controller,
+	Get,
+	Put,
+	Param,
+	ParseIntPipe,
+	Request,
+	UseGuards,
 } from "@nestjs/common";
 import { Channel, Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -66,6 +67,44 @@ export class chatGateway {
     const messagesList = chan.messages;
     client.emit("channel", chan, messagesList);
   }
+
+  @SubscribeMessage('editChannel')
+  async editChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('id') id: number,
+    @MessageBody('updatedSettings') updatedSettings: Partial<createChannel>,
+	@Request() req: any
+	) {
+    try {
+      if (!id) throw new Error('id not found');
+
+      const updatedChannel = await this.chatService.editChannel(id, updatedSettings, req);
+
+      client.emit('edit-channel', updatedChannel);
+
+    } catch (error) {
+      console.error('Error editing channel:', error.message);
+      client.emit('channelError', { message: 'Error editing channel', error: error.message });
+    }
+  }
+
+  @SubscribeMessage('getOrCreateChatChannel')
+  async handleGetOrCreateChatChannel(
+	@ConnectedSocket() client: Socket, 
+	@MessageBody('username2') username2: string,
+	@MessageBody('id') id: number,
+	@Request() req: any,
+	) {
+    try {
+      const channelId = await this.chatService.getOrCreateChatChannel(req, username2, id);
+		console.log("channelId = ", channelId)
+	  	client.emit('chatChannelCreated', { channelId });
+    } catch (error) {
+      console.error(`Error creating or retrieving chat channel: ${error.message}`);
+      client.emit('chatChannelError', { message: 'Error creating or retrieving chat channel', error: error.message });
+    }
+	}
+
 
   @SubscribeMessage("users-not-in-channel")
   async getUsersNotInChannel(
@@ -395,20 +434,23 @@ export class chatGateway {
     }
   }
 
-  @SubscribeMessage("findAllBannedMembers")
-  async findAllBannedMembers(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { chanId: number }
-  ) {
-    try {
-      const bannedList = await this.chatService.findAllBannedMembers(
-        data.chanId
-      );
-      client.emit("allMembers", bannedList);
-    } catch (error) {
-      client.emit("findAllMembersError", { message: error.message });
-    }
-  }
+	@SubscribeMessage("findAllBannedMembers")
+	async findAllBannedMembers(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { chanId: number; }
+	)
+	{
+		try
+		{
+			const bannedList = await this.chatService.findAllBannedMembers(
+				data.chanId
+			);
+			client.emit("allMembersBan", bannedList);
+		} catch (error)
+		{
+			client.emit("findAllMembersError", { message: error.message });
+		}
+	}
 
   @SubscribeMessage("recapMessages")
   async findAllChanMessages(

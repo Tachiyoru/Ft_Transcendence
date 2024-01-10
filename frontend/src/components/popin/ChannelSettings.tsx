@@ -20,7 +20,7 @@ interface ChannelProps {
 	channel: {
 		members: Member[];
 		modes: string;
-		id: number;
+		chanId: number;
 		name: string;
 		owner: Owner;
 		op: string[]
@@ -31,7 +31,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
     const opMembers = channel.members.filter((member) => channel.op.includes(member.username));
-	const [channelType, setChannelType] = useState<"public" | "private" | "protected">("public");
+	const [channelType, setChannelType] = useState<"GROUPCHAT" | "PRIVATE" | "PROTECTED">(channel.modes === "GROUPCHAT" ? "GROUPCHAT" : channel.modes === "PRIVATE" ? "PRIVATE" : "PROTECTED");
 	const [password, setPassword] = useState("");
 	const [channelName, setChannelName] = useState("");
 
@@ -40,7 +40,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	};
 
 	const handleChangeChannelType = (e: ChangeEvent<HTMLSelectElement>) => {
-		setChannelType(e.target.value as "public" | "private");
+		setChannelType(e.target.value as "GROUPCHAT" | "PRIVATE" | "PROTECTED");
 	};
 
 	useEffect(() => {
@@ -57,14 +57,28 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	};
 	}, []);
 
+	const editChannel = () => {
+		const socket = io("http://localhost:5001/", {
+			withCredentials: true,
+		});
+		console.log(channelType)
+		const chanelId = channel.chanId;
+
+		socket.emit('editChannel', {
+			id: chanelId,
+			updatedSettings: {
+			mode: channelType,
+			password: channelType === 'PROTECTED' ? password : undefined,
+			},
+		});
+	};
+
 	const handleSubmit = () => {
 		try {
 			const socket = io("http://localhost:5001/", {
 				withCredentials: true,
 			});
 			socket.on("connect", () => {
-				console.log(channelName);
-				console.log(channel.name);
 				socket.emit("renameChan", { chanName: channel.name, newName: channelName });
 		});
 		} catch (error) {
@@ -122,43 +136,44 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 				</div>
 
 				<div className="flex flex-col mt-4">
-					<div className='flex flex-row'>
+					<div className='flex flex-row items-center'>
 						<label className="text-sm mr-3">Channel Type:</label>
 						<select
 							value={channelType}
 							onChange={handleChangeChannelType}
 							className="rounded-md px-1 text-sm bg-lilac text-accent-violet"
 						>
-							<option value="public">Public</option>
-							<option value="private">Private</option>
-							<option value="protected">Protected</option>
+							<option value="GROUPCHAT">Public</option>
+							<option value="PRIVATE">Private</option>
+							<option value="PROTECTED">Protected</option>
 						</select>
-					</div>
-					{channelType === "protected" && (
-					<div className="mr-3 mt-1">
+					{channelType === "PROTECTED" && (
+						<div className="mr-3 mt-1">
 						<input
 						type="password"
 						placeholder="Enter password"
 						onChange={(e) => setPassword(e.target.value)}
-						className="rounded-md w-auto px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet"
+						className="rounded-md w-[90px] px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet focus:bg-lilac text-accent-violet"
 						/>
 					</div>
 					)}
+					<button onClick={editChannel} className="ml-3 mt-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md">
+						Edit Channel
+					</button>
+					</div>
 				</div>
 
-				<div className='flex flex-row items-center mt-4'>
-					<div className="mr-3 flex flex-row">
-						<p className='text-sm mr-2'>Channel Name:</p>
-							<input
-							type="password"
-							placeholder={channel.name}
-							onChange={(e) => setChannelName(e.target.value)}
-							className="rounded-md w-24 px-2 py-0.2 text-sm bg-lilac placeholder:text-accent-violet placeholder:text-opacity-40 text-accent-violet"
-							/>
-					</div>
+				<div className='flex flex-row items-center mt-2'>
+						<p className='text-sm'>Channel Name:</p>
+						<input
+						type="text"
+						placeholder={channel.name}
+						onChange={(e) => setChannelName(e.target.value)}
+						className="rounded-md w-24 px-2 bg-lilac text-dark-violet placeholder:text-accent-violet text-sm placeholder:text-opacity-40 "
+						/>
 					<button
 						disabled={channelName.length === 0}
-						className='px-2 py-0.2 bg-purple text-sm rounded-md'
+						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
 						onClick={handleSubmit}
 						>
 							Save Change

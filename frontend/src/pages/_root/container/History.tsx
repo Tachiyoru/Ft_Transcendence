@@ -4,7 +4,7 @@ const History = () => {
 	<div className="flex mx-2 flex-row gap-4 md:gap-6">
 		<div className="w-full relative">
 			<p><span className="text-2xl pl-4 font-audiowide absolute text-lilac">Matches history</span></p>
-			<div className="bg-violet-black text-normal h-80 rounded-md m-2 mt-5 mb-2 px-4 py-2 pt-4">
+			<div className="bg-violet-black text-normal h-60 rounded-md m-2 mt-5 mb-2 px-4 py-2 pt-4">
 
 				<div className="flex flex-col justify-content mt-4">
 				{/*MATCH RESUME*/}

@@ -58,7 +58,7 @@ const Dashboard = () => {
 
 	return (
     <MainLayout currentPage={currentPage}>
-        <div className="flex-1 md:flex flex-row">
+        <div className="flex flex-row">
 
 			{/*leftSideBar*/}
 			<Sidebar userData={userData} userStats={userStats}/>
@@ -67,7 +67,6 @@ const Dashboard = () => {
 			<div className="flex-1 bg-violet-black-nav bg-opacity-80 p-4 md:rounded-r-lg">
 				<div className="flex mx-2 flex-row gap-4 md:gap-6">
 					<Badges userAchievements={userAchievements} />
-					<MatchesPlayedTogether/>
 				</div>
 				<div className="flex flex-row m-2 gap-4 md:gap-6">
 					<Animation/>

@@ -5,7 +5,9 @@ interface BadgesSectionProps {
 	userAchievements: { icon: string }[];
 }
 
+
 const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) => {
+	console.log ('BadgesSectionProps', userAchievements);
 	return (
 		<div className="w-full lg:w-60 relative">
 			<p><span className="text-2xl pl-2 font-audiowide absolute text-lilac my-4">Badges</span></p>

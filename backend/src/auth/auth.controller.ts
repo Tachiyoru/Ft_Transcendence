@@ -46,10 +46,8 @@ export class AuthController {
     @GetUser() user: User,
     @Res({ passthrough: true }) res: Response
   ) {
-	console.log("logout", user);
     await this.authService.logout(user, res);
-	console.log("logout", user);
-	return;
+    return;
   }
 
   @Get("refresh")

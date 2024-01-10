@@ -24,7 +24,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ userData, userStats }) => {
 	return (
-	<div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-gray-300 text-xs">
+	<div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-xs">
 				<div className="flex mt-4 mb-10 m-2">
 				{userData.avatar ? (
 					<img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
