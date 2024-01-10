@@ -40,7 +40,7 @@ const AllConv = () => {
 	const socket = useContext(WebSocketContext);
 	const id = useSelector((state: RootState) => state.selectedChannelId);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
-	
+
 	useEffect(() => {
 		const fetchData = async () => {
 		try {
@@ -70,14 +70,14 @@ const AllConv = () => {
 		setAllChannel(channelList);
     });
 
-		return () => {
+	return () => {
 		socket.off("my-channel-list");
-		};
+	};
 	}, [allChannel, socket]);
 
-		const handleChannelClick = (channelId: number) => {
-			dispatch(setSelectedChannelId(channelId));
-		};
+	const handleChannelClick = (channelId: number) => {
+	dispatch(setSelectedChannelId(channelId));
+	};
 
 	const renderLastMessage = (channel: Channel) => {
 		if (channel.messages.length > 0) {
@@ -101,7 +101,7 @@ const AllConv = () => {
 		}
 	};
 
-return (
+	return (
 	<div className="pl-1 md:pl-5">
 		
 	{allChannel.map((channel, index) => (
@@ -124,12 +124,12 @@ return (
 						/>
 					</div>			
 					) : (
-						<div className="relative w-full h-full md:w-[45px] md:h-[45px] mt-2 rounded-full grid justify-items-center items-center md:mr-4">
-
-						<FaUser className="text-lilac" />
+						<div className="relative w-full h-full md:w-[45px] md:h-[45px] bg-purple rounded-full grid justify-items-center items-center">
+							<FaUser className="text-lilac" />
 						</div>
 					)
 				}
+
 			{channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].status === 'ONLINE' ? (
 				<div className="absolute bg-acid-green w-3 h-3 rounded-full right-0 bottom-0.5"></div>
 			) : channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].status === 'OFFLINE' ? (
@@ -140,38 +140,38 @@ return (
 				</div>
 			}
 			</div>
-		) : (
-			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
-				<FaUserGroup className="text-lilac w-5 h-5" />
-			</div>
-		)
-		}
-		<div className="pt-3 hidden md:block">
-			<div className="flex flex-row justify-between items-center">
-			<p className="text-base text-lilac">
-			{/*CHAN NAME*/}
-			{channel.modes === "CHAT" ? (
-				channel.members.filter(member => member.username !== userData.username)[0].username
-			) : channel.name.length > 10 ? 
-				`${channel.name.slice(0, 10)}...` : channel.name
+			) : (
+				<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
+					<FaUserGroup className="text-lilac w-5 h-5" />
+				</div>
+			)
 			}
-			</p>
-			{/*CHAN PROPERTY*/}
-			{channel.modes === "PRIVATE" ? (
-				<p className="text-xs text-lilac text-opacity-60 ml-4">Private</p>
-			) : channel.modes === "GROUPCHAT" ? (
-				<p className="text-xs text-lilac text-opacity-60 ml-4">Public</p>
-			) : channel.modes === "PROTECTED" ? (
-				<p className="text-xs text-lilac text-opacity-60 ml-4">Protected</p>
-			) 
-			: null}
+			<div className="pt-3 hidden md:block">
+				<div className="flex flex-row justify-between items-center">
+				<p className="text-base text-lilac">
+				{/*CHAN NAME*/}
+				{channel.modes === "CHAT" ? (
+					channel.members.filter(member => member.username !== userData.username)[0].username
+				) : channel.name.length > 10 ? 
+					`${channel.name.slice(0, 10)}...` : channel.name
+				}
+				</p>
+				{/*CHAN PROPERTY*/}
+				{channel.modes === "PRIVATE" ? (
+					<p className="text-xs text-lilac text-opacity-60 ml-4">Private</p>
+				) : channel.modes === "GROUPCHAT" ? (
+					<p className="text-xs text-lilac text-opacity-60 ml-4">Public</p>
+				) : channel.modes === "PROTECTED" ? (
+					<p className="text-xs text-lilac text-opacity-60 ml-4">Protected</p>
+				) 
+				: null}
+				</div>
+				{/*LAST MESSAGE*/}
+				<div className="flex flex-row justify-between w-[140px]">
+					{renderLastMessage(channel)}
+				</div>
 			</div>
-			{/*LAST MESSAGE*/}
-			<div className="flex flex-row justify-between w-[140px]">
-				{renderLastMessage(channel)}
 			</div>
-		</div>
-		</div>
 		</div>
 	))}
 

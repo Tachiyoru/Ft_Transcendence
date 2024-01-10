@@ -4,8 +4,6 @@ import { RiGamepadFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
-import { io } from "socket.io-client";
-import { SlOptions } from "react-icons/sl";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
 
@@ -88,7 +86,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   };
 
   const channelName: string = channel.modes;
-  console.log(channel.modes);
   const displayText: string = channelEquivalents[channelName];
 
   usersInChannel.sort((a, b) => {
@@ -138,7 +135,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
       setUsersBan(users);
     });
 
-
     // existe pas dans le back
     socket.emit("check-user-in-channel", { chanName: channel.name });
     socket.on("user-in-channel", (boolean) => {
@@ -151,7 +147,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
       socket.off("allMembersBan");
       socket.off("user-in-channel");
     };
-  }, [channel.name]);
+  }, [channel.name, channel.chanId, socket]);
 
 	useEffect(() => {
 		if (Array.isArray(usersInChannelExceptHim) && usersInChannelExceptHim.length > 0 && usersInChannelExceptHim[0]?.id) {
@@ -192,8 +188,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
         }
     };
 
-	console.log(isBlocked)
-
 	const blockUser = async (userId: number) => {
 		try {
 			await axios.post(`/friends-list/block/${userId}`);
@@ -212,10 +206,20 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 
   const unBanUser = async (username: string) => {
     try {
-      console.log(channel.chanId);
       socket.emit("unBanUser", { chanId: channel.chanId, username: username });
       socket.on("userUnBanned", (users) => {
-        console.log("ok", users);
+        console.log("unban", users);
+      });
+    } catch (error) {
+      console.error("Error deblocked users:", error);
+    }
+  };
+
+  const unMuteUser = async (id: number) => {
+    try {
+      socket.emit("unMuteMember", { chanId: channel.chanId, userId: id });
+      socket.on("memberUnMuted", (users) => {
+        console.log("unmute", users);
       });
     } catch (error) {
       console.error("Error deblocked users:", error);
@@ -487,6 +491,12 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
                   {usersMute.map((mute) => (
                     <div key={mute.id} className="text-red-orange">
                       {mute.username}
+                      <button
+                          className="ml-1"
+                          onClick={() => unMuteUser(mute.id)}
+                        >
+                          <FaXmark className="w-2 h-2 text-red-orange" />
+                        </button>
                     </div>
                   ))}
                 </div>

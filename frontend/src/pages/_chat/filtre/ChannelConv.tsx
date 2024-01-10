@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
 import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
 import { WebSocketContext } from '../../../socket/socket';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store/store';
 
 interface Channel {
 	name: string;
@@ -16,6 +18,7 @@ const ChannelConv = () => {
 	const [publicChannel, setPublicChannel] = useState<Channel[]>([]);
 	const dispatch = useDispatch();
 	const socket = useContext(WebSocketContext);
+	const id = useSelector((state: RootState) => state.selectedChannelId);
 
 	useEffect(() => {
 
@@ -40,16 +43,19 @@ const ChannelConv = () => {
 	};
 
 	return (
-		<div>
+		<div className="pl-1 md:pl-5">
 		{allChannel
 		.filter(channel => channel.modes !== "CHAT")
 		.map((channel, index) => (
-        <div
+		<div
 			key={index}
-			className="flex flex-row h-12 mt-2 md:mx-2"
+			className={` ${
+				channel.chanId === id.selectedChannelId ? 'bg-filter rounded-l-md pb-1' : 'pb-1'
+			}`}
 			onClick={() => handleChannelClick(channel.chanId)}
 			style={{ cursor: "pointer" }}
-        >
+		>
+		<div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
 			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 				<FaUserGroup className="text-lilac" />
 			</div>
@@ -77,10 +83,11 @@ const ChannelConv = () => {
 				</div>
 			</div>
 			</div>
+			</div>
 		))}
 
 		{/*OTHER CHANNEL*/}
-		<div className='mt-10 mb-2 px-2'>
+		<div className='mt-10'>
 		{publicChannel.length > 0 ? (
 			<>
 				<div className="border-t w-full border-lilac "></div>

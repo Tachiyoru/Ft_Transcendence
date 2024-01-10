@@ -245,6 +245,25 @@ export class chatGateway {
     }
   }
 
+  @SubscribeMessage("removeOp")
+  async removeOp(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number; username: string },
+    @Request() req: any
+  ) {
+    try {
+      console.log('test')
+      const result = await this.chatService.removeOp(
+        data.chanId,
+        data.username,
+        req
+      );
+      client.emit("opRemoved", result);
+    } catch (error) {
+      client.emit("removeOpError", { message: error.message });
+    }
+  }
+
   @SubscribeMessage("renameChan")
   async renameChan(
     client: Socket,
@@ -428,6 +447,22 @@ export class chatGateway {
         data.userId
       );
       client.emit("memberMuted", result);
+    } catch (error) {
+      client.emit("muteMemberError", { message: error.message });
+    }
+  }
+
+  @SubscribeMessage("unMuteMember")
+  async unMuteMember(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number; userId: number }
+  ) {
+    try {
+      const result = await this.chatService.unMuteMember(
+        data.chanId,
+        data.userId
+      );
+      client.emit("memberUnMuted", result);
     } catch (error) {
       client.emit("muteMemberError", { message: error.message });
     }

@@ -276,6 +276,27 @@ export class chatService {
     return updatedChannel;
   }
 
+  async removeOp(chanId: number, username: string, @Request() req: any) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { chanId: chanId },
+      include: { owner: true  },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    console.log(chanId)
+    if (req.user.username !== chan.owner.username) {
+      throw new Error("You are not allowed to add an op to this channel");
+    }
+    
+    const updatedOp = chan.op.filter(user => user !== username);
+    const updatedChannel = await this.prisma.channel.update({
+      where: { chanId: chanId },
+      data: { op: { set: updatedOp } },
+    });
+    return updatedChannel;
+  }
+
   async renameChan(chanId: number, newName: string, @Request() req: any) {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },

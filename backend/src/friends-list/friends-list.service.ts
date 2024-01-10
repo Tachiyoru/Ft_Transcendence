@@ -215,9 +215,21 @@ export class FriendsListService
 		return me.blockedList;
 	}
 
-	async isUserBlockedById(userId: number, loggedInUser: User): Promise<boolean> {
-        const blockedUsers = await this.getBlockedUsers(loggedInUser);
-        return blockedUsers.some(user => user.id === userId);
+	async isUserBlockedById(userId: number, loggedInUser: User) {
+		const me = await this.prismaService.user.findUnique({
+			where: { id: loggedInUser.id },
+			include: {
+				blockedList: {
+					where: { id: userId }
+				},
+			},
+		});
+		
+		if (!me) {
+			throw new Error('User not found');
+		}
+	
+		return me.blockedList.length > 0;
     }
 
 	async getMyFriends(user: User)
