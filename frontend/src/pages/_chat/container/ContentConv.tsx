@@ -45,6 +45,9 @@ const ContentConv = () => {
 	const socket = useContext(WebSocketContext);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
 	const messageContainerRef = useRef(null);
+	const [isTyping, setIsTyping] = useState<string>('')
+	const [isTypingBool, setIsTypingBool] = useState<boolean>(false);
+
 
 
 	const scrollToBottom = () => {
@@ -78,8 +81,8 @@ const ContentConv = () => {
 			socket.emit('create-message', { content: message, chanName: channel.name});
 			socket.on('recapMessages', (newMessage: Message) => {
 				console.log("newMessage = ", newMessage);});
-			console.log("messagelist la = ", messageList);
 			setMessage('');
+			setIsTypingBool(false)
 			return () => {
 				socket.off('recapMessages');
 			};
@@ -88,20 +91,19 @@ const ContentConv = () => {
 	useEffect(() => {
 			socket.emit('channel', {id : id.selectedChannelId});
 			socket.on('channel', (channelInfo, messageList) => {
-				console.log(channelInfo);
 				setMessageList(messageList);
 				setChannel(channelInfo);
 			});
 			socket.on('recapMessages', (newMessage: Message) => {
 				setMessageList((prevMessages) => [...prevMessages, newMessage]);
+				setIsTypingBool(false);
 			});
-			console.log("messagelist la2 = ", messageList);
 
 		return () => {
 			socket.off('channel');
 			socket.off('recapMessages');
 		};
-	}, [id]);
+	}, [id, socket]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
@@ -109,16 +111,17 @@ const ContentConv = () => {
 
 	const handleTyping = (e) => {
 		const typedMessage = e.target.value;
-	
-		// Mettez à jour l'état du message
+
 		setMessage(typedMessage);
-		let typing = true;
-		// Émettez l'événement 'typing' avec le message tapé
-		socket.emit('typing', typing, );
+		socket.emit('typing', true, );
 		socket.on('typing', (data) => {
-			console.log("typing = ", data);
+			if (!isTypingBool)
+			{
+				setIsTyping(data.name);
+				setIsTypingBool(true)
+			}
 		});
-	  };
+	};
 
 	return (
 	<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
@@ -172,6 +175,8 @@ const ContentConv = () => {
 
 			{/*SEND*/}
 			<div>
+
+					<div className="text-lilac italic">{isTyping} is typing...</div>
 				<div className="flex items-center relative">
 					<form onSubmit={handleInputSubmit} className="bg-dark-violet w-full rounded-md">
 					<input

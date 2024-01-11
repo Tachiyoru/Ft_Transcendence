@@ -44,7 +44,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("ChanId : ", channel.chanId);
         socket.emit("users-not-in-channel", { chanId: channel.chanId }); //need to change to users not in channels and friend with me
 
         socket.on("users-not-in-channel", (userList) => {
@@ -83,17 +82,11 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
       chanId: channel.chanId,
       targets: selectedItems,
     };
-    console.log("Connected to server");
     socket.emit("add-user", { channelData: channelData });
 
     socket.on("addUsersError", (errorData) => {
       console.error("user creation error:", errorData);
     });
-
-    // socket.on("disconnect", () => {
-    //   console.log("Disconnected from server");
-    //   socket.disconnect();
-    // });
 
     setCheckedItems({});
     console.log("vide", checkedItems);

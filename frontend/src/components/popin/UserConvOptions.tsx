@@ -9,6 +9,7 @@ import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
 import { WebSocketContext } from '../../socket/socket';
+import 	axios from '../../axios/api';
 
 interface Member {
     username: string;
@@ -48,15 +49,14 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	};
 
 	const handleAddOp = () => {
-		console.log('ok')
-		socket.emit('addOp', { chanName: channel.name, username: username });
+		socket.emit('addOp', { chanId: channel.chanId, username: username });
+		setPopinOpen(!popinOpen);
 	};
 
 	const handleRemoveOp = () => {
-		console.log('okk')
-		socket.emit('removeOp', { chanName: channel.name, username: username });
+		socket.emit('removeOp', { chanId: channel.chanId, username: username });
+		setPopinOpen(!popinOpen);
 	};
-
 
 	const handleClick = () => {
 	if (opMembers.find(opMember => opMember.username === username)) {
@@ -78,6 +78,17 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	};
 	}, []);
 
+	useEffect(() => {
+		axios
+		.get(`friends-list/blocked-users/${id}`)
+		.then((response) => {
+			setIsBlocked(response.data.isBlocked);
+		})
+		.catch((error) => {
+			console.error('Error fetching data:', error);
+		});
+	}, [id]);
+
 	const handleClickSendMessage = () => {
 		console.log(username)
 		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
@@ -92,6 +103,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		socket.on('userBanned', (data) => {
 			console.log('Ban', data);
 		});
+		setPopinOpen(!popinOpen);
 	}
 
 	const handleClickKick = () => {
@@ -99,7 +111,47 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		socket.on('userKicked', (data) => {
 			console.log('Kick', data);
 		});
+		setPopinOpen(!popinOpen);
 	}
+
+	const handleClickMute = () => {
+		socket.emit('muteMember', { chanId: channel.chanId, userId: id }); 
+		socket.on('memberMuted', (data) => {
+			console.log('Mute', data);
+		});
+		setPopinOpen(!popinOpen);
+	}
+
+	const handleBlockUser = async (userId: number) => {
+		try {
+			if (isBlocked) {
+				await unblockUser(userId);
+				setIsBlocked(false);
+
+			} else {
+				await blockUser(userId);
+				setIsBlocked(true);
+			}
+		} catch (error) {
+			console.error('Erreur lors du blocage:', error);
+		}
+	};
+
+	const blockUser = async (userId: number) => {
+		try {
+			await axios.post(`/friends-list/block/${userId}`);
+		} catch (error) {
+			console.error('Erreur lors du blocage de l\'utilisateur :', error);
+		}
+	};
+
+	const unblockUser = async (userId: number) => {
+		try {
+		await axios.post(`/friends-list/unblock/${userId}`);
+		} catch (error) {
+		console.error("Error deblocked users:", error);
+		}
+	};
 
 	return (
 	<div>
@@ -115,20 +167,23 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 			<div ref={cardRef} className="absolute top-4 right-0 z-50">
 				<div className="bg-dark-violet text-lilac rounded-lg px-6 py-5">
 					<Link to={`/user/${username}`}>
-						<div className="flex flex-row items-center pb-1">
+						<div className="flex flex-row items-center pb-1 hover:opacity-40">
 							<FaUser size={10}/>
 							<p className="ml-2">See profile</p>
 						</div>
 					</Link>
 					<div
 						style={{ cursor: "pointer" }} 
-						className="flex flex-row items-center pb-1"
+						className="flex flex-row items-center pb-1 hover:opacity-40"
 						onClick={handleClickSendMessage}
 					>
 						<FaRegPenToSquare size={11}/>
 						<p className="ml-2">Send a message</p>
 					</div>
-					<div className="flex flex-row items-center pb-1">
+					<div
+						style={{ cursor: "pointer" }}
+						className="flex flex-row items-center pb-1 hover:opacity-40"
+					>
 						<RiGamepadFill size={11}/>
 						<p className="ml-2">Invite to play</p>
 					</div>
@@ -138,29 +193,37 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 					<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 					
 					<div className="grid grid-cols-2 gap-2">
-						<div className="flex flex-row items-center">
+						<div
+							style={{ cursor: "pointer" }}
+							onClick={handleClickMute}
+							className="flex flex-row items-center hover:opacity-40"
+						>
 							<FaUser size={10} />
 							<p className="ml-2">Mute</p>
 						</div>
 						<div
 							style={{ cursor: "pointer" }} 
 							onClick={handleClickKick}
-							className="flex flex-row items-center"
+							className="flex flex-row items-center hover:opacity-40"
 						>
 							<FaRegPenToSquare size={11} />
 							<p className="ml-2">Kick</p>
 						</div>
-						<div className="flex flex-row items-center">
+						<div 
+							style={{ cursor: "pointer" }}
+							onClick={() => handleBlockUser(id)}
+							className="flex flex-row items-center hover:opacity-40"
+						>
 							<FaMinusCircle size={11} />
-							<p className={`ml-2 hover:underline ${isBlocked ? 'text-red-500' : ''}`}>{isBlocked ? 'Unblock' : 'Block'}</p>
+							<p className={`ml-2 ${isBlocked ? 'text-red-500' : ''}`}>{isBlocked ? 'Unblock' : 'Block'}</p>
 						</div>
 						<div 
 							style={{ cursor: "pointer" }} 
 							onClick={handleClickBan}
-							className="flex flex-row items-center"
+							className="flex flex-row items-center hover:opacity-40"
 						>
 							<RiGamepadFill size={11} />
-							<p className="ml-2">Ban</p>
+							<p className="ml-2 ">Ban</p>
 						</div>
 					</div>
 					
