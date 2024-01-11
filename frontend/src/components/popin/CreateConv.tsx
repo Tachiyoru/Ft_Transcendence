@@ -85,10 +85,10 @@ const CreateConv: React.FC = () => {
         channelData.mode = "PRIVATE";
       } else if (channelType === "protected") {
         channelData.mode = "PROTECTED";
-        channelData.password = "";
+        channelData.password = password;
       }
     }
-
+      console.log(password)
       console.log("Connected to server");
       socket.emit("createChannel", { settings: channelData });
 

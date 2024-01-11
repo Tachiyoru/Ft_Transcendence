@@ -42,7 +42,7 @@ model User {
     twoFASecret String? @unique
 
     role   Role       @default(USER)
-    status StatusUser @default(INGAME)
+    status StatusUser @default(ONLINE)
 
     stats Stats? @relation("stats")
 

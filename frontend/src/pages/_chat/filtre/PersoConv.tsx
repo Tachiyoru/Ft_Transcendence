@@ -7,8 +7,7 @@ import { useSelector } from "react-redux";
 import { RiGamepadFill } from "react-icons/ri";
 import { RootState } from "../../../store/store";
 import TimeConverter from "../../../components/date/TimeConverter";
-import axios from "axios";
-
+import axios from "../../../axios/api";
 interface Member {
 	username: string;
 	avatar: string;

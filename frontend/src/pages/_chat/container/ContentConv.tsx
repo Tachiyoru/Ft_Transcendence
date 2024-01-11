@@ -17,6 +17,7 @@ interface Channel {
 	owner: Owner;
 	members: Member[];
 	op: string[]
+	password: string;
 }
 
 interface Owner {
@@ -47,8 +48,9 @@ const ContentConv = () => {
 	const messageContainerRef = useRef(null);
 	const [isTyping, setIsTyping] = useState<string>('')
 	const [isTypingBool, setIsTypingBool] = useState<boolean>(false);
-
-
+	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
+	const [passwordInput, setPasswordInput] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
 
 	const scrollToBottom = () => {
 		if (messageContainerRef.current) {
@@ -59,7 +61,7 @@ const ContentConv = () => {
 	useEffect(() => {
 		scrollToBottom();
 	}, [messageList]);
-	
+
 	useEffect(() => {
 		const fetchData = async () => {
 		try {
@@ -71,7 +73,7 @@ const ContentConv = () => {
 		};
 		fetchData();
 	}, []);
-	
+
 	const id = useSelector((state: RootState) => state.selectedChannelId); // Supposons que c'est là où se trouve votre selectedChannelId
 
 	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
@@ -88,6 +90,20 @@ const ContentConv = () => {
 			};
 	};
 
+
+	const handleJoinChannel = async () => {
+		console.log(id.selectedChannelId)
+		socket.emit("joinChan", { chanId: id.selectedChannelId, password: passwordInput });
+		socket.on("channelJoined", (updatedChannel) => {
+			console.log(updatedChannel)
+			setCheckUserInChannel(true);
+		});
+		socket.on("channelJoinedError", (error) => {
+			setErrorMessage('Wrong password');
+			console.error('Error joining channel:', error);
+		});
+	};
+
 	useEffect(() => {
 			socket.emit('channel', {id : id.selectedChannelId});
 			socket.on('channel', (channelInfo, messageList) => {
@@ -97,6 +113,11 @@ const ContentConv = () => {
 			socket.on('recapMessages', (newMessage: Message) => {
 				setMessageList((prevMessages) => [...prevMessages, newMessage]);
 				setIsTypingBool(false);
+			});
+
+			socket.emit("check-user-in-channel", { chanId: id.selectedChannelId });
+			socket.on("user-in-channel", (boolean) => {
+				setCheckUserInChannel(boolean);
 			});
 
 		return () => {
@@ -130,7 +151,21 @@ const ContentConv = () => {
 		<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
 			No conversation selected
 		</div>
-		):(
+		): channel.modes === "PROTECTED" && !checkUserInChannel ? (
+			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
+				<div>
+				<input
+					type="password"
+					placeholder="Enter password"
+					value={passwordInput}
+					className="bg-lilac rounded-md text-white placeholder:text-white px-2 py-1"
+					onChange={(e) => setPasswordInput(e.target.value)}
+				/>
+				<button onClick={handleJoinChannel} className="ml-2 px-2 py-1 rounded-md bg-purple">Submit</button>
+				{errorMessage && <div className="text-red-orange">{errorMessage}</div>}
+				</div>
+			</div>
+		) : (
 		<div className="flex-1 flex flex-col justify-between text-xs">
 		<div>
 			<div className="flex flex-row justify-between items-center relative mt-4">

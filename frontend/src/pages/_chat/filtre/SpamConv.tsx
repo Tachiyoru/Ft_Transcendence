@@ -45,13 +45,11 @@ const SpamConv = () => {
 		};
 	}, []);
 
-	console.log(allNoFriends)
-
 	return (
 		<div>
 			{/* USER */}
 			{allChannel
-			.filter(channel => channel.modes === "CHAT" && allNoFriends.map(user => user.id).includes(channel.owner.id))
+			.filter(channel => channel.modes === "CHAT" && !allNoFriends.map(user => user.id).includes(channel.owner.id))
 			.map((channel, index) => (
 				<div
 				key={index}

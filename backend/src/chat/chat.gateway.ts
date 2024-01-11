@@ -168,7 +168,7 @@ export class chatGateway {
   async createchan(
     @ConnectedSocket() client: Socket,
     @MessageBody("settings") settings: createChannel,
-    @MessageBody() data: { chanName: string; users: User[]; mode: Mode },
+    @MessageBody() data: { chanName: string; users: User[]; mode: Mode, password?: string },
     @Request() req: any
   ) {
     try {
@@ -312,12 +312,12 @@ export class chatGateway {
     });
   }
 
-  @SubscribeMessage("find-channels-public")
-  async getChannelsPublic(@ConnectedSocket() client: Socket): Promise<void> {
+  @SubscribeMessage("find-channels-public-protected")
+  async getChannelsPublicProtected(@ConnectedSocket() client: Socket): Promise<void> {
     const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
       client.handshake.auth.id
     );
-    client.emit("channel-public-list", chanlist);
+    client.emit("channel-public-protected-list", chanlist);
   }
 
   @SubscribeMessage("channel-in-common")
@@ -334,15 +334,16 @@ export class chatGateway {
 
   @SubscribeMessage("joinChan")
   async joinChan(
-    client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { chanId: number;},
+    data: { chanId: number; password?: string;},
     @Request() req: any
   ) {
     try {
       const result = await this.chatService.joinChannel(
         data.chanId,
         req,
+        data.password,
       );
       client.emit("channelJoined", result);
     } catch (error) {
