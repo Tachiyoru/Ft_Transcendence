@@ -36,7 +36,7 @@ const ChannelConv = () => {
 		socket.off("my-channel-list");
 		socket.off("channel-public-list");
 		};
-	}, [allChannel, publicChannel, socket]);
+	}, [socket]);
 
 	const handleChannelClick = (channelId: number) => {
 		dispatch(setSelectedChannelId(channelId));
@@ -87,7 +87,7 @@ const ChannelConv = () => {
 		))}
 
 		{/*OTHER CHANNEL*/}
-		<div className='mt-10'>
+		<div className='mt-10 mb-4'>
 		{publicChannel.length > 0 ? (
 			<>
 				<div className="border-t w-full border-lilac "></div>
@@ -101,18 +101,27 @@ const ChannelConv = () => {
 		}
 		</div>
 		{publicChannel.map((channel, index) => (
-		<div key={index} className="flex flex-row h-12 md:m-2">
-			<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
-				<FaUserGroup className="text-lilac"/>
-			</div>
-			<div className="pt-3 hidden md:block">
-				<div className="flex flex-row justify-between">
-					<p className="text-base text-lilac">{channel.name}</p>
-					<p className="text-sm text-lilac text-opacity-60">{channel.modes}</p>
+		<div 
+			key={index}
+			onClick={() => handleChannelClick(channel.chanId)}
+			className={` ${
+				channel.chanId === id.selectedChannelId ? 'bg-filter rounded-l-md pb-1' : 'pb-1'
+			}`}
+		>
+			<div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
+				<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
+					<FaUserGroup className="text-lilac"/>
 				</div>
-				<div className="flex flex-row">
-					<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
-					<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+				<div className="pt-3 hidden md:block">
+					<div className="flex flex-row justify-between">
+						<p className="text-base text-lilac">{channel.name.length > 10 ? 
+						`${channel.name.slice(0, 10)}...` : channel.name}</p>
+						<p className="text-sm text-lilac text-opacity-60">{channel.modes === 'GROUPCHAT' ? 'Public' : ''}</p>
+					</div>
+					<div className="flex flex-row">
+						<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
+						<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+					</div>
 				</div>
 			</div>
 		</div>

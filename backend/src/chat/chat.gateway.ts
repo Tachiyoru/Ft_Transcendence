@@ -120,6 +120,20 @@ export class chatGateway {
     }
   }
 
+  @SubscribeMessage("check-user-in-channel")
+  async isUserInChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { chanId: number },
+    @Request() req: any
+  ) {
+    try {
+      const userList = await this.chatService.isUserInChannel(req, data.chanId);
+      client.emit("user-in-channel", userList);
+    } catch (error) {
+      client.emit("user-in-channel-error", error.message);
+    }
+  }
+
   @SubscribeMessage("users-not-in-channel")
   async getUsersNotInChannel(
     @ConnectedSocket() client: Socket,
@@ -161,7 +175,6 @@ export class chatGateway {
       const chan = await this.chatService.createChannel(settings, req);
       client.emit("channelCreated", chan);
       const chanlist = await this.prisma.channel.findMany();
-      console.log("chan list = ", chanlist);
       client.join(chan.name);
     } catch (error) {
       client.emit("channelCreateError", {
@@ -323,22 +336,17 @@ export class chatGateway {
   async joinChan(
     client: Socket,
     @MessageBody()
-    data: { chanId: number; password?: string; invited?: boolean },
+    data: { chanId: number;},
     @Request() req: any
   ) {
     try {
-      if (!data.invited) {
-        data.invited = false;
-      }
       const result = await this.chatService.joinChannel(
         data.chanId,
-        data.invited,
         req,
-        data.password
       );
       client.emit("channelJoined", result);
     } catch (error) {
-      client.emit("renameChanError", { message: error.message });
+        client.emit("channelJoinedError", { message: error.message });
     }
   }
 

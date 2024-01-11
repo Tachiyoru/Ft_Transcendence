@@ -153,7 +153,7 @@ export class chatService {
       where: {
         AND: [
           {
-            modes: "CHAT",
+            modes: "GROUPCHAT",
           },
           {
             NOT: {
@@ -176,20 +176,6 @@ export class chatService {
       where: { channel: { none: { chanId: chan.chanId } } },
     });
     return users;
-  }
-
-  async getUsersInChannel(chanName: string, @Request() req: any) {
-    const usersInChannel = await this.prisma.user.findMany({
-      where: {
-        channel: {
-          some: {
-            name: chanName,
-          },
-        },
-      },
-    });
-
-    return usersInChannel;
   }
 
   async getUsersInChannelExceptUser(chanName: string, @Request() req: any) {
@@ -284,7 +270,6 @@ export class chatService {
     if (!chan) {
       throw new Error("Could not find channel");
     }
-    console.log(chanId)
     if (req.user.username !== chan.owner.username) {
       throw new Error("You are not allowed to add an op to this channel");
     }
@@ -295,6 +280,19 @@ export class chatService {
       data: { op: { set: updatedOp } },
     });
     return updatedChannel;
+  }
+
+  async isUserInChannel(@Request() req: any, chanId: number): Promise<boolean> {
+    try {
+      const userList = await this.findAllMembers(chanId);
+      
+      const isInChannel = userList.some(user => user.id === req.id);
+      
+      return isInChannel;
+    } catch (error) {
+      console.error("Error checking user in channel:", error);
+      return false;
+    }
   }
 
   async renameChan(chanId: number, newName: string, @Request() req: any) {
@@ -420,10 +418,9 @@ export class chatService {
 
   async joinChannel(
     chanId: number,
-    invited: boolean,
     @Request() req: any,
-    password?: string
   ) {
+    
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
       include: { owner: true, banned: true },
@@ -437,15 +434,7 @@ export class chatService {
     if (banned) {
       throw new Error("You are banned from this channel");
     }
-    if (chan.modes === Mode.CHAT) {
-    } else if (chan.modes === Mode.GROUPCHAT) {
-    } else if (chan.modes === Mode.PRIVATE) {
-    } else if (chan.modes === Mode.PROTECTED) {
-      const hashedPassword: string = password ? await argon.hash(password) : "";
-      if (hashedPassword !== chan.password) {
-        throw new Error("Wrong password");
-      }
-    }
+
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { members: { connect: { id: req.user.id } } },
@@ -537,10 +526,8 @@ export class chatService {
       (user) => user.username === target.username
     );
     if (!banned) {
-      console.log("pas ok", chan.banned, target);
       throw new Error("User is not banned from this channel");
     }
-    console.log("ok");
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: {

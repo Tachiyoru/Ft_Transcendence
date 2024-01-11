@@ -86,7 +86,7 @@ export const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
     return response.data;
   } catch (error) {
     console.error("Error fetching logged-in user info:", error);
-    return { id: -1 }; // Retourne un ID par défaut (vous pouvez ajuster selon vos besoins)
+    return { id: -1 }; 
   }
 };
 
@@ -254,17 +254,17 @@ const socket = useContext(WebSocketContext);
       return (
         <div
           ref={menuRef}
-          className="shadow-md bg-dark-violet rounded-lg py-2 px-4 absolute right-2 mt-1"
+          className="shadow-md bg-dark-violet w-32 rounded-lg py-2 px-4 absolute right-2 mt-1"
           style={{ cursor: "default", zIndex: 1 }}
         >
-          <div className="text-xs font-normal text-param">Notifications</div>
+          <div className="text-xs font-medium text-lilac ">Notifications</div>
           <ul>
             {notifications.map((notification) => (
               <li
                 style={{ cursor: "pointer" }}
                 key={notification.id}
-                className={`border ${
-                  notification.read ? "border-gray-500" : "border-white"
+                className={`border-b border-lilac py-2 ${
+                  notification.read ? "text-opacity-40 text-lilac" : ""
                 }`}
                 onClick={() =>
                   handleNotificationItemClick(
