@@ -307,9 +307,9 @@ export class chatGateway {
       client.handshake.auth.id
     );
     client.emit("my-channel-list", chanlist);
-    chanlist.forEach((channel) => {
-      client.join(channel.name);
-    });
+    // chanlist.forEach((channel) => {
+    //   client.join(channel.name);
+    // });
   }
 
   @SubscribeMessage("find-channels-public")
