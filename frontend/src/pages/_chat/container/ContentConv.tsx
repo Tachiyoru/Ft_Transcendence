@@ -9,6 +9,7 @@ import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
+import { set } from "react-hook-form";
 
 interface Channel {
   name: string;
@@ -48,7 +49,6 @@ const ContentConv = () => {
   });
   const messageContainerRef = useRef(null);
   const [isTyping, setIsTyping] = useState<string>("");
-  const [isTypingBool, setIsTypingBool] = useState<boolean>(false);
 
   const scrollToBottom = () => {
     if (messageContainerRef.current) {
@@ -81,14 +81,17 @@ const ContentConv = () => {
     socket.emit("create-message", { content: message, chanName: channel.name });
     console.log("message = ", message);
     setMessage("");
-    setIsTypingBool(false);
+    setIsTyping("");
   };
 
   useEffect(() => {
-    socket.emit("channel", { id: id.selectedChannelId, prev: id.prevChannelId });
+    socket.emit("channel", {
+      id: id.selectedChannelId,
+      prev: id.prevChannelId,
+    });
     const handleChannelAndMessages = (channelInfo, messageList) => {
       setChannel(channelInfo);
-	  console.log("channelInfo = ", channelInfo)
+      console.log("channelInfo = ", channelInfo);
       setMessageList(messageList);
     };
     socket.on("channel", handleChannelAndMessages);
@@ -96,9 +99,16 @@ const ContentConv = () => {
       setMessageList((prevMessages) => [...prevMessages, newMessage]);
       console.log("newMessage = ", newMessage);
     });
+	socket.on("typing", (username) => {
+        setIsTyping(username + " is typing...");
+		const typingTimeout = setTimeout(() => {
+		  setIsTyping("");
+		}, 5000);
+      });
     return () => {
       socket.off("channel", handleChannelAndMessages);
-      socket.off("recapMessages");
+	  socket.off("recapMessages");
+	  socket.off("typing");
     };
   }, [id]);
 
@@ -109,13 +119,7 @@ const ContentConv = () => {
   const handleTyping = (e) => {
     const typedMessage = e.target.value;
     setMessage(typedMessage);
-    socket.emit("typing", true);
-    socket.on("typing", (data) => {
-      if (!isTypingBool) {
-        setIsTyping(data.name);
-        setIsTypingBool(true);
-      }
-    });
+    socket.emit("typing", channel.name);
   };
 
   return (
@@ -182,7 +186,7 @@ const ContentConv = () => {
 
           {/* SEND */}
           <div>
-            <div className="text-lilac italic">{isTyping} is typing...</div>
+            <div className="text-lilac italic">{isTyping}</div>
             <div className="flex items-center relative">
               <form
                 onSubmit={handleInputSubmit}

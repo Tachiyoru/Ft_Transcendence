@@ -66,14 +66,14 @@ export class chatGateway {
     });
     if (!chan) return null;
     const messagesList = chan.messages;
-	if (prevId) {
-		const chan2 = await this.prisma.channel.findUnique({
-			where: { chanId: prevId },
-		});
-		if (!chan2) return null;
-		client.leave(chan2.name);
-	}
-	client.join(chan.name);
+    if (prevId) {
+      const chan2 = await this.prisma.channel.findUnique({
+        where: { chanId: prevId },
+      });
+      if (!chan2) return null;
+      client.leave(chan2.name);
+    }
+    client.join(chan.name);
     client.emit("channel", chan, messagesList);
   }
 
@@ -274,7 +274,7 @@ export class chatGateway {
     @Request() req: any
   ) {
     try {
-      console.log('test')
+      console.log("test");
       const result = await this.chatService.removeOp(
         data.chanId,
         data.username,
@@ -342,17 +342,14 @@ export class chatGateway {
   async joinChan(
     client: Socket,
     @MessageBody()
-    data: { chanId: number;},
+    data: { chanId: number },
     @Request() req: any
   ) {
     try {
-      const result = await this.chatService.joinChannel(
-        data.chanId,
-        req,
-      );
+      const result = await this.chatService.joinChannel(data.chanId, req);
       client.emit("channelJoined", result);
     } catch (error) {
-        client.emit("channelJoinedError", { message: error.message });
+      client.emit("channelJoinedError", { message: error.message });
     }
   }
 
@@ -572,17 +569,15 @@ export class chatGateway {
 
   @SubscribeMessage("typing")
   async typing(
-    @MessageBody("isTyping") isTyping: boolean,
+	@MessageBody() chanName: string ,
     @ConnectedSocket() client: Socket
   ) {
     const username = client.handshake.auth.username;
     const user = await this.prisma.user.findUnique({
       where: { username: username },
     });
-    if (!user) {
-      return;
-    }
+    if (!user) return;
     const name = user.username;
-    this.server.emit("typing", { name, isTyping });
+    this.server.to(chanName).except(client.id).emit("typing", username);
   }
 }
