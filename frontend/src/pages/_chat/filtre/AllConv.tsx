@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
-import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
+import { setSelectedChannelId, setPrevChannelId} from "../../../services/selectedChannelSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import axios from "../../../axios/api";
@@ -74,8 +74,10 @@ const AllConv = () => {
 		socket.off("my-channel-list");
 	};
 	}, [allChannel, socket]);
-
+	
 	const handleChannelClick = (channelId: number) => {
+	if (id.selectedChannelId !== null)
+		dispatch(setPrevChannelId(id.selectedChannelId))
 	dispatch(setSelectedChannelId(channelId));
 	};
 

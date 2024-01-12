@@ -85,9 +85,10 @@ const ContentConv = () => {
   };
 
   useEffect(() => {
-    socket.emit("channel", { id: id.selectedChannelId });
+    socket.emit("channel", { id: id.selectedChannelId, prev: id.prevChannelId });
     const handleChannelAndMessages = (channelInfo, messageList) => {
       setChannel(channelInfo);
+	  console.log("channelInfo = ", channelInfo)
       setMessageList(messageList);
     };
     socket.on("channel", handleChannelAndMessages);
@@ -95,12 +96,11 @@ const ContentConv = () => {
       setMessageList((prevMessages) => [...prevMessages, newMessage]);
       console.log("newMessage = ", newMessage);
     });
-
     return () => {
       socket.off("channel", handleChannelAndMessages);
       socket.off("recapMessages");
     };
-  }, [id, handleInputSubmit]);
+  }, [id]);
 
   const toggleRightSidebar = () => {
     setIsRightSidebarOpen(!isRightSidebarOpen);

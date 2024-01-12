@@ -52,7 +52,8 @@ export class chatGateway {
   @SubscribeMessage("channel")
   async getChannelById(
     @ConnectedSocket() client: Socket,
-    @MessageBody("id") id: number
+    @MessageBody("id") id: number,
+    @MessageBody("prev") prevId: number
   ) {
     if (!id) throw Error("id not found");
     const chan = await this.prisma.channel.findUnique({
@@ -65,6 +66,14 @@ export class chatGateway {
     });
     if (!chan) return null;
     const messagesList = chan.messages;
+	if (prevId) {
+		const chan2 = await this.prisma.channel.findUnique({
+			where: { chanId: prevId },
+		});
+		if (!chan2) return null;
+		client.leave(chan2.name);
+	}
+	client.join(chan.name);
     client.emit("channel", chan, messagesList);
   }
 
@@ -307,9 +316,6 @@ export class chatGateway {
       client.handshake.auth.id
     );
     client.emit("my-channel-list", chanlist);
-    // chanlist.forEach((channel) => {
-    //   client.join(channel.name);
-    // });
   }
 
   @SubscribeMessage("find-channels-public")
