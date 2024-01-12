@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { RiTriangleFill } from "react-icons/ri";
 import { useRef, useEffect } from "react";
+import Winner from "../../components/popin/Winner";
 
 const Game = () => {
 	const location = useLocation();
@@ -29,35 +30,35 @@ const Game = () => {
 		
 		// Vérifier si l'index est déjà sélectionné
 		const indexExists = updatedIndexes.indexOf(index);
-	  
+		
 		if (indexExists === -1) {
-		  updatedIndexes.push(index);
+			updatedIndexes.push(index);
 		} else {
-		  updatedIndexes = updatedIndexes.filter((i) => i !== index);
+			updatedIndexes = updatedIndexes.filter((i) => i !== index);
 		}
-	  
+		
 		setSelectedIndexes(updatedIndexes);
-	  };
-	  
+	};
+
 
 
 	const [showSecondDiv, setShowSecondDiv] = useState(
 		localStorage.getItem('showSecondDiv') === 'true'
-	  );
+	);
 
-	  useEffect(() => {
-		if (selectedIndexes.length === 1) {
-		  const timer = setTimeout(() => {
-			setShowSecondDiv(true);
-			localStorage.setItem('showSecondDiv', 'true');
-		  }, 10000);
-	  
-		  return () => clearTimeout(timer);
-		} else {
-		  setShowSecondDiv(false);
-		  localStorage.removeItem('showSecondDiv');
-		}
-	  }, [selectedIndexes]);
+	useEffect(() => {
+	if (selectedIndexes.length === 1) {
+		const timer = setTimeout(() => {
+		setShowSecondDiv(true);
+		localStorage.setItem('showSecondDiv', 'true');
+		}, 10000);
+	
+		return () => clearTimeout(timer);
+	} else {
+		setShowSecondDiv(false);
+		localStorage.removeItem('showSecondDiv');
+	}
+	}, [selectedIndexes]);
 
 	const handleCrossClick = () => {
 	setShowSecondDiv(false);
@@ -109,7 +110,7 @@ const Game = () => {
 					ref={cardsRef}
 					className={`flex h-96 w-full rounded-md bg-violet-black border-container grid grid-rows-[2fr,auto] p-2 ${showBackIndex === 0 ? '' : 'hidden'}`}
 						>
-	  				{selectedIndexes.length === 0 ? (
+					{selectedIndexes.length === 0 ? (
 						<div className="relative">
 						{/*LIST*/}
 						<div className="w-full h-2/3 bg-filter my-4">
@@ -327,6 +328,7 @@ const Game = () => {
 					<div className="flex w-full p-8 rounded-lg grid grid-rows-[auto,1fr,auto] bg-filter bg-opacity-75">
 					</div>
 					
+					<Winner/>
 				</div>
 			</div>
 

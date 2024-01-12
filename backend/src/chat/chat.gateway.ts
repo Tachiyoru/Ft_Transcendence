@@ -58,7 +58,11 @@ export class chatGateway {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: id },
       include: {
-        messages: true,
+        messages: {
+          include: {
+            author: true,
+          },
+        },
         members: true,
         owner: true,
       },
@@ -168,7 +172,7 @@ export class chatGateway {
   async createchan(
     @ConnectedSocket() client: Socket,
     @MessageBody("settings") settings: createChannel,
-    @MessageBody() data: { chanName: string; users: User[]; mode: Mode, password?: string },
+    @MessageBody() data: { chanName: string; users: User[]; mode: Mode, password?: string, name?: string },
     @Request() req: any
   ) {
     try {

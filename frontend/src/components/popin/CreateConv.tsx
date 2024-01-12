@@ -13,7 +13,7 @@ import { WebSocketContext } from "../../socket/socket";
 const CreateConv: React.FC = () => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
+  const [listUsers, setListUsers] = useState<{ username: string, avatar: string }[]>([]);
   const [checkedItems, setCheckedItems] = useState<{
     [key: string]: { username: string };
   }>({});
@@ -21,8 +21,10 @@ const CreateConv: React.FC = () => {
     "public" | "private" | "protected"
   >("public");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [searchText, setSearchText] = useState("");
   const socket = useContext(WebSocketContext);
+	const [errorMessage, setErrorMessage] = useState('');
 
   const handleCheckboxChange = (user: { username: string }) => {
     setCheckedItems((prevCheckedItems) => {
@@ -74,6 +76,7 @@ const CreateConv: React.FC = () => {
       members: selectedItems,
       mode: "",
       password: "",
+      name: ""
     };
 
     if (Object.keys(checkedItems).length === 1) {
@@ -81,29 +84,42 @@ const CreateConv: React.FC = () => {
     } else {
       if (channelType === "public") {
         channelData.mode = "GROUPCHAT";
+        channelData.name = name;
       } else if (channelType === "private") {
         channelData.mode = "PRIVATE";
+        channelData.name = name;
       } else if (channelType === "protected") {
         channelData.mode = "PROTECTED";
         channelData.password = password;
+        channelData.name = name;
       }
     }
-      console.log(password)
-      console.log("Connected to server");
-      socket.emit("createChannel", { settings: channelData });
 
-      socket.on("channelCreateError", (errorData) => {
-        console.error("Channel creation error:", errorData);
-      });
+    if(Object.keys(checkedItems).length > 1 && !name){
+        setErrorMessage("Need a name");
+        return;
+    }
 
-    // socket.on("disconnect", () => {
-    //   console.log("Disconnected from server");
-    //   socket.disconnect();
-    // });
+    console.log("Connected to server");
+    socket.emit("createChannel", { settings: channelData })
+    
+    let isError = false;
 
-    setCheckedItems({});
-    console.log("vide", checkedItems);
-    togglePopin();
+    socket.on("channelCreateError", (errorData) => {
+      console.error("Channel creation error:", errorData);
+      setErrorMessage("Name already taken");
+
+      isError = true;
+    });
+  
+    setTimeout(() => {
+      if (!isError) {
+        setCheckedItems({});
+        togglePopin();
+        setErrorMessage("");
+      }
+    }, 2);
+
   };
 
   return (
@@ -159,7 +175,18 @@ const CreateConv: React.FC = () => {
                 >
                   <div className="flex items-center">
                     <div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
-                      <FaUser className="w-[8px] h-[8px] text-lilac" />
+                    {user.avatar ?
+                      (					
+                        <div>
+                          <img
+                            src={user.avatar}
+                            className="h-[20px] w-[20px] object-cover rounded-full text-lilac"
+                          />
+                        </div>	
+                      ) : (
+                        <FaUser className="text-lilac w-[8px] h-[8px]"/>
+                      )
+                      }
                     </div>
                     <p className="text-sm font-regular ml-2">{user.username}</p>
                   </div>
@@ -178,28 +205,42 @@ const CreateConv: React.FC = () => {
               {Object.keys(checkedItems).length > 1 && (
                 <div className="flex flex-col mt-4">
                   <div>
+                    {/*GIVE NAME*/}
+                    <label className="text-sm mr-2">Channel Name:</label>
+                    <input
+                        type="text"
+                        placeholder="Enter name"
+                        onChange={(e) => setName(e.target.value)}
+                        className="rounded w-full px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet focus:outline-none"
+                    />
+                    {errorMessage && <div className="text-xs text-red-orange">{errorMessage}</div>}
+
+                    {/*GIVE PROPERTY*/}
                     <label className="text-sm mr-2">Channel Type:</label>
                     <select
                       value={channelType}
                       onChange={handleChangeChannelType}
-                      className="rounded-md px-1 text-sm bg-lilac text-accent-violet"
+                      className="rounded px-1 text-sm bg-lilac text-accent-violet focus:outline-none"
                       style={{ cursor: "pointer" }}
                     >
                       <option value="public">Public</option>
                       <option value="private">Private</option>
                       <option value="protected">Protected</option>
                     </select>
+                    
+                    {/*GIVE PASSWORD*/}
+                    {channelType === "protected" && (
+                      <div className="mr-3 mt-1">
+                        <input
+                          type="password"
+                          placeholder="Enter password"
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="rounded w-full px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet focus:outline-none"
+                        />
+                      </div>
+                    )}
+
                   </div>
-                  {channelType === "protected" && (
-                    <div className="mr-3 mt-1">
-                      <input
-                        type="password"
-                        placeholder="Enter password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="rounded-md w-full px-2 py-1 text-sm bg-lilac placeholder:text-accent-violet text-accent-violet"
-                      />
-                    </div>
-                  )}
                 </div>
               )}
 

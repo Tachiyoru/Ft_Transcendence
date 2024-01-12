@@ -305,13 +305,14 @@ const socket = useContext(WebSocketContext);
                   setSearchValue(e.target.value);
                   setShowUserList(true);
                 }}
+                className="bg-dark-violet text-lilac px-2 rounded py-0.5 focus:outline-none"
               />
               {showUserList && (
                 <ul className="absolute h-24 w-full bg-lilac z-10">
                   {filteredUsers.map((user, index) => (
                     <li
                       key={index}
-                      className="px-2 py-1 hover:bg-purple cursor-pointer"
+                      className="px-2 py-1  hover:bg-purple cursor-pointer"
                       onClick={() => handleUserClick()}
                     >
                       <Link to={`/user/${user.username}`}>{user.username}</Link>

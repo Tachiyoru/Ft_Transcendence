@@ -2,9 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { IoSettingsSharp } from 'react-icons/io5';
 import ChannelSettings from './ChannelSettings';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
-import { io } from 'socket.io-client';
 import { useDispatch } from 'react-redux';
-import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { WebSocketContext } from '../../socket/socket';
 
 interface Member {
@@ -33,7 +31,6 @@ interface ChannelProps {
 const ChannelOptions: React.FC<ChannelProps> = ({ channel }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
-	const dispatch = useDispatch();
 	const socket = useContext(WebSocketContext);
 
 	const togglePopin = () => {

@@ -25,14 +25,28 @@ interface Message {
 	authorId: string;
 }
 
+interface Owner {
+	username: string;
+	avatar: string;
+	id: number;
+}
+
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
+	owner: Owner;
 	members: Member[];
+	op: string[];
 	messages: Message[];
 }
 
+interface User {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
 
 const AllConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
@@ -40,6 +54,7 @@ const AllConv = () => {
 	const socket = useContext(WebSocketContext);
 	const id = useSelector((state: RootState) => state.selectedChannelId);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const [allNoFriends, setNoFriends] = useState<User[]>([]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -49,6 +64,15 @@ const AllConv = () => {
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
+
+		axios.get<User[]>('friends-list/non-friends')
+		.then((response) => {
+			setNoFriends(response.data);
+		})
+		.catch((error) => {
+			console.error('Erreur lors de la récupération des non-amis:', error);
+		});
+
 		};
 		fetchData();
 	}, []);
@@ -88,7 +112,7 @@ const AllConv = () => {
 				
 				<p className="text-sm pt-1 text-lilac text-opacity-60">
 					{(chanName.length + lastMessage.content.length) > 16
-					? chanName + ': ' + lastMessage.content.slice(0, 10) + "..."
+					? (chanName + ': ' + lastMessage.content).slice(0, 16) + "..."
 					: chanName + ': ' + lastMessage.content}
 				</p>
 				<TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
@@ -104,7 +128,9 @@ const AllConv = () => {
 	return (
 	<div className="pl-1 md:pl-5">
 		
-	{allChannel.map((channel, index) => (
+	{allChannel
+	.filter(channel => !allNoFriends.map(user => user.id).includes(channel.owner.id))
+	.map((channel, index) => (
 		<div
 		key={index}
 		className={` ${

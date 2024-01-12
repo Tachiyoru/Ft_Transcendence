@@ -17,7 +17,7 @@ const Chat = () => {
 
   return (
     <MainLayout currentPage={currentPage}>
-      <div className="flex flex-row h-[80vh] relative" style={{ cursor: "default" }}>
+      <div className="flex flex-row h-[80vh] relative overflow-hidden" style={{ cursor: "default" }}>
         {/*LEFT SIDE BAR*/}
         <SidebarLeft
           handleInputChange={handleInputChange}
@@ -27,8 +27,6 @@ const Chat = () => {
         {/*MIDDLE*/}
         <ContentConv />
 
-        {/*RIGHT SIDE BAR*/}
-        <SidebarRight />
       </div>
     </MainLayout>
   );

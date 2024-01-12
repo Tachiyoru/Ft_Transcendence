@@ -21,23 +21,24 @@ export class chatService {
   ) {}
 
   async createChannel(settings: createChannel, @Request() req: any) {
-    const channelName =
-      settings.members.map((user) => user.username).join(", ") +
+
+    if (settings.mode === 'CHAT') {
+      settings.name = settings.members.map((user) => user.username).join(", ") +
       ", " +
       req.user.username;
-    const existingChannel = await this.prisma.channel.findUnique({
-      where: { name: channelName },
-    });
-    if (!channelName) {
-      throw new Error("Invalid channel name");
     }
+    console.log(settings.name)
+    const existingChannel = await this.prisma.channel.findUnique({
+      where: { name: settings.name },
+    });
+
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
     
     const channel: Channel = await this.prisma.channel.create({
       data: {
-        name: channelName,
+        name: settings.name,
         modes: settings.mode,
         password: settings.password,
         owner: { connect: { id: req.user.id } },
@@ -677,6 +678,7 @@ export class chatService {
           channel: { connect: { name: chan.name } },
           author: { connect: { id: target.id } },
         },
+        include: {author: true}
       });
       await this.prisma.channel.update({
         where: { name: chanName },
@@ -696,6 +698,7 @@ export class chatService {
     }
     const messages = await this.prisma.message.findMany({
       where: { channelName: chanName },
+      include: { author: true },
     });
     return messages;
   }

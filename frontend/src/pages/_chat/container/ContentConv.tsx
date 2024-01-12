@@ -36,7 +36,16 @@ interface Message {
 	content: string;
 	authorId: string,
 	createdAt: Date,
+	author: Users
 }
+
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 
 const ContentConv = () => {
 	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
@@ -44,13 +53,28 @@ const ContentConv = () => {
 	const [messageList, setMessageList] = useState<Message[]>([]);
 	const [message, setMessage] = useState<string>('');
 	const socket = useContext(WebSocketContext);
-	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const [userData, setUserData] = useState<{username: string; id: number}>({ username: '' });
 	const messageContainerRef = useRef(null);
 	const [isTyping, setIsTyping] = useState<string>('')
 	const [isTypingBool, setIsTypingBool] = useState<boolean>(false);
 	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
 	const [passwordInput, setPasswordInput] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+	const [isMuted, setIsMuted] = useState<boolean>(false);
+	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string;}[]>([]);
+	
+	useEffect(() => {
+		const fetchBlockedUsers = async () => {
+		try {
+			const response = await axios.get("/friends-list/blocked-users");
+			setBlockedUsers(response.data);
+		} catch (error) {
+			console.error("Error fetching blocked users:", error);
+		}
+		};
+
+		fetchBlockedUsers();
+	}, []);
 
 	const scrollToBottom = () => {
 		if (messageContainerRef.current) {
@@ -120,6 +144,12 @@ const ContentConv = () => {
 				setCheckUserInChannel(boolean);
 			});
 
+			socket.emit("findAllMutedMembers", { chanId: id.selectedChannelId });
+			socket.on("allMuted", (users) => {
+			if (users.map((user: Users) => user.id).includes(userData.id))
+				setIsMuted(true)
+			});
+
 		return () => {
 			socket.off('channel');
 			socket.off('recapMessages');
@@ -166,70 +196,85 @@ const ContentConv = () => {
 				</div>
 			</div>
 		) : (
-		<div className="flex-1 flex flex-col justify-between text-xs">
-		<div>
-			<div className="flex flex-row justify-between items-center relative mt-4">
-				{channel.modes === "CHAT" ? (
-					<h3 className="text-base text-lilac">{channel.members.filter(member => member.username !== userData.username)[0].username}</h3>) 
-				: (
-					<h3 className="text-base text-lilac">{channel.name}</h3>
-				)}
-				<div className="flex-end flex">
-					{channel.modes !== 'CHAT' && (
-						<div className="flex flex-row">
-							<AddUserConv channel={channel}/>
-							<ChannelOptions channel={channel}/>
-						</div>
+		<div className="flex-1 flex flex-col h-full text-xs">
+			<div>
+				<div className="flex flex-row justify-between items-center relative mt-4">
+					{channel.modes === "CHAT" ? (
+						<h3 className="text-base text-lilac">{channel.members.filter(member => member.username !== userData.username)[0].username}</h3>) 
+					: (
+						<h3 className="text-base text-lilac">{channel.name}</h3>
 					)}
-					<button className="lg:hidden" onClick={toggleRightSidebar}>
-						<FaUserGroup className="w-4 h-4 text-lilac"/>
-					</button>
+					<div className="flex-end flex">
+						{channel.modes !== 'CHAT' && (
+							<div className="flex flex-row">
+								<AddUserConv channel={channel}/>
+								<ChannelOptions channel={channel}/>
+							</div>
+						)}
+						<button onClick={toggleRightSidebar}>
+							<FaUserGroup className="w-4 h-4 text-lilac"/>
+						</button>
+					</div>
 				</div>
+				<div className="border border-t-lilac border-opacity-40 mt-6"></div>
 			</div>
 
-			<div className="border border-t-lilac border-opacity-40 mt-6"></div>
-
 			{/*CONTENT*/}
-			<div className="h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter " ref={messageContainerRef}>
+			<div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter " ref={messageContainerRef}>
 				{messageList.map((message, index) => (
 				<div key={index} className="flex flex-row h-12 mt-6 mr-2">
-					<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
-						<FaUser className="text-lilac w-3 h-3"/>
+					<div className="w-full h-full md:w-[44px] md:h-[44px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
+						{message.author.avatar ?
+						(					
+							<div>
+								<img
+									src={message.author.avatar}
+									className="h-[45px] w-[45px] object-cover rounded-full text-lilac"
+								/>
+							</div>	
+						) : (
+							<FaUser className="text-lilac w-3 h-3"/>
+						)
+						} 
+						
 					</div>
 					<div className="pt-3 flex-1">
 						<p className="text-base text-lilac">{message.authorId}</p>
 						<div className="flex flex-row justify-between">
-							<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>
+							{blockedUsers.map(user => user.username).includes(message.authorId) ? 
+								(<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">Message blocking is</p>)
+							:
+								(<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>)
+							}
 							<TimeConverter initialDate={message.createdAt.toLocaleString()}/>
 						</div>
 					</div>
 				</div>
 				))}
 			</div>
-			</div>
 
 			{/*SEND*/}
-			<div>
-
-					<div className="text-lilac italic">{isTyping} is typing...</div>
-				<div className="flex items-center relative">
-					<form onSubmit={handleInputSubmit} className="bg-dark-violet w-full rounded-md">
-					<input
-						type="text"
-						placeholder="Write message"
-						className="py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac w-full rounded-md"
-						value={message}
-						onChange={handleTyping}
-					/>
-					<button type="submit" className="absolute right-2 top-2">
-						<FaPaperPlane className="w-3.5 h-3.5 text-purple"/>
-					</button>
-					</form>
+			<div className="mt-6">
+				<div className="text-lilac italic">{isTyping} is typing...</div>
+					<div className="flex items-center relative">
+						<form onSubmit={handleInputSubmit} className="bg-dark-violet w-full rounded-md">
+						<input
+							type="text"
+							placeholder={isMuted ? "You are not allowed to send a message in this channel" : "Write message"}
+							className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac w-full rounded-md ${isMuted ? 'cursor-not-allowed' : ''}`}
+							value={message}
+							onChange={handleTyping}
+							disabled={isMuted}
+							/>
+						<button type="submit" className="absolute right-2 top-2">
+						{!isMuted && (<FaPaperPlane className="w-3.5 h-3.5 text-purple"/>)}
+						</button>
+						</form>
+					</div>
 				</div>
-			</div>
 
 			<SidebarRightMobile isRightSidebarOpen={isRightSidebarOpen} toggleRightSidebar={toggleRightSidebar} channel={channel}/>
-		</div>
+			</div>
 		)}
 		</div>
 	)
