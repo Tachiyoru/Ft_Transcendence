@@ -223,7 +223,7 @@ const ContentConv = () => {
 			<div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter " ref={messageContainerRef}>
 				{messageList.map((message, index) => (
 				<div key={index} className="flex flex-row h-12 mt-6 mr-2">
-					<div className="w-full h-full md:w-[44px] md:h-[44px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
+					<div className="w-[44px] h-[44px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
 						{message.author.avatar ?
 						(					
 							<div>

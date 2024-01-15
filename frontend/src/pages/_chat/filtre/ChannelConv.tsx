@@ -5,11 +5,20 @@ import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
 import { WebSocketContext } from '../../../socket/socket';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
+import axios from '../../../axios/api';
 
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
+	owner: User;
+}
+
+interface User {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
 }
 
 const ChannelConv = () => {
@@ -18,6 +27,29 @@ const ChannelConv = () => {
 	const dispatch = useDispatch();
 	const socket = useContext(WebSocketContext);
 	const id = useSelector((state: RootState) => state.selectedChannelId);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const [allNoFriends, setNoFriends] = useState<User[]>([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+
+		axios.get<User[]>('friends-list/non-friends')
+		.then((response) => {
+			setNoFriends(response.data);
+		})
+		.catch((error) => {
+			console.error('Erreur lors de la récupération des non-amis:', error);
+		});
+
+		};
+		fetchData();
+	}, []);
 
 	useEffect(() => {
 
@@ -45,6 +77,7 @@ const ChannelConv = () => {
 		<div className="pl-1 md:pl-5">
 		{allChannel
 		.filter(channel => channel.modes !== "CHAT")
+		.filter(channel => !allNoFriends.map(user => user.id).includes(channel.owner.id))
 		.map((channel, index) => (
 		<div
 			key={index}

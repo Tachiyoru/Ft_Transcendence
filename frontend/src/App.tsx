@@ -17,6 +17,7 @@ import { RootState } from './store/store';
 import DashboardFriends from './pages/_users/DashboardFriends';
 import { WebSocketContext, socket } from './socket/socket';
 import { Websocket } from './components/Websocket';
+import AboutToPlay from './pages/_game/container/AboutToPlay';
 
 //import socketIO from 'socket.io-client';
 
@@ -25,7 +26,7 @@ import { Websocket } from './components/Websocket';
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)
-
+console.log('ok', user)
 return (
 	<WebSocketContext.Provider value={socket}>
 		<Websocket />
@@ -37,6 +38,7 @@ return (
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />}/>
 			<Route path="/user/:userId" element={<DashboardFriends/>}/>
+			<Route path="/gamestart" element={<AboutToPlay />} />
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>

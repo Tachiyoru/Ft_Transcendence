@@ -5,7 +5,9 @@ import { useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { RiTriangleFill } from "react-icons/ri";
 import { useRef, useEffect } from "react";
-import Winner from "../../components/popin/Winner";
+import Winner from "../../components/popin/Victory";
+import Defeat from "../../components/popin/Defeat";
+import Draw from "../../components/popin/Draw";
 
 const Game = () => {
 	const location = useLocation();
@@ -19,16 +21,15 @@ const Game = () => {
 
     const toggleCard = (index: number) => {
         if (showBackIndex === index) {
-            setShowBackIndex(null); // Retourner la carte si elle est déjà retournée
+            setShowBackIndex(null);
         } else {
-            setShowBackIndex(index); // Retourner la carte cliquée
+            setShowBackIndex(index);
         }
     };
 
 	const setClickedIndex = (index: number) => {
 		let updatedIndexes = [...selectedIndexes];
 		
-		// Vérifier si l'index est déjà sélectionné
 		const indexExists = updatedIndexes.indexOf(index);
 		
 		if (indexExists === -1) {
@@ -38,26 +39,27 @@ const Game = () => {
 		}
 		
 		setSelectedIndexes(updatedIndexes);
+		console.log(selectedIndexes)
 	};
-
+		
 
 
 	const [showSecondDiv, setShowSecondDiv] = useState(
 		localStorage.getItem('showSecondDiv') === 'true'
-	);
+		);
 
-	useEffect(() => {
-	if (selectedIndexes.length === 1) {
-		const timer = setTimeout(() => {
-		setShowSecondDiv(true);
-		localStorage.setItem('showSecondDiv', 'true');
-		}, 10000);
-	
-		return () => clearTimeout(timer);
-	} else {
-		setShowSecondDiv(false);
-		localStorage.removeItem('showSecondDiv');
-	}
+		useEffect(() => {
+		if (selectedIndexes.length === 1) {
+			const timer = setTimeout(() => {
+			setShowSecondDiv(true);
+			localStorage.setItem('showSecondDiv', 'true');
+			}, 10000);
+		
+			return () => clearTimeout(timer);
+		} else {
+			setShowSecondDiv(false);
+			localStorage.removeItem('showSecondDiv');
+		}
 	}, [selectedIndexes]);
 
 	const handleCrossClick = () => {
@@ -126,14 +128,14 @@ const Game = () => {
 											onClick={() => setClickedIndex(index)}
 										>
 											<div className="mr-2">
-											{index === selectedIndexes.length || index === hoveredIndex ? (
+											{index === hoveredIndex ? (
 												<RiTriangleFill className="w-[8px] h-[8px] text-lilac transform rotate-90" />
 												) : ( <div className="w-[8px] h-[8px]"></div> )}
 											</div>
 											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
 												<FaUser className="w-[8px] h-[8px] text-lilac" />
 											</div>
-										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex || index === selectedIndexes.length ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
+										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
 										</div>
 									
 								</div>
@@ -202,7 +204,7 @@ const Game = () => {
 					)}
 					</div>
 
-					{/*GAME 1*/}
+					{/*GAME 2*/}
 					<div className={`flex w-full h-96 p-4 rounded-lg grid grid-rows-[2fr,auto] bg-filter bg-opacity-75 ${showBackIndex === 1 ? 'hidden' : ''}`}>
 						<div className="relative">
 						<img src="src/game.png" alt='img' className="w-full h-60"/>
@@ -244,19 +246,19 @@ const Game = () => {
 											onClick={() => setClickedIndex(index)}
 										>
 											<div className="mr-2">
-											{index === selectedIndexes.length || index === hoveredIndex ? (
+											{selectedIndexes.includes(index) || index === hoveredIndex ? (
 												<RiTriangleFill className="w-[8px] h-[8px] text-lilac transform rotate-90" />
 												) : ( <div className="w-[8px] h-[8px]"></div> )}
 											</div>
 											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
 												<FaUser className="w-[8px] h-[8px] text-lilac" />
 											</div>
-										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex || index === selectedIndexes.length ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
+										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex || selectedIndexes.includes(index)? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
 										</div>
 									
 								</div>
 							))}
-							<p className="absolute bottom-24 text-lilac pl-2 font-audiowide">0/1</p>
+							<p className="absolute bottom-24 text-lilac pl-2 font-audiowide">{selectedIndexes.length}/3</p>
 							</div>
 							</div>
 								<div className="flex flex-col justify-end mb-6">
@@ -283,16 +285,34 @@ const Game = () => {
 							<div className="flex justify-center h-5/6">
 								<h3 className="absolute font-audiowide text-xl">Waiting for...</h3>
 								<div className="w-full h-5/6 bg-filter my-4 p-4 flex flex-col justify-center items-center">
-									<div className="element-to-animate rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
-										<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+									<div>
+										<div className="flex flex-row gap-x-8">
+											<div className="flex flex-col items-center justify-content">
+												<div className="element-to-animate rounded-full mt-2" style={{ width: '70px', height: '70px' }}>
+													<FaUser className="absolute top-5 left-5 text-lilac z-50 " style={{ fontSize: '30px' }} />
+												</div>
+												<p>Name</p>
+											</div>
+											<div className="flex flex-col items-center">
+												<div className="element-to-animate rounded-full mt-2" style={{ width: '70px', height: '70px' }}>
+													<FaUser className="absolute top-5 left-5 text-lilac z-50 " style={{ fontSize: '30px' }} />
+												</div>
+												<p>Name</p>
+											</div>
+										</div>
+										<div className="flex flex-col items-center">
+												<div className="element-to-animate rounded-full mt-2" style={{ width: '70px', height: '70px' }}>
+													<FaUser className="absolute top-5 left-5 text-lilac z-50 " style={{ fontSize: '30px' }} />
+												</div>
+												<p>Name</p>
+										</div>
 									</div>
-									<p>Name</p>
-									<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
+									<div className="mt-auto mb-1 w-full h-2 bg-violet-black relative">
 										<div className="h-full bg-fushia" style={{ width: '50%' }} />
 									</div>
 								</div>
 							</div>
-							<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+							<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/3</p>
 							</>
 							) : (
 								<>
@@ -304,10 +324,14 @@ const Game = () => {
 								<div className="flex justify-center h-5/6">
 									<h3 className="absolute font-audiowide text-xl z-50">Unavailable</h3>
 									<div className="w-full h-5/6 bg-filter opacity-50 my-4 p-4 flex flex-col justify-center items-center">
-										<div className="bg-purple rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
-											<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+										<div>
+											<div className="flex flex-row">
+												<div className="bg-purple rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
+													<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+												</div>
+												<p>Name</p>
+											</div>
 										</div>
-										<p>Name</p>
 										<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
 											<div className="h-full" style={{ width: '50%' }} />
 										</div>
@@ -326,11 +350,16 @@ const Game = () => {
 
 					{/*GAME 3*/}
 					<div className="flex w-full p-8 rounded-lg grid grid-rows-[auto,1fr,auto] bg-filter bg-opacity-75">
+						<div>
+							<Winner/>
+							<Defeat/>
+							<Draw/>
+						</div>
 					</div>
 					
-					<Winner/>
 				</div>
 			</div>
+
 
 		</div>
 	</MainLayout>

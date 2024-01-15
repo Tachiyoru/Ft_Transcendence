@@ -152,4 +152,5 @@ model Game {
     nbrPlayers Int    @default(0)
     userId     Int
     // Player		User[]		@relation(fields: [userId], references: [id])
+    //position
 }
