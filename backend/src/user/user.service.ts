@@ -16,6 +16,7 @@ export class UserService {
       username: "Tachi",
       email: "shanley@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
+      //mdp: Shashou/973
       tittle: "The G.O.A.T",
       role: "ADMIN",
       stats: {
@@ -210,47 +211,45 @@ export class UserService {
     return rank;
   }
 
-	async getRankingFriends(userId: number)
-	{
-		const rank = await this.prisma.user.findMany({
-			include: {
-				friends: true,
-				stats: true,
-			},
-			where: {
-				friends: {
-					some: {
-						id: userId,
-					},
-				},
-			},
-			orderBy: {
-				stats: { lvl: "desc" },
-			},
-		});
-		return rank;
-	}
+  async getRankingFriends(userId: number) {
+    const rank = await this.prisma.user.findMany({
+      include: {
+        friends: true,
+        stats: true,
+      },
+      where: {
+        friends: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      orderBy: {
+        stats: { lvl: "desc" },
+      },
+    });
+    return rank;
+  }
 
-	async getRankingFriendsHim(name: string)
-	{
-		const rank = await this.prisma.user.findMany({
-			include: {
-				friends: true,
-				stats: true,
-			},
-			where: {
-				friends: {
-					some: {
-						username: name,
-					},
-				},
-			},
-			orderBy: {
-				stats: { lvl: "desc" },
-			},
-		});
-		return rank;
-	}
+  async getRankingFriendsHim(name: string) {
+    const rank = await this.prisma.user.findMany({
+      include: {
+        friends: true,
+        stats: true,
+      },
+      where: {
+        friends: {
+          some: {
+            username: name,
+          },
+        },
+      },
+      orderBy: {
+        stats: { lvl: "desc" },
+      },
+    });
+    return rank;
+  }
 
   async getHim(name: string) {
     return this.prisma.user.findUnique({
