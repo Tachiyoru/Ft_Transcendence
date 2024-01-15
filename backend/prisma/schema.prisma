@@ -42,7 +42,7 @@ model User {
     twoFASecret String? @unique
 
     role   Role       @default(USER)
-    status StatusUser @default(INGAME)
+    status StatusUser @default(ONLINE)
 
     stats Stats? @relation("stats")
 
@@ -152,4 +152,5 @@ model Game {
     nbrPlayers Int    @default(0)
     userId     Int
     // Player		User[]		@relation(fields: [userId], references: [id])
+    //position
 }

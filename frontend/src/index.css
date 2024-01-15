@@ -6,13 +6,21 @@ body {
   background-image: url("background-t.svg");
   background-size: cover;
   background-position: center;
-  height: 100vh;
+  height: 99vh;
+  margin: 0;
+  position:0;
+  padding:0;
 }
 
 .font-outline-2 {
   text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #ef1fea,
     0 0 80px #ef1fea, 0 0 90px #ef1fea, 0 0 100px #ef1fea, 0 0 150px #ef1fea;
 }
+
+.font-outline-1 {
+	text-shadow: 0 0 2px #fff, 0 0 10px #BF93F7, 0 0 0px #fff, 0 0 20px #fff,
+	  0 0 0px #fff, 0 0 0px #fff, 0 0 0px #fff, 0 0 0px #fff;
+  }
 
 .border-container {
   border: 0px solid #fff;

@@ -58,9 +58,7 @@ const SigninForm = () => {
 		try{
 			const response = window.location.href = "http://localhost:5001/auth/42/callback";
 			if (response)
-			{
 			dispatch(loginSuccess(response))
-			}
 		} catch {
 			setResStatus('Error');
 		}
@@ -70,9 +68,7 @@ const SigninForm = () => {
 		try{
 			const response = window.location.href = "http://localhost:5001/auth/github/callback";
 			if (response)
-			{
-			dispatch(loginSuccess(response))
-			}
+				dispatch(loginSuccess(response))
 		} catch {
 			setResStatus('Error');
 		}

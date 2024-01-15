@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { FaRegPenToSquare, FaUser } from 'react-icons/fa6';
+import { FaRegPenToSquare, FaUser, FaVolumeXmark } from 'react-icons/fa6';
 import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
@@ -36,13 +36,34 @@ interface ChannelProps {
 	id: number;
 }
 
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
+	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const socket = useContext(WebSocketContext);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, []);
 
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
@@ -87,6 +108,12 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		.catch((error) => {
 			console.error('Error fetching data:', error);
 		});
+
+		socket.emit("findAllMutedMembers", { chanId: channel.chanId });
+		socket.on("allMuted", (users) => {
+		if (users.map((user: Users) => user.id).includes(id))
+			setIsMuted(true)
+		});
 	}, [id]);
 
 	const handleClickSendMessage = () => {
@@ -114,13 +141,37 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		setPopinOpen(!popinOpen);
 	}
 
-	const handleClickMute = () => {
-		socket.emit('muteMember', { chanId: channel.chanId, userId: id }); 
-		socket.on('memberMuted', (data) => {
-			console.log('Mute', data);
-		});
+	{/*MUTE FUNCTIONS*/}
+	const handleClickMute = async () => {
+		try {
+			if (isMuted) {
+				await unMuteUser();
+				setIsMuted(false);
+
+			} else {
+				await muteUser();
+				setIsMuted(true);
+			}
+		} catch (error) {
+			console.error('Erreur lors du blocage:', error);
+		}
 		setPopinOpen(!popinOpen);
 	}
+
+	const unMuteUser = async () => {
+		socket.emit("unMuteMember", { chanId: channel.chanId, userId: id });
+		socket.on("memberUnMuted", (users) => {
+			console.log("unMute", users);
+		})
+	};
+
+	const muteUser = async () => {
+		socket.emit("muteMember", { chanId: channel.chanId, userId: id });
+		socket.on("memberMuted", (users) => {
+			console.log("Mute", users);
+		});
+
+	};
 
 	const handleBlockUser = async (userId: number) => {
 		try {
@@ -188,7 +239,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 						<p className="ml-2">Invite to play</p>
 					</div>
 
-					{username !== channel.owner.username && (
+					{(username !== channel.owner.username || opMembers.find(opMember => opMember.username === userData.username))  && (
 					<>
 					<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 					
@@ -198,8 +249,8 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 							onClick={handleClickMute}
 							className="flex flex-row items-center hover:opacity-40"
 						>
-							<FaUser size={10} />
-							<p className="ml-2">Mute</p>
+							<FaVolumeXmark size={10} />
+							<p className={`ml-2 ${isMuted ? 'text-red-500' : ''}`}>{isMuted ? 'Unmute' : 'Mute'}</p>
 						</div>
 						<div
 							style={{ cursor: "pointer" }} 
@@ -236,7 +287,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 								{opMembers.find(opMember => opMember.username === username) ? (
 									<p className="ml-2 text-red-orange">Remove</p>
 								) : (
-									<p className="ml-2">Add from admin</p>
+									<p className="ml-2">Register as operator</p>
 								)}
 						</div>
 						</div>

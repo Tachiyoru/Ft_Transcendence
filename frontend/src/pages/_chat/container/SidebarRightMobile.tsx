@@ -1,4 +1,4 @@
-import { FaBan, FaUser, FaUserGroup, FaXmark } from "react-icons/fa6";
+import { FaBan, FaUser, FaUserGroup, FaVolumeXmark, FaXmark } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
@@ -110,10 +110,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		setShowBanUser(!showBanUser);
 	};
 
-	const toggleMuteUser = () => {
-		setShowMuteUser(!showMuteUser);
-	};
-
 	useEffect(() => {
 		socket.emit("users-in-channel-except-him", { chanName: channel.name });
 		socket.on("users-in-channel-except-him", (users) => {
@@ -146,7 +142,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		socket.off("allMembersBan");
 		socket.off("user-in-channel");
 		};
-	}, [channel.name, channel.chanId, socket]);
+	}, [socket]);
 
 	useEffect(() => {
 		if (Array.isArray(usersInChannelExceptHim) && usersInChannelExceptHim.length > 0 && usersInChannelExceptHim[0]?.id) {
@@ -176,11 +172,11 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		try {
 			if (isBlocked) {
 				await unblockUser(userId);
-						setIsBlocked(false);
+				setIsBlocked(false);
 
 			} else {
 				await blockUser(userId);
-						setIsBlocked(true);
+				setIsBlocked(true);
 			}
 		} catch (error) {
 			console.error('Erreur lors du blocage ou deblocage de l\'utilisateur :', error);
@@ -220,25 +216,14 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		}
 	};
 
-	const unMuteUser = async (id: number) => {
-		try {
-		socket.emit("unMuteMember", { chanId: channel.chanId, userId: id });
-		socket.on("memberUnMuted", (users) => {
-			console.log("unmute", users);
-		});
-		} catch (error) {
-		console.error("Error deblocked users:", error);
-		}
-	};
-
 	return (
 		<div
-		className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-6 text-gray-300 text-xs ${
+		className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs ${
 			isRightSidebarOpen ? "block" : "hidden"
 		}`}
 		>
 		{/*CLOSE*/}
-		<button className="lg:hidden flex-end" onClick={toggleRightSidebar}>
+		<button className="flex-end" onClick={toggleRightSidebar}>
 			<FaXmark className="w-4 h-4 text-lilac" />
 		</button>
 
@@ -411,17 +396,20 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 					<div className="flex items-center">
 						<div
 						className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
-										${channel.owner.username === member.username ? "border border-fushia" : ""}
-										${
-						opMembers.find(
-						(opMember) => opMember.username === member.username
-						)
-						? "border border-green-500"
-						: ""
-					}
-										`}
+							${channel.owner.username === member.username ? "border-2 border-fushia" : ""}
+							${opMembers.find((opMember) => opMember.username === member.username)
+							? "border border-green-500": ""}`}
 						>
-						<FaUser className="w-[8px] h-[8px] text-lilac" />
+						{member.avatar ? (					
+							<div>
+								<img
+									src={member.avatar}
+									className="h-[16px] w-[16px] object-cover rounded-full text-lilac"
+								/>
+							</div>	
+						) : (
+							<FaUser className="text-lilac w-[8px] h-[8px]"/>
+						)}
 						</div>
 						<p className="text-xs text-lilac ml-2">{member.username}</p>
 
@@ -435,77 +423,53 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						</div>
 						) : null}
 					</div>
-
-					{usersInChannelExceptHim.find(
-						(userMember) => userMember.username === member.username
-					) && (
-						<UserConvOptions
-						channel={channel}
-						username={member.username}
-						id={member.id}
-						/>
-					)}
+					<div className="flex flex-row text-lilac">
+						{usersMute.map(user => user.id).includes(member.id) && (<FaVolumeXmark size={10} className="mr-2"/>)}
+						{usersInChannelExceptHim.find(
+							(userMember) => userMember.username === member.username
+						) && (
+							<UserConvOptions
+							channel={channel}
+							username={member.username}
+							id={member.id}
+							/>
+						)}
+						</div>
 					</div>
 				);
 				})}
 
 				{/*BAN USER*/}
-				<div className="flex flex-col justify-end space-y-2 px-2 py-2 mt-4 rounded-lg bg-purple">
-				<div
-					onClick={toggleBanUser}
-					className="flex flex-row justify-between items-center cursor-pointer"
-				>
-					<div className="text-xs text-lilac">
-					{usersBan.length} banned members
-					</div>
-					<IoIosArrowForward className="w-2 h-2 text-lilac" />
-				</div>
-				{showBanUser && (
-					<div>
-					{usersBan &&
-						usersBan.map((ban) => (
-						<div
-							key={ban.id}
-							className="text-red-orange flex items-center"
-						>
-							{ban.username}
-							<button
-							className="ml-1"
-							onClick={() => unBanUser(ban.username)}
-							>
-							<FaXmark className="w-2 h-2 text-red-orange" />
-							</button>
+				<div className="mx-4 flex flex-col justify-end space-y-2 px-2 py-2 mt-4 rounded-lg bg-purple">
+					<div
+						onClick={toggleBanUser}
+						className="flex flex-row justify-between items-center cursor-pointer"
+					>
+						<div className="text-xs text-lilac">
+						{usersBan.length} banned members
 						</div>
-						))}
+						<IoIosArrowForward className={`w-2 h-2 text-lilac ${showBanUser && 'rotate-90'}`} />
 					</div>
-				)}
+					{showBanUser && (
+						<div>
+						{usersBan &&
+							usersBan.map((ban) => (
+							<div
+								key={ban.id}
+								className="text-red-orange flex items-center justify-between"
+							>
+								{ban.username}
+								<button
+								className="ml-1"
+								onClick={() => unBanUser(ban.username)}
+								>
+								<FaXmark className="w-2 h-2 text-red-orange" />
+								</button>
+							</div>
+							))}
+						</div>
+					)}
 
-				{/*MUTE USER*/}
-				<div className="border-t border-lilac"></div>
-				<div
-					onClick={toggleMuteUser}
-					className="flex flex-row justify-between items-center cursor-pointer"
-				>
-					<div className="text-xs text-lilac">
-					{usersMute.length} muted members
-					</div>
-					<IoIosArrowForward className="w-2 h-2 text-lilac" />
-				</div>
-				{showMuteUser && (
-					<div>
-					{usersMute.map((mute) => (
-						<div key={mute.id} className="text-red-orange">
-						{mute.username}
-						<button
-							className="ml-1"
-							onClick={() => unMuteUser(mute.id)}
-							>
-							<FaXmark className="w-2 h-2 text-red-orange" />
-							</button>
-						</div>
-					))}
-					</div>
-				)}
 				</div>
 			</div>
 			</div>

@@ -1,9 +1,8 @@
 import { ChangeEvent, useContext, useEffect, useRef, useState } from 'react';
-import { FaUser } from 'react-icons/fa6';
 import { MdSettings } from 'react-icons/md';
 import MemberAvatar from '../photo/MemberAvatar';
-import { io } from 'socket.io-client';
 import { WebSocketContext } from '../../socket/socket';
+import axios from '../../axios/api';
 
 interface Member {
     username: string;
@@ -36,7 +35,19 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	const [password, setPassword] = useState("");
 	const [channelName, setChannelName] = useState("");
 	const socket = useContext(WebSocketContext);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
 
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, []);
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
 	};
@@ -128,7 +139,8 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 					)}
 					</div>
 				</div>
-
+				{userData.username === channel.owner.username && (
+				<>
 				<div className="flex flex-col mt-4">
 					<div className='flex flex-row items-center'>
 						<label className="text-sm mr-3">Channel Type:</label>
@@ -172,7 +184,9 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						>
 							Save Change
 					</button>
-					</div>
+				</div>
+				</>
+				)}
 				</div>
 
 			</div>

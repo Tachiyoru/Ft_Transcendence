@@ -59,7 +59,11 @@ export class chatGateway {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: id },
       include: {
-        messages: true,
+        messages: {
+          include: {
+            author: true,
+          },
+        },
         members: true,
         owner: true,
       },
@@ -177,7 +181,7 @@ export class chatGateway {
   async createchan(
     @ConnectedSocket() client: Socket,
     @MessageBody("settings") settings: createChannel,
-    @MessageBody() data: { chanName: string; users: User[]; mode: Mode },
+    @MessageBody() data: { chanName: string; users: User[]; mode: Mode, password?: string, name?: string },
     @Request() req: any
   ) {
     try {
@@ -318,12 +322,12 @@ export class chatGateway {
     client.emit("my-channel-list", chanlist);
   }
 
-  @SubscribeMessage("find-channels-public")
-  async getChannelsPublic(@ConnectedSocket() client: Socket): Promise<void> {
+  @SubscribeMessage("find-channels-public-protected")
+  async getChannelsPublicProtected(@ConnectedSocket() client: Socket): Promise<void> {
     const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
       client.handshake.auth.id
     );
-    client.emit("channel-public-list", chanlist);
+    client.emit("channel-public-protected-list", chanlist);
   }
 
   @SubscribeMessage("channel-in-common")
@@ -340,13 +344,17 @@ export class chatGateway {
 
   @SubscribeMessage("joinChan")
   async joinChan(
-    client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { chanId: number },
+    data: { chanId: number; password?: string;},
     @Request() req: any
   ) {
     try {
-      const result = await this.chatService.joinChannel(data.chanId, req);
+      const result = await this.chatService.joinChannel(
+        data.chanId,
+        req,
+        data.password,
+      );
       client.emit("channelJoined", result);
     } catch (error) {
       client.emit("channelJoinedError", { message: error.message });

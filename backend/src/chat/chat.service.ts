@@ -21,27 +21,26 @@ export class chatService {
   ) {}
 
   async createChannel(settings: createChannel, @Request() req: any) {
-    const channelName =
-      settings.members.map((user) => user.username).join(", ") +
+
+    if (settings.mode === 'CHAT') {
+      settings.name = settings.members.map((user) => user.username).join(", ") +
       ", " +
       req.user.username;
-    const existingChannel = await this.prisma.channel.findUnique({
-      where: { name: channelName },
-    });
-    if (!channelName) {
-      throw new Error("Invalid channel name");
     }
+    console.log(settings.name)
+    const existingChannel = await this.prisma.channel.findUnique({
+      where: { name: settings.name },
+    });
+
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-    const hashedPassword: string = settings.password
-      ? await argon.hash(settings.password)
-      : "";
+    
     const channel: Channel = await this.prisma.channel.create({
       data: {
-        name: channelName,
+        name: settings.name,
         modes: settings.mode,
-        password: hashedPassword,
+        password: settings.password,
         owner: { connect: { id: req.user.id } },
         members: {
           connect: [
@@ -153,7 +152,10 @@ export class chatService {
       where: {
         AND: [
           {
-            modes: "GROUPCHAT",
+            OR: [
+              { modes: "GROUPCHAT" },
+              { modes: "PROTECTED" },
+            ],
           },
           {
             NOT: {
@@ -285,9 +287,7 @@ export class chatService {
   async isUserInChannel(@Request() req: any, chanId: number): Promise<boolean> {
     try {
       const userList = await this.findAllMembers(chanId);
-      
-      const isInChannel = userList.some(user => user.id === req.id);
-      
+      const isInChannel = userList.some(user => user.id === req.user.id);
       return isInChannel;
     } catch (error) {
       console.error("Error checking user in channel:", error);
@@ -419,12 +419,13 @@ export class chatService {
   async joinChannel(
     chanId: number,
     @Request() req: any,
+    password?: string
   ) {
-    
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
       include: { owner: true, banned: true },
     });
+
     if (!chan) {
       throw new Error("Could not find channel");
     }
@@ -435,6 +436,22 @@ export class chatService {
       throw new Error("You are banned from this channel");
     }
 
+    if (chan.modes === Mode.PROTECTED && password !== undefined) {
+      if (chan.password !== null) {
+        try {
+          if (password !== chan.password) {
+            throw new Error("Wrong password");
+          }
+        } catch (error) {
+          console.error("Error verifying password:", error);
+          throw new Error("Error verifying password");
+        }
+      } else {
+        console.error("Hashed password is null.");
+        throw new Error("Invalid channel configuration");
+      }
+    }
+  
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { members: { connect: { id: req.user.id } } },
@@ -661,6 +678,7 @@ export class chatService {
           channel: { connect: { name: chan.name } },
           author: { connect: { id: target.id } },
         },
+        include: {author: true}
       });
       await this.prisma.channel.update({
         where: { name: chanName },
@@ -680,6 +698,7 @@ export class chatService {
     }
     const messages = await this.prisma.message.findMany({
       where: { channelName: chanName },
+      include: { author: true },
     });
     return messages;
   }

@@ -14,7 +14,6 @@ const FileUpload = () => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("image", selectedFile[0]);
-
       try {
         const response = await axios.patch("/users/add-avatar", formData, {
           headers: {
@@ -29,15 +28,9 @@ const FileUpload = () => {
   };
 
   return (
-    <div className="file-upload">
-      <input
-        className="text-sm custom-file-upload"
-        type="file"
-        onChange={handleFileChange}
-      />
-      <button className="text-sm" onClick={handleUpload}>
-        Upload file
-      </button>
+    <div >
+      <input className="text-sm" type="file" onChange={handleFileChange} />
+      <button className="text-sm" onClick={handleUpload}>Upload</button>
     </div>
   );
 };

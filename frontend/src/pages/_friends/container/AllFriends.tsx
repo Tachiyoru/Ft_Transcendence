@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   FaBan,
   FaGamepad,
@@ -12,6 +12,10 @@ import { SlOptions } from "react-icons/sl";
 import axios from "../../../axios/api";
 import { FaMinusCircle } from "react-icons/fa";
 import { RiGamepadFill } from "react-icons/ri";
+import { Link, useNavigate } from "react-router-dom";
+import { WebSocketContext } from "../../../socket/socket";
+import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
+import { useDispatch } from "react-redux";
 
 const AllFriends = () => {
   const [listUsers, setListUsers] = useState<
@@ -22,6 +26,10 @@ const AllFriends = () => {
   >([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [previousUserId, setPreviousUserId] = useState<number | null>(null);
+	const socket = useContext(WebSocketContext);
+	const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const togglePopinPending = (userId: number) => {
     if (selectedUserId === userId || previousUserId === userId) {
@@ -120,6 +128,14 @@ const AllFriends = () => {
     }
   };
 
+  const handleClickSendMessage = (username: string, id: number) => {
+		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
+		socket.on('chatChannelCreated', (data) => {
+			dispatch(setSelectedChannelId(data.channelId));
+      navigate('/chat')
+		});
+	}
+
   return (
     <div
       className="mt-10 m-4 gap-y-4 flex flex-wrap"
@@ -167,7 +183,7 @@ const AllFriends = () => {
 
       {listUsers.length === 0 ? (
         <div className="text-center mt-4">
-          <p className="text-sm font-regular">No friends found</p>
+          <p className="text-sm font-regular text-lilac">No friends found</p>
         </div>
       ) : (
         listUsers.map((user, index) => (
@@ -185,15 +201,18 @@ const AllFriends = () => {
                 id={`popin-${user.id}`}
                 className="h-18 p-3 text-xs text-lilac text-opacity-60 overflow-auto w-full bg-accent-violet border border-lilac absolute top-6 right-0 rounded-md "
               >
+                <Link to={`/user/${user.username}`}>
+                  <div
+                    className="flex flex-row items-center hover:text-lilac"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaUser size={12} />
+                    <p className="m-1">See Profile</p>
+                  </div>
+                </Link>
                 <div
                   className="flex flex-row items-center hover:text-lilac"
-                  style={{ cursor: "pointer" }}
-                >
-                  <FaUser size={12} />
-                  <p className="m-1">See Profile</p>
-                </div>
-                <div
-                  className="flex flex-row items-center hover:text-lilac"
+                  onClick={() => handleClickSendMessage(user.username, user.id)}
                   style={{ cursor: "pointer" }}
                 >
                   <FaRegPenToSquare size={12} />
