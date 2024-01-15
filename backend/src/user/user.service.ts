@@ -16,7 +16,6 @@ export class UserService {
       username: "Tachi",
       email: "shanley@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
-      //mdp: Shashou/973
       tittle: "The G.O.A.T",
       role: "ADMIN",
       stats: {
