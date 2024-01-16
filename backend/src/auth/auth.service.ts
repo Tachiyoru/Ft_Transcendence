@@ -143,20 +143,4 @@ export class AuthService {
     response.clearCookie("refresh_token");
     return "Successfully logged out";
   }
-
-  async set2FASecret(secret: string, userId: number): Promise<User> {
-    const userA = this.prisma.user.update({
-      where: { id: userId },
-      data: { twoFASecret: secret },
-    });
-    return userA;
-  }
-
-  getUserByEmail(email: string) {
-    const user = this.prisma.user.findUnique({
-      where: { email },
-	  include: { friends: true, stats: true, achievements: true },
-    });
-    return user;
-  }
 }

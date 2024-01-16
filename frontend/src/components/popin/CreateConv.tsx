@@ -10,6 +10,13 @@ import io from "socket.io-client";
 import { Link } from "react-router-dom";
 import { WebSocketContext } from "../../socket/socket";
 
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 const CreateConv: React.FC = () => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -45,7 +52,7 @@ const CreateConv: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<{ username: string }[]>("/users/all");
+        const response = await axios.get<Users[]>("/users/all");
         setListUsers(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -95,7 +102,7 @@ const CreateConv: React.FC = () => {
       }
     }
 
-    if(Object.keys(checkedItems).length > 1 && !name){
+    if (Object.keys(checkedItems).length > 1 && !name){
         setErrorMessage("Need a name");
         return;
     }

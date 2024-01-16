@@ -26,7 +26,7 @@ import AboutToPlay from './pages/_game/container/AboutToPlay';
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)
-console.log('ok', user)
+
 return (
 	<WebSocketContext.Provider value={socket}>
 		<Websocket />

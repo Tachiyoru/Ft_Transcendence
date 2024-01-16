@@ -3,13 +3,14 @@ import { FaRegPenToSquare, FaUser, FaVolumeXmark } from 'react-icons/fa6';
 import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
-import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
-import { setSelectedChannelId } from '../../services/selectedChannelSlice';
+import { setSelectedChannelId, setUsersBan, setUsersInChannel, setUsersNotInChannel } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
 import { WebSocketContext } from '../../socket/socket';
 import 	axios from '../../axios/api';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
 interface Member {
     username: string;
@@ -32,8 +33,8 @@ interface ChannelProps {
 		owner: Owner;
 		op: string[];
 	}
-	username: string;
-	id: number;
+	user: Users,
+	onMuteUser: (mutedUserId: number, user: Users) => void;
 }
 
 interface Users {
@@ -43,7 +44,7 @@ interface Users {
 	status: string;
 }
 
-const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
+const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
     const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
@@ -52,6 +53,9 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const socket = useContext(WebSocketContext);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
+	const usersNotInChannel = useSelector((state: RootState) => state.selectedChannelId.usersNotInChannel[channel.chanId]);
+	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -70,17 +74,17 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	};
 
 	const handleAddOp = () => {
-		socket.emit('addOp', { chanId: channel.chanId, username: username });
+		socket.emit('addOp', { chanId: channel.chanId, username: user.username });
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleRemoveOp = () => {
-		socket.emit('removeOp', { chanId: channel.chanId, username: username });
+		socket.emit('removeOp', { chanId: channel.chanId, username: user.username });
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleClick = () => {
-	if (opMembers.find(opMember => opMember.username === username)) {
+	if (opMembers.find(opMember => opMember.username === user.username)) {
 		handleRemoveOp();
 	} else {
 		handleAddOp();
@@ -101,7 +105,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 
 	useEffect(() => {
 		axios
-		.get(`friends-list/blocked-users/${id}`)
+		.get(`friends-list/blocked-users/${user.id}`)
 		.then((response) => {
 			setIsBlocked(response.data.isBlocked);
 		})
@@ -111,14 +115,13 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 
 		socket.emit("findAllMutedMembers", { chanId: channel.chanId });
 		socket.on("allMuted", (users) => {
-		if (users.map((user: Users) => user.id).includes(id))
+		if (users.map((user: Users) => user.id).includes(user.id))
 			setIsMuted(true)
 		});
-	}, [id]);
+	}, [user.id, socket]);
 
 	const handleClickSendMessage = () => {
-		console.log(username)
-		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
+		socket.emit('getOrCreateChatChannel', { username2: user.username, id: user.id }); 
 		socket.on('chatChannelCreated', (data) => {
 			console.log('Chat channel created:', data);
 			dispatch(setSelectedChannelId(data.channelId));
@@ -126,17 +129,27 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	}
 
 	const handleClickBan = () => {
-		socket.emit('banUser', { chanId: channel.chanId, username: username }); 
+		socket.emit('banUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userBanned', (data) => {
 			console.log('Ban', data);
+			const updatedUsers = usersInChannel.filter((users: Users) => users.id !== user.id);
+			dispatch(setUsersInChannel({channelId: channel.chanId, users:updatedUsers}));
+			dispatch(setUsersBan({channelId: channel.chanId, users: [...usersBan, user]}));
+			const updatedUsersNotInChannel = usersNotInChannel.filter(users => users.id !== user.id);
+			dispatch(setUsersNotInChannel({channelId: channel.chanId, users: updatedUsersNotInChannel}));	
+			console.log(usersBan)
 		});
 		setPopinOpen(!popinOpen);
 	}
 
 	const handleClickKick = () => {
-		socket.emit('kickUser', { chanId: channel.chanId, username: username }); 
+		socket.emit('kickUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userKicked', (data) => {
 			console.log('Kick', data);
+			const updatedUsers = usersInChannel.filter(users => users.id !== user.id);
+			dispatch(setUsersInChannel({channelId: channel.chanId, users:updatedUsers}));
+			const updatedUsersNotInChannel = usersNotInChannel.filter(users => users.id !== user.id);
+			dispatch(setUsersNotInChannel({channelId: channel.chanId, users: updatedUsersNotInChannel}));			
 		});
 		setPopinOpen(!popinOpen);
 	}
@@ -147,10 +160,11 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 			if (isMuted) {
 				await unMuteUser();
 				setIsMuted(false);
-
+				onMuteUser(user.id, user);
 			} else {
 				await muteUser();
 				setIsMuted(true);
+				onMuteUser(user.id, user);
 			}
 		} catch (error) {
 			console.error('Erreur lors du blocage:', error);
@@ -159,14 +173,14 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 	}
 
 	const unMuteUser = async () => {
-		socket.emit("unMuteMember", { chanId: channel.chanId, userId: id });
+		socket.emit("unMuteMember", { chanId: channel.chanId, userId: user.id });
 		socket.on("memberUnMuted", (users) => {
 			console.log("unMute", users);
 		})
 	};
 
 	const muteUser = async () => {
-		socket.emit("muteMember", { chanId: channel.chanId, userId: id });
+		socket.emit("muteMember", { chanId: channel.chanId, userId: user.id });
 		socket.on("memberMuted", (users) => {
 			console.log("Mute", users);
 		});
@@ -217,7 +231,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"></div>
 			<div ref={cardRef} className="absolute top-4 right-0 z-50">
 				<div className="bg-dark-violet text-lilac rounded-lg px-6 py-5">
-					<Link to={`/user/${username}`}>
+					<Link to={`/user/${user.username}`}>
 						<div className="flex flex-row items-center pb-1 hover:opacity-40">
 							<FaUser size={10}/>
 							<p className="ml-2">See profile</p>
@@ -239,7 +253,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 						<p className="ml-2">Invite to play</p>
 					</div>
 
-					{(username !== channel.owner.username || opMembers.find(opMember => opMember.username === userData.username))  && (
+					{(user.username !== channel.owner.username || opMembers.find(opMember => opMember.username === userData.username))  && (
 					<>
 					<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 					
@@ -262,7 +276,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 						</div>
 						<div 
 							style={{ cursor: "pointer" }}
-							onClick={() => handleBlockUser(id)}
+							onClick={() => handleBlockUser(user.id)}
 							className="flex flex-row items-center hover:opacity-40"
 						>
 							<FaMinusCircle size={11} />
@@ -279,12 +293,12 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, username, id }) => {
 					</div>
 					
 
-					{username !== channel.owner.username && (
+					{user.username !== channel.owner.username && (
 						<div>
 							<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 							<div className="flex flex-row items-center cursor-pointer" onClick={handleClick}>
 								<LuBadgePlus size={11} />
-								{opMembers.find(opMember => opMember.username === username) ? (
+								{opMembers.find(opMember => opMember.username === user.username) ? (
 									<p className="ml-2 text-red-orange">Remove</p>
 								) : (
 									<p className="ml-2">Register as operator</p>
