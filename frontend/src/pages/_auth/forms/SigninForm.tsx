@@ -33,11 +33,20 @@ const SigninForm = () => {
 		axios
 		.post("auth/signin", data)
 		.then( (response) => {
-		console.log(response.status);
-		if (response.status === 201) {
-			setResStatus("Successful Registration!");
-			dispatch(loginSuccess(response.data))
-			navigate("/");
+			if (response.status === 201)
+			{
+				console.log('ok', response.data.user);
+				if (response.data.user.isTwoFaEnabled)
+				{
+					dispatch(loginSuccess(response.data))
+					navigate("/sign-in-2fa");
+				}
+				else
+				{
+					setResStatus("Successful Registration!");
+					dispatch(loginSuccess(response.data))
+					navigate("/");
+				}
 		} else {
 			setResStatus("Error");
 		}

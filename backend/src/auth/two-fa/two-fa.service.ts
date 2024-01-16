@@ -57,20 +57,43 @@ export class TwoFAService
 		}
 	}
 
-	async set2FaOtpAuthUrl(otpAuthUrl: string, userId: number): Promise<User> {
+	async set2FaOtpAuthUrl(otpAuthUrl: string, userId: number): Promise<User>
+	{
 		const updatedUser = this.prismaService.user.update({
-		where: { id: userId },
-		data: { otpAuthUrl: otpAuthUrl },
+			where: { id: userId },
+			data: { otpAuthUrl: otpAuthUrl },
 		});
-		return updatedUser;
+		return (updatedUser);
 	}
-	
-	
-	async set2FaSecret(secret: string, userId: number): Promise<User> {
+
+
+	async set2FaSecret(secret: string, userId: number): Promise<User>
+	{
 		const updatedUser = this.prismaService.user.update({
-		where: { id: userId },
-		data: { twoFASecret: secret },
+			where: { id: userId },
+			data: { twoFASecret: secret },
 		});
-		return updatedUser;
+		return (updatedUser);
+	}
+
+	async setTwoFaStatus(status: boolean | null, userId: number)
+	{
+		if (status === true)
+		{
+			const updatedUser = this.prismaService.user.update({
+				where: { id: userId },
+				data: {
+					isTwoFaEnabled: false,
+					otpAuthUrl: null,
+					twoFASecret: null,
+				},
+			});
+			return (updatedUser);
+		}
+		const updatedUser = this.prismaService.user.update({
+			where: { id: userId },
+			data: { isTwoFaEnabled: true },
+		});
+		return (updatedUser);
 	}
 }
