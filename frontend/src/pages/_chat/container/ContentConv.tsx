@@ -186,7 +186,7 @@ const ContentConv = () => {
 		socket.off("typing");
 		};
 	}
-	}, [chanId]);
+	}, [socket]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
