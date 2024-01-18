@@ -41,6 +41,7 @@ return (
 			<Route path="/gamestart" element={<AboutToPlay />} />
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
+			<Route path="/chat/:chanId" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>
 				<Route path="/friends" element={user ? <SetFriends /> : <Navigate to="/sign-in" />}/>
 			</Route>

@@ -1,7 +1,7 @@
 import { FaBan, FaUser, FaUserGroup, FaVolumeXmark, FaXmark } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
@@ -77,8 +77,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const dispatch = useDispatch();
 	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
 	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
-	
-	console.log(usersInChannel)
+	const { chanId } = useParams();
+
 	type ChannelEquivalents = {
 		[key: string]: string;
 	};
@@ -115,28 +115,32 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	};
 
 	useEffect(() => {
-		socket.emit("users-in-channel-except-him", { chanName: channel.name });
-		socket.on("users-in-channel-except-him", (users) => {
-		setUsersInChannelExceptHim(users);
-		});
-		
-		socket.emit("findAllMutedMembers", { chanId: channel.chanId });
-		socket.on("allMuted", (users) => {
-		setUsersMute(users);
-		});
+		if (chanId !== undefined) {
+			const parsedChanId = parseInt(chanId, 10);
+			
+			socket.emit("users-in-channel-except-him", { chanName: channel.name });
+			socket.on("users-in-channel-except-him", (users) => {
+			setUsersInChannelExceptHim(users);
+			});
+			
+			socket.emit("findAllMutedMembers", { chanId: parsedChanId });
+			socket.on("allMuted", (users) => {
+			setUsersMute(users);
+			});
 
-		socket.emit("check-user-in-channel", { chanId: channel.chanId });
-		socket.on("user-in-channel", (boolean) => {
-		setCheckUserInChannel(boolean);
-		});
+			socket.emit("check-user-in-channel", { chanId: parsedChanId });
+			socket.on("user-in-channel", (boolean) => {
+			setCheckUserInChannel(boolean);
+			});
 
-		return () => {
-		socket.off("allMembers");
-		socket.off("allMembers");
-		socket.off("allMembersBan");
-		socket.off("user-in-channel");
-		};
-	}, [socket]);
+			return () => {
+			socket.off("allMembers");
+			socket.off("allMembers");
+			socket.off("allMembersBan");
+			socket.off("user-in-channel");
+			};
+		}
+	}, [socket, chanId, channel.name, channel.modes]);
 
 	const updateUsersMute = (mutedUserId: number, user: Users) => {
 		const isUserMuted = usersMute.some(user => user.id === mutedUserId);

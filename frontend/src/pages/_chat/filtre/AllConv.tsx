@@ -10,6 +10,7 @@ import { RiGamepadFill } from "react-icons/ri";
 import { WebSocketContext } from "../../../socket/socket";
 import { Message } from "react-hook-form";
 import TimeConverter from "../../../components/date/TimeConverter";
+import { useNavigate } from "react-router-dom";
 
 interface Member {
     username: string;
@@ -94,15 +95,19 @@ const AllConv = () => {
 		setAllChannel(channelList);
     });
 
+	
 	return () => {
 		socket.off("my-channel-list");
 	};
-	}, [allChannel, socket]);
-	
+}, [allChannel, socket]);
+
+	const navigate = useNavigate();
+
 	const handleChannelClick = (channelId: number) => {
 	if (id.selectedChannelId !== null)
 		dispatch(setPrevChannelId(id.selectedChannelId))
 	dispatch(setSelectedChannelId(channelId));
+	navigate(`/chat/${channelId}`)
 	};
 
 	const renderLastMessage = (channel: Channel) => {

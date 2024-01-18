@@ -1,9 +1,8 @@
 import MainLayout from "../../components/nav/MainLayout";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { ChangeEvent, useState } from "react";
 import SidebarLeft from "./container/SidebaLeft";
 import ContentConv from "./container/ContentConv";
-import SidebarRight from "./container/SidebarRight";
 
 const Chat = () => {
   const location = useLocation();

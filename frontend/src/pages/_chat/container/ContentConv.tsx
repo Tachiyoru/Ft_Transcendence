@@ -11,6 +11,7 @@ import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
 import { setUsersBan, setUsersInChannel } from "../../../services/selectedChannelSlice";
 import { useDispatch } from "react-redux";
+import { useLocation, useParams } from "react-router-dom";
 
 interface Channel {
 	name: string;
@@ -60,13 +61,13 @@ const ContentConv = () => {
 	const [userData, setUserData] = useState<{username: string; id: number}>({ username: '' , id: -1});
 	const messageContainerRef = useRef(null);
 	const [isTyping, setIsTyping] = useState<string>('')
-	const [isTypingBool, setIsTypingBool] = useState<boolean>(false);
 	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
 	const [passwordInput, setPasswordInput] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string;}[]>([]);
 	const dispatch = useDispatch();
+
 
 	useEffect(() => {
 		const fetchBlockedUsers = async () => {
@@ -106,6 +107,8 @@ const ContentConv = () => {
 
 	const selectedChannelId = useSelector((state: RootState) => state.selectedChannelId.selectedChannelId);
 	const prevChannelId = useSelector((state: RootState) => state.selectedChannelId.prevChannelId);
+	const { chanId } = useParams();
+
 
 	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -117,7 +120,7 @@ const ContentConv = () => {
 	};
 
 	const handleJoinChannel = async () => {
-	socket.emit("joinChan", { chanId: selectedChannelId, password: passwordInput });
+	socket.emit("joinChan", { chanId: chanId, password: passwordInput });
 	socket.on("channelJoined", (updatedChannel) => {
 		console.log(updatedChannel)
 		setCheckUserInChannel(true);
@@ -129,8 +132,10 @@ const ContentConv = () => {
 };
 
 	useEffect(() => {
+		if (chanId !== undefined) {
+		const parsedChanId = parseInt(chanId, 10);
 		socket.emit("channel", {
-		id: selectedChannelId,
+		id: parsedChanId,
 		prev: prevChannelId,
 		});
 		const handleChannelAndMessages = (channelInfo, messageList) => {
@@ -150,22 +155,24 @@ const ContentConv = () => {
 			}, 5000);
 		});
 
-		socket.emit("check-user-in-channel", { chanId: selectedChannelId });
+		socket.emit("check-user-in-channel", { chanId: parsedChanId });
 		socket.on("user-in-channel", (boolean) => {
 			setCheckUserInChannel(boolean);
 		});
 
-		socket.emit("findAllMembers", { chanId: selectedChannelId });
+		socket.emit("findAllMembers", { chanId: parsedChanId });
 		socket.on("allMembers", (users) => {
-			dispatch(setUsersInChannel({ channelId: selectedChannelId, users: users }));
+			if (chanId)
+				dispatch(setUsersInChannel({ channelId: parsedChanId, users: users }));
 		});
 
-		socket.emit("findAllBannedMembers", { chanId: selectedChannelId }); 
+		socket.emit("findAllBannedMembers", { chanId: parsedChanId }); 
 		socket.on("allMembersBan", (users) => {
-			dispatch(setUsersBan({ channelId: selectedChannelId, users: users }));
+			if( chanId)
+				dispatch(setUsersBan({ channelId: parsedChanId, users: users }));
 		});
 
-		socket.emit("findAllMutedMembers", { chanId: selectedChannelId });
+		socket.emit("findAllMutedMembers", { chanId: parsedChanId });
 		socket.on("allMuted", (users) => {
 		if (users.map((user: Users) => user.id).includes(userData.id))
 			setIsMuted(true)
@@ -178,7 +185,8 @@ const ContentConv = () => {
 		socket.off("recapMessages");
 		socket.off("typing");
 		};
-	}, [selectedChannelId]);
+	}
+	}, [chanId]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
