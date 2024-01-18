@@ -9,7 +9,7 @@ import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
-import { setUsersBan, setUsersInChannel } from "../../../services/selectedChannelSlice";
+import { setUsersBan, setUsersInChannel, setUsersOperatorsChannel } from "../../../services/selectedChannelSlice";
 import { useDispatch } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
 
@@ -138,7 +138,7 @@ const ContentConv = () => {
 		id: parsedChanId,
 		prev: prevChannelId,
 		});
-		const handleChannelAndMessages = (channelInfo, messageList) => {
+		const handleChannelAndMessages = (channelInfo: Channel, messageList: Message[]) => {
 		setChannel(channelInfo);
 		console.log("channelInfo = ", channelInfo);
 		setMessageList(messageList);

@@ -4,7 +4,7 @@ import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
 import { Link } from 'react-router-dom';
-import { setSelectedChannelId, setUsersBan, setUsersInChannel, setUsersNotInChannel } from '../../services/selectedChannelSlice';
+import { setSelectedChannelId, setUsersBan, setUsersInChannel, setUsersNotInChannel, setUsersOperatorsChannel } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
 import { WebSocketContext } from '../../socket/socket';
@@ -12,11 +12,6 @@ import 	axios from '../../axios/api';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 
-interface Member {
-    username: string;
-	avatar: string;
-	id: number;
-}
 
 interface Owner {
     username: string;
@@ -26,7 +21,7 @@ interface Owner {
 
 interface ChannelProps {
 	channel: {
-		members: Member[];
+		members: Users[];
 		modes: string;
 		chanId: number;
 		name: string;
@@ -47,7 +42,6 @@ interface Users {
 const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) => {
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
-    const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -56,6 +50,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
 	const usersNotInChannel = useSelector((state: RootState) => state.selectedChannelId.usersNotInChannel[channel.chanId]);
 	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
+	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -75,16 +70,19 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 
 	const handleAddOp = () => {
 		socket.emit('addOp', { chanId: channel.chanId, username: user.username });
+		dispatch(setUsersOperatorsChannel({ channelId: channel.chanId, users: [...usersOp, user] }));
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleRemoveOp = () => {
 		socket.emit('removeOp', { chanId: channel.chanId, username: user.username });
+		const updatedUsers = usersOp.filter(users => users.id !== user.id);
+		dispatch(setUsersOperatorsChannel({ channelId: channel.chanId, users: updatedUsers }));
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleClick = () => {
-	if (opMembers.find(opMember => opMember.username === user.username)) {
+	if (usersOp.find(opMember => opMember.username === user.username)) {
 		handleRemoveOp();
 	} else {
 		handleAddOp();
@@ -298,7 +296,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 							<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 							<div className="flex flex-row items-center cursor-pointer" onClick={handleClick}>
 								<LuBadgePlus size={11} />
-								{opMembers.find(opMember => opMember.username === user.username) ? (
+								{usersOp.find(opMember => opMember.username === user.username) ? (
 									<p className="ml-2 text-red-orange">Remove</p>
 								) : (
 									<p className="ml-2">Register as operator</p>

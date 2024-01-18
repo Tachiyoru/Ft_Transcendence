@@ -8,7 +8,7 @@ import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
-import { setUsersBan } from "../../../services/selectedChannelSlice";
+import { setUsersBan, setUsersOperatorsChannel } from "../../../services/selectedChannelSlice";
 
 interface Member {
 	username: string;
@@ -77,6 +77,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const dispatch = useDispatch();
 	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
 	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
+	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
 	const { chanId } = useParams();
 
 	type ChannelEquivalents = {
@@ -133,14 +134,18 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 			setCheckUserInChannel(boolean);
 			});
 
+			const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
+			dispatch(setUsersOperatorsChannel({ channelId: parsedChanId, users: opMembers }));
+			
 			return () => {
 			socket.off("allMembers");
 			socket.off("allMembers");
 			socket.off("allMembersBan");
 			socket.off("user-in-channel");
 			};
+
 		}
-	}, [socket, chanId, channel.name, channel.modes]);
+	}, [socket, chanId, channel.name, channel.modes, channel.op]);
 
 	const updateUsersMute = (mutedUserId: number, user: Users) => {
 		const isUserMuted = usersMute.some(user => user.id === mutedUserId);
@@ -408,7 +413,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						<div
 						className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
 							${channel.owner.username === member.username ? "border-2 border-fushia" : ""}
-							${opMembers.find((opMember) => opMember.username === member.username)
+							${usersOp && usersOp.find((opMember) => opMember.username === member.username)
 							? "border border-green-500": ""}`}
 						>
 						{member.avatar ? (					

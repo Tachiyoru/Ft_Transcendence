@@ -6,6 +6,7 @@ interface SelectedChannelState {
 	channelUsers: { [key: number]: Users[] };
 	channelBannedUsers: { [key: number]: Users[] };
 	usersNotInChannel: { [key: number]: Users[] };
+	channelOperators: { [key: number]: Users[] };
 }
 
 interface Users {
@@ -21,6 +22,7 @@ const initialState: SelectedChannelState = {
 	channelUsers: {},
 	channelBannedUsers: {},
 	usersNotInChannel: {},
+	channelOperators: {}
 };
 
 const selectedChannelSlice = createSlice({
@@ -47,7 +49,12 @@ const selectedChannelSlice = createSlice({
 			const { channelId, users } = action.payload;
 			if (channelId !== null) 
 				state.usersNotInChannel[channelId] = users;
-			},
+		},
+		setUsersOperatorsChannel(state, action: PayloadAction<{ channelId: number | null; users: Users[] }>) {
+			const { channelId, users } = action.payload;
+			if (channelId !== null) 
+				state.channelOperators[channelId] = users;
+		},
 	},
 });
 
@@ -56,5 +63,6 @@ export const { setPrevChannelId } = selectedChannelSlice.actions;
 export const { setUsersInChannel } = selectedChannelSlice.actions;
 export const { setUsersBan } = selectedChannelSlice.actions;
 export const { setUsersNotInChannel } = selectedChannelSlice.actions;
+export const { setUsersOperatorsChannel } = selectedChannelSlice.actions;
 
 export default selectedChannelSlice.reducer;
