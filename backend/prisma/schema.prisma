@@ -40,6 +40,7 @@ model User {
     hash     String?
 
     twoFASecret String? @unique
+    otpAuthUrl String? @unique
 
     role   Role       @default(USER)
     status StatusUser @default(ONLINE)

@@ -30,6 +30,7 @@ const AboutToPlay = () => {
 			<p className="font-audiowide text-purple">Your game is <br/> about to begin</p>
 			</div>
 		</div>
+		<OhOh/>
 		</MainLayout>
 	)
 }

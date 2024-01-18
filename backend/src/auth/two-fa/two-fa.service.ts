@@ -1,24 +1,24 @@
-import { Injectable } from "@nestjs/common";
+import { Get, Injectable, Options, Param } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { User } from "@prisma/client";
 import { authenticator } from "otplib";
 import { AuthService } from "src/auth/auth.service";
 import { GetUser } from "src/auth/decorator";
-import { toFileStream } from "qrcode";
+import { toDataURL, toFileStream } from "qrcode";
 import { Response } from "express";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class TwoFAService
 {
 	constructor(
 		private readonly configService: ConfigService,
-		private authService: AuthService
+		private authService: AuthService,
+		private readonly prismaService: PrismaService
 	) {}
 
-	async generate2FASecret(@GetUser() user: User): Promise<string>
+	async generate2FASecret(user: User): Promise<string>
 	{
-		// console.log('Generate QR Code');
-
 		const secret = authenticator.generateSecret();
 		const issuerName: string =
 			this.configService.get<string>("ISSUER_NAME") || "DEFAULT_NAME";
@@ -29,28 +29,24 @@ export class TwoFAService
 			secret
 		);
 
-		await this.authService.set2FASecret(secret, user.id);
+		await this.set2FaSecret(secret, user.id);
 		// console.log('otpAuthUrl : ', otpAuthUrl);
+		console.log("user.twoFaSecret : ", user.twoFASecret);
 		return otpAuthUrl;
 	}
 
-	async qrcodeStream(stream: Response, otpAuthUrl: string)
+	async qrcodeStream(otpAuthUrl: string)
 	{
-		return toFileStream(stream, otpAuthUrl);
+		return toDataURL(otpAuthUrl);
 	}
 
-	async verify2FACode(@GetUser() user: User): Promise<boolean>
+	async verify2FACode(@GetUser() user: User, token: string): Promise<boolean>
 	{
-		// console.log('Verify 2FA Code');
-		// console.log({ user });
-
 		try
 		{
-			// console.log('verify2FACode -> user.twoFASecret : ', user.twoFASecret);
 			const secret: string = user.twoFASecret || "";
-			const token = authenticator.generate(secret);
-			// console.log('verify2FACode -> token : ', token);
-			// console.log('verify2FACode -> secret : ', secret);
+			console.log('verify2FACode -> token : ', token);
+			console.log('verify2FACode -> secret : ', secret);
 			const isValid = authenticator.verify({ token, secret });
 			console.log("verify2FACode -> isValid : ", isValid);
 			return isValid;
@@ -59,5 +55,22 @@ export class TwoFAService
 			console.error(err);
 			return false;
 		}
+	}
+
+	async set2FaOtpAuthUrl(otpAuthUrl: string, userId: number): Promise<User> {
+		const updatedUser = this.prismaService.user.update({
+		where: { id: userId },
+		data: { otpAuthUrl: otpAuthUrl },
+		});
+		return updatedUser;
+	}
+	
+	
+	async set2FaSecret(secret: string, userId: number): Promise<User> {
+		const updatedUser = this.prismaService.user.update({
+		where: { id: userId },
+		data: { twoFASecret: secret },
+		});
+		return updatedUser;
 	}
 }

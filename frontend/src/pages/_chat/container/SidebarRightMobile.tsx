@@ -1,11 +1,14 @@
 import { FaBan, FaUser, FaUserGroup, FaVolumeXmark, FaXmark } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
+import { setUsersBan, setUsersOperatorsChannel } from "../../../services/selectedChannelSlice";
 
 interface Member {
 	username: string;
@@ -60,7 +63,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<
 		Users[]
 	>([]);
-	const [usersInChannel, setUsersInChannel] = useState<Users[]>([]);
 	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
 	const [commonFriendsCount, setCommonFriendsCount] = useState(0);
 	const [usersInFriends, setUsersInFriends] = useState<Users[]>([]);
@@ -70,10 +72,13 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		channel.op.includes(members.username)
 	);
 	const [showBanUser, setShowBanUser] = useState(false);
-	const [usersBan, setUsersBan] = useState<Users[]>([]);
-	const [showMuteUser, setShowMuteUser] = useState(false);
 	const [usersMute, setUsersMute] = useState<Users[]>([]);
 	const socket = useContext(WebSocketContext);
+	const dispatch = useDispatch();
+	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
+	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
+	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
+	const { chanId } = useParams();
 
 	type ChannelEquivalents = {
 		[key: string]: string;
@@ -88,15 +93,15 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const channelName: string = channel.modes;
 	const displayText: string = channelEquivalents[channelName];
 
-	usersInChannel.sort((a, b) => {
-		if (channel.owner.username === a.username) {
-		return -1;
-		} else if (channel.owner.username === b.username) {
-		return 1;
-		} else {
-		return 0;
-		}
-	});
+	// usersInChannel.sort((a, b) => {
+	// 	if (channel.owner.username === a.username) {
+	// 	return -1;
+	// 	} else if (channel.owner.username === b.username) {
+	// 	return 1;
+	// 	} else {
+	// 	return 0;
+	// 	}
+	// });
 
 	const toggleCommonFriends = () => {
 		setShowCommonFriends(!showCommonFriends);
@@ -111,38 +116,47 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	};
 
 	useEffect(() => {
-		socket.emit("users-in-channel-except-him", { chanName: channel.name });
-		socket.on("users-in-channel-except-him", (users) => {
-		setUsersInChannelExceptHim(users);
-		});
+		if (chanId !== undefined) {
+			const parsedChanId = parseInt(chanId, 10);
+			
+			socket.emit("users-in-channel-except-him", { chanName: channel.name });
+			socket.on("users-in-channel-except-him", (users) => {
+			setUsersInChannelExceptHim(users);
+			});
+			
+			socket.emit("findAllMutedMembers", { chanId: parsedChanId });
+			socket.on("allMuted", (users) => {
+			setUsersMute(users);
+			});
 
-		socket.emit("findAllMembers", { chanId: channel.chanId });
-		socket.on("allMembers", (users) => {
-		setUsersInChannel(users);
-		});
+			socket.emit("check-user-in-channel", { chanId: parsedChanId });
+			socket.on("user-in-channel", (boolean) => {
+			setCheckUserInChannel(boolean);
+			});
+
+			const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
+			dispatch(setUsersOperatorsChannel({ channelId: parsedChanId, users: opMembers }));
+			
+			return () => {
+			socket.off("allMembers");
+			socket.off("allMembers");
+			socket.off("allMembersBan");
+			socket.off("user-in-channel");
+			};
+
+		}
+	}, [socket, chanId, channel.name, channel.modes, channel.op]);
+
+	const updateUsersMute = (mutedUserId: number, user: Users) => {
+		const isUserMuted = usersMute.some(user => user.id === mutedUserId);
 		
-		socket.emit("findAllMutedMembers", { chanId: channel.chanId });
-		socket.on("allMuted", (users) => {
-		setUsersMute(users);
-		});
-
-		socket.emit("findAllBannedMembers", { chanId: channel.chanId });
-		socket.on("allMembersBan", (users) => {
-		setUsersBan(users);
-		});
-
-		socket.emit("check-user-in-channel", { chanId: channel.chanId });
-		socket.on("user-in-channel", (boolean) => {
-		setCheckUserInChannel(boolean);
-		});
-
-		return () => {
-		socket.off("allMembers");
-		socket.off("allMembers");
-		socket.off("allMembersBan");
-		socket.off("user-in-channel");
-		};
-	}, [socket]);
+		if (isUserMuted) {
+			const updatedUsers = usersMute.filter(user => user.id !== mutedUserId);
+			setUsersMute(updatedUsers);
+		} else {
+			setUsersMute(prevUsers => [...prevUsers, user]);
+		}
+	};
 
 	useEffect(() => {
 		if (Array.isArray(usersInChannelExceptHim) && usersInChannelExceptHim.length > 0 && usersInChannelExceptHim[0]?.id) {
@@ -209,7 +223,9 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		try {
 		socket.emit("unBanUser", { chanId: channel.chanId, username: username });
 		socket.on("userUnBanned", (users) => {
-			console.log("unban", users);
+			console.log("Unban", users);
+			const updatedUsers = usersMute.filter(user => user.id === users.id);
+			dispatch(setUsersBan({channelId: channel.chanId, users: updatedUsers}));
 		});
 		} catch (error) {
 		console.error("Error deblocked users:", error);
@@ -397,7 +413,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						<div
 						className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
 							${channel.owner.username === member.username ? "border-2 border-fushia" : ""}
-							${opMembers.find((opMember) => opMember.username === member.username)
+							${usersOp && usersOp.find((opMember) => opMember.username === member.username)
 							? "border border-green-500": ""}`}
 						>
 						{member.avatar ? (					
@@ -430,8 +446,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						) && (
 							<UserConvOptions
 							channel={channel}
-							username={member.username}
-							id={member.id}
+							user={member}
+							onMuteUser={updateUsersMute}
 							/>
 						)}
 						</div>

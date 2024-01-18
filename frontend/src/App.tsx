@@ -26,7 +26,7 @@ import AboutToPlay from './pages/_game/container/AboutToPlay';
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)
-console.log('ok', user)
+
 return (
 	<WebSocketContext.Provider value={socket}>
 		<Websocket />
@@ -41,6 +41,7 @@ return (
 			<Route path="/gamestart" element={<AboutToPlay />} />
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
+			<Route path="/chat/:chanId" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>
 				<Route path="/friends" element={user ? <SetFriends /> : <Navigate to="/sign-in" />}/>
 			</Route>

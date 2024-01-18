@@ -8,6 +8,10 @@ import {
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
 import { WebSocketContext } from "../../socket/socket";
+import { setUsersInChannel, setUsersNotInChannel } from "../../services/selectedChannelSlice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface ChannelProps {
   channel: {
@@ -17,18 +21,28 @@ interface ChannelProps {
   };
 }
 
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   const [isPopinOpen, setIsPopinOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
   const [checkedItems, setCheckedItems] = useState<{
-    [key: string]: { username: string };
+    [key: string]: Users;
   }>({});
   const [searchText, setSearchText] = useState("");
   const socket = useContext(WebSocketContext);
 	const cardRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
+	const usersNotInChannel = useSelector((state: RootState) => state.selectedChannelId.usersNotInChannel[channel.chanId]);
+	const [errorMessage, setErrorMessage] = useState('');
 
-  const handleCheckboxChange = (user: { username: string }) => {
+  const handleCheckboxChange = (user: Users) => {
     setCheckedItems((prevCheckedItems) => {
       const newCheckedItems = { ...prevCheckedItems };
       if (newCheckedItems[user.username]) {
@@ -40,15 +54,13 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     });
   };
 
-  //modifier des trucs pour fix les socket qi etaient redefini a chaque changement de page
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        socket.emit("users-not-in-channel", { chanId: channel.chanId }); //need to change to users not in channels and friend with me
+        socket.emit("users-not-in-channel", { chanId: channel.chanId });
 
         socket.on("users-not-in-channel", (userList) => {
-          setListUsers(userList);
+          dispatch(setUsersNotInChannel({ channelId: channel.chanId, users: userList }))
         });
         return () => {
           socket.off("users-not-in-channel");
@@ -70,9 +82,9 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     setIsPopinOpen(!isPopinOpen);
   };
 
-  const filteredUsers = listUsers.filter((user) =>
-    user.username.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // const filteredUsers = usersNotInChannel.filter((user) =>
+  //   user.username.toLowerCase().includes(searchText.toLowerCase())
+  // );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -99,13 +111,24 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     };
     socket.emit("add-user", { channelData: channelData });
 
+    let isError = false;
+
     socket.on("addUsersError", (errorData) => {
       console.error("user creation error:", errorData);
-    });
+      setErrorMessage("Member is banned");
 
-    setCheckedItems({});
-    console.log("vide", checkedItems);
-    togglePopin();
+      isError = true;
+    });
+  
+    setTimeout(() => {
+      if (!isError) {
+        togglePopin();
+        dispatch(setUsersInChannel({ channelId: channel.chanId, users: [...usersInChannel, ...selectedItems] }))
+        setCheckedItems({});
+        setErrorMessage("");
+      }
+    }, 4);
+
   };
 
   return (
@@ -142,7 +165,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             </div>
           </div>
 
-          {listUsers.length === 0 ? (
+          {usersNotInChannel.length === 0 ? (
             <div className="text-center mt-4">
               <p className="text-sm font-regular">No friends found</p>
               <Link to="/friends">
@@ -153,7 +176,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             </div>
           ) : (
             <div className="h-38 overflow-auto pr-3">
-              {filteredUsers.map((user, index) => (
+              {usersNotInChannel.map((user, index) => (
                 <div
                   key={index}
                   className="flex flex-row justify-between items-center mt-2"
@@ -176,6 +199,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
                 </div>
               ))}
 
+              {errorMessage && <div className="text-red-orange mt-1">{errorMessage}</div>}
               <div className="flex flex-col items-center">
                 <button
                   disabled={Object.keys(checkedItems).length === 0}
