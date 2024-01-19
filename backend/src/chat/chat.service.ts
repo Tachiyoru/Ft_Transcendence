@@ -247,6 +247,16 @@ export class chatService {
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { op: { push: username } },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     const userTarget = await this.prisma.user.findUnique({
       where: { username: username },
@@ -280,6 +290,16 @@ export class chatService {
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { op: { set: updatedOp } },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     return updatedChannel;
   }
@@ -388,7 +408,16 @@ export class chatService {
   ) {
     const channel = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
-      include: { banned: true, invitedList: true },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     if (!channel) {
       throw new Error("Could not find channel");
@@ -410,6 +439,16 @@ export class chatService {
       where: { chanId: chanId },
       data: {
         members: { connect: users.map((user) => ({ id: user.id })) },
+      },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
       },
     });
 
@@ -515,6 +554,16 @@ export class chatService {
         banned: { connect: { id: target.id } },
         members: { disconnect: { id: target.id } },
       },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     return updatedChannel;
   }
@@ -550,6 +599,16 @@ export class chatService {
       data: {
         banned: { disconnect: { id: target.id } },
       },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     return updatedChannel;
   }
@@ -579,6 +638,16 @@ export class chatService {
       data: {
         members: { disconnect: { id: target.id } },
       },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     return updatedChannel;
   }
@@ -597,7 +666,13 @@ export class chatService {
   async muteMember(chanId: number, userId: number) {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
-    });
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+    }});
     if (!chan) {
       throw new Error("Could not find channel");
     }
@@ -607,6 +682,15 @@ export class chatService {
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chan.chanId },
       data: { muted: { set: [...chan.muted, userId] } },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+      },
     });
     return updatedChannel;
   }
@@ -623,7 +707,16 @@ export class chatService {
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chan.chanId },
-      data: { muted: { set: chan.muted.filter((id) => id !== userId) } },
+      data: { muted: { set: chan.muted.filter((id) => id !== userId) }, },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+      },
     });
     return updatedChannel;
   }

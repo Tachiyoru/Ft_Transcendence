@@ -9,18 +9,18 @@ import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
-import { setUsersBan, setUsersInChannel, setUsersOperatorsChannel } from "../../../services/selectedChannelSlice";
 import { useDispatch } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
 	owner: Owner;
-	members: Member[];
+	members: Users[];
 	op: string[]
 	password: string;
+	muted: number[];
 }
 
 interface Owner {
@@ -29,13 +29,12 @@ interface Owner {
   id: number;
 }
 
-interface Member {
+interface Users{
 	username: string;
 	avatar: string;
 	id: number;
 	status: string;
 }
-
 
 interface Message {
 	content: string;
@@ -64,23 +63,26 @@ const ContentConv = () => {
 	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
 	const [passwordInput, setPasswordInput] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
-	const [isMuted, setIsMuted] = useState<boolean>(false);
-	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string;}[]>([]);
+	const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
 	const dispatch = useDispatch();
-
-
+	
+	
 	useEffect(() => {
 		const fetchBlockedUsers = async () => {
-		try {
-			const response = await axios.get("/friends-list/blocked-users");
-			setBlockedUsers(response.data);
-		} catch (error) {
-			console.error("Error fetching blocked users:", error);
-		}
+			try {
+				const response = await axios.get("/friends-list/blocked-users");
+				setBlockedUsers(response.data);
+			} catch (error) {
+				console.error("Error fetching blocked users:", error);
+			}
 		};
-
+		
 		fetchBlockedUsers();
 	}, []);
+	
+	const updateList = (newList: Users[]) => {
+		setBlockedUsers(newList);
+	};
 
 	const scrollToBottom = () => {
 		if (messageContainerRef.current) {
@@ -107,7 +109,6 @@ const ContentConv = () => {
 
 	const selectedChannelId = useSelector((state: RootState) => state.selectedChannelId.selectedChannelId);
 	const prevChannelId = useSelector((state: RootState) => state.selectedChannelId.prevChannelId);
-	const { chanId } = useParams();
 
 
 	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
@@ -120,7 +121,7 @@ const ContentConv = () => {
 	};
 
 	const handleJoinChannel = async () => {
-	socket.emit("joinChan", { chanId: chanId, password: passwordInput });
+	socket.emit("joinChan", { chanId: selectedChannelId, password: passwordInput });
 	socket.on("channelJoined", (updatedChannel) => {
 		console.log(updatedChannel)
 		setCheckUserInChannel(true);
@@ -132,12 +133,12 @@ const ContentConv = () => {
 };
 
 	useEffect(() => {
-		if (chanId !== undefined) {
-		const parsedChanId = parseInt(chanId, 10);
+		if (selectedChannelId !== null) {
 		socket.emit("channel", {
-		id: parsedChanId,
+		id: selectedChannelId,
 		prev: prevChannelId,
 		});
+
 		const handleChannelAndMessages = (channelInfo: Channel, messageList: Message[]) => {
 		setChannel(channelInfo);
 		console.log("channelInfo = ", channelInfo);
@@ -155,38 +156,21 @@ const ContentConv = () => {
 			}, 5000);
 		});
 
-		socket.emit("check-user-in-channel", { chanId: parsedChanId });
+		socket.emit("check-user-in-channel", { chanId: selectedChannelId });
 		socket.on("user-in-channel", (boolean) => {
 			setCheckUserInChannel(boolean);
 		});
 
-		socket.emit("findAllMembers", { chanId: parsedChanId });
-		socket.on("allMembers", (users) => {
-			if (chanId)
-				dispatch(setUsersInChannel({ channelId: parsedChanId, users: users }));
-		});
-
-		socket.emit("findAllBannedMembers", { chanId: parsedChanId }); 
-		socket.on("allMembersBan", (users) => {
-			if( chanId)
-				dispatch(setUsersBan({ channelId: parsedChanId, users: users }));
-		});
-
-		socket.emit("findAllMutedMembers", { chanId: parsedChanId });
-		socket.on("allMuted", (users) => {
-		if (users.map((user: Users) => user.id).includes(userData.id))
-			setIsMuted(true)
-		});
 
 		return () => {
 			socket.off("check-user-in-channel");
 			socket.off("findAllMutedMembers");
-		socket.off("channel", handleChannelAndMessages);
-		socket.off("recapMessages");
-		socket.off("typing");
+			socket.off("channel", handleChannelAndMessages);
+			socket.off("recapMessages");
+			socket.off("typing");
 		};
 	}
-	}, [socket]);
+	}, [socket, selectedChannelId]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
@@ -197,6 +181,7 @@ const ContentConv = () => {
 		setMessage(typedMessage);
 		socket.emit("typing", channel.name);
 	};
+
 
 	return (
 		<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
@@ -242,7 +227,7 @@ const ContentConv = () => {
 					<div className="flex-end flex">
 						{channel.modes !== "CHAT" && (
 						<div className="flex flex-row">
-							<AddUserConv channel={channel} />
+							{(channel.owner.username === userData.username || channel.op.find(opMember => opMember === userData.username )) && (<AddUserConv channel={channel} />)}
 							<ChannelOptions channel={channel} />
 						</div>
 						)}
@@ -296,7 +281,7 @@ const ContentConv = () => {
 
 			{/* SEND */}
 			<div className="mt-6">
-				<div className="text-lilac italic">{isTyping}</div>
+				<div className="text-lilac italic mb-2 ml-4">{isTyping}</div>
 					<div className="flex items-center relative">
 					<form
 						onSubmit={handleInputSubmit}
@@ -304,21 +289,21 @@ const ContentConv = () => {
 					>
 						<input
 						type="text"
-								placeholder={isMuted ? "You are not allowed to send a message in this channel" : "Write message"}
-						className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac w-full rounded-md ${isMuted ? 'cursor-not-allowed' : ''}`}
+						disabled={channel.muted.map(user => user).includes(userData.id)}
+						placeholder={channel.muted.map(user => user).includes(userData.id) ? "You are not allowed to send a message in this channel" : "Write a message"}
+						className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac placeholder:text-opacity-50 w-full rounded-md ${channel.muted.map(user => user).includes(userData.id)} ? 'cursor-not-allowed' : ''}`}
 						value={message}
 						onChange={handleTyping}
-								disabled={isMuted}
 
 						/>
 						<button type="submit" className="absolute right-2 top-2">
-								{!isMuted && (<FaPaperPlane className="w-3.5 h-3.5 text-purple"/>)}
+								{!channel.muted.map(user => user).includes(userData.id) && (<FaPaperPlane className="w-3.5 h-3.5 text-purple" />)}
 						</button>
 					</form>
 				</div>
 			</div>
 
-				<SidebarRightMobile isRightSidebarOpen={isRightSidebarOpen} toggleRightSidebar={toggleRightSidebar} channel={channel}/>
+				<SidebarRightMobile isRightSidebarOpen={isRightSidebarOpen} toggleRightSidebar={toggleRightSidebar} channel={channel} block={blockedUsers} onUpdateList={updateList}/>
 			</div>
 			)}
 		</div>

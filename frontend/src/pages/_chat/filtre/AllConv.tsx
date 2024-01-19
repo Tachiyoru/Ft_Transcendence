@@ -166,7 +166,7 @@ const AllConv = () => {
 			{channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].status === 'ONLINE' ? (
 				<div className="absolute bg-acid-green w-3 h-3 rounded-full right-0 bottom-0.5"></div>
 			) : channel.members.filter(member => member.username !== userData.username) && channel.members.filter(member => member.username !== userData.username)[0].status === 'OFFLINE' ? (
-			<div className="absolute bg-red-orange w-3 h-3 rounded-full right-0 bottom-0.5"></div>
+			<div className="absolute w-3 h-3 rounded-full right-0 bottom-0.5"></div>
 			) : 
 				<div className="absolute bg-fushia w-3 h-3 rounded-full right-0 bottom-0.5 flex items-center justify-center">
 					<RiGamepadFill className="text-white w-2 h-2"/>

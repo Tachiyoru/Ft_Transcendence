@@ -26,27 +26,27 @@ const Sidebar: React.FC<SidebarProps> = ({ userData, userStats }) => {
 	return (
 	<div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-xs">
 				<div className="flex mt-4 mb-10 m-2">
-				{userData.avatar ? (
-					<img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
-				) : (
-					<div className="bg-purple rounded-full p-2 mt-2">
-					<FaUser className="w-[60px] h-[60px] p-3 text-lilac"/>
+					{userData.avatar ? (
+						<img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
+					) : (
+						<div className="bg-purple rounded-full p-2 mt-2">
+						<FaUser className="w-[60px] h-[60px] p-3 text-lilac"/>
+						</div>
+					)}
+					<div className="pl-4 pt-4">
+						<DateConverter initialDate={userData.createdAt}/>
+						<p className="text-sm font-semibold text-lilac">{userData.username}</p>
+						<p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
 					</div>
-				)}
-				<div className="pl-4 pt-4">
-					<DateConverter initialDate={userData.createdAt}/>
-					<p className="text-sm font-semibold text-lilac">{userData.username}</p>
-					<p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
-				</div>
 				</div>
 				
 				<div>	
-				<Link to="/settings">
-									<div className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm">
-										<IoSettingsSharp className="w-3 h-4 mr-2"/>
-										<p>Edit Profile</p>
-									</div>
-								</Link>
+					<Link to="/settings">
+						<div className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm">
+							<IoSettingsSharp className="w-3 h-4 mr-2"/>
+							<p>Edit Profile</p>
+						</div>
+					</Link>
 				</div>
 
 				<div className="mt-60 mb-10">

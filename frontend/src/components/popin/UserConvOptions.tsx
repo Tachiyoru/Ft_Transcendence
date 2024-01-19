@@ -30,6 +30,8 @@ interface ChannelProps {
 	}
 	user: Users,
 	onMuteUser: (mutedUserId: number, user: Users) => void;
+	onUpdateList: (newList: Users[]) => void;	
+	block: Users[]
 }
 
 interface Users {
@@ -39,18 +41,24 @@ interface Users {
 	status: string;
 }
 
-const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) => {
+const UserConvOptions: React.FC<ChannelProps> = ({ 
+	channel,
+	user,
+	onMuteUser,
+	block,
+	onUpdateList 
+	}) => {
+
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
+    const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const socket = useContext(WebSocketContext);
-	const [userData, setUserData] = useState<{username: string}>({ username: '' });
 	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
 	const usersNotInChannel = useSelector((state: RootState) => state.selectedChannelId.usersNotInChannel[channel.chanId]);
-	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
-	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -69,20 +77,20 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 	};
 
 	const handleAddOp = () => {
+		console.log('add op')
 		socket.emit('addOp', { chanId: channel.chanId, username: user.username });
-		dispatch(setUsersOperatorsChannel({ channelId: channel.chanId, users: [...usersOp, user] }));
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleRemoveOp = () => {
+		console.log('remove op')
 		socket.emit('removeOp', { chanId: channel.chanId, username: user.username });
-		const updatedUsers = usersOp.filter(users => users.id !== user.id);
-		dispatch(setUsersOperatorsChannel({ channelId: channel.chanId, users: updatedUsers }));
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleClick = () => {
-	if (usersOp.find(opMember => opMember.username === user.username)) {
+		console.log(channel.op)
+	if (channel.op.find(opMember => opMember === user.username)) {
 		handleRemoveOp();
 	} else {
 		handleAddOp();
@@ -130,12 +138,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 		socket.emit('banUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userBanned', (data) => {
 			console.log('Ban', data);
-			const updatedUsers = usersInChannel.filter((users: Users) => users.id !== user.id);
-			dispatch(setUsersInChannel({channelId: channel.chanId, users:updatedUsers}));
-			dispatch(setUsersBan({channelId: channel.chanId, users: [...usersBan, user]}));
-			const updatedUsersNotInChannel = usersNotInChannel.filter(users => users.id !== user.id);
-			dispatch(setUsersNotInChannel({channelId: channel.chanId, users: updatedUsersNotInChannel}));	
-			console.log(usersBan)
 		});
 		setPopinOpen(!popinOpen);
 	}
@@ -144,10 +146,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 		socket.emit('kickUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userKicked', (data) => {
 			console.log('Kick', data);
-			const updatedUsers = usersInChannel.filter(users => users.id !== user.id);
-			dispatch(setUsersInChannel({channelId: channel.chanId, users:updatedUsers}));
-			const updatedUsersNotInChannel = usersNotInChannel.filter(users => users.id !== user.id);
-			dispatch(setUsersNotInChannel({channelId: channel.chanId, users: updatedUsersNotInChannel}));			
 		});
 		setPopinOpen(!popinOpen);
 	}
@@ -185,21 +183,24 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 
 	};
 
-	const handleBlockUser = async (userId: number) => {
+	const handleBlockUser = async (user: Users) => {
 		try {
 			if (isBlocked) {
-				await unblockUser(userId);
+				await unblockUser(user.id);
+				const updatedUsers = block.filter(user => user.id !== user.id);
+				onUpdateList(updatedUsers)
 				setIsBlocked(false);
 
 			} else {
-				await blockUser(userId);
+				await blockUser(user.id);
+				onUpdateList([...block, user])
 				setIsBlocked(true);
 			}
 		} catch (error) {
-			console.error('Erreur lors du blocage:', error);
+			console.error('Erreur lors du blocage ou deblocage de l\'utilisateur :', error);
 		}
 	};
-
+	
 	const blockUser = async (userId: number) => {
 		try {
 			await axios.post(`/friends-list/block/${userId}`);
@@ -250,8 +251,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 						<RiGamepadFill size={11}/>
 						<p className="ml-2">Invite to play</p>
 					</div>
-
-					{(user.username !== channel.owner.username || opMembers.find(opMember => opMember.username === userData.username))  && (
+					{(channel.op.find(opMember => opMember === userData.username) || userData.username === channel.owner.username) && (
 					<>
 					<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 					
@@ -274,7 +274,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 						</div>
 						<div 
 							style={{ cursor: "pointer" }}
-							onClick={() => handleBlockUser(user.id)}
+							onClick={() => handleBlockUser(user)}
 							className="flex flex-row items-center hover:opacity-40"
 						>
 							<FaMinusCircle size={11} />
@@ -296,7 +296,7 @@ const UserConvOptions: React.FC<ChannelProps> = ({ channel, user, onMuteUser }) 
 							<div className='border-t border-lilac my-2 w-2/3 m-auto border-opacity-50'></div>
 							<div className="flex flex-row items-center cursor-pointer" onClick={handleClick}>
 								<LuBadgePlus size={11} />
-								{usersOp.find(opMember => opMember.username === user.username) ? (
+								{channel.op && channel.op.find((opMember => opMember === user.username)) ? (
 									<p className="ml-2 text-red-orange">Remove</p>
 								) : (
 									<p className="ml-2">Register as operator</p>

@@ -142,7 +142,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
         <div  className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute top-0 inset-0 bg-black bg-opacity-50"></div>
           <div ref={cardRef} className="absolute top-28 right-36 mt-8 z-50 w-[180px] p-4 text-lilac rounded-md bg-accent-violet ">
-          <p className="text-base mb-1 ">Select Friends</p>
+          <p className="text-base mb-1 ">Select Members</p>
           <p className="text-xs">You can add 5 more friends</p>
 
           {/*RESEARCH BAR*/}
@@ -167,10 +167,10 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
 
           {usersNotInChannel.length === 0 ? (
             <div className="text-center mt-4">
-              <p className="text-sm font-regular">No friends found</p>
+              <p className="text-sm font-regular">No members found</p>
               <Link to="/friends">
                 <p className="text-xs my-1 underline">
-                  Add new friends to your list
+                  Add new members to your list
                 </p>
               </Link>
             </div>
