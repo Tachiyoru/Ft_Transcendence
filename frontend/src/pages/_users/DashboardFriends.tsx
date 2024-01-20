@@ -26,7 +26,7 @@ interface Users {
 const DashboardFriends = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
-	const [userData, setUserData] = useState<{id:number ;username: string; avatar: string; createdAt: string}>();
+	const [userData, setUserData] = useState<Users>();
 	const [userStats, setUserStats] = useState<{ partyPlayed: number; partyWon: number; partyLost: number, lvl: number; exp: number }>({
 		partyPlayed: 0,
 		partyWon: 0,
@@ -37,8 +37,7 @@ const DashboardFriends = () => {
 	const { username } = useParams();
 	const [friend, setFriend] = useState<Users | null >();
 	const [friendPending, setFriendPending] = useState<Users | null>();
-	
-	
+	const [blockedUser, setBlockedUser] = useState<Users | null>();
 	
 	useEffect(() => {
 		const fetchData = async () => {
@@ -72,6 +71,8 @@ const DashboardFriends = () => {
 	const addFriend = useCallback(async () => {
 		try {
 			await axios.post(`/friends-list/friend-request/${userData?.id}`);
+			setFriendPending(userData);
+			setFriend(null);
 		} catch (error) {
 			console.error("Error adding friend:", error);
 		}
@@ -103,7 +104,7 @@ const DashboardFriends = () => {
 			}
 		};
 		fetchUserData();
-	}, [username, addFriend]);
+	}, [username]);
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -123,7 +124,54 @@ const DashboardFriends = () => {
 		fetchUserData();
 	}, [username, addFriend]);
 
-console.log(friend, friendPending)
+	useEffect(() => {
+		const fetchBlockedUsers = async () => {
+		try {
+			const response = await axios.get<Users[]>("/friends-list/blocked-users");
+			const foundUser = response.data.find((user) => user.username === username);
+			if (username && foundUser)
+				setBlockedUser(foundUser);
+			else 
+				setBlockedUser(null);
+		} catch (error) {
+			console.error("Error fetching blocked users:", error);
+		}
+		};
+
+		fetchBlockedUsers();
+	}, []);
+
+	const blockUser = async (userId: number) => {
+		try {
+			await axios.post(`/friends-list/block/${userId}`);
+		} catch (error) {
+			console.error('Erreur lors du blocage de l\'utilisateur :', error);
+		}
+	};
+
+	const unblockUser = async (userId: number) => {
+		try {
+		await axios.post(`/friends-list/unblock/${userId}`);
+		} catch (error) {
+		console.error("Error deblocked users:", error);
+		}
+	};
+
+	const handleBlockUser = async (user: Users) => {
+		try {
+			if (blockedUser !== null) {
+				await unblockUser(user.id);
+				setBlockedUser(null);
+
+			} else {
+				await blockUser(user.id);
+				setBlockedUser(user);
+			}
+		} catch (error) {
+			console.error('Erreur lors du blocage ou deblocage de l\'utilisateur :', error);
+		}
+	};
+
 
 return (
 	<MainLayout currentPage={currentPage}>
@@ -171,9 +219,12 @@ return (
 
 						</div>
 
-						<div className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm">
+						<div
+							onClick={() => handleBlockUser(userData)}
+							className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm"
+						>
 							<FaMinusCircle className="w-3 h-4 mr-2"/>
-							<p>Block user</p>
+							<p className={`${blockedUser ? 'text-red-orange' : ''} `}>{blockedUser ? 'Unblock user' : 'Block user'}</p>
 						</div>
 					</div>
 

@@ -84,13 +84,14 @@ export class FriendsListService
 	{
 		user = await this.prismaService.user.update(
 			{
-				where: { id: friendId },
+				where: { id: user.id },
+				include: { pendingList: true },
 				data: {
-					pendingList: { disconnect: { id: user.id } },
+					pendingList: { disconnect: { id: friendId } },
 				}
 			}
 		);
-
+		console.log(user)
 		if (notificationId)
 		{
 			console.log('notificationId', notificationId);
