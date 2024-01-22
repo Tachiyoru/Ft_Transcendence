@@ -14,6 +14,12 @@ enum StatusUser {
     INGAME
 }
 
+enum StatusGame {
+	WIN
+	DRAW
+	LOSE
+}
+
 enum Role {
     ADMIN
     USER
@@ -153,5 +159,6 @@ model Game {
     nbrPlayers Int    @default(0)
     userId     Int
     // Player		User[]		@relation(fields: [userId], references: [id])
+	// result 	   StatusGame?
     //position
 }
