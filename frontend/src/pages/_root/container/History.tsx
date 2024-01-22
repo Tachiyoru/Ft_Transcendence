@@ -8,10 +8,10 @@ const History = () => {
 
 				<div className="flex flex-col justify-content mt-4">
 				{/*MATCH RESUME*/}
-					<div className="w-full overflow-x-auto">
+					<div className="w-full">
 					<p className="text-dark-violet mb-2">today</p>
 					<table className="w-full">
-						<tbody className="text-xs px-2">
+						<tbody className="text-xs">
 						<tr className="text-lilac">
 							<td>5-1</td>
 							<td>Thonthon</td>

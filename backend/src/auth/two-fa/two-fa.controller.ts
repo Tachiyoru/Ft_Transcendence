@@ -1,14 +1,14 @@
 import
-	{
-		Body,
-		Controller,
-		ForbiddenException,
-		Get,
-		Param,
-		Post,
-		Res,
-		UseGuards,
-	} from "@nestjs/common";
+{
+	Body,
+	Controller,
+	ForbiddenException,
+	Get,
+	Param,
+	Post,
+	Res,
+	UseGuards,
+} from "@nestjs/common";
 import { TwoFAService } from "./two-fa.service";
 import { AuthService } from "src/auth/auth.service";
 import { Response } from "express";
@@ -40,17 +40,21 @@ export class TwoFaController
 	}
 
 	@Post("authenticate")
-	async authenticateWith2FA(@GetUser() user: User, @Res() res: Response, @Body() body: { token: string} )
+	async authenticateWith2FA(@GetUser() user: User, @Body() body: { token: string; })
 	{
 		if (user)
 		{
 			const isValid = await this.twoFAService.verify2FACode(user, body.token);
 			if (!isValid)
 				throw new ForbiddenException("Invalid 2FA Token");
-			const access_token = await this.authService.callForgeTokens(user, res);
-
-			return { user, access_token };
-			// res.redirect("https://google.com");
+			await this.twoFAService.setTwoFaStatusTrue(user.id);
+			return (user);
 		}
+	}
+
+	@Post("set-status")
+	async setTwoFaStatus(@GetUser() user: User): Promise<User>
+	{
+		return (this.twoFAService.setTwoFaStatus(user.isTwoFaEnabled, user.id));
 	}
 }

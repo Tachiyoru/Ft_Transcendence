@@ -11,19 +11,22 @@ interface IdataRegister {
   
 const SecurityEdit = () => {
 	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
-  const [qrcode, setQrcode] = useState<string | null>(null)
 	const [loading, setLoading] = useState(true);
   const [tokenGoogle, setTokenGoogle] = useState<string>("");
-	const [userData, setUserData] = useState<{otpAuthUrl: string} | undefined>();
+	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean} | undefined, >();
+  const [isQrCode, setIsQrCode] = useState<boolean>(false);
+  const [isTwoFaEnabled, setIsTwoFaEnabled] = useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
 		try {
 			const userDataResponse = await axios.get('/users/me');
 			setUserData(userDataResponse.data);
-      if (!userDataResponse.data.otpAuthUrl)
-          await axios.get('/two-fa/generate-qrcode');
-
+      console.log(userDataResponse.data)
+      if (userDataResponse.data.otpAuthUrl)
+        setIsQrCode(true);
+      if(userDataResponse.data.isTwoFaEnabled)
+        setIsTwoFaEnabled(true);
 		} catch (error) {
       console.error('Error fetching user data:', error);
 		}
@@ -31,8 +34,7 @@ const SecurityEdit = () => {
 		fetchData();
 	}, []);
   
-  console.log("URL : ", userData?.otpAuthUrl);
-
+  
 	const {
 		register,
 		handleSubmit,
@@ -53,11 +55,27 @@ const SecurityEdit = () => {
       }
     };
 
+    const handleQrCode = async (isChecked: boolean) => {
+      try {
+        setLoading(true);
+        await axios.post('/two-fa/set-status');
+        if (!userData?.otpAuthUrl)
+          await axios.get('/two-fa/generate-qrcode');
+        const userDataResponse = await axios.get('/users/me');
+        setUserData(userDataResponse.data);
+        setIsQrCode(isChecked);
+        setIsTwoFaEnabled(false)
+      } catch (error) {
+        console.error("Error two-fa verification", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+	
   const handleSubmitTwoFa = async () => {
     try {
-      console.log(tokenGoogle)
-      const verifyTwoFa = await axios.post('/two-fa/authenticate', {token: tokenGoogle});
-      console.log(verifyTwoFa.data);
+      await axios.post('/two-fa/authenticate', {token: tokenGoogle});
+      setIsTwoFaEnabled(true)
     } catch (error) {
       console.error("Error two-fa verification", error);
     }
@@ -179,25 +197,51 @@ const SecurityEdit = () => {
 		</form>
 
 		{/*2FA*/}
-		<div>
-			<h3 className="text-sm text-lilac mb-6">2-Step Verification</h3>
-      <img src={userData?.otpAuthUrl} className="w-32 h-32 mb-4"/>
-      <input
-                type="text"
-                placeholder="Search..."
-                value={tokenGoogle}
-                onChange={(e) => {
-                  setTokenGoogle(e.target.value);
-                }}
-                className="bg-dark-violet text-lilac rounded-md focus:outline-none text-sm p-2"
-              />
-        <button
-						disabled={tokenGoogle.length === 0}
-						className='ml-2 bg-purple text-lilac rounded-md text-sm p-2'
-						onClick={handleSubmitTwoFa}
-						>
-							Save Change
-					</button>
+			<div>
+				<div className="flex flex-row items-center mb-6">
+					<h3 className="text-sm text-lilac mr-4">2-Step Verification</h3>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" value="" className="sr-only peer" checked={isQrCode} onChange={() => handleQrCode(!isQrCode)}/>
+            <div className={`w-9 h-5 bg-dark-violet peer-focus:outline-none peer-focus:ring-0 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:absolute after:top-[2px] after:start-[2px]  after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple ${isQrCode ? 'after:bg-acid-green' : 'after:bg-purple'}`}></div>
+            {isQrCode ? (
+              <>
+                <span className="absolute left-1 text-[0.45rem] text-lilac">ON</span>
+              </>
+            ) : (
+              <>
+                <span className="absolute right-0.5 text-[0.45rem] text-lilac">OFF</span>
+              </>
+            )}
+          </label>
+        </div>
+					{(isQrCode && !isTwoFaEnabled) && (
+					<div className="flex flex-row gap-x-4">
+						<img src={userData?.otpAuthUrl} className="w-32 h-32"/>
+            <div className="flex flex-col gap-y-4">
+							<input
+											type="text"
+											placeholder="Enter auth code"
+											value={tokenGoogle}
+											onChange={(e) => {
+												setTokenGoogle(e.target.value);
+											}}
+											className="border-b border-lilac bg-transparent text-lilac placeholder:text-lilac focus:outline-none text-sm p-2"
+							/>
+							<button
+									disabled={tokenGoogle.length === 0}
+									className='bg-purple text-lilac rounded-md text-sm p-2 w-32 disabled:text-violet-black disabled:bg-dark-violet disabled:cursor-not-allowed'
+									onClick={handleSubmitTwoFa}
+									>
+										Save Change
+							</button>
+              {!isTwoFaEnabled ? (
+                  <p className="text-red-orange text-xs">2FA Not active</p>
+                ) : (
+                  <p className="text-acid-green text-xs">2FA Active</p>
+              )}
+              </div>
+					</div>
+					)}
 		</div>
 	</div>
 
