@@ -62,10 +62,17 @@ export class UserController {
     return this.userService.editUser(userId, dto);
   }
 
+  @Get("histo")
+  getHisto(@GetUser() user: User) {
+	const histo = this.userService.getHisto(user.id);
+	return this.userService.getHisto(user.id);
+  }
+
   @Get("ranking-global")
   getRankingGlobal() {
     return this.userService.getRankingGlobal();
   }
+
 
   @Get("ranking-friends")
   getRankingFriendsHim(@Body() userId: number) {

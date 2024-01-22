@@ -23,7 +23,22 @@ export class UserService {
         partyPlayed: 42,
         partyWon: 42,
         partyLost: 0,
-        history: ["You would not understand"],
+        history: [
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaaaaaaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+			"3-0 Manshaa Victory +10exp",
+		],
       },
     });
     await this.createInitialUser({
@@ -36,7 +51,7 @@ export class UserService {
       stats: {
         lvl: 3,
         partyPlayed: 42,
-        partyWon: 0,
+        partyWon: 1,
         partyLost: 41,
         history: ["You could not wistand this loose series"],
       },
@@ -198,6 +213,20 @@ export class UserService {
     return user2;
   }
 
+  async getHisto(userId: number) {
+	const id: number = userId;
+	const user = await this.prisma.user.findUnique({
+		include: {
+			stats: true,
+		},
+		where: {
+			id: id,
+		},
+	});
+	if  (!user) return;
+	return (user.stats?.history);
+  }
+
   async getRankingGlobal() {
     const rank = await this.prisma.user.findMany({
       include: {
@@ -226,7 +255,7 @@ export class UserService {
       orderBy: {
         stats: { lvl: "desc" },
       },
-    });
+    });	
     return rank;
   }
 

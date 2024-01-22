@@ -23,6 +23,7 @@ export class SocketTokenGuard implements CanActivate
 	{
 		if (context.getType() !== "ws")
 		{
+			console.log("la");
 			return true;
 		}
 		const request = context.switchToHttp().getRequest();

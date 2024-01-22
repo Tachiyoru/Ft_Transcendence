@@ -15,5 +15,5 @@ export interface statsCreateInput {
   partyPlayed?: number;
   partyWon?: number;
   partyLost?: number;
-  history?: [string];
+  history?: string[];
 }

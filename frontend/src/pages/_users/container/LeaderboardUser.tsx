@@ -63,7 +63,7 @@ const LeaderboardUser = () => {
 			<div className="bg-purple lg:w-40 h-40 rounded-lg my-5 bg-opacity-70">
 			<div className="shadow-inner-custom px-4 py-4 h-40 rounded-lg">
 				<HighlightMiddle>
-				<div className="h-20 py-2 overflow-y-scroll">
+				<div className="h-20 py-2 overflow-y-auto max-h-20 scrollbar-thin scrollbar-thumb-black">
 					{userRankingGlobal.map((user, index) => (
 					<div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
 						{`${index + 1}-${user.username}`}

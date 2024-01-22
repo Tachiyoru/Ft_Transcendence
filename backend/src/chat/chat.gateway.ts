@@ -43,6 +43,7 @@ export class chatGateway {
     private readonly notificationService: NotificationService
   ) {}
 
+  
   afterInit() {
     this.server.on("connection", (socket) => {
       console.log("connected as socket :", socket.id);
