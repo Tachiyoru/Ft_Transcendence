@@ -53,14 +53,15 @@ export class UserController {
     @GetUser("id") userId: number,
     @UploadedFiles() file: Express.Multer.File[]
   ) {
-    console.log("file : ");
+    console.log("file : ", userId);
     const filepath = file[0].path;
     this.userService.editAvatar(userId, filepath);
   }
 
   @Patch("edit")
   editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
-      return this.userService.editUser(userId, dto);
+      console.log(dto)
+    return this.userService.editUser(userId, dto);
   }
 
   @Get("histo")

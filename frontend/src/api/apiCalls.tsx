@@ -33,13 +33,11 @@ export const fetchDataUser = async ({
 		const userRankingFriends = await axios.get('/users/ranking-friends');
 		setUserRankingFriends(userRankingFriends.data);
 
-		await axios.post(`achievements/add/${1}`);
 		const username = userDataResponse.data.username;
-		if (username.includes("_42")) { await axios.post(`achievements/add/${7}`);}
-		if (username.includes("_git")) { await axios.post(`achievements/add/${8}`);}
+		if (username.includes("_42") || username.includes("_git")) { await axios.post(`achievements/add/${1}`);}
 		const userInTop3 = userRankingGlobals.data.slice(0, 3).some(user => user.id === userDataResponse.data.id);
 		if (userInTop3) {
-		  await axios.post(`achievements/add/${2}`);
+			await axios.post(`achievements/add/${2}`);
 		}
 
 		const userAchievements = await axios.get('/achievements/mine');

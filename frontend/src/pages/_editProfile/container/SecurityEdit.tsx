@@ -13,7 +13,7 @@ const SecurityEdit = () => {
 	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
 	const [loading, setLoading] = useState(true);
   const [tokenGoogle, setTokenGoogle] = useState<string>("");
-	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean} | undefined, >();
+	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean, username: string} | undefined, >();
   const [isQrCode, setIsQrCode] = useState<boolean>(false);
   const [isTwoFaEnabled, setIsTwoFaEnabled] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -39,7 +39,9 @@ const SecurityEdit = () => {
 	const {
 		register,
 		handleSubmit,
-		formState: { isValid },
+    watch,
+		formState: { errors, isValid },
+    trigger,
     } = useForm<IdataRegister>();
 
     const submitHandler = async (data: IdataRegister) => {
@@ -89,16 +91,20 @@ const SecurityEdit = () => {
     }
   };
 
+  const newPassword = watch('newPassword');
+  const confirmPassword = watch('confirmPassword');
+  
 	return (
 	<div className="mx-2">
 		{/*TITLE*/}
-		<div className="text-lilac mt-4">
+		<div className="text-lilac mt-4 mb-6">
 			<h2>Password and Security</h2>
 			<p className="text-xs">Manage security preferences</p>
 		</div>
 
 		{/*CHANGE*/}
-		<form onSubmit={handleSubmit(submitHandler)} className="mt-6">
+    {!(userData?.username.includes("_42") || userData?.username.includes("_git")) &&
+		<form onSubmit={handleSubmit(submitHandler)}>
 			<h3 className="text-sm text-lilac">Edit Password</h3>
 
 			<div className="mt-4 w-full">
@@ -136,7 +142,7 @@ const SecurityEdit = () => {
             {error && <div className="text-xs text-red-orange">{error}</div>}
 
 
-			  <div className="w-[260px] flex flex-row items-center border-b border-lilac">
+          <div className="w-[260px] flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
@@ -153,6 +159,10 @@ const SecurityEdit = () => {
                   })}
                   placeholder="Enter New Password"
                   className="px-5 py-3 text-sm w-full text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
+                  onChange={() => {
+                    trigger('newPassword');
+                    trigger('confirmPassword');
+                  }}
                 />
                 <button
                   onClick={() => {
@@ -178,9 +188,12 @@ const SecurityEdit = () => {
                       value: true,
                       message: 'Confirm Password is required',
                     },
+                    validate: value => value === newPassword || 'Passwords do not match',
                   })}
+                  
                   placeholder="Confirm New Password"
-                  className="px-5 py-3 w-full text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"/>
+                  className="px-5 py-3 w-full text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
+                  />
                 <button
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
@@ -193,6 +206,9 @@ const SecurityEdit = () => {
                   )}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <div className="text-xs text-red-orange">{errors.confirmPassword.message}</div>
+              )}
             </div>
 
 
@@ -205,7 +221,7 @@ const SecurityEdit = () => {
               Save changes
             </button>
           </form>
-
+        }
 		{/*2FA*/}
 			<div>
 				<div className="flex flex-row items-center mb-6">

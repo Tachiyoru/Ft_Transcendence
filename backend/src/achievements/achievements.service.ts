@@ -17,52 +17,46 @@ export class AchievementsService
 	async onModuleInit()
 	{
 		await this.createInitialAchievements({
-			title: "First steps",
-			description: "it's just the beginning on this wonderfull SPA",
+			title: "1",
+			description: "Link your profile to 42 or Github",
 			icon: "src/achievements-1.png",
 		});
 		await this.createInitialAchievements({
-			title: "Top of the world",
-			description: "You are in the top 3",
-			icon: "src/achievements-3.png",
-		});
-		await this.createInitialAchievements({
-			title: "Polymorph",
-			description: "Changed your avatar",
-			icon: "src/achievements-7.png",
-		});
-		await this.createInitialAchievements({
-			title: "I go by many names",
-			description: "Change your username",
-			icon: "src/achievements-7.png",
-		});
-		await this.createInitialAchievements({
-			title: "Gladiator",
-			description: "Are you not entertained ? You just won 10 games",
+			title: "2",
+			description: "10 times winner",
 			icon: "src/achievements-2.png",
 		});
 		await this.createInitialAchievements({
-			title: "Serial loser",
-			description: "You have lost 10 games without losing interest here's your reward",
-			icon: "src/achievements-8.png",
+			title: "3",
+			description: "Top 3 worldwide",
+			icon: "src/achievements-3.png",
 		});
 		await this.createInitialAchievements({
-			title: "The one who code",
-			description: "You are from 42 I see",
-			icon: "src/achievements-6.png",
-		});
-		await this.createInitialAchievements({
-			title: "the one who github",
-			description: "You have a github account only to learn or store your code I suppose ;)",
-			icon: "src/achievements-6.png",
-		});
-		await this.createInitialAchievements({
-			title: "Google is my friend",
-			description: "You used google to verify your email, you are someone I can trust",
+			title: "4",
+			description: "Take revenge",
 			icon: "src/achievements-4.png",
 		});
+		await this.createInitialAchievements({
+			title: "5",
+			description: "First game",
+			icon: "src/achievements-5.png",
+		});
+		await this.createInitialAchievements({
+			title: "6",
+			description: "Changed your avatar/username",
+			icon: "src/achievements-6.png",
+		});
+		await this.createInitialAchievements({
+			title: "7",
+			description: "Did 42 games",
+			icon: "src/achievements-7.png",
+		});
+		await this.createInitialAchievements({
+			title: "8",
+			description: "Serial looser : lose 10 times in a row",
+			icon: "src/achievements-8.png",
+		});
 		const achievements = await this.prismaService.achievement.findMany({});
-		console.log(achievements);
 	}
 
 

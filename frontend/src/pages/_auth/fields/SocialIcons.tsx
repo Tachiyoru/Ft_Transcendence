@@ -24,10 +24,10 @@ const SocialIcons: React.FC<SocialIconsProps> = ({ onGitClick, on42Click }) => (
             <AiOutlineGithub className="w-4 h-4 text-lilac" />
         </IconContainer>
 
-        <IconContainer fct={on42Click}>
-            <Si42 className="w-4 h-4 text-lilac" />
-        </IconContainer>
-    </div>
+		<IconContainer fct={on42Click}>
+			<Si42 className="w-4 h-4 text-lilac" />
+		</IconContainer>
+	</div>
 );
 
 export default SocialIcons;

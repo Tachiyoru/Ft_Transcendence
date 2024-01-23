@@ -67,7 +67,6 @@ const SignupForm = () => {
         setResStatus('Error');
         console.log(error.response.data.message);
       });
-	  const response = await axios.post(`achievements/add/${1}`);
   };
 
   console.log(resStatus);
