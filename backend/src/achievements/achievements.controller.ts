@@ -4,12 +4,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseGuards,
 } from "@nestjs/common";
 import { AchievementsService } from "./achievements.service";
 import { TokenGuard } from "src/auth/guard";
 import { GetUser } from "src/auth/decorator";
+import { MessageBody } from "@nestjs/websockets";
 
 @Controller("achievements")
 @UseGuards(TokenGuard)
@@ -33,14 +35,19 @@ export class AchievementsController {
     return this.achievementsService.getAchievementsByUserId(userId);
   }
 
-  @Post("/add/:userId/:achievementId")
+  @Post("/add/:id")
   async addAchievementByUserId(
-    @Param("userId", ParseIntPipe) userId: number,
-    @Param("achievementId", ParseIntPipe) achievementId: number
+    @GetUser() user: User,
+    @Param("id", ParseIntPipe) id: number
   ): Promise<User> {
-    return this.achievementsService.addAchievementByUserId(
-      userId,
-      achievementId
-    );
+    console.log("addAchievementByUserId");
+    return await this.achievementsService.addAchievementByUserId(user.id, id);
+  }
+
+  @Patch("/settitle/:id")
+  async setTitle(@GetUser() user: User, @Param("id", ParseIntPipe) id: number) {
+	console.log(user);
+    console.log("setTitle");
+    await this.achievementsService.setTittle(user.id, id);
   }
 }

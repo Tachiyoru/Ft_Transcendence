@@ -12,7 +12,7 @@ export class UserService {
 
   async onModuleInit() {
     await this.createInitialUser({
-      avatar: "/upload/Tachi.png",
+      avatar: "upload/Tachi.png",
       username: "Tachi",
       email: "shanley@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -42,7 +42,7 @@ export class UserService {
       },
     });
     await this.createInitialUser({
-      avatar: "/upload/Manu.png",
+      avatar: "upload/Manu.png",
       username: "Mansha",
       email: "mansha@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -53,11 +53,11 @@ export class UserService {
         partyPlayed: 42,
         partyWon: 1,
         partyLost: 41,
-        history: ["You could not wistand this loose series"],
+        history: [],
       },
     });
     await this.createInitialUser({
-      avatar: "/upload/Clem.png",
+      avatar: "upload/Clem.png",
       username: "Cremette",
       email: "creme@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -68,7 +68,7 @@ export class UserService {
         partyPlayed: 1,
         partyWon: 0,
         partyLost: 1,
-        history: ["just a noob"],
+        history: [],
       },
     });
   }
@@ -132,7 +132,7 @@ export class UserService {
       where: { id: userId },
     });
     if (user) {
-      if (user.avatar && user.avatar.startsWith("/upload")) {
+      if (user.avatar && user.avatar.startsWith("upload")) {
         await unlink(user.avatar); //attention a la suppression de l'avatar
       }
       await this.prisma.user.delete({
@@ -167,9 +167,12 @@ export class UserService {
       where: { id: userId },
     });
     if (file) {
+	  console.log("file==", file);
       if (user) {
         if (user.avatar && user.avatar.startsWith("/upload")) {
-          await unlink(user.avatar);
+			console.log("unlink : ", (user.avatar), file);
+
+			await unlink("upload/Tachi.png");
         }
         await this.prisma.user.update({
           where: {
@@ -201,6 +204,7 @@ export class UserService {
       }
     }
     const { password, username: newusername } = dto;
+	console.log(userId);
     const user2 = await this.prisma.user.update({
       where: {
         id: userId,

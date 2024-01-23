@@ -49,6 +49,7 @@ const AccountEdit = () => {
 		if (username) {
 			filteredData.username = username;
 			console.log("username : ", filteredData.username);
+			await axios.post(`achievements/add/${4}`);
 		}
 
 		if (email) {

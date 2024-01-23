@@ -27,12 +27,24 @@ export const fetchDataUser = async ({
 
 		const userRankingGlobals = await axios.get('/users/ranking-global');
 		setUserRankingGlobal(userRankingGlobals.data);
+		console.log("userRankingGlobals : ", userRankingGlobals.data
+		)
 
 		const userRankingFriends = await axios.get('/users/ranking-friends');
 		setUserRankingFriends(userRankingFriends.data);
 
-		const userAchievements = await axios.get('/achievements/list');
+		await axios.post(`achievements/add/${1}`);
+		const username = userDataResponse.data.username;
+		if (username.includes("_42")) { await axios.post(`achievements/add/${7}`);}
+		if (username.includes("_git")) { await axios.post(`achievements/add/${8}`);}
+		const userInTop3 = userRankingGlobals.data.slice(0, 3).some(user => user.id === userDataResponse.data.id);
+		if (userInTop3) {
+		  await axios.post(`achievements/add/${2}`);
+		}
+
+		const userAchievements = await axios.get('/achievements/mine');
 		setUserAchievements(userAchievements.data);
+
 	} catch (error) {
 		console.error('Error fetching user data:', error);
 	} finally {

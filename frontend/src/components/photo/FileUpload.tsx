@@ -20,6 +20,7 @@ const FileUpload = () => {
             "Content-Type": "multipart/form-data",
           },
         });
+		await axios.post(`achievements/add/${3}`);
         console.log("File uploaded successfully:", response.data);
       } catch (error) {
         console.error("Error uploading file:", error);

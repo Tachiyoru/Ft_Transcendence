@@ -18,14 +18,51 @@ export class AchievementsService
 	{
 		await this.createInitialAchievements({
 			title: "First steps",
-			description: "Complete your first quest",
-			icon: "src/achievements_1.png",
+			description: "it's just the beginning on this wonderfull SPA",
+			icon: "src/achievements-1.png",
 		});
 		await this.createInitialAchievements({
-			title: "Quests addict",
-			description: "Complete 10 quests",
-			icon: "src/achievements_1.png",
+			title: "Top of the world",
+			description: "You are in the top 3",
+			icon: "src/achievements-3.png",
 		});
+		await this.createInitialAchievements({
+			title: "Polymorph",
+			description: "Changed your avatar",
+			icon: "src/achievements-7.png",
+		});
+		await this.createInitialAchievements({
+			title: "I go by many names",
+			description: "Change your username",
+			icon: "src/achievements-7.png",
+		});
+		await this.createInitialAchievements({
+			title: "Gladiator",
+			description: "Are you not entertained ? You just won 10 games",
+			icon: "src/achievements-2.png",
+		});
+		await this.createInitialAchievements({
+			title: "Serial loser",
+			description: "You have lost 10 games without losing interest here's your reward",
+			icon: "src/achievements-8.png",
+		});
+		await this.createInitialAchievements({
+			title: "The one who code",
+			description: "You are from 42 I see",
+			icon: "src/achievements-6.png",
+		});
+		await this.createInitialAchievements({
+			title: "the one who github",
+			description: "You have a github account only to learn or store your code I suppose ;)",
+			icon: "src/achievements-6.png",
+		});
+		await this.createInitialAchievements({
+			title: "Google is my friend",
+			description: "You used google to verify your email, you are someone I can trust",
+			icon: "src/achievements-4.png",
+		});
+		const achievements = await this.prismaService.achievement.findMany({});
+		console.log(achievements);
 	}
 
 
@@ -46,11 +83,11 @@ export class AchievementsService
 				},
 			});
 		}
+
 	}
 
 	async getAchievementsList()
-	{
-		const achievementsList = await this.prismaService.achievement.findMany();
+	{		const achievementsList = await this.prismaService.achievement.findMany();
 		return achievementsList;
 	}
 
@@ -126,4 +163,30 @@ export class AchievementsService
 
 		return updatedUser;
 	}
+
+	async setTittle(userId: number, achievementId: number){
+		const user = await this.prismaService.user.findUnique({
+			where: {
+				id: userId,
+			},
+			include: {
+				achievements: true,
+			},
+		});
+		const achievement = await this.prismaService.achievement.findUnique({
+			where: {
+				id: achievementId,
+			},
+		});
+		if (!achievement) throw new Error("Achievement not found");
+		const updatedUser = await this.prismaService.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				tittle: (achievement.title),
+			},
+		});
+	}
+
 }

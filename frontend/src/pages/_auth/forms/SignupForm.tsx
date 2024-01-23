@@ -49,14 +49,15 @@ const SignupForm = () => {
     formState: { errors, isValid },
   } = useForm<IdataRegister>();
   
-  const SubmitHandler = (data: IdataRegister) => {
-      axios
+  const  SubmitHandler = async (data: IdataRegister) => {
+      await axios
       .post('/auth/signup', data)
       .then((response) => {
         if (response.status === 201) {
           setResStatus('Successful Registration!');
           console.log(response.data);
           dispatch(loginSuccess(response.data))
+		//   axios.post('/add/achievement', {id:1})
           navigate('/');
         } else {
           setResStatus('Error');
@@ -66,6 +67,7 @@ const SignupForm = () => {
         setResStatus('Error');
         console.log(error.response.data.message);
       });
+	  const response = await axios.post(`achievements/add/${1}`);
   };
 
   console.log(resStatus);

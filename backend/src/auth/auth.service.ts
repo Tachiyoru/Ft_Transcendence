@@ -8,13 +8,14 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { error } from "console";
 import { StatusUser, User } from "@prisma/client";
 import { Request, Response } from "express";
+import { AchievementsService } from "src/achievements/achievements.service";
 
 @Injectable({})
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-    private config: ConfigService
+    private config: ConfigService,
   ) {}
 
   async signup(dto: AuthDto, res: Response) {
@@ -50,7 +51,7 @@ export class AuthService {
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
     user.status = StatusUser.ONLINE;
-    return this.forgeTokens(user, res);
+    return (this.forgeTokens(user, res), console.log("user connected"));
   }
 
   async authExtUserCreate(userInfo: any, imageLink: string) {
@@ -139,6 +140,7 @@ export class AuthService {
       data : {status : 'OFFLINE'}
     })
     userA.status = StatusUser.OFFLINE;
+	console.log("user disconnected");
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
     return "Successfully logged out";

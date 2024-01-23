@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import { setLogout } from "../../../services/UserSlice";
 import { useDispatch } from "react-redux";
 import axios from "../../../axios/api";
+import { WebSocketContext } from "../../../socket/socket";
+import { useContext } from "react";
+
 
 interface NavItemProps {
 	lien: string;
@@ -36,6 +39,7 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ lien, icon:
 
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 	const dispatch = useDispatch();
+	const socket= useContext(WebSocketContext);
 
 	const handleLogout = () => {
 	dispatch(setLogout());
@@ -43,6 +47,8 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 		.post('/auth/logout')
 		.then( () => {
 		console.log('Déconnexion réussie');
+		socket.disconnect();
+		window.location.reload();
 		})
 		.catch(error => {
 		console.error('Erreur lors de la déconnexion côté serveur :', error);

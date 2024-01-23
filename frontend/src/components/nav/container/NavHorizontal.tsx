@@ -4,8 +4,6 @@ import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
-import { io } from "socket.io-client";
-import { set } from "react-hook-form";
 import { WebSocketContext } from "../../../socket/socket";
 
 interface NavItemProps {
@@ -173,12 +171,7 @@ const socket = useContext(WebSocketContext);
       socket.on("unread-notification-array", (notification) => {
         if (notification) setUnreadNotifications(notification.length);
       });
-
-    // socket.on("disconnect", () => {
-    //   console.log("Disconnected from server");
-    //   socket.disconnect();
-    // });
-  }, []);
+  }, [socket]);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {

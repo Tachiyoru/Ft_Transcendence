@@ -37,20 +37,17 @@ export class SocketTokenGuard implements CanActivate
 		if (request.user)
 			return true;
 		if (!token)
-		{
 			throw new UnauthorizedException();
-		}
 		const payload = await this.jwt.verifyAsync(token, {
 			secret: this.config.get<string>("JWT_SECRET_REFRESH"),
 		});
 		if (!payload)
-		{
 			throw new UnauthorizedException();
-		}
 		const user = await this.prisma.user.findUnique({
 			where: { id: payload.sub },
 			include: { friends: true, stats: true, achievements: true },
 		});
+		console.log("user : ", user);
 		if (!user)
 		{
 			throw new UnauthorizedException("User not found");

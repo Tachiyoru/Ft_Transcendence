@@ -22,7 +22,7 @@ export class TwoFAService
 		const secret = authenticator.generateSecret();
 		const issuerName: string =
 			this.configService.get<string>("ISSUER_NAME") || "DEFAULT_NAME";
-
+		if (!user.email) return "ntm manu";
 		const otpAuthUrl: string = authenticator.keyuri(
 			user.email,
 			issuerName,

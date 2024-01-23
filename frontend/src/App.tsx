@@ -21,8 +21,6 @@ import AboutToPlay from './pages/_game/container/AboutToPlay';
 
 //import socketIO from 'socket.io-client';
 
-//const socket = socketIO.connect('http://localhost:5001');
-
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)
