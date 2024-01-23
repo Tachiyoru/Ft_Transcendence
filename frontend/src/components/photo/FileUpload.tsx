@@ -20,7 +20,7 @@ const FileUpload = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-		await axios.post(`achievements/add/${3}`);
+        await axios.post(`achievements/add/${6}`);
         console.log("File uploaded successfully:", response.data);
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -30,8 +30,8 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input className="block w-full mb-5 text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
-      <button className="text-sm" onClick={handleUpload}>Upload</button>
+      <input className="ml-6 block w-full mb-5 text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
+      <button className="text-sm ml-6 px-4 py-1 bg-purple rounded-md" onClick={handleUpload}>Upload</button>
     </div>
   );
 };

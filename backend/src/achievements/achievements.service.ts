@@ -46,6 +46,7 @@ export class AchievementsService
 			description: "Changed your avatar/username",
 			icon: "src/achievements-6.png",
 		});
+		
 		await this.createInitialAchievements({
 			title: "7",
 			description: "Did 42 games",
