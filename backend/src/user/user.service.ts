@@ -167,12 +167,10 @@ export class UserService {
       where: { id: userId },
     });
     if (file) {
-	  console.log("file==", file);
       if (user) {
-        if (user.avatar && user.avatar.startsWith("/upload")) {
+        if (user.avatar && user.avatar.startsWith("upload")) {
 			console.log("unlink : ", (user.avatar), file);
-
-			await unlink("upload/Tachi.png");
+			await unlink(user.avatar);
         }
         await this.prisma.user.update({
           where: {
