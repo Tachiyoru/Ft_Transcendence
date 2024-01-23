@@ -42,7 +42,7 @@ model User {
     email    String?  @unique 
     username String? @unique
     avatar   String?
-    tittle   String?
+    tittle   String? @default("Newcomer")
     hash     String?
 
     twoFASecret String? @unique
