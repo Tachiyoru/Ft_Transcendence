@@ -3,8 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface SelectedChannelState {
 	selectedChannelId: number | null;
 	prevChannelId: number | null;
+	selectedUser: Users | null;
 	channelUsers: { [key: number]: Users[] };
-	channelBannedUsers: { [key: number]: Users[] };
 	usersNotInChannel: { [key: number]: Users[] };
 	channelOperators: { [key: number]: Users[] };
 }
@@ -19,8 +19,8 @@ interface Users {
 const initialState: SelectedChannelState = {
 	selectedChannelId: null as number | null,
 	prevChannelId: null as number | null,
+	selectedUser: null as Users | null,
 	channelUsers: {},
-	channelBannedUsers: {},
 	usersNotInChannel: {},
 	channelOperators: {}
 };
@@ -35,16 +35,15 @@ const selectedChannelSlice = createSlice({
 		setPrevChannelId(state, action: PayloadAction<number>) {
 		state.prevChannelId = action.payload;
 		},
+		setSelectedUserProfile(state, action: PayloadAction<Users>) {
+			state.selectedUser = action.payload;
+		},
 		setUsersInChannel(state, action: PayloadAction<{ channelId: number | null; users: Users[] }>) {
 		const { channelId, users } = action.payload;
 		if (channelId !== null) 
 			state.channelUsers[channelId] = users;
 		},
-		setUsersBan(state, action: PayloadAction<{ channelId: number | null; users: Users[] }>) {
-		const { channelId, users } = action.payload;
-		if (channelId !== null) 
-			state.channelBannedUsers[channelId] = users;
-		},
+
 		setUsersNotInChannel(state, action: PayloadAction<{ channelId: number | null; users: Users[] }>) {
 			const { channelId, users } = action.payload;
 			if (channelId !== null) 
@@ -60,8 +59,8 @@ const selectedChannelSlice = createSlice({
 
 export const { setSelectedChannelId } = selectedChannelSlice.actions;
 export const { setPrevChannelId } = selectedChannelSlice.actions;
+export const { setSelectedUserProfile } = selectedChannelSlice.actions;
 export const { setUsersInChannel } = selectedChannelSlice.actions;
-export const { setUsersBan } = selectedChannelSlice.actions;
 export const { setUsersNotInChannel } = selectedChannelSlice.actions;
 export const { setUsersOperatorsChannel } = selectedChannelSlice.actions;
 

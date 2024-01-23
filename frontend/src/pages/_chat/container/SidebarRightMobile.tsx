@@ -8,25 +8,22 @@ import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
-import { setUsersBan, setUsersOperatorsChannel } from "../../../services/selectedChannelSlice";
 
-interface Member {
-	username: string;
-	avatar: string;
-	id: number;
-	status: string;
-}
 
 interface RightSidebarProps {
 	isRightSidebarOpen: boolean;
 	toggleRightSidebar: () => void;
+	onUpdateList: (newList: Users[]) => void;	
+	block: Users[]
 	channel: {
-		members: Member[];
+		members: Users[];
 		modes: string;
 		chanId: number;
 		name: string;
 		owner: Owner;
 		op: string[];
+		muted: number[];
+		banned: Users[],
 	};
 }
 
@@ -48,14 +45,16 @@ interface Channel {
 	modes: string;
 	chanId: number;
 	owner: Owner;
-	members: Member[];
-	op: string[];
+	members: Users[];
+	op: Users[];
 }
 
 const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	isRightSidebarOpen,
 	toggleRightSidebar,
 	channel,
+	block,
+	onUpdateList,
 	}) => {
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
@@ -68,17 +67,23 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const [usersInFriends, setUsersInFriends] = useState<Users[]>([]);
 	const [showCommonFriends, setShowCommonFriends] = useState(false);
 	const [showCommonChannel, setShowCommonChannel] = useState(false);
-	const opMembers = channel.members.filter((members) =>
-		channel.op.includes(members.username)
-	);
+
 	const [showBanUser, setShowBanUser] = useState(false);
 	const [usersMute, setUsersMute] = useState<Users[]>([]);
 	const socket = useContext(WebSocketContext);
-	const dispatch = useDispatch();
-	const usersBan = useSelector((state: RootState) => state.selectedChannelId.channelBannedUsers[channel.chanId]);
-	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
-	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
-	const { chanId } = useParams();
+	const [userData, setUserData] = useState<{username: string, id: number}>({ username: '', id: -1 });
+
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, []);
 
 	type ChannelEquivalents = {
 		[key: string]: string;
@@ -93,15 +98,15 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	const channelName: string = channel.modes;
 	const displayText: string = channelEquivalents[channelName];
 
-	// usersInChannel.sort((a, b) => {
-	// 	if (channel.owner.username === a.username) {
-	// 	return -1;
-	// 	} else if (channel.owner.username === b.username) {
-	// 	return 1;
-	// 	} else {
-	// 	return 0;
-	// 	}
-	// });
+	channel.members.sort((a, b) => {
+		if (channel.owner.username === a.username) {
+		return -1;
+		} else if (channel.owner.username === b.username) {
+		return 1;
+		} else {
+		return 0;
+		}
+	});
 
 	const toggleCommonFriends = () => {
 		setShowCommonFriends(!showCommonFriends);
@@ -116,36 +121,31 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 	};
 
 	useEffect(() => {
-		if (chanId !== undefined) {
-			const parsedChanId = parseInt(chanId, 10);
+		if (channel.chanId !== null) {
 			
 			socket.emit("users-in-channel-except-him", { chanName: channel.name });
 			socket.on("users-in-channel-except-him", (users) => {
 			setUsersInChannelExceptHim(users);
 			});
 			
-			socket.emit("findAllMutedMembers", { chanId: parsedChanId });
+			socket.emit("findAllMutedMembers", { chanId: channel.chanId });
 			socket.on("allMuted", (users) => {
 			setUsersMute(users);
 			});
 
-			socket.emit("check-user-in-channel", { chanId: parsedChanId });
+			socket.emit("check-user-in-channel", { chanId: channel.chanId });
 			socket.on("user-in-channel", (boolean) => {
 			setCheckUserInChannel(boolean);
 			});
 
-			const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
-			dispatch(setUsersOperatorsChannel({ channelId: parsedChanId, users: opMembers }));
-			
 			return () => {
 			socket.off("allMembers");
 			socket.off("allMembers");
 			socket.off("allMembersBan");
 			socket.off("user-in-channel");
 			};
-
 		}
-	}, [socket, chanId, channel.name, channel.modes, channel.op]);
+	}, [socket, channel.chanId, channel.name, channel.modes]);
 
 	const updateUsersMute = (mutedUserId: number, user: Users) => {
 		const isUserMuted = usersMute.some(user => user.id === mutedUserId);
@@ -182,26 +182,30 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		}
 	}, [usersInChannelExceptHim]);	
 
-	const handleBlockUser = async (userId: number) => {
+	
+	const handleJoinChannel = async () => {
+		socket.emit("joinChan", { chanId: channel.chanId });
+		socket.on("channelJoined", () => {});
+		setCheckUserInChannel(true);
+	}
+	
+	const handleBlockUser = async (user: Users) => {
 		try {
 			if (isBlocked) {
-				await unblockUser(userId);
+				await unblockUser(user.id);
+				const updatedUsers = block.filter(user => user.id !== user.id);
+				onUpdateList(updatedUsers)
 				setIsBlocked(false);
 
 			} else {
-				await blockUser(userId);
+				await blockUser(user.id);
+				onUpdateList([...block, user])
 				setIsBlocked(true);
 			}
 		} catch (error) {
 			console.error('Erreur lors du blocage ou deblocage de l\'utilisateur :', error);
 		}
 	};
-
-	const handleJoinChannel = async () => {
-		socket.emit("joinChan", { chanId: channel.chanId });
-		socket.on("channelJoined", () => {});
-		setCheckUserInChannel(true);
-	}
 
 	const blockUser = async (userId: number) => {
 		try {
@@ -224,8 +228,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 		socket.emit("unBanUser", { chanId: channel.chanId, username: username });
 		socket.on("userUnBanned", (users) => {
 			console.log("Unban", users);
-			const updatedUsers = usersMute.filter(user => user.id === users.id);
-			dispatch(setUsersBan({channelId: channel.chanId, users: updatedUsers}));
 		});
 		} catch (error) {
 		console.error("Error deblocked users:", error);
@@ -265,7 +267,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						{member.status === "ONLINE" ? (
 						<div className="absolute bg-acid-green  w-5 h-5 rounded-full left-32 bottom-6"></div>
 						) : member.status === "OFFLINE" ? (
-						<div className="absolute bg-red-orange  w-5 h-5 rounded-full left-32 bottom-6"></div>
+						<div className="absolute w-5 h-5 rounded-full left-32 bottom-6"></div>
 						) : member.status === "INGAME" ? (
 						<div className="absolute bg-fushia w-5 h-5 rounded-full left-32 bottom-6 flex items-center justify-center z-50">
 							<RiGamepadFill className="text-white w-3 h-3" />
@@ -281,7 +283,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 								<ul className="text-lilac">
 									<li 
 										className="hover:opacity-40"
-										onClick={() => handleBlockUser(member.id)}
 										style={{ cursor: "pointer" }}
 									>
 										<Link to={`/user/${member.username}`}>
@@ -294,7 +295,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 									{!isBlocked && (
 									<li 
 									className="hover:opacity-40"
-									onClick={() => handleBlockUser(member.id)}
 									style={{ cursor: "pointer" }}
 								>
 										<Link to="">
@@ -307,7 +307,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 									)}
 									<li 
 										className="hover:opacity-40 mt-1"
-										onClick={() => handleBlockUser(member.id)}
+										onClick={() => handleBlockUser(member)}
 										style={{ cursor: "pointer" }}
 									>
 										<div className="flex flex-row items-center mt-1">
@@ -403,7 +403,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 				</div>
 			)}
 			<div className="mt-6">
-				{usersInChannel.map((member, index) => {
+				{channel.members.map((member, index) => {
 				return (
 					<div
 					key={index}
@@ -413,9 +413,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						<div
 						className={`w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center 
 							${channel.owner.username === member.username ? "border-2 border-fushia" : ""}
-							${usersOp && usersOp.find((opMember) => opMember.username === member.username)
-							? "border border-green-500": ""}`}
-						>
+							${channel.op.find(opMember => opMember === member.username) ? "border-2 border-acid-green" : ""}
+						`}>
 						{member.avatar ? (					
 							<div>
 								<img
@@ -432,7 +431,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						{member.status === "ONLINE" ? (
 						<div className="absolute bg-acid-green w-1.5 h-1.5 rounded-full left-3.5 top-3.5"></div>
 						) : member.status === "OFFLINE" ? (
-						<div className="absolute bg-red-orange w-1.5 h-1.5 rounded-full left-3.5 top-3.5"></div>
+						<div className="absolute w-1.5 h-1.5 rounded-full left-3.5 top-3.5"></div>
 						) : member.status === "INGAME" ? (
 						<div className="absolute bg-fushia w-1.5 h-1.5 rounded-full left-3.5 top-3.5 flex items-center justify-center">
 							<RiGamepadFill className="text-white w-1 h-1" />
@@ -440,14 +439,16 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						) : null}
 					</div>
 					<div className="flex flex-row text-lilac">
-						{usersMute.map(user => user.id).includes(member.id) && (<FaVolumeXmark size={10} className="mr-2"/>)}
-						{usersInChannelExceptHim.find(
-							(userMember) => userMember.username === member.username
-						) && (
+						{channel.muted.map(user => user).includes(member.id) 
+						&& (<FaVolumeXmark size={10} className="mr-2"/>)
+						}
+						{channel.members.map(user => user.id).includes(member.id) && member.id !== userData.id && (
 							<UserConvOptions
 							channel={channel}
 							user={member}
 							onMuteUser={updateUsersMute}
+							block={block} 
+							onUpdateList={onUpdateList}
 							/>
 						)}
 						</div>
@@ -462,14 +463,14 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 						className="flex flex-row justify-between items-center cursor-pointer"
 					>
 						<div className="text-xs text-lilac">
-						{usersBan.length} banned members
+						{channel.banned ? (channel.banned.length) : 0 } banned members
 						</div>
 						<IoIosArrowForward className={`w-2 h-2 text-lilac ${showBanUser && 'rotate-90'}`} />
 					</div>
 					{showBanUser && (
 						<div>
-						{usersBan &&
-							usersBan.map((ban) => (
+						{channel.banned &&
+							channel.banned.map((ban) => (
 							<div
 								key={ban.id}
 								className="text-red-orange flex items-center justify-between"
@@ -479,7 +480,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 								className="ml-1"
 								onClick={() => unBanUser(ban.username)}
 								>
-								<FaXmark className="w-2 h-2 text-red-orange" />
+								{(channel.op.find(opMember => opMember === userData.username) || userData.username === channel.owner.username) && (<FaXmark className="w-2 h-2 text-red-orange" />)}
 								</button>
 							</div>
 							))}

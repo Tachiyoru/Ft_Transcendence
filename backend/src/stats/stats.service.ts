@@ -15,9 +15,10 @@ export class StatsService {
     return me.stats;
   }
 
-  async getStatsById(userId: number) {
+  async getStatsById(userId: string) {
+    console.log(userId)
     const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
+      where: { username: userId },
       include: { stats: true },
     });
     if (!user) throw new Error("User not found");

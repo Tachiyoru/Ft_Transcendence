@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useContext, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
@@ -103,7 +103,7 @@ const CreateConv: React.FC = () => {
     }
 
     if (Object.keys(checkedItems).length > 1 && !name){
-        setErrorMessage("Need a name");
+        setErrorMessage("Channel name required");
         return;
     }
 
@@ -114,7 +114,7 @@ const CreateConv: React.FC = () => {
 
     socket.on("channelCreateError", (errorData) => {
       console.error("Channel creation error:", errorData);
-      setErrorMessage("Name already taken");
+      setErrorMessage("Channel name already taken");
 
       isError = true;
     });
@@ -129,6 +129,20 @@ const CreateConv: React.FC = () => {
 
   };
 
+  {/*POPIN*/}
+	const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        togglePopin();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+    }, []);
+
   return (
     <div>
       <button onClick={togglePopin}>
@@ -137,10 +151,9 @@ const CreateConv: React.FC = () => {
 
       {/*POPIN*/}
       {isPopinOpen && (
-        <div
-          className="w-[200px] p-4 text-lilac rounded-md bg-accent-violet absolute top-17 md:left-10 left-4 mt-1"
-          style={{ zIndex: 1 }}
-        >
+        <div  className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute top-0 inset-0 bg-black bg-opacity-50"></div>
+        <div ref={cardRef} className="absolute top-28 left-40 mt-8 z-50 w-[200px] p-4 pl-5 text-lilac rounded-md bg-accent-violet ">
           <p className="text-base mb-1">Select Friends</p>
           <p className="text-xs">You can add 5 more friends</p>
 
@@ -269,7 +282,8 @@ const CreateConv: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+          </div>
+          </div>
       )}
     </div>
   );

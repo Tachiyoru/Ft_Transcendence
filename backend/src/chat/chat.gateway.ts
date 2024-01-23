@@ -67,6 +67,7 @@ export class chatGateway {
         },
         members: true,
         owner: true,
+        banned: true,
       },
     });
     if (!chan) return null;
@@ -79,7 +80,8 @@ export class chatGateway {
       client.leave(chan2.name);
     }
     client.join(chan.name);
-    client.emit("channel", chan, messagesList);
+    console.log('info chan')
+    this.server.emit("channel", chan, messagesList);
   }
 
   @SubscribeMessage("editChannel")
@@ -249,6 +251,7 @@ export class chatGateway {
         );
       }
       client.emit("usersAdded", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("addUsersError", { message: error.message });
     }
@@ -266,7 +269,8 @@ export class chatGateway {
         data.username,
         req
       );
-      client.emit("opAdded", result);
+      this.server.emit("opAdded", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("addOpError", { message: error.message });
     }
@@ -285,7 +289,8 @@ export class chatGateway {
         data.username,
         req
       );
-      client.emit("opRemoved", result);
+      this.server.emit("opRemoved", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("removeOpError", { message: error.message });
     }
@@ -389,6 +394,7 @@ export class chatGateway {
         req
       );
       client.emit("userBanned", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("banUserError", { message: error.message });
     }
@@ -407,6 +413,7 @@ export class chatGateway {
         req
       );
       client.emit("userUnBanned", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("unBanUserError", { message: error.message });
     }
@@ -425,6 +432,8 @@ export class chatGateway {
         req
       );
       client.emit("userKicked", result);
+      this.server.emit("channel", result, result.messages);
+
     } catch (error) {
       client.emit("kickUserError", { message: error.message });
     }
@@ -466,7 +475,10 @@ export class chatGateway {
         data.chanId,
         data.userId
       );
-      client.emit("memberMuted", result);
+      console.log('mute')
+      this.server.emit("memberMuted", result);
+      console.log(result)
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("muteMemberError", { message: error.message });
     }
@@ -482,7 +494,9 @@ export class chatGateway {
         data.chanId,
         data.userId
       );
-      client.emit("memberUnMuted", result);
+      console.log('unmute')
+      this.server.emit("memberUnMuted", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("muteMemberError", { message: error.message });
     }
@@ -495,7 +509,7 @@ export class chatGateway {
   ) {
     try {
       const mutedList = await this.chatService.findAllMutedMembers(data.chanId);
-      client.emit("allMuted", mutedList);
+      this.server.emit("allMuted", mutedList);
     } catch (error) {
       client.emit("findAllMembersError", { message: error.message });
     }

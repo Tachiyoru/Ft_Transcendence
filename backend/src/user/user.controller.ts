@@ -8,6 +8,7 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  BadRequestException,
 } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { GetUser } from "../auth/decorator";
@@ -59,7 +60,7 @@ export class UserController {
 
   @Patch("edit")
   editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
-    return this.userService.editUser(userId, dto);
+      return this.userService.editUser(userId, dto);
   }
 
   @Get("histo")

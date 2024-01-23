@@ -303,13 +303,15 @@ const socket = useContext(WebSocketContext);
               {showUserList && (
                 <ul className="absolute h-24 w-full bg-lilac z-10">
                   {filteredUsers.map((user, index) => (
-                    <li
-                      key={index}
-                      className="px-2 py-1  hover:bg-purple cursor-pointer"
-                      onClick={() => handleUserClick()}
-                    >
-                      <Link to={`/user/${user.username}`}>{user.username}</Link>
-                    </li>
+                    <Link to={`/user/${user.username}`}>
+                        <li
+                          key={index}
+                          className="px-2 py-1  hover:bg-purple cursor-pointer"
+                          onClick={() => handleUserClick()}
+                        >
+                          {user.username}
+                        </li>
+                    </Link>
                   ))}
                 </ul>
               )}

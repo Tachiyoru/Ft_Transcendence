@@ -195,6 +195,7 @@ export class UserService {
     if (user) {
       if (dto.password) {
         const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
+        console.log(pwdMatches)
         if (!pwdMatches) {
           throw new BadRequestException("Invalid password");
         }

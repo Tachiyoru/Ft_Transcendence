@@ -3,8 +3,6 @@ import { MdSettings } from 'react-icons/md';
 import MemberAvatar from '../photo/MemberAvatar';
 import { WebSocketContext } from '../../socket/socket';
 import axios from '../../axios/api';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
 
 interface Member {
     username: string;
@@ -38,7 +36,6 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	const [channelName, setChannelName] = useState("");
 	const socket = useContext(WebSocketContext);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
-	const usersOp = useSelector((state: RootState) => state.selectedChannelId.channelOperators[channel.chanId]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -128,9 +125,9 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						<p>Admins can add and remove administrators except the channel owner</p>
 					</div>
 					<div className='w-full border rounded-r-md p-6'>
-					{usersOp.length > 0 ? (
+					{opMembers.length > 0 ? (
 						<div className='flex flex-col w-[45px] items-center'>
-							{usersOp.map((opMember,index) => (
+							{opMembers.map((opMember,index) => (
 								<div key={index}  className='flex flex-col items-center'>
 									<MemberAvatar avatar={opMember.avatar}/>
 									<p className='mt-1'>{opMember.username}</p>

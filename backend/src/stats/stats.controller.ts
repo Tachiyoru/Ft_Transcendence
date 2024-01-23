@@ -20,9 +20,9 @@ export class StatsController {
     return this.statsService.getMyStats(user);
   }
 
-  @Get(":id")
+  @Get(":userId")
   async getStatsById(
-    @Param("id", ParseIntPipe) userId: number
+    @Param("userId") userId: string
   ): Promise<Stats | null> {
     return this.statsService.getStatsById(userId);
   }
