@@ -16,6 +16,7 @@ const SecurityEdit = () => {
 	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean} | undefined, >();
   const [isQrCode, setIsQrCode] = useState<boolean>(false);
   const [isTwoFaEnabled, setIsTwoFaEnabled] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -42,16 +43,23 @@ const SecurityEdit = () => {
     } = useForm<IdataRegister>();
 
     const submitHandler = async (data: IdataRegister) => {
-
       try {
-          setLoading(true);
-          await axios.patch('/users/edit', data);
+        setLoading(true);
     
-          console.log('User data updated successfully:', data);;
-          } catch (error) {
-              console.error('Error updating user data:', error);
-          } finally {
-              setLoading(false);
+        if (data.newPassword !== data.confirmPassword) {
+          console.error('New Password and Confirm Password do not match');
+          return;
+        }
+    
+        await axios.patch('/users/edit', { password: data.password, newPassword: data.newPassword});
+    
+        console.log('User data updated successfully:', data);
+      } catch (error) {
+          console.error(error.response.data.message);
+          setError('Invalid password');
+      }
+      finally {
+        setLoading(false);
       }
     };
 
@@ -125,8 +133,10 @@ const SecurityEdit = () => {
                 </button>
               </div>
             </div>
+            {error && <div className="text-xs text-red-orange">{error}</div>}
 
-			<div className="w-[260px] flex flex-row items-center border-b border-lilac">
+
+			  <div className="w-[260px] flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
                   type={passwordIsVisible ? 'text' : 'password'}
@@ -194,7 +204,7 @@ const SecurityEdit = () => {
             >
               Save changes
             </button>
-		</form>
+          </form>
 
 		{/*2FA*/}
 			<div>
