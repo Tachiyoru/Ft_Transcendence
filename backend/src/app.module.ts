@@ -27,4 +27,5 @@ import { StatsModule } from "./stats/stats.module";
   controllers: [AppController],
   providers: [AppService, JwtService],
 })
+
 export class AppModule {}

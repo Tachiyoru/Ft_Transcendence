@@ -46,17 +46,17 @@ const History = () => {
             Match history
           </span>
         </p>
-        <div className="bg-violet-black text-normal h-60 rounded-md m-2 mt-5 mb-2 px-4 py-2 pt-4">
+        <div className="bg-violet-black text-sm h-60 rounded-md m-2 mt-5 mb-2 px-4 py-2 pt-4">
           <div className="flex flex-col">
             {/* MATCH RESUME */}
             <div className="w-full">
               <table>
                 <thead>
-                  <tr>
-                    <th className="w-1/6">Score</th>
-                    <th className="w-80">Opponent</th>
-                    <th className="w-80">Result</th>
-                    <th className="w-80">Exp</th>
+                  <tr className="text-purple">
+                    <th className="w-1/6 font-thin">Score</th>
+                    <th className="w-80 font-thin">Opponent</th>
+                    <th className="w-80 font-thin">Result</th>
+                    <th className="w-80 font-thin">Exp</th>
                   </tr>
                 </thead>
               </table>

@@ -29,8 +29,8 @@ const FileUpload = () => {
   };
 
   return (
-    <div >
-      <input className="text-sm" type="file" onChange={handleFileChange} />
+    <div>
+      <input className="block w-full mb-5 text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
       <button className="text-sm" onClick={handleUpload}>Upload</button>
     </div>
   );
