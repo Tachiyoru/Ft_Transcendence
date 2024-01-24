@@ -3,7 +3,7 @@ import { FaUser } from "react-icons/fa6";
 import axios from "../../../axios/api";
 
 const Blocked = () => {
-	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string;}[]>([]);
+	const [blockedUsers, setBlockedUsers] = useState<{ id: number; username: string; avatar: string}[]>([]);
 	
 	useEffect(() => {
 		const fetchBlockedUsers = async () => {
@@ -33,9 +33,20 @@ const Blocked = () => {
 		{/*TEST USER PENDING*/}
 		{blockedUsers.map((user, index) => (
 		<div key={index} className="flex flex-col items-center px-6">
-			<div className="w-[80px] h-[80px] mt-2 bg-fushia rounded-full grid justify-items-center items-center">
-				<FaUser className="w-[30px] h-[30px] "/>
-			</div>
+			{user.avatar ?
+				(
+					<div>
+						<img
+						src={user.avatar}
+						className="h-[80px] w-[80px] object-cover rounded-full mt-2"
+						></img>
+					</div>
+				) : (
+					<div className="w-[80px] h-[80px] bg-fushia rounded-full grid justify-items-center items-center mt-2">
+						<FaUser className="w-[30px] h-[30px]" />
+					</div>
+				)
+			}
 			<p className="text-sm text-fushia bg-opacity-40 pt-2">{user.username}</p>
 			<p
 				className="text-xs text-lilac pt-2 underline hover:text-white"

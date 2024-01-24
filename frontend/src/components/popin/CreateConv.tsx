@@ -6,7 +6,6 @@ import {
   FaUser,
 } from "react-icons/fa6";
 import axios from "../../axios/api";
-import io from "socket.io-client";
 import { Link } from "react-router-dom";
 import { WebSocketContext } from "../../socket/socket";
 

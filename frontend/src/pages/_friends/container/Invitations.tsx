@@ -4,7 +4,7 @@ import { FaCheck, FaXmark } from "react-icons/fa6";
 import axios from "../../../axios/api";
 
 const Invitations = () => {
-	const [listUsers, setListUsers] = useState<{ id: number; username: string }[]>([]);
+	const [listUsers, setListUsers] = useState<{ id: number; username: string; avatar: string }[]>([]);
 
 	useEffect(() => {
 	const fetchUserData = async () => {
@@ -46,9 +46,20 @@ const Invitations = () => {
 		{/*TEST USER PENDING*/}
 		{listUsers.map((user, index) => (
 			<div key={index} className="flex flex-col items-center px-6">
-				<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
-					<FaUser className="w-[30px] h-[30px] text-lilac"/>
-				</div>
+				{user.avatar ?
+					(
+					<div>
+						<img
+						src={user.avatar}
+						className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
+						/>
+					</div>	
+					) : (
+					<div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
+						<FaUser className="w-[30px] h-[30px] text-lilac" />
+					</div>
+					)
+				}
 				<p className="text-sm text-lilac pt-2">{user.username}</p>
 				<div className="flex flex-row justify-between space-x-5">
 					<div 

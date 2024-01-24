@@ -44,6 +44,12 @@ export class FriendsListController
 		return this.friendListService.pendingList(user.id);
 	}
 
+	@Delete('/pending-list/reject/:id')
+	rejectPending(@GetUser() user: User, @Param('id') id: string)
+	{
+		return this.friendListService.rejectPending(user, +id);
+	}
+
 	@Get('in-common/:friendId')
 	async getFriendsInCommon(
 		@GetUser() user: User, @Param('friendId', ParseIntPipe) friendId: number)

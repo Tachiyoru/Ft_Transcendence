@@ -4,18 +4,25 @@ import AllFriends from "./AllFriends";
 import Invitations from "./Invitations";
 import Blocked from "./Blocked";
 import axios from "../../../axios/api";
-import { Link } from "react-router-dom";
-import { NavHorizontal } from "../../../components/nav/NavHorizontal";
 import { getLoggedInUserInfo } from "../../../components/nav/container/NavHorizontal";
+import { setListUsersNotFriend, setListUsersPending } from "../../../services/friendSlice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
+import { RiTimer2Line } from "react-icons/ri";
 
 type FilterType = "tous" | "invitations" | "blocked";
+
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
 
 const SetFriends: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [filtreActif, setFiltreActif] = useState<FilterType>("tous");
-  const [listUsers, setListUsers] = useState<
-    { id: number; username: string }[]
-  >([]);
   const [checkedItems, setCheckedItems] = useState<{
     [key: string]: { id: number };
   }>({});
@@ -24,9 +31,13 @@ const SetFriends: React.FC = () => {
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [loadingFriendsList, setLoadingFriendsList] = useState(true);
-  const [friendsList, setFriendsList] = useState<
+  const [friendsList, setNoFriendsList] = useState<
     { id: number; username: string }[]
   >([]);
+  const dispatch = useDispatch();
+  const listUsersPending = useSelector((state: RootState) => state.friend.listUsersPending);
+  const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,12 +45,11 @@ const SetFriends: React.FC = () => {
         const response = await axios.get<{ id: number; username: string }[]>(
           "/friends-list/non-friends"
         );
-        console.log(response.data);
-        setFriendsList(response.data);
-        setLoadingFriendsList(false); // Marque la fin du chargement
+        setNoFriendsList(response.data);
+        setLoadingFriendsList(false); 
       } catch (error) {
         console.error("Error fetching user list:", error);
-        setLoadingFriendsList(false); // Arrête le chargement en cas d'erreur
+        setLoadingFriendsList(false);
       }
     };
 
@@ -68,12 +78,15 @@ const SetFriends: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<{ id: number; username: string }[]>(
+        const response = await axios.get<Users[]>(
           "/friends-list/non-friends"
         );
-        console.log(response.data);
+        dispatch(setListUsersNotFriend(response.data));
 
-        setListUsers(response.data);
+        const pending = await axios.get<Users[]>(
+          "/friends-list/pending-request/"
+        );
+        dispatch(setListUsersPending(pending.data));
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
@@ -90,7 +103,6 @@ const SetFriends: React.FC = () => {
   const getPendingList = async () => {
     try {
       const response = await axios.get(`/friends-list/pending-list`);
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching user pending list:", error);
@@ -101,7 +113,6 @@ const SetFriends: React.FC = () => {
   const hasNewInvitations = async () => {
     const { id: userId } = await getLoggedInUserInfo();
     const fetchedPendingList = await getPendingList();
-    console.log("fetchedPendingList", fetchedPendingList);
     return fetchedPendingList.length;
   };
 
@@ -121,7 +132,7 @@ const SetFriends: React.FC = () => {
     setIsDropdownOpen(true);
   };
 
-  const filteredUsers = listUsers.filter((user) =>
+  const filteredUsers = listUsersNotFriend.filter((user) =>
     user.username.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -143,13 +154,13 @@ const SetFriends: React.FC = () => {
     }
   }, []);
 
-  const handleUserSelection = async (selectedUser: { id: number }) => {
+  const handleUserSelection = async (selectedUser: Users) => {
     setCheckedItems({ [selectedUser.id]: selectedUser });
     try {
-      const response = await axios.post(
+      await axios.post(
         `/friends-list/friend-request/${selectedUser.id}`
       );
-      console.log(response.data);
+      dispatch(setListUsersPending([...listUsersPending, selectedUser]));
     } catch (error) {
       console.error("Error adding friend:", error);
     }
@@ -164,7 +175,6 @@ const SetFriends: React.FC = () => {
       {/*NAV FRIENDS*/}
       <div
         className="w-[260px] md:rounded-l-lg bg-violet-black"
-        ref={dropdownRef}
       >
         <div className="p-4">
           <h1
@@ -174,7 +184,7 @@ const SetFriends: React.FC = () => {
             Friends
           </h1>
 
-          <div className="relative m-2">
+          <div ref={dropdownRef} className="relative m-2">
             <div className="flex items-center relative">
               <input
                 type="text"
@@ -213,23 +223,38 @@ const SetFriends: React.FC = () => {
                     {filteredUsers.map((user, index) => (
                       <div
                         key={index}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: !listUsersPending.find(pending => pending.id === user.id) ? "pointer" : "not-allowed"}}
                         className={`flex flex-row justify-between items-center py-1 ${
                           hoveredUser === user.id ? "opacity-100" : "opacity-40"
                         }`}
-                        onClick={() => handleUserSelection(user)}
+                        onClick={() => {
+                          if (!listUsersPending.find(pending => pending.id === user.id))
+                            handleUserSelection(user)}
+                        }
                         onMouseEnter={() => handleUserHover(user.id)}
                         onMouseLeave={() => handleUserHover(null)}
                       >
                         <div className="flex items-center mx-2">
-                          <div className="w-[20px] h-[20px] bg-purple border border-lilac rounded-full grid justify-items-center items-center">
-                            <FaUser className="w-[8px] h-[8px] text-lilac" />
-                          </div>
+                          {user.avatar ?
+                            (
+                              <div>
+                                <img
+                                  src={user.avatar}
+                                  className="h-[20px] w-[20px] object-cover rounded-full text-lilac border-lilac"
+                                />
+                              </div>	
+                            ) : (
+                              <div className="w-[20px] h-[20px] bg-purple border border-lilac rounded-full grid justify-items-center items-center">
+                                <FaUser className="w-[8px] h-[8px] text-lilac" />
+                              </div>
+                            )
+                          }
                           <p className="text-xs font-regular ml-2 text-lilac ">
                             {user.username}
                           </p>
                         </div>
-                        <FaUserPlus className="text-lilac w-3 h-3 mr-4" />
+                        {!listUsersPending.find(pending => pending.id === user.id) ? 
+                        <FaUserPlus className="text-lilac w-3 h-3 mr-4" /> : <RiTimer2Line className="text-lilac w-3 h-3 mr-4" />}
                       </div>
                     ))}
                   </div>

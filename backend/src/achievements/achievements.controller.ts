@@ -40,14 +40,11 @@ export class AchievementsController {
     @GetUser() user: User,
     @Param("id", ParseIntPipe) id: number
   ): Promise<User> {
-    console.log("addAchievementByUserId");
     return await this.achievementsService.addAchievementByUserId(user.id, id);
   }
 
   @Patch("/settitle/:id")
   async setTitle(@GetUser() user: User, @Param("id", ParseIntPipe) id: number) {
-	console.log(user);
-    console.log("setTitle");
     await this.achievementsService.setTittle(user.id, id);
   }
 }

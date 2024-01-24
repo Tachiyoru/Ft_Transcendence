@@ -16,20 +16,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { WebSocketContext } from "../../../socket/socket";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
+import { setListUsersNotFriend, setListUsersPending } from "../../../services/friendSlice";
 
 const AllFriends = () => {
-  const [listUsers, setListUsers] = useState<
-    { id: number; username: string }[]
-  >([]);
-  const [listUsersPending, setListUsersPending] = useState<
-    { id: number; username: string }[]
-  >([]);
+  const [listUsers, setListUsers] = useState<{ id: number; username: string; avatar: string }[]>([]);
+  const listUsersPending = useSelector((state: RootState) => state.friend.listUsersPending);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [previousUserId, setPreviousUserId] = useState<number | null>(null);
 	const socket = useContext(WebSocketContext);
 	const dispatch = useDispatch();
   const navigate = useNavigate();
-
 
   const togglePopinPending = (userId: number) => {
     if (selectedUserId === userId || previousUserId === userId) {
@@ -71,8 +69,6 @@ const AllFriends = () => {
         const response = await axios.get<{ id: number; username: string }[]>(
           "/friends-list/mine"
         );
-        console.log(response.data);
-
         setListUsers(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -81,35 +77,28 @@ const AllFriends = () => {
     fetchUserData();
   }, []);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get<{ id: number; username: string }[]>(
-          "/friends-list/pending-request/"
-        );
-        setListUsersPending(response.data);
-      } catch (error) {
-        console.error("Error fetching user list:", error);
-      }
-    };
-    fetchUserData();
-  }, []);
 
 	const rejectFriendRequest = async (userId: number) => {
-        try {
-            await axios.delete(`/friends-list/friend-request/reject/${userId}`);
-			const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
-			setListUsersPending(updateListUsersPending);
+    try {
+      await axios.delete(`/friends-list/pending-list/reject/${userId}`);
+			console.log()
+      const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
+      dispatch(setListUsersPending(updateListUsersPending));
 		} catch (error) {
             console.error('Error accepting friend request:', error);
         }
     };
 
-  const removeFriend = async (userId: number) => {
+  const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
+  
+  const removeFriend = async (user) => {
     try {
-      await axios.delete(`/friends-list/remove/${userId}`);
-      const updateListUsers = listUsers.filter((user) => user.id !== userId);
+      await axios.delete(`/friends-list/remove/${user.id}`);
+
+      const updateListUsers = listUsers.filter((user) => user.id !== user.id);
       setListUsers(updateListUsers);
+
+      dispatch(setListUsersNotFriend([...listUsersNotFriend, user]));
     } catch (error) {
       console.error("Error deleting friend:", error);
     }
@@ -171,11 +160,23 @@ const AllFriends = () => {
               </div>
             </div>
           )}
-          <div className="w-[80px] h-[80px] opacity-60 mt-2 bg-purple rounded-full grid justify-items-center items-center">
-            <FaUser className="w-[30px] h-[30px] text-lilac" />
-          </div>
-          <p className="text-base text-opacity-60 text-lilac pt-2">
-            {user.username}
+
+          {user.avatar ?
+            (
+              <div>
+                <img
+                  src={user.avatar}
+                  className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
+                />
+              </div>	
+            ) : (
+              <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
+                <FaUser className="w-[30px] h-[30px] text-lilac" />
+              </div>
+            )
+          }
+          <p className="text-base text-opacity-60 text-lilac pt-1" title={user.username}>
+            {user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
           </p>
           <p className="text-xs text-lilac opacity-40 italic">Pending...</p>
         </div>
@@ -183,7 +184,7 @@ const AllFriends = () => {
 
       {listUsers.length === 0 ? (
         <div className="text-center mt-4">
-          <p className="text-sm font-regular text-lilac">No friends found</p>
+          <p className="text-sm font-regular text-lilac"></p>
         </div>
       ) : (
         listUsers.map((user, index) => (
@@ -236,7 +237,7 @@ const AllFriends = () => {
                 <div className="border-b border-b-lilac border-opacity-60 my-2"></div>
                 <div
                   className="flex flex-row items-center hover:text-lilac"
-                  onClick={() => removeFriend(user.id)}
+                  onClick={() => removeFriend(user)}
                   style={{ cursor: "pointer" }}
                 >
                   <FaUserMinus size={12} />
@@ -244,10 +245,23 @@ const AllFriends = () => {
                 </div>
               </div>
             )}
-            <div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
-              <FaUser className="w-[30px] h-[30px] text-lilac" />
-            </div>
-            <p className="text-base text-lilac pt-2 mt-1">{user.username}</p>
+            {user.avatar ?
+              (
+                <div>
+                  <img
+                    src={user.avatar}
+                    className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
+                  />
+                </div>	
+              ) : (
+                <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
+                  <FaUser className="w-[30px] h-[30px] text-lilac" />
+                </div>
+              )
+            }
+            <p className="text-base text-opacity-60 text-lilac pt-1" title={user.username}>
+              {user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
+            </p>
           </div>
         ))
       )}

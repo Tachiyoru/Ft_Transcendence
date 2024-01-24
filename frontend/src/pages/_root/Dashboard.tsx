@@ -4,13 +4,10 @@ import { useEffect } from "react";
 import { useDashboardState } from "../../state/stateManagement";
 import Sidebar from "./container/SideBar";
 import Badges from "./container/Badges";
-import MatchesPlayedTogether from "./container/MatchesPlayedTogether";
 import Animation from "./container/Animation";
 import Leaderboard from "./container/Leaderboard";
 import History from "./container/History";
 import { fetchDataUser } from "../../api/apiCalls";
-import { SiMakerbot } from "react-icons/si";
-import axios from "../../axios/api";
 
 const Dashboard = () => {
   const {

@@ -1,10 +1,12 @@
-import { FaMagnifyingGlass, FaBell } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaBell, FaTrophy, FaUserPlus } from "react-icons/fa6";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
 import { WebSocketContext } from "../../../socket/socket";
+import { RiMessage3Fill } from "react-icons/ri";
+import { LuBadgeCheck } from "react-icons/lu";
 
 interface NavItemProps {
   name: string;
@@ -247,16 +249,15 @@ const socket = useContext(WebSocketContext);
       return (
         <div
           ref={menuRef}
-          className="shadow-md bg-dark-violet w-32 rounded-lg py-2 px-4 absolute right-2 mt-1"
+          className="shadow-md bg-dark-violet w-44 rounded-lg py-2 px-4 absolute right-2 mt-1"
           style={{ cursor: "default", zIndex: 1 }}
         >
-          <div className="text-xs font-medium text-lilac ">Notifications</div>
           <ul>
             {notifications.map((notification) => (
               <li
                 style={{ cursor: "pointer" }}
                 key={notification.id}
-                className={`border-b border-lilac py-2 ${
+                className={`flex flex-row text-fushia text-xs py-2 hover:underline ${
                   notification.read ? "text-opacity-40 text-lilac" : ""
                 }`}
                 onClick={() =>
@@ -266,9 +267,14 @@ const socket = useContext(WebSocketContext);
                   )
                 }
               >
-                <a href={getNotificationRedirect(notification.type)}>
-                  <span className="text-white">{notification.content}</span>
-                </a>
+                  {notification.type === 3 && <FaTrophy className="mr-2 w-7 h-3"/>}
+                  {notification.type === 0 && <FaUserPlus className="mr-2 w-7 h-3"/>}
+                  {notification.type === 1 && <FaUserPlus className="mr-2 w-7 h-3"/>}
+                  {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-3"/>}
+                  {notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-3"/>}
+                  <a href={getNotificationRedirect(notification.type)}>
+                    <span>{notification.content}</span>
+                  </a>
               </li>
             ))}
           </ul>

@@ -26,6 +26,20 @@ export class FriendsListService
 		return user.pendingList;
 	}
 
+	async rejectPending(user: User, friendId: number, notificationId?: number) 
+	{
+		user = await this.prismaService.user.update(
+			{
+				where: { id: friendId },
+				include: { pendingList: true },
+				data: {
+					pendingList: { disconnect: { id: user.id } },
+				}
+			}
+		);
+		return (user);
+	}
+
 	async getUsersWithMeInPendingList(user: User)
 	{
 		const users = await this.prismaService.user.findMany(
