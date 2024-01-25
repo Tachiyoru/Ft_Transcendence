@@ -157,11 +157,12 @@ model Game {
     gameId           Int      @id @default(autoincrement())
     gameSocket       String   @default("")
     paddle           Paddle[] @relation("paddles")
-    ball             Ball?     @relation("game-ball")
+    ball             Ball?    @relation("game-ball")
     pScore           Int[]    @default([])
     player1          String   @default("")
     player2          String   @default("")
     connectedPlayers Int      @default(0)
+    inGame           Int      @default(0)
 
     @@map("Game")
 }
