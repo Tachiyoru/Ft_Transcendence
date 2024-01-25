@@ -154,11 +154,31 @@ model Message {
 }
 
 model Game {
-    id         Int    @id @default(autoincrement())
-    name       String @unique
-    nbrPlayers Int    @default(0)
-    userId     Int
-    // Player		User[]		@relation(fields: [userId], references: [id])
-	// result 	   StatusGame?
-    //position
+    gameId           Int      @id @default(autoincrement())
+    gameSocket       String   @default("")
+    paddle           Paddle[] @relation("paddles")
+    ball             Ball?    @relation("game-ball")
+    pScore           Int[]    @default([])
+    player1          String   @default("")
+    player2          String   @default("")
+    connectedPlayers Int      @default(0)
+    inGame           Int      @default(0)
+
+    @@map("Game")
+}
+
+model Ball {
+    id   Int   @id @default(autoincrement())
+    x    Float
+    y    Float
+    z    Float
+    game Game  @relation("game-ball", fields: [id], references: [gameId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Paddle {
+    id   Int   @id @default(autoincrement())
+    x    Float
+    y    Float
+    z    Float
+    game Game  @relation("paddles", fields: [id], references: [gameId], onDelete: Cascade, onUpdate: Cascade)
 }
