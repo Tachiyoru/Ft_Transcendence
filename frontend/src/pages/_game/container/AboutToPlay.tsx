@@ -47,7 +47,7 @@ const AboutToPlay = () => {
 						<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
 							<FaUser className="w-[30px] h-[30px] text-lilac" />
 						</div>
-						<p className='text-base mt-2'></p>
+						<p className='text-base mt-2'>{game.player1}</p>
 					</div>
 				</div>
 			</div>

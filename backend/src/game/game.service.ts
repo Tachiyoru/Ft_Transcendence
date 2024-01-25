@@ -20,7 +20,8 @@ export class GameService {
               connectedPlayers: 2,
               player2: socket.id,
               player2User: { connect: { id: req.user.id } }
-            }
+            },
+            include:  {player1User: true, player2User: true}
           })
           socket.join(updateGame.gameSocket);
           console.log(updateGame)
@@ -42,19 +43,28 @@ export class GameService {
       }
       return (null);
     }
-    
-    async disconnect(socket: Socket)  {
 
-    }
-
-    async disconnectOutGame(gameSocket: string) {
-      const game = await this.findGame(gameSocket);
-      
-      if (game?.player1 === "") {
-        const gameID = await this.getRoomID(gameSocket);
-        if (gameID)
-          await this.removeGame(gameID);
+    async removeUserFromGame(userID: string)  {
+      let game = await this.prisma.game.findFirst({
+          where:  {
+            player1: userID
+          }
+      })
+      if (game) {
+        this.removeGame(game.gameId);
+        return ('deleted');
       }
+      game = await this.prisma.game.findFirst({
+        where:  {
+          player2: userID
+        }
+      })
+      if (game) {
+        game.player2 = "";
+        game.connectedPlayers = 1;
+        return (game);
+      }
+      return (null);
     }
 
     async removeGame(gameId: number)  {

@@ -6,6 +6,7 @@ import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { UseGuards, Request } from '@nestjs/common';
 import { Socket } from 'socket.io';
+import { disconnect } from 'process';
 
 @WebSocketGateway({
   cors: { origin: "http://localhost:5173", credentials: true },
@@ -30,11 +31,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log("Player : " + client.id + " connected to the game.")
     const gameReady = await this.gameService.connection(client, req);
     if (gameReady)  {
-      console.log('oooooook', gameReady)
       this.server.to(gameReady.player1).emit('GameFull', gameReady);
       this.server.to(gameReady.player2).emit('GameFull', gameReady);
     }
   }
+
+  @SubscribeMessage("gotDisconnected")
+  async removeUserFromGame(
+    @ConnectedSocket() client: Socket
+  ) {
+    console.log("Player : " + client.id + " got disconnected from the game.")
+    const closeGame = await this.gameService.removeUserFromGame(client.id);
+    if (closeGame)  {
+      if (closeGame === 'deleted')  {
+        return (null);
+      }
+      else if (!closeGame)  {
+        return (null);
+      }
+      else  {
+        this.server.to(closeGame.player1).emit('GameReset', closeGame);
+      }
+    }
+  }
+
   @SubscribeMessage("gamestart")
   async gamestart(
     @MessageBody("gameSocket") gameSocket: string,
