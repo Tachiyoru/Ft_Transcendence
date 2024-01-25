@@ -297,9 +297,9 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 							<div className="flex flex-row items-center cursor-pointer" onClick={handleClick}>
 								<LuBadgePlus size={11} />
 								{channel.op && channel.op.find((opMember => opMember === user.username)) ? (
-									<p className="ml-2 text-red-orange">Remove</p>
+									<p className="ml-2 text-red-orange">Remove as admin</p>
 								) : (
-									<p className="ml-2">Register as operator</p>
+									<p className="ml-2">Register as admin</p>
 								)}
 						</div>
 						</div>

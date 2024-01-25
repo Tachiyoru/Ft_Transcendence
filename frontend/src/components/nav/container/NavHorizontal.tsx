@@ -247,38 +247,42 @@ const socket = useContext(WebSocketContext);
   const getContent = () => {
     if (selectedSection === "Notifications") {
       return (
-        <div
-          ref={menuRef}
-          className="shadow-md bg-dark-violet w-44 rounded-lg py-2 px-4 absolute right-2 mt-1"
-          style={{ cursor: "default", zIndex: 1 }}
-        >
-          <ul>
-            {notifications.map((notification) => (
-              <li
-                style={{ cursor: "pointer" }}
-                key={notification.id}
-                className={`flex flex-row text-fushia text-xs py-2 hover:underline ${
-                  notification.read ? "text-opacity-40 text-lilac" : ""
-                }`}
-                onClick={() =>
-                  handleNotificationItemClick(
-                    notification.id,
-                    notification.type
-                  )
-                }
-              >
-                  {notification.type === 3 && <FaTrophy className="mr-2 w-7 h-5"/>}
-                  {notification.type === 0 && <FaUserPlus className="mr-2 w-5 h-5"/>}
-                  {notification.type === 1 && <FaUserPlus className="mr-2 w-5 h-5"/>}
-                  {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-5"/>}
-                  {notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5"/>}
-                  <a href={getNotificationRedirect(notification.type)}>
-                    <span>{notification.content}</span>
-                  </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <>
+        {notifications.length > 0 ? (
+          <div
+            ref={menuRef}
+            className="shadow-md bg-dark-violet w-44 rounded-lg py-2 px-4 absolute right-2 mt-1"
+            style={{ cursor: "default", zIndex: 1 }}
+          >
+            <ul>
+              {notifications.map((notification) => (
+                <li
+                  style={{ cursor: "pointer" }}
+                  key={notification.id}
+                  className={`flex flex-row text-fushia text-xs py-2 hover:underline ${
+                    notification.read ? "text-opacity-40 text-lilac" : ""
+                  }`}
+                  onClick={() =>
+                    handleNotificationItemClick(
+                      notification.id,
+                      notification.type
+                    )
+                  }
+                >
+                    {notification.type === 3 && <FaTrophy className="mr-2 w-7 h-5"/>}
+                    {notification.type === 0 && <FaUserPlus className="mr-2 w-5 h-5"/>}
+                    {notification.type === 1 && <FaUserPlus className="mr-2 w-5 h-5"/>}
+                    {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-5"/>}
+                    {notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5"/>}
+                    <a href={getNotificationRedirect(notification.type)}>
+                      <span>{notification.content}</span>
+                    </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        </>
       );
     }
     return null;
