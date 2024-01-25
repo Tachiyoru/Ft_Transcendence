@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaArrowRightFromBracket, FaStar, FaUser } from 'react-icons/fa6';
+import { FaArrowRightFromBracket } from 'react-icons/fa6';
 import { MdWallet } from 'react-icons/md';
 
-const OhOh = () => {
-	const [popinOpen, setPopinOpen] = useState(false);
-	const cardRef = useRef<HTMLDivElement>(null);
+interface Props {
+	error: boolean;
+}
 
+const OhOh: React.FC<Props> = ({error}) => {
+	const [popinOpen, setPopinOpen] = useState(error);
+	const cardRef = useRef<HTMLDivElement>(null);
+	console.log(error)
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
 	};
@@ -29,10 +33,6 @@ const OhOh = () => {
 
 	return (
 	<div className="flex items-center justify-center">
-		<button className="pr-4 flex flex-row text-lilac items-center" onClick={togglePopin}>
-			<MdWallet className="w-4 h-5 mr-2" />
-			Draw
-		</button>
 		{popinOpen && (
 			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
 				<div ref={cardRef} className="bg-filter text-lilac rounded-lg p-8 w-auto h-auto relative">

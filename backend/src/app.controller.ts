@@ -10,7 +10,6 @@ export class AppController {
   @Get("hello")
   async getUserData(@Request() req: any) {
     const user = req.user;
-    console.log("print user", user);
   }
   getHello(@Req() req: any): string {
     return this.appService.getHello();

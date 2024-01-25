@@ -83,6 +83,7 @@ const Game = () => {
 	const handleCrossClick = () => {
 	setShowSecondDiv(false);
 	setSelectedIndexes([]);
+	socket.emit("gotDisconnected");
 	localStorage.removeItem('showSecondDiv');
 	};
 

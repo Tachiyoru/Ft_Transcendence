@@ -19,7 +19,7 @@ export class GameService {
             data: {
               connectedPlayers: 2,
               player2: socket.id,
-              player2User: { connect: { id: req.user.id } }
+              player2User: { connect: { id: req.user.id } },
             },
             include:  {player1User: true, player2User: true}
           })
@@ -38,6 +38,8 @@ export class GameService {
               gameSocket: ("Game" + socket.id)
             }
           })
+          const allGames = await this.prisma.game.findMany({
+          });
           return (null);
         }
       }
@@ -86,6 +88,7 @@ export class GameService {
         where:  {
           gameSocket: gameSocket
         },
+        include : {player1User: true, player2User: true}
       })
       return (game);
     }
@@ -94,14 +97,16 @@ export class GameService {
       let game = await this.prisma.game.findFirst({
         where: {
           player1: socket.id
-        }
+        },
+        include: { player1User: true, player2User: true}
       })
       if (game)
         return (game);
       game = await this.prisma.game.findFirst({
         where: {
           player2: socket.id
-        }
+        },
+        include: { player1User: true, player2User: true}
       })
       return (game);
     }

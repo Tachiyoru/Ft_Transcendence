@@ -34,25 +34,34 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       this.server.to(gameReady.player1).emit('GameFull', gameReady);
       this.server.to(gameReady.player2).emit('GameFull', gameReady);
     }
+    client.on("disconnect", () => {
+      console.log("disconnected from server");
+      this.removeUserFromGame(client)
+    });
   }
 
   @SubscribeMessage("gotDisconnected")
   async removeUserFromGame(
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client: Socket,
   ) {
     console.log("Player : " + client.id + " got disconnected from the game.")
-    const closeGame = await this.gameService.removeUserFromGame(client.id);
-    if (closeGame)  {
-      if (closeGame === 'deleted')  {
-        return (null);
-      }
-      else if (!closeGame)  {
-        return (null);
-      }
-      else  {
-        this.server.to(closeGame.player1).emit('GameReset', closeGame);
-      }
+    const game = await this.gameService.checkGameUsers(client);
+    if(game)  {
+      await this.gameService.removeGame(game?.gameId);
+      client.emit('GameReset', true);
     }
+    // if (closeGame)  {
+    //   if (closeGame === 'deleted')  {
+    //     return (null);
+    //   }
+    //   else if (!closeGame)  {
+    //     return (null);
+    //   }
+    //   else  {
+    //     console.log('ok')
+    //     this.server.to(closeGame.player1).emit('GameReset', closeGame);
+    //   }
+    // }
   }
 
   @SubscribeMessage("gamestart")
