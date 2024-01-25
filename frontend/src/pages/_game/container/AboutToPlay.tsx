@@ -8,7 +8,6 @@ import { WebSocketContext } from "../../../socket/socket";
 interface Game {
 	gameId: number;
 	player1: string;
-	player2: number;
 }
 
 const AboutToPlay = () => {
@@ -22,6 +21,7 @@ const AboutToPlay = () => {
 		try {
 			socket.emit("gamestart", {gameSocket: gameSocket})
 			socket.on("gamestart", (game) => {
+				console.log(game);
 				setGame(game);
 			});
 		} catch (error) {
@@ -47,7 +47,7 @@ const AboutToPlay = () => {
 						<div className="w-[80px] h-[80px] mt-2 bg-purple rounded-full grid justify-items-center items-center">
 							<FaUser className="w-[30px] h-[30px] text-lilac" />
 						</div>
-						<p className='text-base mt-2'>{game.player2}</p>
+						<p className='text-base mt-2'></p>
 					</div>
 				</div>
 			</div>

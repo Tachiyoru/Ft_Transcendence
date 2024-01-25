@@ -19,20 +19,20 @@ export class GameService {
             data: {
               connectedPlayers: 2,
               player2: socket.id,
-              player2User: req.user
+              player2User: { connect: { id: req.user.id } }
             }
           })
           socket.join(updateGame.gameSocket);
+          console.log(updateGame)
           return (updateGame);
         } else  {
           socket.join("Game" + socket.id);
           const rooms = socket.rooms;
-          console.log(rooms);
           const game = await this.prisma.game.create({
             data: {
               player1: socket.id,
-              player1User: req.user,
-              player2User: req.user,
+              player1User: { connect: { id: req.user.id } },
+              player2User: { connect: { id: req.user.id } },
               connectedPlayers: 1,
               gameSocket: ("Game" + socket.id)
             }

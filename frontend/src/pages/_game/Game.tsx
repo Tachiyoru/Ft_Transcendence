@@ -53,7 +53,8 @@ const Game = () => {
 
 	useEffect(() => {
 		try {
-			socket.on("gameFull", ({game}) => {
+			socket.on("GameFull", (game) => {
+				console.log(game);
 				navigate(`/gamestart/${game.gameSocket}`)
 			});
 		} catch (error) {

@@ -27,17 +27,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() client : Socket,
     @Request() req: any
   ) {
-    const gameReady = await this.gameService.connection(client);
-    if (gameReady)
-      this.server.emit("gameFull", gameReady, client);
+    console.log("Player : " + client.id + " connected to the game.")
+    const gameReady = await this.gameService.connection(client, req);
+    if (gameReady)  {
+      console.log('oooooook', gameReady)
+      this.server.to(gameReady.player1).emit('GameFull', gameReady);
+      this.server.to(gameReady.player2).emit('GameFull', gameReady);
+    }
   }
-
   @SubscribeMessage("gamestart")
   async gamestart(
     @MessageBody("gameSocket") gameSocket: string,
   ) {
     const game = await this.gameService.findGame(gameSocket);
-    console.log(gameSocket)
     this.server.emit("gamestart", game);
   }
 
