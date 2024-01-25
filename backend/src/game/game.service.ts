@@ -21,8 +21,7 @@ export class GameService {
             }
           })
           socket.join(updateGame.gameSocket);
-          console.log("game post modif = ", updateGame);
-          return updateGame;
+          return (updateGame);
         } else  {
           socket.join("Game" + socket.id);
           const rooms = socket.rooms;
@@ -34,10 +33,47 @@ export class GameService {
               gameSocket: ("Game" + socket.id)
             }
           })
-          console.log(game);
-          return (game);
+          return (null);
         }
       }
+      return (null);
+    }
+    
+    async disconnect(socket: Socket)  {
+
+    }
+
+    async disconnectOutGame(gameSocket: string) {
+      const game = await this.findGame(gameSocket);
+      
+      if (game?.player1 === "") {
+        const gameID = await this.getRoomID(gameSocket);
+        if (gameID)
+          await this.removeGame(gameID);
+      }
+    }
+
+    async removeGame(gameId: number)  {
+      return (await this.prisma.game.delete({
+        where:  {
+          gameId: gameId
+        }
+      })
+      );
+    }
+
+    async getRoomID(gameSocket: string) {
+      const game = await this.findGame(gameSocket);
+      return (game?.gameId);
+    }
+
+    async findGame(gameSocket: string)  {
+      const game = await this.prisma.game.findFirst({
+        where:  {
+          gameSocket: gameSocket
+        },
+      })
+      return (game);
     }
 
     async checkGameUsers(socket: Socket)  {
@@ -63,10 +99,11 @@ export class GameService {
           connectedPlayers: 2
         }
       })
+
       return (lstGamesOff);
     }
 
-    async startGame(gameID: String) {
+    async startGame(gameSocket: string) {
       const fieldWidth = 1200;
       const fieldLenght = 3000;
       const paddle1Default = {}

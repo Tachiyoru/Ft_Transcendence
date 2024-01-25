@@ -3,7 +3,7 @@ import NavVertical from "./container/NavVertical"
 
 const MainLayout = ({ children, currentPage }) => {
 	return (
-		<div className="bg-violet-black-nav bg-opacity-50">
+		<div className="bg-violet-black-nav h-screen bg-opacity-50">
 			<div className="m-5 mt-2 h-full">
 				<div className="mx-1"> 
 					<NavHorizontal />

@@ -1,4 +1,4 @@
-import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Game } from '@prisma/client';
 import { Server } from 'socket.io';
@@ -26,9 +26,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async connection(
     @ConnectedSocket() client : Socket
   ) {
-    // this.server.on
-    console.log("Player : " + client.id + " connected to the game.")
-    await this.gameService.connection(client);
+    const gameReady = await this.gameService.connection(client);
+    if (gameReady)
+      this.server.emit("gameFull", gameReady, client);
+  }
+
+  @SubscribeMessage("gamestart")
+  async gamestart(
+    @MessageBody("gameSocket") gameSocket: string,
+  ) {
+    const game = await this.gameService.findGame(gameSocket);
+    console.log(gameSocket)
+    this.server.emit("gamestart", game);
   }
 
 

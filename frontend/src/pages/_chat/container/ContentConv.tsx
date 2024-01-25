@@ -10,7 +10,6 @@ import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
 
 interface Channel {
 	name: string;
