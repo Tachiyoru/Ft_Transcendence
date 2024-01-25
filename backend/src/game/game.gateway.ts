@@ -4,7 +4,7 @@ import { Game } from '@prisma/client';
 import { Server } from 'socket.io';
 import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Request } from '@nestjs/common';
 import { Socket } from 'socket.io';
 
 @WebSocketGateway({
@@ -24,13 +24,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage("saucisse")
   async connection(
-    @ConnectedSocket() client : Socket
+    @ConnectedSocket() client : Socket,
+    @Request() req: any
   ) {
-    // this.server.on
     console.log("Player : " + client.id + " connected to the game.")
-    await this.gameService.connection(client);
+    console.log(client);
+    const gameReady = await this.gameService.connection(client, req);
+    if (gameReady)  {
+      this.server.to(gameReady.player1).emit('GameFull');
+      this.server.to(gameReady.player2).emit('GameFull');
+    }
   }
-
 
   handleConnection(client: any, ...args: any[]) {
     console.log(`Client connected: ${client.id}`);
