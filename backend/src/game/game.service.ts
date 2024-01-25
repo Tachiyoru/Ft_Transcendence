@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Request } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Socket } from 'socket.io';
+import { disconnect, emit } from 'process';
 
 @Injectable()
 export class GameService {
     constructor(private prisma: PrismaService)  {}
 
-    async connection(socket: Socket)  {
+    async connection(socket: Socket, @Request() req: any)  {
       const game = await this.prisma.game.findFirst({
         where: {connectedPlayers: 1}
       })
@@ -17,7 +18,8 @@ export class GameService {
             where: {gameId: game.gameId},
             data: {
               connectedPlayers: 2,
-              player2: socket.id
+              player2: socket.id,
+              player2User: req.user
             }
           })
           socket.join(updateGame.gameSocket);
@@ -29,6 +31,8 @@ export class GameService {
           const game = await this.prisma.game.create({
             data: {
               player1: socket.id,
+              player1User: req.user,
+              player2User: req.user,
               connectedPlayers: 1,
               gameSocket: ("Game" + socket.id)
             }
