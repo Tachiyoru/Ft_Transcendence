@@ -90,7 +90,6 @@ const PersoConv = () => {
 		const chanName = (lastMessage.authorId === userData.username) ? 'me' :  lastMessage.authorId;
 		return (
 			<>
-				
 				<p className="text-sm pt-1 text-lilac text-opacity-60">
 					{(chanName.length + lastMessage.content.length) > 16
 					? (chanName + ': ' + lastMessage.content).slice(0, 16) + "..."
@@ -111,7 +110,6 @@ const PersoConv = () => {
 		{/* USER */}
 		{allChannel
 			.filter((channel) => channel.modes === "CHAT")
-			.filter(channel => !allNoFriends.map(user => user.id).includes(channel.owner.id))
 			.map((channel, index) => (
 			<div
 			key={index}

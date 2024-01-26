@@ -8,7 +8,7 @@ const TimeConverter: React.FC<DateConverterProps> = ({ initialDate }) => {
 	
 	const timestamp = new Date(initialDate);
 	const heure = timestamp.getHours();
-	const minutes = timestamp.getMinutes();
+	const minutes = timestamp.getMinutes().toString().padStart(2, '0');
 
 	return (
 	<div>

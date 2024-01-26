@@ -501,23 +501,41 @@ export class chatService {
   async leaveChannel(chanId: number, @Request() @Request() req: any) {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
-      include: { owner: true },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     if (!chan) {
       throw new Error("Could not find channel");
     }
+    console.log('ok')
     if (req.user === chan.owner) {
       await this.prisma.channel.delete({
         where: { chanId: chanId },
       });
-      return {
-        success: true,
-        message: `Channel ${chan.name} deleted successfully`,
-      };
+      return 
+        (null);
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { members: { disconnect: { id: req.user.id } } },
+      include: {
+        messages: {
+          include: {
+            author: true,
+          },
+        },
+        members: true,
+        owner: true,
+        banned: true,
+      },
     });
     return updatedChannel;
   }

@@ -71,7 +71,7 @@ export class AuthController {
       raw._json.image.versions.small
     );
     await this.authService.callForgeTokens(user2, res);
-    res.redirect("http://localhost:5173/");
+    res.redirect(`${process.env.REACT_APP_URL_FRONTEND}`);
     return user2;
   }
 
@@ -87,7 +87,7 @@ export class AuthController {
       raw._json.avatar_url
     );
     await this.authService.callForgeTokens(user2, res);
-    res.redirect(`http://localhost:5173/`);
+    res.redirect(`${process.env.REACT_APP_URL_FRONTEND}`);
     return user2;
   }
 }

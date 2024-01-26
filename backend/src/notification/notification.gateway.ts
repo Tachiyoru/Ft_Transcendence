@@ -6,7 +6,7 @@ import { SocketTokenGuard } from 'src/auth/guard/socket-token.guard';
 import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
-	cors: { origin: "http://localhost:5173", credentials: true },
+	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
 })
 @UseGuards(SocketTokenGuard)
 export class NotificationGateway implements OnGatewayConnection

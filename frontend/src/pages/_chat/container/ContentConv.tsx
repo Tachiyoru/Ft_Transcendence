@@ -10,6 +10,7 @@ import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface Channel {
 	name: string;
@@ -23,9 +24,9 @@ interface Channel {
 }
 
 interface Owner {
-  username: string;
-  avatar: string;
-  id: number;
+	username: string;
+	avatar: string;
+	id: number;
 }
 
 interface Users{
@@ -64,8 +65,8 @@ const ContentConv = () => {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
 	const dispatch = useDispatch();
-	
-	
+	const navigate = useNavigate();
+
 	useEffect(() => {
 		const fetchBlockedUsers = async () => {
 			try {
@@ -185,7 +186,7 @@ const ContentConv = () => {
 		<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
 
 
-		{!channel ? 
+		{!channel || (channel.members.every(member => member.username !== userData.username) && channel.modes != 'GROUPCHAT')  ? 
 		(
 			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
 			No conversation selected

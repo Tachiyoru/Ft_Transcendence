@@ -10,8 +10,8 @@ const DateConverter: React.FC<DateConverterProps> = ({ initialDate }) => {
 	useEffect(() => {
 	const formatDate = () => {
 		const date = new Date(initialDate);
-		const jour = date.getDate();
-		const mois = date.getMonth() + 1;
+		const jour = date.getDate().toString().padStart(2, '0');
+		const mois = date.getMonth().toString().padStart(1, '0') + 1;
 		const annee = date.getFullYear();
 
 		const dateConvertie = `${jour}/${mois}/${annee}`;
