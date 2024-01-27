@@ -26,6 +26,7 @@ export class NotificationGateway
 
 	@SubscribeMessage('unread-notification')
 	async sendUnreadNotification(@ConnectedSocket() client: Socket){
+		console.log("unread-notification");
 		const unreadNotifications = await this.notificationService.getUnreadNotifications(client.handshake.auth.id);
 		this.server.to(client.id).emit('unread-notification-array', unreadNotifications);
 	}

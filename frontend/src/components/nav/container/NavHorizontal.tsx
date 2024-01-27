@@ -279,9 +279,9 @@ const socket = useContext(WebSocketContext);
                     {notification.type === 1 && <FaUserPlus className="mr-2 w-5 h-5"/>}
                     {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-5"/>}
                     {notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5"/>}
-                    <a href={getNotificationRedirect(notification.type)}>
-                      <span>{notification.content}</span>
-                    </a>
+                    <Link to={getNotificationRedirect(notification.type)}>
+					  <span>{notification.content}</span>
+					</Link>
                 </li>
               ))}
             </ul>
