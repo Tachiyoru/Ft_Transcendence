@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useEffect } from 'react';
+import { useState, ChangeEvent, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AiOutlineLock,
@@ -14,6 +14,7 @@ import SocialIcons from '../fields/SocialIcons';
 
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../../services/UserSlice';
+import { WebSocketContext } from '../../../socket/socket';
 
 interface IdataRegister {
   username: string;
@@ -57,8 +58,8 @@ const SignupForm = () => {
           setResStatus('Successful Registration!');
           console.log(response.data);
           dispatch(loginSuccess(response.data))
-		//   axios.post('/add/achievement', {id:1})
           navigate('/');
+		  window.location.reload();
         } else {
           setResStatus('Error');
         }
