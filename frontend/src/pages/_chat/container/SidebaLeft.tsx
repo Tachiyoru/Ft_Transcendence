@@ -8,14 +8,13 @@ import AllConv from "../filtre/AllConv";
 import PersoConv from "../filtre/PersoConv";
 import ChannelConv from "../filtre/ChannelConv";
 import CreateConv from "../../../components/popin/CreateConv";
-import SpamConv from "../filtre/SpamConv";
 
 interface SidebarLeftProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isTyping: boolean;
 }
 
-type FilterType = "all" | "personnal" | "channel" | "spam";
+type FilterType = "all" | "personnal" | "channel";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
   handleInputChange,
@@ -25,7 +24,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 
   useEffect(() => {
     const hash = window.location.hash.substr(1) as FilterType;
-    if (hash && ["all", "personnal", "channel", "spam"].includes(hash)) {
+    if (hash && ["all", "personnal", "channel"].includes(hash)) {
       setFiltreActif(hash);
     }
   }, []);
@@ -39,7 +38,6 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
     all: <AllConv />,
     personnal: <PersoConv />,
     channel: <ChannelConv />,
-    spam: <SpamConv />,
   };
 
   return (
@@ -72,7 +70,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         </div>
         {/*NAV*/}
         <div className="hidden md:block flex w-full" style={{ cursor: "pointer" }}>
-          <ul className="flex flex-row m-2 flex-between">
+          <ul className="flex flex-row m-2 justify-between">
             <li
               className={`text-sm text-lilac ${
                 filtreActif === "all"
@@ -88,7 +86,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 							${filtreActif === "personnal" ? "bg-purple" : ""}`}
               onClick={() => handleFiltre("personnal")}
             >
-              Direct
+              Personnal
             </li>
             <li
               className={`text-sm text-lilac hover:bg-purple hover:bg-opacity-30 ml-1 rounded-md py-1 p-3 
@@ -96,13 +94,6 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
               onClick={() => handleFiltre("channel")}
             >
               Group
-            </li>
-            <li
-              className={`text-sm text-lilac hover:bg-purple hover:bg-opacity-30 ml-1 rounded-md py-1 p-3 
-							${filtreActif === "spam" ? "bg-purple" : ""}`}
-              onClick={() => handleFiltre("spam")}
-            >
-              Spam
             </li>
           </ul>
         </div>

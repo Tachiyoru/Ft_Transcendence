@@ -1,16 +1,33 @@
 import { useContext, useEffect, useState } from 'react';
 import { FaUserGroup } from 'react-icons/fa6'
 import { useDispatch } from 'react-redux';
-import { setSelectedChannelId } from '../../../services/selectedChannelSlice';
+import { setPrevChannelId, setSelectedChannelId } from '../../../services/selectedChannelSlice';
 import { WebSocketContext } from '../../../socket/socket';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
 import axios from '../../../axios/api';
+import TimeConverter from '../../../components/date/TimeConverter';
+import { useNavigate } from 'react-router-dom';
+
+interface Member {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
+interface Message {
+	content: string;
+	createdAt: string;
+	authorId: string;
+}
 
 interface Channel {
 	name: string;
 	modes: string;
 	chanId: number;
+	members: Member[];
+	messages: Message[];
 	owner: User;
 }
 
@@ -20,7 +37,6 @@ interface User {
 	id: number;
 	status: string;
 }
-
 const ChannelConv = () => {
 	const [allChannel, setAllChannel] = useState<Channel[]>([]);
 	const [publicChannel, setPublicChannel] = useState<Channel[]>([]);
@@ -69,15 +85,41 @@ const ChannelConv = () => {
 		};
 	}, [socket]);
 
+	const navigate = useNavigate();
+
 	const handleChannelClick = (channelId: number) => {
+		if (id.selectedChannelId !== null)
+			dispatch(setPrevChannelId(id.selectedChannelId))
 		dispatch(setSelectedChannelId(channelId));
+		navigate(`/chat/${channelId}`)
+	};
+
+	const renderLastMessage = (channel: Channel) => {
+		if (channel.messages.length > 0) {
+		const lastMessage = channel.messages[channel.messages.length - 1];
+		const chanName = (lastMessage.authorId === userData.username) ? 'me' :  lastMessage.authorId;
+		return (
+			<>
+				
+				<p className="text-sm pt-1 text-lilac text-opacity-60">
+					{(chanName.length + lastMessage.content.length) > 16
+					? (chanName + ': ' + lastMessage.content).slice(0, 16) + "..."
+					: chanName + ': ' + lastMessage.content}
+				</p>
+				<TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
+			</>
+		);
+		} else {
+		return (
+			<p className="text-sm pt-1 text-lilac text-opacity-60">No messages</p>
+		);
+		}
 	};
 
 	return (
 		<div className="pl-1 md:pl-5">
 		{allChannel
 		.filter(channel => channel.modes !== "CHAT")
-		.filter(channel => !allNoFriends.map(user => user.id).includes(channel.owner.id))
 		.map((channel, index) => (
 		<div
 			key={index}
@@ -107,11 +149,8 @@ const ChannelConv = () => {
 				) 
 				: null}
 				</div>
-				<div className="flex flex-row">
-				<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">
-					Lorem ipsum dolor…
-				</p>
-				<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+				<div className="flex flex-row justify-between w-[140px]">
+					{renderLastMessage(channel)}
 				</div>
 			</div>
 			</div>
@@ -146,15 +185,11 @@ const ChannelConv = () => {
 				<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 					<FaUserGroup className="text-lilac"/>
 				</div>
-				<div className="pt-3 hidden md:block">
+				<div className="pt-3 hidden md:block w-2/3">
 					<div className="flex flex-row justify-between">
 						<p className="text-base text-lilac">{channel.name.length > 10 ? 
 						`${channel.name.slice(0, 10)}...` : channel.name}</p>
-						<p className="text-sm text-lilac text-opacity-60">{channel.modes === 'GROUPCHAT' ? 'Public' : ''}</p>
-					</div>
-					<div className="flex flex-row">
-						<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
-						<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
+						<p className="text-sm text-lilac text-opacity-60">{channel.modes === 'PROTECTED' ? 'Protected' : ''}</p>
 					</div>
 				</div>
 			</div>
@@ -185,19 +220,15 @@ const ChannelConv = () => {
 				channel.chanId === id.selectedChannelId ? 'bg-filter rounded-l-md pb-1' : 'pb-1'
 			}`}
 		>
-			<div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
+			<div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2">
 				<div className="w-full h-full md:w-[45px] md:h-[45px] mt-2 bg-purple rounded-full grid justify-items-center items-center md:mr-4">
 					<FaUserGroup className="text-lilac"/>
 				</div>
-				<div className="pt-3 hidden md:block">
+				<div className="pt-3 hidden md:block w-2/3">
 					<div className="flex flex-row justify-between">
 						<p className="text-base text-lilac">{channel.name.length > 10 ? 
 						`${channel.name.slice(0, 10)}...` : channel.name}</p>
 						<p className="text-sm text-lilac text-opacity-60">{channel.modes === 'GROUPCHAT' ? 'Public' : ''}</p>
-					</div>
-					<div className="flex flex-row">
-						<p className="text-sm  pt-1 text-lilac text-opacity-60 mr-2">Lorem ipsum dolor…</p>
-						<p className="text-sm pt-1 text-lilac text-opacity-60">12:00</p>
 					</div>
 				</div>
 			</div>

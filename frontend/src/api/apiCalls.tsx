@@ -27,8 +27,6 @@ export const fetchDataUser = async ({
 
 		const userRankingGlobals = await axios.get('/users/ranking-global');
 		setUserRankingGlobal(userRankingGlobals.data);
-		console.log("userRankingGlobals : ", userRankingGlobals.data
-		)
 
 		const userRankingFriends = await axios.get('/users/ranking-friends');
 		setUserRankingFriends(userRankingFriends.data);

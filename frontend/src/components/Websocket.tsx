@@ -10,6 +10,7 @@ export const Websocket = () => {
     });
     socket.on("disconnect", () => {
       console.log("disconnected from server");
+      socket.emit("gotDisconnected");
     });
     socket.on("message", (message: string) => {
       console.log(message);

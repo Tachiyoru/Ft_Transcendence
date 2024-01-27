@@ -31,7 +31,7 @@ import { NotificationService } from "src/notification/notification.service";
 import { TokenGuard } from "src/auth/guard";
 
 @WebSocketGateway({
-  cors: { origin: "http://localhost:5173", credentials: true },
+  cors: { origin: "http://paul-f4ar2s4:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
 export class chatGateway {
@@ -80,8 +80,7 @@ export class chatGateway {
       client.leave(chan2.name);
     }
     client.join(chan.name);
-    console.log('info chan')
-    this.server.emit("channel", chan, messagesList);
+    this.server.to(chan.name).emit("channel", chan, messagesList);
   }
 
   @SubscribeMessage("editChannel")
@@ -362,6 +361,7 @@ export class chatGateway {
         data.password,
       );
       client.emit("channelJoined", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("channelJoinedError", { message: error.message });
     }
@@ -376,6 +376,8 @@ export class chatGateway {
     try {
       const result = await this.chatService.leaveChannel(data.chanId, req);
       client.emit("channelLeft", result);
+      if (result)
+        this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("chanLeftError", { message: error.message });
     }

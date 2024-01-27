@@ -107,14 +107,12 @@ export class NotificationService
 			if (!notificationDto.fromUser)
 				throw new Error("Missing fromUser in notificationDto");
 			const content = contentGenerator(notificationDto.fromUser);
-			console.log(content);
 			return content;
 		} else if (notifType === NotificationType.ACHIEVEMENT_UNLOCKED)
 		{
 			if (!notificationDto.achievementName)
 				throw new Error("Missing achievementName in notificationDto");
 			const content = contentGenerator(notificationDto.achievementName);
-			console.log(content);
 			return content;
 		} else if (
 			notifType === NotificationType.INVITED_TO_CHANNEL ||
@@ -129,7 +127,6 @@ export class NotificationService
 				notificationDto.fromUser,
 				notificationDto.channelName
 			);
-			console.log(content);
 			return content;
 		} else if (notifType === NotificationType.CHANNEL_PRIVILEGE_GRANTED)
 		{
@@ -141,7 +138,6 @@ export class NotificationService
 				notificationDto.privilegeName,
 				notificationDto.channelName
 			);
-			console.log(content);
 			return content;
 		} else throw new Error("Invalid notification type");
 	}

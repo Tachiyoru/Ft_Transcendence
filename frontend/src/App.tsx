@@ -5,6 +5,7 @@ import SigninForm from './pages/_auth/forms/SigninForm';
 import SignupForm from './pages/_auth/forms/SignupForm';
 import Dashboard from './pages/_root/Dashboard';
 import ForgetPassword from './pages/_auth/forms/ForgetPassword';
+import InGame from './pages/_inGame/InGame';
 import Game from './pages/_game/Game';
 import Chat from './pages/_chat/Chat';
 import Friends from './pages/_friends/Friends';
@@ -36,8 +37,9 @@ return (
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />}/>
 			<Route path="/user/:username" element={<DashboardFriends/>}/>
-			<Route path="/gamestart" element={<AboutToPlay />} />
+			<Route path="/gamestart/:gameSocket" element={<AboutToPlay />} />
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
+			<Route path="/inGame" element={<InGame />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat/:chanId" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>

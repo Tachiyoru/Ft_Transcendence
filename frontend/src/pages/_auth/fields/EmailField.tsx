@@ -7,7 +7,7 @@ const EmailField = ({ register, errors, showUsernameErrors, resStatus, setShowUs
 		<input
 		type="email"
 		id="email"
-		autocomplete="off"
+		autoComplete="off"
 
 		{...register('email', {
 			pattern: {

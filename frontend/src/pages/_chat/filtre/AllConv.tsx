@@ -136,7 +136,6 @@ const AllConv = () => {
 	<div className="pl-1 md:pl-5">
 		
 	{allChannel
-	.filter(channel => !allNoFriends.map(user => user.id).includes(channel.owner.id))
 	.map((channel, index) => (
 		<div
 		key={index}

@@ -87,7 +87,7 @@ const SignupForm = () => {
 
   const handle42Click = async () => {
     try{
-      const response = window.location.href = "http://localhost:5001/auth/42/callback";
+      const response = window.location.href = "http://paul-f4ar2s4:5001/auth/42/callback";
       if (response)
       {
         dispatch(loginSuccess(response))
@@ -99,7 +99,7 @@ const SignupForm = () => {
 
   const handleGitClick = async () => {
     try{
-      const response = window.location.href = "http://localhost:5001/auth/github/callback";
+      const response = window.location.href = "http://paul-f4ar2s4:5001/auth/github/callback";
       if (response)
       {
         dispatch(loginSuccess(response))

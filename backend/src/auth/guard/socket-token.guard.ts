@@ -23,7 +23,6 @@ export class SocketTokenGuard implements CanActivate
 	{
 		if (context.getType() !== "ws")
 		{
-			console.log("la");
 			return true;
 		}
 		const request = context.switchToHttp().getRequest();
@@ -47,7 +46,6 @@ export class SocketTokenGuard implements CanActivate
 			where: { id: payload.sub },
 			include: { friends: true, stats: true, achievements: true },
 		});
-		console.log("user : ", user);
 		if (!user)
 		{
 			throw new UnauthorizedException("User not found");

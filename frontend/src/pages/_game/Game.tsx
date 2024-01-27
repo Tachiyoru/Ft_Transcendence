@@ -1,13 +1,14 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { IoIosArrowForward } from "react-icons/io";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { RiTriangleFill } from "react-icons/ri";
 import { useRef, useEffect } from "react";
 import Winner from "../../components/popin/Victory";
 import Defeat from "../../components/popin/Defeat";
 import Draw from "../../components/popin/Draw";
+import { WebSocketContext } from "../../socket/socket";
 
 const Game = () => {
 	const location = useLocation();
@@ -16,6 +17,8 @@ const Game = () => {
     const [showBackIndex, setShowBackIndex] = useState<number | null>(null);
 	const cardsRef = useRef<HTMLDivElement>(null);
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
+	const socket = useContext(WebSocketContext);
+	const navigate = useNavigate();
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -42,7 +45,22 @@ const Game = () => {
 		console.log(selectedIndexes)
 	};
 		
+	const connectServ = () =>	{
+		socket.emit("saucisse");
+		console.log(socket.id);
+		setSelectedIndexes([-1]);
+	}
 
+	useEffect(() => {
+		try {
+			socket.on("GameFull", (game) => {
+				console.log(game);
+				navigate(`/gamestart/${game.gameSocket}`)
+			});
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données:', error);
+		}
+	}, [socket]);
 
 	const [showSecondDiv, setShowSecondDiv] = useState(
 		localStorage.getItem('showSecondDiv') === 'true'
@@ -65,6 +83,7 @@ const Game = () => {
 	const handleCrossClick = () => {
 	setShowSecondDiv(false);
 	setSelectedIndexes([]);
+	socket.emit("gotDisconnected");
 	localStorage.removeItem('showSecondDiv');
 	};
 
@@ -101,8 +120,8 @@ const Game = () => {
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</button>
 							<div className="border-t border-lilac"></div>
-							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Random player</div>
+							<div className="flex flex-row justify-between items-center cursor-pointer">
+								<div onClick={() => { connectServ(); toggleCard(0); }} className="text-xs text-lilac">Random player</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
@@ -119,9 +138,8 @@ const Game = () => {
 							<h3 className='absolute top-0 text-lilac text-xl font-audiowide pl-2'>choose a player</h3>
 							<div className="py-4">
 							{names.map((name, index) => (
-									<div>
+									<div key={index}>
 										<div
-											key={index}
 											className="flex flex-row justify-content items-center px-2 py-1"
 											onMouseEnter={() => setHoveredIndex(index)}
 											onMouseLeave={() => setHoveredIndex(null)}
@@ -150,14 +168,14 @@ const Game = () => {
 									<div className="border-t w-12 border-lilac"></div>
 									</div>
 									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
-									<div className="text-xs text-lilac">Random player</div>
+									<div onClick={() => { connectServ(); toggleCard(0); }} className="text-xs text-lilac">Random player</div>
 									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 									</div>
 							</div>
 						</div>
 					) : (
 						<div className="relative text-lilac">
-							{!showSecondDiv ? (
+							{!showSecondDiv && selectedIndexes[0] !== -1? (
 							<>
 							<div className="pb-6">
 								<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
@@ -178,6 +196,23 @@ const Game = () => {
 							</div>
 							<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
 							</>
+							) : selectedIndexes[0] === -1 ? (
+								<>
+								<div className="pb-6">
+									<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+										&#x2715;
+									</div>
+								</div>
+								<div className="flex justify-center h-5/6">
+									<h3 className="absolute font-audiowide text-xl">Waiting for...</h3>
+									<div className="w-full h-5/6 bg-filter my-4 p-4 flex flex-col justify-center items-center">
+										<div className="element-to-animate rounded-full" style={{ width: '80px', height: '80px' }}>
+											<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+										</div>
+									</div>
+								</div>
+								<p className="absolute bottom-14 text-lilac pl-2 font-audiowide">0/1</p>
+								</>
 							) : (
 								<>
 								<div className="pb-6">
@@ -230,16 +265,15 @@ const Game = () => {
 					ref={cardsRef}
 					className={`flex h-96 w-full rounded-md bg-violet-black border-container grid grid-rows-[2fr,auto] p-2 ${showBackIndex === 1 ? '' : 'hidden'}`}
 						>
-	  				{selectedIndexes.length !== 3 ? (
+					{selectedIndexes.length !== 3 ? (
 						<div className="relative">
 						{/*LIST*/}
 						<div className="w-full h-2/3 bg-filter my-4">
 							<h3 className='absolute top-0 text-lilac text-xl font-audiowide pl-2'>choose a player</h3>
 							<div className="py-4">
 							{names.map((name, index) => (
-									<div>
+									<div key={index}>
 										<div
-											key={index}
 											className="flex flex-row justify-content items-center px-2 py-1"
 											onMouseEnter={() => setHoveredIndex(index)}
 											onMouseLeave={() => setHoveredIndex(null)}
@@ -275,10 +309,10 @@ const Game = () => {
 						</div>
 					) : (
 						<div className="relative text-lilac">
-							{!showSecondDiv ? (
+							{!showSecondDiv? (
 							<>
 							<div className="pb-6">
-								<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+								<div onClick={handleCrossClick} className="cross-icon cursor-pointer absolute right-0">
 									&#x2715;
 								</div>
 							</div>
@@ -317,7 +351,7 @@ const Game = () => {
 							) : (
 								<>
 								<div className="pb-6">
-									<div onClick={handleCrossClick}className="cross-icon cursor-pointer absolute right-0">
+									<div onClick={handleCrossClick} className="cross-icon cursor-pointer absolute right-0">
 										&#x2715;
 									</div>
 								</div>
