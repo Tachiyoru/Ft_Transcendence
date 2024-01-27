@@ -21,13 +21,13 @@ export class chatService {
   ) {}
 
   async createChannel(settings: createChannel, @Request() req: any) {
-
-    if (settings.mode === 'CHAT') {
-      settings.name = settings.members.map((user) => user.username).join(", ") +
-      ", " +
-      req.user.username;
+    if (settings.mode === "CHAT") {
+      settings.name =
+        settings.members.map((user) => user.username).join(", ") +
+        ", " +
+        req.user.username;
     }
-    console.log(settings.name)
+    console.log(settings.name);
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: settings.name },
     });
@@ -35,7 +35,7 @@ export class chatService {
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-    
+
     const channel: Channel = await this.prisma.channel.create({
       data: {
         name: settings.name,
@@ -152,10 +152,7 @@ export class chatService {
       where: {
         AND: [
           {
-            OR: [
-              { modes: "GROUPCHAT" },
-              { modes: "PROTECTED" },
-            ],
+            OR: [{ modes: "GROUPCHAT" }, { modes: "PROTECTED" }],
           },
           {
             NOT: {
@@ -277,7 +274,7 @@ export class chatService {
   async removeOp(chanId: number, username: string, @Request() req: any) {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
-      include: { owner: true  },
+      include: { owner: true },
     });
     if (!chan) {
       throw new Error("Could not find channel");
@@ -285,8 +282,8 @@ export class chatService {
     if (req.user.username !== chan.owner.username) {
       throw new Error("You are not allowed to add an op to this channel");
     }
-    
-    const updatedOp = chan.op.filter(user => user !== username);
+
+    const updatedOp = chan.op.filter((user) => user !== username);
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { op: { set: updatedOp } },
@@ -307,7 +304,7 @@ export class chatService {
   async isUserInChannel(@Request() req: any, chanId: number): Promise<boolean> {
     try {
       const userList = await this.findAllMembers(chanId);
-      const isInChannel = userList.some(user => user.id === req.user.id);
+      const isInChannel = userList.some((user) => user.id === req.user.id);
       return isInChannel;
     } catch (error) {
       console.error("Error checking user in channel:", error);
@@ -455,11 +452,7 @@ export class chatService {
     return updatedChannel;
   }
 
-  async joinChannel(
-    chanId: number,
-    @Request() req: any,
-    password?: string
-  ) {
+  async joinChannel(chanId: number, @Request() req: any, password?: string) {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
       include: {
@@ -499,7 +492,7 @@ export class chatService {
         throw new Error("Invalid channel configuration");
       }
     }
-  
+
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
       data: { members: { connect: { id: req.user.id } } },
@@ -534,13 +527,13 @@ export class chatService {
     if (!chan) {
       throw new Error("Could not find channel");
     }
-    console.log('ok')
+    console.log("ok");
     if (req.user === chan.owner) {
       await this.prisma.channel.delete({
         where: { chanId: chanId },
       });
-      return 
-        (null);
+      return;
+      null;
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
@@ -709,7 +702,8 @@ export class chatService {
             author: true,
           },
         },
-    }});
+      },
+    });
     if (!chan) {
       throw new Error("Could not find channel");
     }
@@ -744,7 +738,7 @@ export class chatService {
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chan.chanId },
-      data: { muted: { set: chan.muted.filter((id) => id !== userId) }, },
+      data: { muted: { set: chan.muted.filter((id) => id !== userId) } },
       include: {
         messages: {
           include: {
@@ -789,7 +783,7 @@ export class chatService {
     const { content, chanName } = createMessageDto;
     const chan = await this.prisma.channel.findUnique({
       where: { name: chanName },
-      include: { banned: true },
+      include: { banned: true, members: true },
     });
     if (!chan) {
       throw new Error("Could not find channel");
@@ -808,14 +802,62 @@ export class chatService {
           channel: { connect: { name: chan.name } },
           author: { connect: { id: target.id } },
         },
-        include: {author: true}
+        include: { author: true },
       });
-      await this.prisma.channel.update({
-        where: { name: chanName },
-        data: { updatedAt: new Date() },
-      });
+      const memberslist = chan.members.filter((user) => user.id !== target.id);
+      const memberArray = memberslist.map((user) =>
+        user.username !== null ? user.username : ""
+      );
+      console.log(memberArray);
+
+      if (memberArray && memberArray.length > 0) {
+        await this.prisma.channel.update({
+          where: { name: chanName },
+          data: {
+            updatedAt: new Date(),
+            read: { set: memberArray },
+          },
+        });
+      }
       return message;
     }
+  }
+
+  async read(chanName: string, username: string) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    const memberslist = chan?.read.filter((user) => user !== username);
+    if (memberslist && memberslist.length > 0) {
+      const memberArray = memberslist.map((user) =>
+        user !== null ? username : ""
+      );
+      await this.prisma.channel.update({
+        where: { name: chanName },
+        data: {
+          updatedAt: new Date(),
+          read: { set: memberArray },
+        },
+      });
+	  console.log(username, " a lu la conv ", chanName);
+    }
+  }
+
+  async isUnRead(chanName: string, username: string) {
+    const chan = await this.prisma.channel.findUnique({
+      where: { name: chanName },
+    });
+    if (!chan) {
+      throw new Error("Could not find channel");
+    }
+    const target = await this.prisma.user.findUnique({
+      where: { username: username },
+    });
+    if (!target) {
+      throw new Error("Could not find user");
+    }
+    const unread = chan.read.some((user) => user === target.username);
+    return unread;
   }
 
   // changer pour chanId ici

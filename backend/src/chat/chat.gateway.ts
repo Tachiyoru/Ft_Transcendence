@@ -43,7 +43,6 @@ export class chatGateway {
     private readonly notificationService: NotificationService
   ) {}
 
-  
   afterInit() {
     this.server.on("connection", (socket) => {
       console.log("connected as socket :", socket.id);
@@ -183,7 +182,14 @@ export class chatGateway {
   async createchan(
     @ConnectedSocket() client: Socket,
     @MessageBody("settings") settings: createChannel,
-    @MessageBody() data: { chanName: string; users: User[]; mode: Mode, password?: string, name?: string },
+    @MessageBody()
+    data: {
+      chanName: string;
+      users: User[];
+      mode: Mode;
+      password?: string;
+      name?: string;
+    },
     @Request() req: any
   ) {
     try {
@@ -328,7 +334,9 @@ export class chatGateway {
   }
 
   @SubscribeMessage("find-channels-public-protected")
-  async getChannelsPublicProtected(@ConnectedSocket() client: Socket): Promise<void> {
+  async getChannelsPublicProtected(
+    @ConnectedSocket() client: Socket
+  ): Promise<void> {
     const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
       client.handshake.auth.id
     );
@@ -351,14 +359,14 @@ export class chatGateway {
   async joinChan(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { chanId: number; password?: string;},
+    data: { chanId: number; password?: string },
     @Request() req: any
   ) {
     try {
       const result = await this.chatService.joinChannel(
         data.chanId,
         req,
-        data.password,
+        data.password
       );
       client.emit("channelJoined", result);
       this.server.emit("channel", result, result.messages);
@@ -376,8 +384,7 @@ export class chatGateway {
     try {
       const result = await this.chatService.leaveChannel(data.chanId, req);
       client.emit("channelLeft", result);
-      if (result)
-        this.server.emit("channel", result, result.messages);
+      if (result) this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("chanLeftError", { message: error.message });
     }
@@ -435,7 +442,6 @@ export class chatGateway {
       );
       client.emit("userKicked", result);
       this.server.emit("channel", result, result.messages);
-
     } catch (error) {
       client.emit("kickUserError", { message: error.message });
     }
@@ -477,9 +483,9 @@ export class chatGateway {
         data.chanId,
         data.userId
       );
-      console.log('mute')
+      console.log("mute");
       this.server.emit("memberMuted", result);
-      console.log(result)
+      console.log(result);
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("muteMemberError", { message: error.message });
@@ -496,7 +502,7 @@ export class chatGateway {
         data.chanId,
         data.userId
       );
-      console.log('unmute')
+      console.log("unmute");
       this.server.emit("memberUnMuted", result);
       this.server.emit("channel", result, result.messages);
     } catch (error) {
@@ -594,7 +600,7 @@ export class chatGateway {
 
   @SubscribeMessage("typing")
   async typing(
-	@MessageBody() chanName: string ,
+    @MessageBody() chanName: string,
     @ConnectedSocket() client: Socket
   ) {
     const username = client.handshake.auth.username;
@@ -604,5 +610,25 @@ export class chatGateway {
     if (!user) return;
     const name = user.username;
     this.server.to(chanName).except(client.id).emit("typing", username);
+  }
+
+  @SubscribeMessage("read")
+  async read(
+    @MessageBody() chanName: string,
+    @ConnectedSocket() client: Socket
+  ) {
+	const username = client.handshake.auth.username;
+	await this.chatService.read(chanName, username);
+  }
+
+  @SubscribeMessage("un-read")
+  async unRead(
+    @MessageBody() chanName: string,
+    @ConnectedSocket() client: Socket
+  ) {
+	console.log("un-read");
+    const username = client.handshake.auth.username;
+    if (!(await this.chatService.isUnRead(chanName, username))) return false;
+    else return true;
   }
 }
