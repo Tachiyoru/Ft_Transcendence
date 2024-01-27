@@ -96,7 +96,6 @@ export class FriendsListController
 	@Get('/blocked-users/:userId')
     async checkIfUserIsBlocked(@Param('userId', ParseIntPipe) userId: number, @GetUser() user: User): Promise<{isBlocked: boolean}> {
         const isBlocked = await this.friendListService.isUserBlockedById(userId, user);
-		console.log(isBlocked)
 		return { isBlocked };
     }
 
