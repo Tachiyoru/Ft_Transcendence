@@ -361,6 +361,7 @@ export class chatGateway {
         data.password,
       );
       client.emit("channelJoined", result);
+      this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("channelJoinedError", { message: error.message });
     }

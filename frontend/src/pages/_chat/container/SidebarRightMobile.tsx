@@ -394,7 +394,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 				{displayText} - {channel.members.length} members
 				</p>
 			</div>
-			{!checkUserInChannel && channel.modes === "GROUPCHAT" && (
+			{channel.members.every(member => member.username !== userData.username) && channel.modes === "GROUPCHAT" && (
 				<div className="flex flex-col justify-end p-2 mt-4 mx-4 rounded-lg bg-purple">
 				<div onClick={handleJoinChannel} style={{ cursor: "pointer" }} className="flex flex-row justify-between items-center w-full">
 					<div className="text-xs text-lilac">Join group</div>

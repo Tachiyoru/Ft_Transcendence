@@ -11,6 +11,7 @@ import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 
 interface Channel {
 	name: string;
@@ -21,6 +22,7 @@ interface Channel {
 	op: string[]
 	password: string;
 	muted: number[];
+	banned: Users[];
 }
 
 interface Owner {
@@ -170,6 +172,13 @@ const ContentConv = () => {
 		};
 	}
 	}, [socket, selectedChannelId]);
+	
+	useEffect(() => {
+		if (!channel || (channel.members.every(member => member.username !== userData.username) && channel.banned.find(member => member.username === userData.username)))	
+		{
+			navigate('/chat');
+		}
+	}, [channel, userData.username]);
 
 	const toggleRightSidebar = () => {
 		setIsRightSidebarOpen(!isRightSidebarOpen);
@@ -186,14 +195,19 @@ const ContentConv = () => {
 		<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
 
 
-		{!channel || (channel.members.every(member => member.username !== userData.username) && channel.modes != 'GROUPCHAT')  ? 
+		{!channel ? 
 		(
 			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
-			No conversation selected
+			No conversation selected<br/>
 			</div>
 
-		) 
-		: channel.modes === "PROTECTED" && !checkUserInChannel ? 
+		) : (channel.members.every(member => member.username !== userData.username) && channel.banned.find(member => member.username === userData.username)) ?
+		(
+			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
+			You've got banned from this channel
+			</div>			
+		)
+		: channel.modes === "PROTECTED" && channel.members.every(member => member.username !== userData.username) ? 
 		(
 		<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
 			<div>
@@ -288,9 +302,9 @@ const ContentConv = () => {
 					>
 						<input
 						type="text"
-						disabled={channel.muted.map(user => user).includes(userData.id)}
-						placeholder={channel.muted.map(user => user).includes(userData.id) ? "You are not allowed to send a message in this channel" : "Write a message"}
-						className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac placeholder:text-opacity-50 w-full rounded-md ${channel.muted.map(user => user).includes(userData.id)} ? 'cursor-not-allowed' : ''}`}
+						disabled={channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username))}
+						placeholder={channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username)) ? "You are not allowed to send a message in this channel" : "Write a message"}
+						className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac placeholder:text-opacity-50 w-full rounded-md ${channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username))} ? 'cursor-not-allowed' : ''}`}
 						value={message}
 						onChange={handleTyping}
 

@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+
+const backendUrl = import.meta.env.REACT_APP_URL_BACKEND as string
+
 const axiosInstance = axios.create({
-    baseURL: 'http://paul-f4ar2s4:5001',
+    baseURL: backendUrl,
     withCredentials: true,
 })
 
