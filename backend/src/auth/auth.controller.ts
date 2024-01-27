@@ -26,8 +26,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const user = await this.authService.signup(dto, res);
-	// if (user)
-	// 	await addAchievementByUserId(user.user.id, 1);
     return { user };
   }
 
