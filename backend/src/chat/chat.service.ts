@@ -823,23 +823,24 @@ export class chatService {
     }
   }
 
-  async read(chanName: string, username: string) {
+  async read(chanId: number, username: string) {
     const chan = await this.prisma.channel.findUnique({
-      where: { name: chanName },
+      where: { chanId: chanId },
     });
+	console.log(username,"avant", chan?.read);
     const memberslist = chan?.read.filter((user) => user !== username);
-    if (memberslist && memberslist.length > 0) {
+    if (memberslist) {
       const memberArray = memberslist.map((user) =>
         user !== null ? username : ""
       );
       await this.prisma.channel.update({
-        where: { name: chanName },
+        where: { chanId: chanId },
         data: {
-          updatedAt: new Date(),
           read: { set: memberArray },
         },
       });
-	  console.log(username, " a lu la conv ", chanName);
+	  console.log(username, " a lu la conv ", chan?.name);
+	  console.log("apres",memberArray);
     }
   }
 

@@ -14,313 +14,369 @@ import { useNavigate } from "react-router-dom";
 import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 
 interface Channel {
-	name: string;
-	modes: string;
-	chanId: number;
-	owner: Owner;
-	members: Users[];
-	op: string[]
-	password: string;
-	muted: number[];
-	banned: Users[];
+  name: string;
+  modes: string;
+  chanId: number;
+  owner: Owner;
+  members: Users[];
+  op: string[];
+  password: string;
+  muted: number[];
+  banned: Users[];
 }
 
 interface Owner {
-	username: string;
-	avatar: string;
-	id: number;
-}
-
-interface Users{
-	username: string;
-	avatar: string;
-	id: number;
-	status: string;
-}
-
-interface Message {
-	content: string;
-	authorId: string,
-	createdAt: Date,
-	author: Users
+  username: string;
+  avatar: string;
+  id: number;
 }
 
 interface Users {
-	username: string;
-	avatar: string;
-	id: number;
-	status: string;
+  username: string;
+  avatar: string;
+  id: number;
+  status: string;
 }
 
+interface Message {
+  content: string;
+  authorId: string;
+  createdAt: Date;
+  channelName: string;
+  author: Users;
+}
+
+interface Users {
+  username: string;
+  avatar: string;
+  id: number;
+  status: string;
+}
 
 const ContentConv = () => {
-	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-	const [channel, setChannel] = useState<Channel | null>(null);
-	const [messageList, setMessageList] = useState<Message[]>([]);
-	const [message, setMessage] = useState<string>('');
-	const socket = useContext(WebSocketContext);
-	const [userData, setUserData] = useState<{username: string; id: number}>({ username: '' , id: -1});
-	const messageContainerRef = useRef(null);
-	const [isTyping, setIsTyping] = useState<string>('')
-	const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
-	const [passwordInput, setPasswordInput] = useState('');
-	const [errorMessage, setErrorMessage] = useState('');
-	const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [channel, setChannel] = useState<Channel | null>(null);
+  const [messageList, setMessageList] = useState<Message[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const socket = useContext(WebSocketContext);
+  const [userData, setUserData] = useState<{ username: string; id: number }>({
+    username: "",
+    id: -1,
+  });
+  const messageContainerRef = useRef(null);
+  const [isTyping, setIsTyping] = useState<string>("");
+  const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchBlockedUsers = async () => {
-			try {
-				const response = await axios.get("/friends-list/blocked-users");
-				setBlockedUsers(response.data);
-			} catch (error) {
-				console.error("Error fetching blocked users:", error);
-			}
-		};
-		fetchBlockedUsers();
-	}, []);
-	
-	const updateList = (newList: Users[]) => {
-		setBlockedUsers(newList);
-	};
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+        const response = await axios.get("/friends-list/blocked-users");
+        setBlockedUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching blocked users:", error);
+      }
+    };
+    fetchBlockedUsers();
+  }, []);
 
-	const scrollToBottom = () => {
-		if (messageContainerRef.current) {
-		messageContainerRef.current.scrollTop =
-			messageContainerRef.current.scrollHeight;
-		}
-	};
+  const updateList = (newList: Users[]) => {
+    setBlockedUsers(newList);
+  };
 
-	useEffect(() => {
-		scrollToBottom();
-	}, [messageList]);
+  const scrollToBottom = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  };
 
-	useEffect(() => {
-		const fetchData = async () => {
-		try {
-			const userDataResponse = await axios.get('/users/me');
-			setUserData(userDataResponse.data);
-		} catch (error) {
-			console.error('Error fetching user data:', error);
-		}
-		};
-		fetchData();
-	}, []);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageList]);
 
-	const selectedChannelId = useSelector((state: RootState) => state.selectedChannelId.selectedChannelId);
-	const prevChannelId = useSelector((state: RootState) => state.selectedChannelId.prevChannelId);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userDataResponse = await axios.get("/users/me");
+        setUserData(userDataResponse.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
+  const selectedChannelId = useSelector(
+    (state: RootState) => state.selectedChannelId.selectedChannelId
+  );
+  const prevChannelId = useSelector(
+    (state: RootState) => state.selectedChannelId.prevChannelId
+  );
 
-	const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		if (!channel) return;
-		socket.emit("create-message", { content: message, chanName: channel.name });
-		console.log("message = ", message);
-		setMessage("");
-		setIsTyping("");
-	};
+  const handleInputSubmit = (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!channel) return;
+    socket.emit("create-message", { content: message, chanName: channel.name });
+    console.log("message = ", message);
+    setMessage("");
+    setIsTyping("");
+  };
 
-	const handleJoinChannel = async () => {
-	socket.emit("joinChan", { chanId: selectedChannelId, password: passwordInput });
-	socket.on("channelJoined", (updatedChannel) => {
-		console.log(updatedChannel)
-		setCheckUserInChannel(true);
-	});
-	socket.on("channelJoinedError", (error) => {
-		setErrorMessage('Wrong password');
-		console.error('Error joining channel:', error);
-	});
+  const handleJoinChannel = async () => {
+    socket.emit("joinChan", {
+      chanId: selectedChannelId,
+      password: passwordInput,
+    });
+    socket.on("channelJoined", (updatedChannel) => {
+      console.log(updatedChannel);
+      setCheckUserInChannel(true);
+    });
+    socket.on("channelJoinedError", (error) => {
+      setErrorMessage("Wrong password");
+      console.error("Error joining channel:", error);
+    });
+  };
+
+  useEffect(() => {
+    if (selectedChannelId !== null) {
+      socket.emit("channel", {
+        id: selectedChannelId,
+        prev: prevChannelId,
+      });
+
+      const handleChannelAndMessages = (
+        channelInfo: Channel,
+        messageList: Message[]
+      ) => {
+        setChannel(channelInfo);
+        console.log("channelInfo = ", channelInfo);
+        setMessageList(messageList);
+      };
+      socket.on("channel", handleChannelAndMessages);
+      socket.on("recapMessages", (newMessage: Message) => {
+        setMessageList((prevMessages) => [...prevMessages, newMessage]);
+        console.log("newMessage = ", newMessage);
+        if (newMessage.channelName === channel?.name) {
+          socket.emit("read", channel.chanId);
+        }
+      });
+      socket.on("typing", (username) => {
+        setIsTyping(username + " is typing...");
+        const typingTimeout = setTimeout(() => {
+          setIsTyping("");
+        }, 5000);
+      });
+
+      socket.emit("check-user-in-channel", { chanId: selectedChannelId });
+      socket.on("user-in-channel", (boolean) => {
+        setCheckUserInChannel(boolean);
+      });
+
+      return () => {
+        socket.off("check-user-in-channel");
+        socket.off("findAllMutedMembers");
+        socket.off("channel", handleChannelAndMessages);
+        socket.off("recapMessages");
+        socket.off("typing");
+      };
+    }
+  }, [socket, selectedChannelId]);
+
+  useEffect(() => {
+    if (
+      !channel ||
+      (channel.members.every(
+        (member) => member.username !== userData.username
+      ) &&
+        channel.banned.find((member) => member.username === userData.username))
+    ) {
+      navigate("/chat");
+    }
+  }, [channel, userData.username]);
+
+  const toggleRightSidebar = () => {
+    setIsRightSidebarOpen(!isRightSidebarOpen);
+  };
+
+  const handleTyping = (e) => {
+    const typedMessage = e.target.value;
+    setMessage(typedMessage);
+    socket.emit("typing", channel.name);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
+      {!channel ? (
+        <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
+          No conversation selected
+          <br />
+        </div>
+      ) : channel.members.every(
+          (member) => member.username !== userData.username
+        ) &&
+        channel.banned.find(
+          (member) => member.username === userData.username
+        ) ? (
+        <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
+          You've got banned from this channel
+        </div>
+      ) : channel.modes === "PROTECTED" &&
+        channel.members.every(
+          (member) => member.username !== userData.username
+        ) ? (
+        <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
+          <div>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={passwordInput}
+              className="bg-lilac rounded-md text-white placeholder:text-white px-2 py-1"
+              onChange={(e) => setPasswordInput(e.target.value)}
+            />
+            <button
+              onClick={handleJoinChannel}
+              className="ml-2 px-2 py-1 rounded-md bg-purple"
+            >
+              Submit
+            </button>
+            {errorMessage && (
+              <div className="text-red-orange">{errorMessage}</div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col h-full text-xs">
+          <div>
+            <div className="flex flex-row justify-between items-center relative mt-4">
+              {channel.modes === "CHAT" ? (
+                <h3 className="text-base text-lilac">
+                  {
+                    channel.members.filter(
+                      (member) => member.username !== userData.username
+                    )[0].username
+                  }
+                </h3>
+              ) : (
+                <h3 className="text-base text-lilac">{channel.name}</h3>
+              )}
+              <div className="flex-end flex">
+                {channel.modes !== "CHAT" && (
+                  <div className="flex flex-row">
+                    {(channel.owner.username === userData.username ||
+                      channel.op.find(
+                        (opMember) => opMember === userData.username
+                      )) && <AddUserConv channel={channel} />}
+                    <ChannelOptions channel={channel} />
+                  </div>
+                )}
+                <button onClick={toggleRightSidebar}>
+                  <FaUserGroup className="w-4 h-4 text-lilac" />
+                </button>
+              </div>
+            </div>
+            <div className="border border-t-lilac border-opacity-40 mt-6"></div>
+          </div>
+
+          {/* CONTENT */}
+          <div
+            className="h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter "
+            ref={messageContainerRef}
+          >
+            {messageList.map((message, index) => (
+              <div key={index} className="flex flex-row h-12 mt-6 mr-2">
+                <div className="w-[44px] h-[44px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
+                  {message.author.avatar ? (
+                    <div>
+                      <img
+                        src={message.author.avatar}
+                        className="h-[45px] w-[45px] object-cover rounded-full text-lilac"
+                      />
+                    </div>
+                  ) : (
+                    <FaUser className="text-lilac w-3 h-3" />
+                  )}
+                </div>
+                <div className="pt-3 flex-1">
+                  <p className="text-base text-lilac">{message.authorId}</p>
+                  <div className="flex flex-row justify-between">
+                    {blockedUsers
+                      .map((user) => user.username)
+                      .includes(message.authorId) ? (
+                      <p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">
+                        Message blocked
+                      </p>
+                    ) : (
+                      <p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">
+                        {message.content}
+                      </p>
+                    )}
+                    <TimeConverter
+                      initialDate={message.createdAt.toLocaleString()}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* SEND */}
+          <div className="mt-6">
+            <div className="text-lilac italic mb-2 ml-4">{isTyping}</div>
+            <div className="flex items-center relative">
+              <form
+                onSubmit={handleInputSubmit}
+                className="bg-dark-violet w-full rounded-md"
+              >
+                <input
+                  type="text"
+                  disabled={
+                    channel.muted.map((user) => user).includes(userData.id) ||
+                    channel.members.every(
+                      (member) => member.username !== userData.username
+                    )
+                  }
+                  placeholder={
+                    channel.muted.map((user) => user).includes(userData.id) ||
+                    channel.members.every(
+                      (member) => member.username !== userData.username
+                    )
+                      ? "You are not allowed to send a message in this channel"
+                      : "Write a message"
+                  }
+                  className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac placeholder:text-opacity-50 w-full rounded-md ${
+                    channel.muted.map((user) => user).includes(userData.id) ||
+                    channel.members.every(
+                      (member) => member.username !== userData.username
+                    )
+                  } ? 'cursor-not-allowed' : ''}`}
+                  value={message}
+                  onChange={handleTyping}
+                />
+                <button type="submit" className="absolute right-2 top-2">
+                  {!channel.muted.map((user) => user).includes(userData.id) && (
+                    <FaPaperPlane className="w-3.5 h-3.5 text-purple" />
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <SidebarRightMobile
+            isRightSidebarOpen={isRightSidebarOpen}
+            toggleRightSidebar={toggleRightSidebar}
+            channel={channel}
+            block={blockedUsers}
+            onUpdateList={updateList}
+          />
+        </div>
+      )}
+    </div>
+  );
 };
-
-	useEffect(() => {
-		if (selectedChannelId !== null) {
-		socket.emit("channel", {
-		id: selectedChannelId,
-		prev: prevChannelId,
-		});
-
-		const handleChannelAndMessages = (channelInfo: Channel, messageList: Message[]) => {
-		setChannel(channelInfo);
-		console.log("channelInfo = ", channelInfo);
-		setMessageList(messageList);
-		};
-		socket.on("channel", handleChannelAndMessages);
-		socket.on("recapMessages", (newMessage: Message) => {
-		setMessageList((prevMessages) => [...prevMessages, newMessage]);
-		console.log("newMessage = ", newMessage);
-		});
-		socket.on("typing", (username) => {
-			setIsTyping(username + " is typing...");
-			const typingTimeout = setTimeout(() => {
-			setIsTyping("");
-			}, 5000);
-		});
-
-		socket.emit("check-user-in-channel", { chanId: selectedChannelId });
-		socket.on("user-in-channel", (boolean) => {
-			setCheckUserInChannel(boolean);
-		});
-
-
-		return () => {
-			socket.off("check-user-in-channel");
-			socket.off("findAllMutedMembers");
-			socket.off("channel", handleChannelAndMessages);
-			socket.off("recapMessages");
-			socket.off("typing");
-		};
-	}
-	}, [socket, selectedChannelId]);
-	
-	useEffect(() => {
-		if (!channel || (channel.members.every(member => member.username !== userData.username) && channel.banned.find(member => member.username === userData.username)))	
-		{
-			navigate('/chat');
-		}
-	}, [channel, userData.username]);
-
-	const toggleRightSidebar = () => {
-		setIsRightSidebarOpen(!isRightSidebarOpen);
-	};
-
-	const handleTyping = (e) => {
-		const typedMessage = e.target.value;
-		setMessage(typedMessage);
-		socket.emit("typing", channel.name);
-	};
-
-
-	return (
-		<div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
-
-
-		{!channel ? 
-		(
-			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
-			No conversation selected<br/>
-			</div>
-
-		) : (channel.members.every(member => member.username !== userData.username) && channel.banned.find(member => member.username === userData.username)) ?
-		(
-			<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
-			You've got banned from this channel
-			</div>			
-		)
-		: channel.modes === "PROTECTED" && channel.members.every(member => member.username !== userData.username) ? 
-		(
-		<div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
-			<div>
-				<input
-					type="password"
-					placeholder="Enter password"
-					value={passwordInput}
-					className="bg-lilac rounded-md text-white placeholder:text-white px-2 py-1"
-					onChange={(e) => setPasswordInput(e.target.value)}
-				/>
-				<button onClick={handleJoinChannel} className="ml-2 px-2 py-1 rounded-md bg-purple">Submit</button>
-				{errorMessage && <div className="text-red-orange">{errorMessage}</div>}
-			</div>
-		</div>
-		) : (
-		<div className="flex-1 flex flex-col h-full text-xs">
-			<div>
-				<div className="flex flex-row justify-between items-center relative mt-4">
-				{channel.modes === "CHAT" ? (
-					<h3 className="text-base text-lilac">
-					{
-						channel.members.filter(
-						(member) => member.username !== userData.username
-						)[0].username
-					}
-					</h3>
-				) : (
-					<h3 className="text-base text-lilac">{channel.name}</h3>
-				)}
-					<div className="flex-end flex">
-						{channel.modes !== "CHAT" && (
-						<div className="flex flex-row">
-							{(channel.owner.username === userData.username || channel.op.find(opMember => opMember === userData.username )) && (<AddUserConv channel={channel} />)}
-							<ChannelOptions channel={channel} />
-						</div>
-						)}
-						<button onClick={toggleRightSidebar}>
-						<FaUserGroup className="w-4 h-4 text-lilac" />
-						</button>
-					</div>
-				</div>
-				<div className="border border-t-lilac border-opacity-40 mt-6"></div>
-			</div>
-
-
-				{/* CONTENT */}
-				<div
-				className="h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-lilac scrollbar-track-dark-filter "
-				ref={messageContainerRef}
-				>
-				{messageList.map((message, index) => (
-					<div key={index} className="flex flex-row h-12 mt-6 mr-2">
-						<div className="w-[44px] h-[44px] mt-2 bg-purple rounded-full grid justify-items-center items-center mr-4">
-
-						{message.author.avatar ?
-						(					
-							<div>
-								<img
-									src={message.author.avatar}
-									className="h-[45px] w-[45px] object-cover rounded-full text-lilac"
-								/>
-							</div>	
-						) : 
-						(
-							<FaUser className="text-lilac w-3 h-3" />
-						)}
-						</div>
-						<div className="pt-3 flex-1">
-						<p className="text-base text-lilac">{message.authorId}</p>
-							<div className="flex flex-row justify-between">
-								{blockedUsers.map(user => user.username).includes(message.authorId) ? 
-										(<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">Message blocked</p>)
-									:
-										(<p className="text-sm pt-1 text-lilac text-opacity-60 mr-2">{message.content}</p>)
-									}
-							<TimeConverter
-								initialDate={message.createdAt.toLocaleString()}
-							/>
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
-
-			{/* SEND */}
-			<div className="mt-6">
-				<div className="text-lilac italic mb-2 ml-4">{isTyping}</div>
-					<div className="flex items-center relative">
-					<form
-						onSubmit={handleInputSubmit}
-						className="bg-dark-violet w-full rounded-md"
-					>
-						<input
-						type="text"
-						disabled={channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username))}
-						placeholder={channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username)) ? "You are not allowed to send a message in this channel" : "Write a message"}
-						className={`py-2 pl-4 bg-dark-violet text-lilac outline-none placeholder:text-lilac placeholder:text-opacity-50 w-full rounded-md ${channel.muted.map(user => user).includes(userData.id) || (channel.members.every(member => member.username !== userData.username))} ? 'cursor-not-allowed' : ''}`}
-						value={message}
-						onChange={handleTyping}
-
-						/>
-						<button type="submit" className="absolute right-2 top-2">
-								{!channel.muted.map(user => user).includes(userData.id) && (<FaPaperPlane className="w-3.5 h-3.5 text-purple" />)}
-						</button>
-					</form>
-				</div>
-			</div>
-
-				<SidebarRightMobile isRightSidebarOpen={isRightSidebarOpen} toggleRightSidebar={toggleRightSidebar} channel={channel} block={blockedUsers} onUpdateList={updateList}/>
-			</div>
-			)}
-		</div>
-	)
-}
 
 export default ContentConv;

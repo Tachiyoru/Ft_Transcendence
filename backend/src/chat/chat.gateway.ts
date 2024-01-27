@@ -4,6 +4,8 @@ import {
   MessageBody,
   WebSocketServer,
   ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { chatService } from "./chat.service";
 import {
@@ -29,12 +31,13 @@ import { CreateNotificationDto } from "src/notification/dto/create-notification.
 import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
 import { TokenGuard } from "src/auth/guard";
+import { subscribe } from "diagnostics_channel";
 
 @WebSocketGateway({
   cors: { origin: "http://paul-f4ar2s4:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
-export class chatGateway {
+export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   constructor(
@@ -43,10 +46,19 @@ export class chatGateway {
     private readonly notificationService: NotificationService
   ) {}
 
-  afterInit() {
-    this.server.on("connection", (socket) => {
-      console.log("connected as socket :", socket.id);
-    });
+  connectedUsers: string[] = [];
+
+  handleConnection(client: Socket) {
+    const userId = client.id;
+    this.connectedUsers.push(userId);
+    console.log(`Client connected: ${userId}`);
+  }
+
+  @SubscribeMessage("gotDisconnected")
+  handleDisconnect(client: Socket) {
+    const userId = client.id;
+    this.connectedUsers = this.connectedUsers.filter((id) => id !== userId);
+    console.log(`Client disconnected: ${userId}`);
   }
 
   @SubscribeMessage("channel")
@@ -195,7 +207,16 @@ export class chatGateway {
     try {
       const chan = await this.chatService.createChannel(settings, req);
       client.emit("channelCreated", chan);
-      const chanlist = await this.prisma.channel.findMany();
+      //const chanlist = await this.prisma.channel.findMany({
+		//include: { members: true, owner: true, banned: true },
+	 //});
+	//   chanlist.forEach(chan => {
+	// 	console.log("chan", chan.name, "members : ", chan.members);
+		
+	//   });
+	//   console.log("chanlist", chanlist);
+    //   client.emit("my-channel-list", chanlist);
+	this.allUpdate();
       client.join(chan.name);
     } catch (error) {
       client.emit("channelCreateError", {
@@ -330,7 +351,18 @@ export class chatGateway {
     const chanlist = await this.chatService.getChannelsByUserId(
       client.handshake.auth.id
     );
+	console.log("la",  client.handshake.auth.id, client.handshake.auth.username );
     client.emit("my-channel-list", chanlist);
+  }
+
+  @SubscribeMessage("all-update")
+  async allUpdate():  Promise<void>{
+	const chanlist = await this.prisma.channel.findMany();
+	  console.log("chanliiiiiiiiiiiiiiist", this.connectedUsers);
+	  const emitPromises = this.connectedUsers.map(async (element) => {
+		await this.server.to(element).emit("update-call");
+	  });
+	  await Promise.all(emitPromises);
   }
 
   @SubscribeMessage("find-channels-public-protected")
@@ -565,6 +597,7 @@ export class chatGateway {
         req
       );
       this.server.to(message.channelName).emit("recapMessages", message);
+	  this.allUpdate();
     } catch (error) {
       client.emit("createMsgError", { message: error.message });
     }
@@ -614,11 +647,12 @@ export class chatGateway {
 
   @SubscribeMessage("read")
   async read(
-    @MessageBody() chanName: string,
+    @MessageBody() chanId: number,
     @ConnectedSocket() client: Socket
   ) {
 	const username = client.handshake.auth.username;
-	await this.chatService.read(chanName, username);
+	await this.chatService.read(chanId, username);
+	this.allUpdate();
   }
 
   @SubscribeMessage("un-read")
