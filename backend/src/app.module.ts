@@ -16,15 +16,14 @@ import { GameModule } from "./game/game.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
     UserModule,
     AchievementsModule,
     AuthModule,
     StatsModule,
     FriendsListModule,
-    NotificationModule,
-    PrismaModule,
     chatModule,
-    GameModule
+    // GameModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

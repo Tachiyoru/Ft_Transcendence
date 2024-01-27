@@ -173,6 +173,9 @@ const socket = useContext(WebSocketContext);
       socket.on("unread-notification-array", (notification) => {
         if (notification) setUnreadNotifications(notification.length);
       });
+	  return () => {
+		  socket.off("unread-notification-array");
+	  }
   }, [socket]);
 
   const handleNotificationClick = useCallback(async () => {

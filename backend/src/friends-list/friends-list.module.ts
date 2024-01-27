@@ -15,5 +15,6 @@ import { NotificationGateway } from "src/notification/notification.gateway";
 		NotificationService,
 		NotificationGateway
 	],
+	imports: [],
 })
 export class FriendsListModule {}
