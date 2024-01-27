@@ -4,6 +4,8 @@ import { FaUser } from "react-icons/fa6";
 import OhOh from "../../../components/popin/OhOh";
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../../socket/socket";
+import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 interface Game {
 	gameId: number;
@@ -41,6 +43,16 @@ const AboutToPlay = () => {
 		}
 	}, [socket]);
 
+	const handleStartGame = () => {
+		if (game)
+		{
+			const player1 = game.player1User.username; // Replace with your actual data
+			const player2 = game.player2User.username; // Replace with your actual data
+		
+			navigate('/test', { state: { player1, player2 } });
+		}
+	};
+	
 	return (
 		<MainLayout currentPage={currentPage}>
 		<div className="flex-1 bg-violet-black h-[80vh] flex justify-center items-center text-lilac">
@@ -85,7 +97,12 @@ const AboutToPlay = () => {
 					</div>
 				</div>
 			</div>
-			<p className="font-audiowide text-purple">Your game is <br/> about to begin</p>
+			<p
+				className="font-audiowide text-purple underline hover:text-red-orange"
+				onClick={handleStartGame}
+				>
+				Start Game
+			</p>
 			</div>
 		) : <OhOh error={true}/> }
 		</div>

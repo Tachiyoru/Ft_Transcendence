@@ -1,13 +1,137 @@
-import { WebSocketContext } from "../socket/socket";
-import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
+import { Canvas, extend, useFrame, useLoader, useThree } from "@react-three/fiber";
+import MainLayout from "../components/nav/MainLayout";
+import { useLocation } from "react-router-dom";
+import { PerspectiveCamera } from '@react-three/drei';
+import { HemisphereLight, ColorRepresentation, BoxGeometry } from "three";
+extend({ HemisphereLight });
+import { useEffect, useRef, useState } from "react";
+import { Physics, useBox } from "@react-three/cannon";
+import { useEventListener } from 'react-use';
 
-console.log("LELELELELELELEEL");
-const TryConnect = () => {
-	const socket = useContext(WebSocketContext);
-	socket.emit('connection', "Lul");
 
+interface CustomHemisphereLightProps {
+	skyColor?: ColorRepresentation;
+	groundColor?: ColorRepresentation;
+	intensity?: number;
 }
-TryConnect();
+interface SceneManagerState {
+	player1?: string;
+	player2?: string;
+}
+
+const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
+		const { gl, scene } = useThree();
+
+		const light = new HemisphereLight(props.skyColor, props.groundColor, props.intensity);
+	
+		scene.add(light);
+	
+		useThree(({ clock }) => {
+		light.position.x = Math.sin(clock.getElapsedTime()) * 10;
+		});
+	
+		return null;
+}
+
+function Ball() {
+	return (
+		<mesh position={[0, -15, -100]}>
+			<sphereGeometry args={[2, 10, 10]} />
+			<meshStandardMaterial color={'white'}/>
+		</mesh>
+	);
+}
+
+function Paddle1() {
+	return (
+		<mesh position={[0, -18, -260]}>
+			<boxGeometry args={[50, 5, 5]} />
+			<meshStandardMaterial color={'red'}/>
+		</mesh>
+	);
+}
+
+	function Paddle2() {
+		const [left, setLeft] = useState<number>(0);
+
+		const handleKeyDown = (event: React.KeyboardEvent) => {
+		const keyCode = event.code;
+
+		switch (keyCode) {
+			case 'ArrowLeft':
+				setLeft((prevLeft: number) => prevLeft - 5);
+				console.log('left')
+			break;
+			case 'ArrowRight':
+				setLeft((prevLeft: number) => prevLeft + 5);
+				console.log('right')
+			break;
+			default:
+			break;
+		}
+		};
+		const handleKeyUp = () => {
+			console.log('release');
+		};
+	
+		// Add keyboard event listeners
+		useEffect(() => {
+		const onKeyDown = (event: KeyboardEvent) => handleKeyDown(event);
+		const onKeyUp = () => handleKeyUp();
+	
+		document.addEventListener('keydown', onKeyDown);
+		document.addEventListener('keyup', onKeyUp);
+	
+		return () => {
+			document.removeEventListener('keydown', onKeyDown);
+			document.removeEventListener('keyup', onKeyUp);
+		};
+		}, []); 
+	
+		return (
+		<mesh position={[left, -18, -60]}>
+			<boxGeometry args={[50, 5, 5]} />
+			<meshStandardMaterial color={'green'} />
+		</mesh>
+		);
+	}
+
+export default function Experience() {
+	const location = useLocation();
+	const currentPage = location.pathname;
+	const { player1, player2 } = location.state as SceneManagerState;
+
+	return (
+		<MainLayout currentPage={currentPage}>
+			<div className="h-[80vh]">
+				<p>Player 1: {player1}</p>
+				<p>Player 2: {player2}</p>
+				<Canvas>
+					<color attach="background" args={[0x160030]} />
+					<PerspectiveCamera 
+						makeDefault
+						position={[0, 0, 20]}
+						fov={60}
+						aspect={window.innerWidth / window.innerHeight}
+						near={0.1}
+						far={1000}
+					/>
+					<ambientLight intensity={0.5} />
+					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
+					<Ball/>
+					<Physics>
+						<Paddle1 />
+						<Paddle2 />
+					</Physics>
+					<mesh position={[0, -20, -146]}>
+						<boxGeometry args={[120, 2, 170]} />
+						<meshLambertMaterial color={0x460994} />
+					</mesh>
+				</Canvas>
+			</div>
+		</MainLayout>
+	);
+}
 
 // (function (window, document, THREE)	{
 // 	var container = document.getElementById('gameCanvas'),
