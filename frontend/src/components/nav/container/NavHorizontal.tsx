@@ -91,10 +91,11 @@ export const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
 };
 
 export const getNotifications = async (
-  userId: number
+  id: number
 ): Promise<Notification[]> => {
   try {
-    const response = await axios.get<Notification[]>(`/notification/${userId}`);
+	console.log("id", id);
+    const response = await axios.get<Notification[]>(`/notification/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching notifications:", error);
@@ -182,6 +183,7 @@ const socket = useContext(WebSocketContext);
     if (selectedSection === "Notifications") {
       try {
         const { id: userId } = await getLoggedInUserInfo();
+		console.log("userIdddddd");
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
 

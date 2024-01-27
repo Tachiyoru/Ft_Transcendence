@@ -23,6 +23,7 @@ import { GameModule } from "./game/game.module";
     StatsModule,
     FriendsListModule,
     chatModule,
+	NotificationModule,
     // GameModule
   ],
   controllers: [AppController],

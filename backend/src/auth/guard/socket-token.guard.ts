@@ -28,10 +28,8 @@ export class SocketTokenGuard implements CanActivate {
     let token;
     if (client.handshake.headers.cookie?.split("=")[0] === "io") {
       token = client.handshake.headers.cookie?.split("=")[3].split(";")[0];
-      console.log("token apres io : ", token);
     } else {
       token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
-	  console.log("token apres pas io : ", token);
     }
     if (!token) {
 		console.log("no token");
@@ -54,7 +52,6 @@ export class SocketTokenGuard implements CanActivate {
 
       client.handshake.auth = user;
       request.user = user;
-      console.log("user laaaaaaaaaaaaaa : ", user);
       return true;
     } catch (error) {
       throw new UnauthorizedException("Invalid token");

@@ -78,6 +78,7 @@ export class NotificationController
 		@Param("id", ParseIntPipe) userId: number
 	): Promise<Notification[]>
 	{
+		console.log("getNotificationsById : ", userId);
 		return this.notificationService.getNotificationsById(userId);
 	}
 }

@@ -55,7 +55,6 @@ const SigninForm = () => {
         setResStatus("Error");
         console.log(error);
       });
-    const response = await axios.post(`achievements/add/${1}`);
   };
 
   const handlePasswordChange = (e) => {
