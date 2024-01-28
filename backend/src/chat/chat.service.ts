@@ -7,11 +7,9 @@ import {
 import { PrismaService } from "src/prisma/prisma.service";
 import { Channel, Message, Mode, User } from "@prisma/client";
 import * as argon from "argon2";
-import { channel } from "diagnostics_channel";
 import { NotificationService } from "src/notification/notification.service";
 import { NotificationType } from "src/notification/content-notification";
 import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
-import { Server, Socket } from "socket.io";
 
 @Injectable()
 export class chatService {
@@ -511,29 +509,28 @@ export class chatService {
   }
 
   async leaveChannel(chanId: number, @Request() @Request() req: any) {
-    const chan = await this.prisma.channel.findUnique({
-      where: { chanId: chanId },
-      include: {
-        messages: {
-          include: {
-            author: true,
-          },
-        },
-        members: true,
-        owner: true,
-        banned: true,
-      },
-    });
-    if (!chan) {
-      throw new Error("Could not find channel");
-    }
-    console.log("ok");
-    if (req.user === chan.owner) {
-      await this.prisma.channel.delete({
+	  const chan = await this.prisma.channel.findUnique({
+		  where: { chanId: chanId },
+		  include: {
+			  messages: {
+				  include: {
+					  author: true,
+					},
+				},
+				members: true,
+				owner: true,
+				banned: true,
+			},
+		});
+		if (!chan) {
+			throw new Error("Could not find channel");
+		}
+	let payload = {room:  chan.name, chan: chan};
+    if (req.user.id === chan.owner.id) {
+		await this.prisma.channel.delete({
         where: { chanId: chanId },
       });
-      return;
-      null;
+      return payload;
     }
     const updatedChannel = await this.prisma.channel.update({
       where: { chanId: chanId },
@@ -549,7 +546,8 @@ export class chatService {
         banned: true,
       },
     });
-    return updatedChannel;
+	payload.chan = updatedChannel;
+    return payload;
   }
 
   async banUser(chanId: number, username: string, @Request() req: any) {

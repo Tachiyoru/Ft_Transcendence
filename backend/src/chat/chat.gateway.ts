@@ -416,7 +416,11 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const result = await this.chatService.leaveChannel(data.chanId, req);
       client.emit("channelLeft", result);
-      if (result) this.server.emit("channel", result, result.messages);
+      if (result.chan) {
+		this.server.emit("channel", result.chan, result.chan.messages);
+	}
+	this.server.emit("channel", null, null)
+	await this.server.to(result.room).emit("update-call");
     } catch (error) {
       client.emit("chanLeftError", { message: error.message });
     }
