@@ -1,9 +1,8 @@
 import { User } from "@prisma/client";
 import { PrismaService } from '../prisma/prisma.service';
-import { Socket } from 'socket.io';
 
 interface Player    {
-    playerSocket: Socket;
+    playerSocket: string;
     playerProfile: User;
 }
 
@@ -41,7 +40,7 @@ export class Game  {
     status:             number;
     multiplier:         number;
 
-    constructor(gameId: number, player1: Socket, player1Profile: User, player2: Socket, player2Profile: User)   {
+    constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
         this.gameSocket = "Game" + player1;
 
@@ -116,7 +115,7 @@ export class Game  {
     }
 
     scored(playerScored: string, prisma: PrismaService)    {
-        if (playerScored === this.player1.playerSocket.id)
+        if (playerScored === this.player1.playerSocket)
             this.pScore[0]++;
         else
             this.pScore[1]++;
@@ -137,7 +136,7 @@ export class Game  {
     }
 
     moves(input: string, player: string, upDown: number)    {
-        if (player === this.player1.playerSocket.id && upDown === 1)   {
+        if (player === this.player1.playerSocket && upDown === 1)   {
             switch (input)  {
                 case "ArrowLeft":
                     this.camera[0].x = this.paddle[0].x -= 5 * this.multiplier;
@@ -149,7 +148,7 @@ export class Game  {
                 break;
             }
         }
-        else if (player === this.player1.playerSocket.id && upDown === 2)   {
+        else if (player === this.player1.playerSocket && upDown === 2)   {
             switch (input)  {
                 case "ArrowLeft":
                     this.multiplier = 1;
@@ -159,7 +158,7 @@ export class Game  {
                 break;
             }
         }
-        else if (player === this.player2.playerSocket.id && upDown === 1)  {
+        else if (player === this.player2.playerSocket && upDown === 1)  {
             switch (input)  {
                 case "ArrowLeft":
                     this.camera[1].x = this.paddle[1].x += 5 * this.multiplier;
@@ -171,7 +170,7 @@ export class Game  {
                 break;
             }
         }
-        else if (player === this.player2.playerSocket.id && upDown === 2)  {
+        else if (player === this.player2.playerSocket && upDown === 2)  {
             switch (input)  {
                 case "ArrowLeft":
                     this.multiplier = 1;

@@ -12,7 +12,7 @@ export class GameService {
     constructor(private prisma: PrismaService)  {}
     @WebSocketServer() server: Server;
 
-      async createGame(gameID: number, player1User: User, player1Socket: Socket, player2User: User, player2Socket: Socket)  {
+      async createGame(gameID: number, player1User: User, player1Socket: string, player2User: User, player2Socket: string)  {
         const game = new Game(gameID, player1Socket, player1User, player2Socket, player2User);
         this.server.emit("CreatedGame", game);
       }

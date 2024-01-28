@@ -43,9 +43,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage("createGame")
   async createGameDB(
     player1User: User,
-    player1Socket: Socket,
+    player1Socket: string,
     player2User: User,
-    player2Socket: Socket,
+    player2Socket: string,
     @Request() req: any
   )  {
     const gameDB = await this.prisma.game.create({data: {}});
