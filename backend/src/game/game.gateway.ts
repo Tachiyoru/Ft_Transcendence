@@ -1,6 +1,6 @@
 import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Game } from '@prisma/client';
+import { Game, User } from '@prisma/client';
 import { Server } from 'socket.io';
 import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
@@ -40,13 +40,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   //   });
   // }
 
-  @SubscribeMessage("createGameDB")
+  @SubscribeMessage("createGame")
   async createGameDB(
+    player1User: User,
+    player1Socket: string,
+    player2User: User,
+    player2Socket: string,
     @Request() req: any
   )  {
-    const gameDB = await this.prisma.game.create({ data: {}})
-    //const game = new Game()
-    this.server.emit('newGame', gameDB)
+    const gameDB = await this.prisma.game.create({data: {}});
+    this.gameService.createGame(gameDB.gameId, player1User, player1Socket, player2User, player2Socket);
   }
 
   @SubscribeMessage("start")
@@ -58,6 +61,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log(ok)
   }
 
+  
   // @SubscribeMessage("gotDisconnected")
   // async removeUserFromGame(
   //   @ConnectedSocket() client: Socket,
@@ -68,27 +72,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   //     await this.gameService.removeGame(game?.gameId);
   //     client.emit('GameReset', true);
   //   }
-    // if (closeGame)  {
-    //   if (closeGame === 'deleted')  {
-    //     return (null);
-    //   }
-    //   else if (!closeGame)  {
-    //     return (null);
-    //   }
-    //   else  {
-    //     console.log('ok')
-    //     this.server.to(closeGame.player1).emit('GameReset', closeGame);
-    //   }
-    // }
   // }
 
-  // @SubscribeMessage("gamestart")
-  // async gamestart(
-  //   @MessageBody("gameSocket") gameSocket: string,
-  // ) {
-  //   const game = await this.gameService.findGame(gameSocket);
-  //   this.server.emit("gamestart", game);
-  // }
+  // // @SubscribeMessage("gamestart")
+  // // async gamestart(
+  // //   @MessageBody("gameSocket") gameSocket: string,
+  // // ) {
+  // //   const game = await this.gameService.findGame(gameSocket);
+  // //   this.server.emit("gamestart", game);
+  // // }
 
 
   handleConnection(client: any, ...args: any[]) {
