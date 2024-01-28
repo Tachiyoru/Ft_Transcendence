@@ -22,17 +22,13 @@ export class GameService {
     constructor(private prisma: PrismaService)  {}
 
     createGamer(
-      userId: number,
-      username = '',
+      user: User,
       socketId = '',
-      avatar = '',
       isHost = false,
     ): Gamer {
       return {
-        userId,
-        username,
+        user,
         socketId,
-        avatar,
         isHost,
       };
     }
@@ -40,21 +36,16 @@ export class GameService {
     @WebSocketServer() server: Server;
 
     async createGame(gameID: number, player1User: User, player1Socket: string, player2User: User, player2Socket: string)  {
+      console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket)
       const game = new Game(gameID, player1Socket, player1User, player2Socket, player2User);
+      console.log(game)
       this.server.emit("CreatedGame", game);
-    }
-
-    async createGameDB()  {
-      return await this.prisma.game.create({ data: {
-      }})
     }
 
     async prepareQueListGame(socket: Socket, @Request() req: any) {
 
       const gamer = this.createGamer(
-        req.user.id,
-        req.user.username,
-        req.user.avatar ?? '',
+        req.user,
         socket.id,
         true,
       );
@@ -68,10 +59,12 @@ export class GameService {
           const participants = [gamer, this.waitingRoomGame.participants[0]];
           // remove the waiting game session
           this.waitingRoomGame = undefined;
-          const gameSession = await this.createGameDB(
-          );
+          const gameDB = await this.prisma.game.create({data: {}});
+          const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId);
+
           return { matchFound: true, gameSession };
         }
+
       } else {
         // create a new game session with the host
         const waitingListIds = Array.from(this.waitingChallenge.keys());
@@ -79,7 +72,7 @@ export class GameService {
           waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
         this.waitingRoomGame = {
           waitingGameId: id,
-          hostId: gamer.userId,
+          hostId: gamer.user.id,
           participants: [gamer],
         };
         return { matchFound: false, waitingSession: this.waitingRoomGame};

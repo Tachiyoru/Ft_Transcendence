@@ -6,19 +6,22 @@ interface Player    {
     playerProfile: User;
 }
 
-interface Paddle    {
+
+export interface Paddle    {
     x: number;
     y: number;
     z: number;
 }
 
-interface Ball  {
+
+export interface Ball  {
     x: number;
     y: number;
     z: number;
 }
 
-interface Camera    {
+
+export interface Camera    {
     x: number;
     y: number;
     z: number;

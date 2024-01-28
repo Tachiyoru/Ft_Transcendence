@@ -1,10 +1,9 @@
+import { User } from "@prisma/client";
 import { Socket } from "dgram";
 
 export interface Gamer {
-	userId: number;
-	username: string;
+	user: User;
 	socketId: string;
-	avatar?: string;
 	isHost?: boolean;
 }
 
