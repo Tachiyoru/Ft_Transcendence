@@ -20,8 +20,8 @@ export class GameService {
     createGamer(
       userId: number,
       username = '',
-      avatar = '',
       socketId = '',
+      avatar = '',
       isHost = false,
     ): Gamer {
       return {
@@ -43,7 +43,7 @@ export class GameService {
       const gamer = this.createGamer(
         req.user.id,
         req.user.username,
-        req.user.profile.avatar ?? '',
+        req.user.avatar ?? '',
         socket.id,
         true,
       );
@@ -71,10 +71,9 @@ export class GameService {
           hostId: gamer.userId,
           participants: [gamer],
         };
-        return { matchFound: false, waitingSession: this.waitingRoomGame };
+        return { matchFound: false, waitingSession: this.waitingRoomGame};
       }
     }
-
     // async connection(socket: Socket, @Request() req: any)  {
     //   const game = await this.prisma.game.findFirst({
     //     where: {connectedPlayers: 1}

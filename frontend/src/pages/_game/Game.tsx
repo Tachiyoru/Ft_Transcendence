@@ -46,10 +46,7 @@ const Game = () => {
 
 	const connectServ = () =>	{
 		console.log('ok')
-		socket.emit("createGameDB");
-		socket.on("newGame", (game) => {
-			console.log(game);
-		});
+		socket.emit("start");
 	}
 
 	const [showSecondDiv, setShowSecondDiv] = useState(

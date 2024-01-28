@@ -54,7 +54,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() client: Socket,
     @Request() req: any
   ) {
-    return this.gameService.prepareQueListGame(client, req);
+    const ok = await this.gameService.prepareQueListGame(client, req);
+    console.log(ok)
   }
 
   // @SubscribeMessage("gotDisconnected")

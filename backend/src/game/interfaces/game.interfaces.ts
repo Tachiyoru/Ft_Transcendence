@@ -1,3 +1,4 @@
+import { Socket } from "dgram";
 
 export interface Gamer {
 	userId: number;

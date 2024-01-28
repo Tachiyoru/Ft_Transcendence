@@ -117,7 +117,7 @@ export default function Experience() {
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
 					<Ball/>
 					<Physics>
-						<Paddle userData={player1}/>
+						<Paddle/>
 					</Physics>
 					<mesh position={[0, -20, -146]}>
 						<boxGeometry args={[120, 2, 170]} />
