@@ -25,6 +25,7 @@ export class TwoFaController
 		private readonly authService: AuthService
 	) {}
 
+
 	@Get("generate-qrcode")
 	async generate(@GetUser() user: User)
 	{
@@ -33,8 +34,8 @@ export class TwoFaController
 			const otpAuthUrl = await this.twoFAService.generate2FASecret(user);
 			const qrcodeStream = await this.twoFAService.qrcodeStream(
 				otpAuthUrl
-			);
-			this.twoFAService.set2FaOtpAuthUrl(qrcodeStream, user.id);
+				);
+			await this.twoFAService.set2FaOtpAuthUrl(qrcodeStream, user.id);
 			return qrcodeStream;
 		}
 	}

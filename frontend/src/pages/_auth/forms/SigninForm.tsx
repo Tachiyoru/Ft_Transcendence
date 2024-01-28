@@ -21,6 +21,8 @@ interface IdataLogin {
   password: string;
 }
 
+const FORTYTWOUrl = import.meta.env.FORTYTWO_CALLBACK_URL as string
+
 const SigninForm = () => {
   const dispatch = useDispatch();
   const [resStatus, setResStatus] = useState("");
@@ -36,26 +38,33 @@ const SigninForm = () => {
     formState: { errors, isValid },
   } = useForm<IdataLogin>();
 
-  const submitHandler = async (data: IdataLogin) => {
-    console.log(data);
-    await axios
-      .post("auth/signin", data)
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 201) {
-          setResStatus("Successful Registration!");
-          dispatch(loginSuccess(response.data));
-          navigate("/");
-        } else {
-          setResStatus("Error");
-        }
-      })
-      .catch(function (error) {
-        setResStatus("Error");
-        console.log(error);
-      });
-    const response = await axios.post(`achievements/add/${1}`);
-  };
+	const submitHandler = (data: IdataLogin) => {
+		axios
+		.post("auth/signin", data)
+		.then( (response) => {
+			if (response.status === 201)
+			{
+				console.log('ok', response.data);
+				if (response.data.user.isTwoFaEnabled)
+				{
+					dispatch(loginSuccess(response.data))
+					navigate("/sign-in-2fa");
+				}
+				else
+				{
+					setResStatus("Successful Registration!");
+					dispatch(loginSuccess(response.data))
+					navigate("/");
+				}
+		} else {
+			setResStatus("Error");
+		}
+		})
+		.catch(function (error) {
+      setResStatus("Error");
+      console.log(error);
+		});
+	};
 
   const handlePasswordChange = (e) => {
     const newPassword = e.currentTarget.value;
@@ -64,9 +73,9 @@ const SigninForm = () => {
   };
 
   const handle42Click = async () => {
+
     try {
-      const response =  (window.location.href =
-        "http://paul-f4ar2s4:5001/auth/42/callback");
+      const response =  (window.location.href = 'http://paul-f4ar1s3:5001/auth/42/callback');
       if (response) {
         dispatch(loginSuccess(response));
       }

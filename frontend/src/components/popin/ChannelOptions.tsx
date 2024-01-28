@@ -51,7 +51,7 @@ const ChannelOptions: React.FC<ChannelProps> = ({ channel }) => {
 
 	const handleQuitChannel = () => {
 
-			socket.emit('leaveChan', { chanId: channel.chanId });
+		socket.emit('leaveChan', { chanId: channel.chanId });
 
 		// socket.on("disconnect", () => {
 		// 	socket.disconnect();

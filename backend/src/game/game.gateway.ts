@@ -23,33 +23,50 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log('Init');
   }
 
-  @SubscribeMessage("saucisse")
-  async connection(
-    @ConnectedSocket() client : Socket,
+  // @SubscribeMessage("saucisse")
+  // async connection(
+  //   @ConnectedSocket() client : Socket,
+  //   @Request() req: any
+  // ) {
+  //   console.log("Player : " + client.id + " connected to the game.")
+  //   const gameReady = await this.gameService.connection(client, req);
+  //   if (gameReady)  {
+  //     this.server.to(gameReady.player1).emit('GameFull', gameReady);
+  //     this.server.to(gameReady.player2).emit('GameFull', gameReady);
+  //   }
+  //   client.on("disconnect", () => {
+  //     console.log("disconnected from server");
+  //     this.removeUserFromGame(client)
+  //   });
+  // }
+
+  @SubscribeMessage("createGameDB")
+  async createGameDB(
     @Request() req: any
-  ) {
-    console.log("Player : " + client.id + " connected to the game.")
-    const gameReady = await this.gameService.connection(client, req);
-    if (gameReady)  {
-      this.server.to(gameReady.player1).emit('GameFull', gameReady);
-      this.server.to(gameReady.player2).emit('GameFull', gameReady);
-    }
-    client.on("disconnect", () => {
-      console.log("disconnected from server");
-      this.removeUserFromGame(client)
-    });
+  )  {
+    const gameDB = await this.prisma.game.create({ data: {}})
+    //const game = new Game()
+    this.server.emit('newGame', gameDB)
   }
 
-  @SubscribeMessage("gotDisconnected")
-  async removeUserFromGame(
+  @SubscribeMessage("start")
+  async startGameSession(
     @ConnectedSocket() client: Socket,
+    @Request() req: any
   ) {
-    console.log("Player : " + client.id + " got disconnected from the game.")
-    const game = await this.gameService.checkGameUsers(client);
-    if(game)  {
-      await this.gameService.removeGame(game?.gameId);
-      client.emit('GameReset', true);
-    }
+    return this.gameService.prepareQueListGame(client, req);
+  }
+
+  // @SubscribeMessage("gotDisconnected")
+  // async removeUserFromGame(
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   console.log("Player : " + client.id + " got disconnected from the game.")
+  //   const game = await this.gameService.checkGameUsers(client);
+  //   if(game)  {
+  //     await this.gameService.removeGame(game?.gameId);
+  //     client.emit('GameReset', true);
+  //   }
     // if (closeGame)  {
     //   if (closeGame === 'deleted')  {
     //     return (null);
@@ -62,15 +79,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     //     this.server.to(closeGame.player1).emit('GameReset', closeGame);
     //   }
     // }
-  }
+  // }
 
-  @SubscribeMessage("gamestart")
-  async gamestart(
-    @MessageBody("gameSocket") gameSocket: string,
-  ) {
-    const game = await this.gameService.findGame(gameSocket);
-    this.server.emit("gamestart", game);
-  }
+  // @SubscribeMessage("gamestart")
+  // async gamestart(
+  //   @MessageBody("gameSocket") gameSocket: string,
+  // ) {
+  //   const game = await this.gameService.findGame(gameSocket);
+  //   this.server.emit("gamestart", game);
+  // }
 
 
   handleConnection(client: any, ...args: any[]) {
@@ -81,8 +98,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log(`Client disconnected: ${client.id}`);
   }
   
-  @SubscribeMessage('start_game')
-  handleGameStart(client: any, payload: any): void {
+  // @SubscribeMessage('start_game')
+  // handleGameStart(client: any, payload: any): void {
     
   }
-}
+

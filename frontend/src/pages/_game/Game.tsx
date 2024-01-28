@@ -18,7 +18,6 @@ const Game = () => {
 	const cardsRef = useRef<HTMLDivElement>(null);
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
-	const navigate = useNavigate();
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -44,23 +43,14 @@ const Game = () => {
 		setSelectedIndexes(updatedIndexes);
 		console.log(selectedIndexes)
 	};
-		
-	const connectServ = () =>	{
-		socket.emit("saucisse");
-		console.log(socket.id);
-		setSelectedIndexes([-1]);
-	}
 
-	useEffect(() => {
-		try {
-			socket.on("GameFull", (game) => {
-				console.log(game);
-				navigate(`/gamestart/${game.gameSocket}`)
-			});
-		} catch (error) {
-			console.error('Erreur lors de la récupération des données:', error);
-		}
-	}, [socket]);
+	const connectServ = () =>	{
+		console.log('ok')
+		socket.emit("createGameDB");
+		socket.on("newGame", (game) => {
+			console.log(game);
+		});
+	}
 
 	const [showSecondDiv, setShowSecondDiv] = useState(
 		localStorage.getItem('showSecondDiv') === 'true'
@@ -255,7 +245,7 @@ const Game = () => {
 							</button>
 							<div className="border-t border-lilac"></div>
 							<div className="flex flex-row justify-between items-center">
-								<div className="text-xs text-lilac">Random player</div>
+							<div onClick={() => { connectServ(); toggleCard(1); }} className="text-xs text-lilac">Random player</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
 						</div>
@@ -302,8 +292,8 @@ const Game = () => {
 									<div className="border-t w-12 border-lilac"></div>
 									</div>
 									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
-									<div className="text-xs text-lilac">Random player</div>
-									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
+									<div onClick={() => { connectServ(); toggleCard(0); }} className="text-xs text-lilac">Random player</div>
+										<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 									</div>
 							</div>
 						</div>

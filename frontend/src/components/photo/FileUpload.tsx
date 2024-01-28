@@ -1,8 +1,20 @@
 import React, { useState } from "react";
 import axios from "../../axios/api";
 
-const FileUpload = () => {
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+interface FileUploadProps {
+  userData: Users;
+  setUserData: (newUserData: Users) => void;
+}
+
+const FileUpload : React.FC<FileUploadProps> = ({ userData, setUserData }) => {
   const [selectedFile, setSelectedFile] = useState<FileList | null>(null);
+  const [error, setError] = useState<string>('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -13,6 +25,7 @@ const FileUpload = () => {
   const handleUpload = async () => {
     if (selectedFile) {
       const formData = new FormData();
+      let url;
       formData.append("image", selectedFile[0]);
       try {
         const response = await axios.patch("/users/add-avatar", formData, {
@@ -20,18 +33,22 @@ const FileUpload = () => {
             "Content-Type": "multipart/form-data",
           },
         });
+        url = response.data;
         await axios.post(`achievements/add/${6}`);
-        console.log("File uploaded successfully:", response.data);
       } catch (error) {
         console.error("Error uploading file:", error);
+        setError('Incorrect file')
       }
+      if (url)
+        setUserData({...userData, avatar: url});
     }
   };
 
   return (
-    <div>
-      <input className="ml-6 block w-full mb-5 text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
-      <button className="text-sm ml-6 px-4 py-1 bg-purple rounded-md" onClick={handleUpload}>Upload</button>
+    <div className="ml-6">
+      <input className="mb-2 block w-full text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
+      {error && <p className="text-red-orange text-xs ">{error}</p>}
+      <button className="text-sm px-4 py-1 bg-purple rounded disabled:bg-dark-violet disabled:text-black" disabled={!selectedFile} onClick={handleUpload}>Upload</button>
     </div>
   );
 };

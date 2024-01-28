@@ -20,6 +20,7 @@ import { WebSocketContext, socket } from './socket/socket';
 import { Websocket } from './components/Websocket';
 import AboutToPlay from './pages/_game/container/AboutToPlay';
 import SceneManager from './game/SceneManager';
+import SigninForm2Fa from './pages/_auth/forms/SigninForm2Fa';
 
 //import socketIO from 'socket.io-client';
 
@@ -34,6 +35,7 @@ return (
 		{/*public routes */}
 		<Route element={<AuthLayout />}>
 			<Route path="/sign-in" element={<SigninForm />} />
+			<Route path="/sign-in-2fa" element={<SigninForm2Fa />} />
 			<Route path="/sign-up" element={<SignupForm />} />
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />}/>

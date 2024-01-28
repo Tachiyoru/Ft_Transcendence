@@ -22,6 +22,7 @@ interface IdataRegister {
   confirmPassword: string;
 }
 
+
 const SignupForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -87,7 +88,8 @@ const SignupForm = () => {
 
   const handle42Click = async () => {
     try{
-      const response = window.location.href = "http://paul-f4ar2s4:5001/auth/42/callback";
+
+      const response = (window.location.href = 'http://paul-f4ar1s3:5001/auth/42/callback');
       if (response)
       {
         dispatch(loginSuccess(response))

@@ -68,11 +68,31 @@ const ChannelConv = () => {
 	}, []);
 
 	useEffect(() => {
-
 		socket.emit("find-my-channels");
 		socket.on("my-channel-list", (channelList) => {
 		setAllChannel(channelList);
 		});
+
+		return () => {
+		socket.off("my-channel-list");
+		};
+	}, [allChannel, socket]);
+
+	useEffect(() => {
+		socket.emit("last-message", allChannel);
+		socket.on("last-channel-mesage", (channelList) => {
+		setAllChannel(channelList);
+    });
+
+	
+	return () => {
+		socket.off("my-channel-list");
+	};
+}, [allChannel, socket]);
+
+
+
+	useEffect(() => {
 
 		socket.emit("find-channels-public-protected");
 		socket.on("channel-public-protected-list", (channelList) => {
@@ -80,7 +100,6 @@ const ChannelConv = () => {
 		});
 
     return () => {
-		socket.off("my-channel-list");
 		socket.off("channel-public-list");
 		};
 	}, [socket]);

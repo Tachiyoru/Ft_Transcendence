@@ -54,9 +54,6 @@ model User {
 
   stats Stats? @relation("stats")
 
-  gamep1  Game?   @relation("p1User") 
-  gamep2  Game?   @relation("p2User")
-
   friendsof User[] @relation("friendslist")
   friends   User[] @relation("friendslist")
 
@@ -159,33 +156,12 @@ model Message {
 model Game {
     gameId           Int      @id @default(autoincrement())
     gameSocket       String   @default("")
-    paddle           Paddle[] @relation("paddles")
-    ball             Ball?    @relation("game-ball")
-    pScore           Int[]    @default([])
-    player1          String   @default("") @unique
-    player1User      User?    @relation("p1User", fields: [player1ID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    player1ID        Int? @unique
-    player2          String   @default("") 
-    player2User      User?    @relation("p2User", fields: [player2ID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    player2ID        Int? @unique
-    connectedPlayers Int      @default(0)
-    inGame           Int      @default(0)
+    scorePlayer1     Int      @default(0)
+    scorePlayer2     Int      @default(0)
+    player1          Int      @default(0)
+    player2          Int      @default(0)
+    victory          Int      @default(0)
+    status           Int      @default(0)
 
     @@map("Game")
-}
-
-model Ball {
-    id   Int   @id @default(autoincrement())
-    x    Float
-    y    Float
-    z    Float
-    game Game  @relation("game-ball", fields: [id], references: [gameId], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Paddle {
-    id   Int   @id @default(autoincrement())
-    x    Float
-    y    Float
-    z    Float
-    game Game  @relation("paddles", fields: [id], references: [gameId], onDelete: Cascade, onUpdate: Cascade)
 }

@@ -24,13 +24,12 @@ export class TwoFAService
 			this.configService.get<string>("ISSUER_NAME") || "DEFAULT_NAME";
 		if (!user.email) return "ntm manu";
 		const otpAuthUrl: string = authenticator.keyuri(
-			user.email,
+			'twofa@gmail.com',
 			issuerName,
 			secret
 		);
 
 		await this.set2FaSecret(secret, user.id);
-		// console.log('otpAuthUrl : ', otpAuthUrl);
 		console.log("user.twoFaSecret : ", user.twoFASecret);
 		return otpAuthUrl;
 	}
@@ -57,15 +56,14 @@ export class TwoFAService
 		}
 	}
 
-	async set2FaOtpAuthUrl(otpAuthUrl: string, userId: number): Promise<User>
+	async set2FaOtpAuthUrl(otpAuthUrl: string, userId: number)
 	{
-		const updatedUser = this.prismaService.user.update({
+		const updatedUser = await this.prismaService.user.update({
 			where: { id: userId },
 			data: { otpAuthUrl: otpAuthUrl },
 		});
 		return (updatedUser);
 	}
-
 
 	async set2FaSecret(secret: string, userId: number): Promise<User>
 	{

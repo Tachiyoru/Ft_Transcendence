@@ -11,14 +11,16 @@ interface IdataRegister {
 	email: string;
 }
 
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 const AccountEdit = () => {
 	const [loading, setLoading] = useState(true);
-	const [userData, setUserData] = useState<{
-		username: string;
-		avatar: string;
-		email: string;
-		createdAt: string;
-	} | undefined>();
+	const [userData, setUserData] = useState<Users>();
 	const navigate = useNavigate()
 	const {
 		register,
@@ -93,7 +95,7 @@ const AccountEdit = () => {
 					</div>
 				)}
 				<div>
-				<FileUpload />
+				<FileUpload userData={userData} setUserData={setUserData}/>
 				</div>
 			</div>
 

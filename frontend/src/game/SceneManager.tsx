@@ -6,8 +6,7 @@ import { HemisphereLight, ColorRepresentation, BoxGeometry } from "three";
 extend({ HemisphereLight });
 import { useEffect, useRef, useState } from "react";
 import { Physics, useBox } from "@react-three/cannon";
-import { useEventListener } from 'react-use';
-
+import axios from "../axios/api";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -42,16 +41,8 @@ function Ball() {
 	);
 }
 
-function Paddle1() {
-	return (
-		<mesh position={[0, -18, -260]}>
-			<boxGeometry args={[50, 5, 5]} />
-			<meshStandardMaterial color={'red'}/>
-		</mesh>
-	);
-}
 
-	function Paddle2() {
+	function Paddle() {
 		const [left, setLeft] = useState<number>(0);
 
 		const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -89,10 +80,16 @@ function Paddle1() {
 		}, []); 
 	
 		return (
-		<mesh position={[left, -18, -60]}>
-			<boxGeometry args={[50, 5, 5]} />
-			<meshStandardMaterial color={'green'} />
-		</mesh>
+		<>
+			<mesh position={[0, -18, -260]}>
+				<boxGeometry args={[50, 5, 5]} />
+				<meshStandardMaterial color={'red'}/>
+			</mesh>
+			<mesh position={[0, -18, -60]}>
+				<boxGeometry args={[50, 5, 5]} />
+				<meshStandardMaterial color={'green'} />
+			</mesh>
+		</>
 		);
 	}
 
@@ -120,8 +117,7 @@ export default function Experience() {
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
 					<Ball/>
 					<Physics>
-						<Paddle1 />
-						<Paddle2 />
+						<Paddle userData={player1}/>
 					</Physics>
 					<mesh position={[0, -20, -146]}>
 						<boxGeometry args={[120, 2, 170]} />

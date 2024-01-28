@@ -41,18 +41,28 @@ export class AuthService {
     throw error;
   }
 
-  async signin(dto: AuthDto2, res: Response) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-      include: { friends: true, stats: true, achievements: true },
-    });
-    if (user) console.log("user exist");
-    if (!user) throw new ForbiddenException("User not found");
-    const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
-    if (!pwdMatches) throw new ForbiddenException("Wrong password");
-    user.status = StatusUser.ONLINE;
-    return (this.forgeTokens(user, res), console.log("user connected"));
-  }
+	async signin(dto: AuthDto2, res: Response)
+	{
+		const user = await this.prisma.user.findUnique({
+			where: { email: dto.email },
+			include: { friends: true, stats: true, achievements: true },
+		});
+		if (user)
+			console.log("user exist");
+		if (!user)
+			throw new ForbiddenException("User not found");
+		const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
+		if (!pwdMatches)
+			throw new ForbiddenException("Wrong password");
+		if (!user.isTwoFaEnabled)
+		{
+			user.status = StatusUser.ONLINE;
+			return this.forgeTokens(user, res);
+		}
+		await this.forgeTokens(user, res);
+		console.log("2FA enabled for this account");
+		return user;
+	}
 
   async authExtUserCreate(userInfo: any, imageLink: string) {
     {

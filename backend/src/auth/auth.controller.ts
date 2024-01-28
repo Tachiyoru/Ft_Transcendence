@@ -15,10 +15,14 @@ import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { GetUser } from "./decorator";
 import { TokenGuard } from "./guard";
+import { ConfigService } from "@nestjs/config";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private config: ConfigService,
+    private readonly authService: AuthService
+    ) {}
 
   @Post("signup")
   async signup(
@@ -71,7 +75,10 @@ export class AuthController {
       raw._json.image.versions.small
     );
     await this.authService.callForgeTokens(user2, res);
-    res.redirect(`${process.env.REACT_APP_URL_FRONTEND}`);
+    if (!user2.isTwoFaEnabled)
+      res.redirect('http://paul-f4ar1s3:5173/');
+    else
+      res.redirect('http://paul-f4ar1s3:5173/sign-in-2fa');
     return user2;
   }
 
