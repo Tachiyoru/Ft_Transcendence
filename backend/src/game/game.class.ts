@@ -47,19 +47,19 @@ export class Game  {
 
         // Player 1 Paddle
         this.paddle[0].x = 0;
-        this.paddle[0].y = 0;
-        this.paddle[0].z = 0;
+        this.paddle[0].y = -18;
+        this.paddle[0].z = -60;
 
         // Player 1 Camera
         this.camera[0].x = 0;
         this.camera[0].y = 0;
-        this.camera[0].z = 0;
+        this.camera[0].z = 20;
         this.camera[0].angle = 0;
 
         // Player 2 Paddle
         this.paddle[1].x = 0;
-        this.paddle[1].y = 0;
-        this.paddle[1].z = 0;
+        this.paddle[1].y = -18;
+        this.paddle[1].z = -260;
 
         // Player 2 Camera
         this.camera[1].x = 0;
@@ -68,8 +68,8 @@ export class Game  {
         this.camera[1].angle = 0;
 
         this.ball.x = 0;
-        this.ball.y = 0;
-        this.ball.z = 0;
+        this.ball.y = -15;
+        this.ball.z = -100;
 
         this.pScore[0] = 0;
         this.pScore[1] = 0;
