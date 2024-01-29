@@ -4,7 +4,7 @@ import { Game, User } from '@prisma/client';
 import { Server } from 'socket.io';
 import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
-import { UseGuards, Request } from '@nestjs/common';
+import { UseGuards, Request, ParseIntPipe} from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { disconnect } from 'process';
 
@@ -57,8 +57,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() client: Socket,
     @Request() req: any
   ) {
-    const ok = await this.gameService.prepareQueListGame(client, req);
-    console.log(ok)
+    const game = await this.gameService.prepareQueListGame(client, req);
+    if (game)
+      this.server.emit("CreatedGame", game);
   }
 
   
@@ -74,13 +75,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   //   }
   // }
 
-  // // @SubscribeMessage("gamestart")
-  // // async gamestart(
-  // //   @MessageBody("gameSocket") gameSocket: string,
-  // // ) {
-  // //   const game = await this.gameService.findGame(gameSocket);
-  // //   this.server.emit("gamestart", game);
-  // // }
+    @SubscribeMessage("findGame")
+    async gamestart(
+      @MessageBody('gameId', ParseIntPipe) gameId: number
+    ) {
+      const game = await this.gameService.findGame(gameId);
+      console.log('ok', game)
+      this.server.emit("findGame", game);
+    }
 
 
   handleConnection(client: any, ...args: any[]) {

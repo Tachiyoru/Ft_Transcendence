@@ -19,6 +19,7 @@ export interface GameSessionQResponse {
 export class GameService {
   private waitingRoomGame: WaitingGameSession | undefined = undefined;
   private waitingChallenge: Map<number, WaitingGameSession> = new Map();
+  private games: Game[] = [];
     constructor(private prisma: PrismaService)  {}
 
     createGamer(
@@ -33,13 +34,13 @@ export class GameService {
       };
     }
 
-    @WebSocketServer() server: Server;
-
+    
     async createGame(gameID: number, player1User: User, player1Socket: string, player2User: User, player2Socket: string)  {
-      console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket)
+      //console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket)
       const game = new Game(gameID, player1Socket, player1User, player2Socket, player2User);
-      console.log(game)
-      this.server.emit("CreatedGame", game);
+      this.games.push(game);
+      return(game);
+      
     }
 
     async prepareQueListGame(socket: Socket, @Request() req: any) {
@@ -61,8 +62,7 @@ export class GameService {
           this.waitingRoomGame = undefined;
           const gameDB = await this.prisma.game.create({data: {}});
           const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId);
-
-          return { matchFound: true, gameSession };
+          return gameSession;
         }
 
       } else {
@@ -75,7 +75,8 @@ export class GameService {
           hostId: gamer.user.id,
           participants: [gamer],
         };
-        return { matchFound: false, waitingSession: this.waitingRoomGame};
+        console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
+        return null;
       }
     }
     // async connection(socket: Socket, @Request() req: any)  {
@@ -154,15 +155,9 @@ export class GameService {
 //       return (game?.gameId);
 //     }
 
-//     async findGame(gameSocket: string)  {
-//       const game = await this.prisma.game.findFirst({
-//         where:  {
-//           gameSocket: gameSocket
-//         },
-//         include : {player1User: true, player2User: true, paddle: true, ball: true}
-//       })
-//       return (game);
-//     }
+    async findGame(gameId: number)  {
+      return this.games.find((game) => game.gameId === gameId);
+    }
 
 //     async checkGameUsers(socket: Socket)  {
 //       let game = await this.prisma.game.findFirst({

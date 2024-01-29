@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 interface Player    {
     playerSocket: string;
-    playerProfile: User;
+    playerProfile: User | null;
 }
 
 
@@ -30,18 +30,18 @@ export interface Camera    {
 }
 
 export class Game  {
-    gameId:             number;
-    gameSocket:         string;
-    paddle:             Paddle[];
-    camera:             Camera[];
-    ball:               Ball;
-    pScore:             number[];
-    player1:            Player;
-    player2:            Player;
-    connectedPlayers:   number;
-    victory:            number;
-    status:             number;
-    multiplier:         number;
+    gameId: number;
+    gameSocket: string;
+    paddle: Paddle[] = [{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }];
+    camera: Camera[] = [{ x: 0, y: 0, z: 0, fov: 0, angle: 0 }, { x: 0, y: 0, z: 0, fov: 0, angle: 0 }];
+    ball: Ball = { x: 0, y: 0, z: 0 };
+    pScore: number[] = [0, 0];
+    player1: Player = { playerSocket: "", playerProfile: null }; 
+    player2: Player = { playerSocket: "", playerProfile: null }; 
+    connectedPlayers: number;
+    victory: number;
+    status: number;
+    multiplier: number;
 
     constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
@@ -61,12 +61,12 @@ export class Game  {
         // Player 2 Paddle
         this.paddle[1].x = 0;
         this.paddle[1].y = -18;
-        this.paddle[1].z = -260;
+        this.paddle[1].z = -230;
 
         // Player 2 Camera
         this.camera[1].x = 0;
         this.camera[1].y = 0;
-        this.camera[1].z = 0;
+        this.camera[1].z = -310;
         this.camera[1].angle = 0;
 
         this.ball.x = 0;
@@ -95,8 +95,8 @@ export class Game  {
             },
             data: {
                 gameSocket: this.gameSocket,
-                player1: this.player1.playerProfile.id,
-                player2: this.player2.playerProfile.id,
+                player1: this.player1.playerProfile?.id,
+                player2: this.player2.playerProfile?.id,
                 scorePlayer1: this.pScore[0],
                 scorePlayer2: this.pScore[1],
                 victory: this.victory,

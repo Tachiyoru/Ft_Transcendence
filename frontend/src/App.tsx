@@ -40,10 +40,10 @@ return (
 			<Route path="/forget-password" element={<ForgetPassword />} />
 			<Route index element={user ? <Dashboard /> : <Navigate to="/sign-in" />}/>
 			<Route path="/user/:username" element={<DashboardFriends/>}/>
-			<Route path="/gamestart/:gameSocket" element={<AboutToPlay />} />
+			<Route path="/gamestart/:gameId" element={<AboutToPlay />} />
 			<Route path="/game" element={user ? <Game /> : <Navigate to="/sign-in" />} />
 			<Route path="/inGame" element={<InGame />} />
-			<Route path="/test" element={<SceneManager />} />
+			<Route path="/test/:gameId" element={<SceneManager />} />
 			<Route path="/chat" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/chat/:chanId" element={user ? <Chat /> : <Navigate to="/sign-in" />} />
 			<Route path="/friends" element={user ? <Friends /> : <Navigate to="/sign-in" />}>

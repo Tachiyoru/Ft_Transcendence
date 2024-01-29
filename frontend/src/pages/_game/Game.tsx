@@ -18,6 +18,7 @@ const Game = () => {
 	const cardsRef = useRef<HTMLDivElement>(null);
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
+	const navigate = useNavigate();
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -45,9 +46,20 @@ const Game = () => {
 	};
 
 	const connectServ = () =>	{
-		console.log('ok')
 		socket.emit("start");
 	}
+
+	useEffect(() => {
+		socket.on("CreatedGame", (game) => {
+			try {
+			console.log("New Game:", game);
+			navigate(`/gamestart/${game.gameId}`)
+
+		} catch (error) {
+			console.error("Error", error);
+		}
+		});
+	}, [socket]);
 
 	const [showSecondDiv, setShowSecondDiv] = useState(
 		localStorage.getItem('showSecondDiv') === 'true'
