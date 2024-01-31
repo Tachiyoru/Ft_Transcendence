@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AiOutlineMail,
@@ -25,11 +25,10 @@ const SigninForm = () => {
   const dispatch = useDispatch();
   const [resStatus, setResStatus] = useState("");
   const navigate = useNavigate();
-
   const [password, setPassword] = useState("");
   const [passwordIsVisible, setPasswordIsVisible] = useState(false);
   const [showUsernameErrors, setShowUsernameErrors] = useState(false);
-
+  const [isPasswordModified, setPasswordModified] = useState(false);
   const {
     register,
     handleSubmit,
@@ -61,7 +60,10 @@ const SigninForm = () => {
     const newPassword = e.currentTarget.value;
     setPassword(newPassword);
     setShowUsernameErrors(true);
-  };
+	if (newPassword.length > 6)
+		setPasswordModified(true);
+};
+
 
   const handle42Click = async () => {
     try {
@@ -144,6 +146,7 @@ const SigninForm = () => {
                   onChange={handlePasswordChange}
                 />
                 <button
+				  type="button"
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
                     setShowUsernameErrors(false);
@@ -172,7 +175,7 @@ const SigninForm = () => {
             <div className="flex flex-col items-center mt-10">
               <button
                 type="submit"
-                disabled={!isValid}
+                disabled={!isPasswordModified}
                 className=" bg-purple text-lilac text-base py-1 px-6 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
               >
                 Sign in

@@ -51,6 +51,10 @@ const SignupForm = () => {
   } = useForm<IdataRegister>();
   
   const  SubmitHandler = async (data: IdataRegister) => {
+	if (data.password !== data.confirmPassword) {
+		setResStatus('Passwords do not match');
+		return;
+	  }
       await axios
       .post('/auth/signup', data)
       .then((response) => {
@@ -70,8 +74,6 @@ const SignupForm = () => {
       });
   };
 
-  console.log(resStatus);
-
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.currentTarget.value;
     setPassword(newPassword);
@@ -79,10 +81,15 @@ const SignupForm = () => {
     setShowUsernameErrors(true);
   };
 
+  const [isPasswordModified, setPasswordModified] = useState(false);
   const handleConfirmPassword = (e: ChangeEvent<HTMLInputElement>) => {
     const confirmPasswordValue = e.currentTarget.value;
     setConfirmPassword(confirmPasswordValue === password);
     setConfirmPasswordHasContent(confirmPasswordValue.length > 0);
+	console.log(confirmPasswordValue.length);
+	console.log(isPasswordModified);
+	if (confirmPasswordValue.length === password.length )
+		setPasswordModified(true);
   };
 
 
@@ -156,6 +163,7 @@ const SignupForm = () => {
                   onChange={handlePasswordChange}
                 />
                 <button
+				  type="button"
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
                     setShowUsernameErrors(false);
@@ -235,6 +243,7 @@ const SignupForm = () => {
                   onChange={handleConfirmPassword}
                 />
                 <button
+				  type="button"
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
                     setShowUsernameErrors(false);
@@ -269,7 +278,7 @@ const SignupForm = () => {
             <div className='flex flex-col items-center mb-6'>
               <button
                 type="submit"
-                disabled={!isValid || !confirmPassword}
+                disabled={!isPasswordModified}
                 className="bg-purple text-lilac text-base py-1 px-6 rounded mb-6 hover:bg-accent-violet disabled:bg-dark-violet disabled:text-violet-black"
               >
                 Create an account
