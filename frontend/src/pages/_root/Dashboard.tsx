@@ -8,6 +8,8 @@ import Animation from "./container/Animation";
 import Leaderboard from "./container/Leaderboard";
 import History from "./container/History";
 import { fetchDataUser } from "../../api/apiCalls";
+import axiosInstance from "../../axios/api";
+
 
 const Dashboard = () => {
   const {
@@ -53,6 +55,36 @@ const Dashboard = () => {
   if (!userData) {
     return <div>Error loading user data</div>;
   }
+
+  if (userStats) {
+	//first game
+	if (userStats.partyPlayed >= 1 && !userAchievements.some(achievement => achievement.id === 5)) {
+		axiosInstance.post(`achievements/add/${5}`);}
+	//win 10 parties
+	if (userStats.partyWon >= 10 && !userAchievements.some(achievement => achievement.id === 2)) {
+		axiosInstance.post(`achievements/add/${2}`);}
+	//did 42 parties
+	if (userStats.partyPlayed >= 42 && !userAchievements.some(achievement => achievement.id === 7)) {
+		axiosInstance.post(`achievements/add/${7}`);}
+	//lose 10 parties in a row
+	let consecutiveDefeats = 0;
+	const history = userStats.history;
+	for (let i = 0; i < history.length; i++) {
+		const currentItem = history[i];
+		const nextItem = history[i + 1];
+		if (currentItem.includes(`Defeat`)) {
+		consecutiveDefeats++;
+		if (consecutiveDefeats === 10)
+			axiosInstance.post(`achievements/add/${8}`)		
+		} else {
+		consecutiveDefeats = 0;
+		}
+	}
+	
+	}
+
+
+
 
   return (
     <MainLayout currentPage={currentPage}>

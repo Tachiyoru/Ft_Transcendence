@@ -60,7 +60,7 @@ const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) => {
             {[...Array(8)].map((_, index) => (
               !badgeIds.includes(index + 1) && (
                 <div key={index} className="w-12 h-12 m-1 opacity-20" title={achievementTitles[index]}>
-                  <img src={`src/achievements-${index + 1}.png`} alt={achievementTitles[index]} />
+                  <img src={`/src/achievements-${index + 1}.png`} alt={achievementTitles[index]} />
                 </div>
               )
             ))}

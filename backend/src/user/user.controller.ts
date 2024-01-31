@@ -90,4 +90,9 @@ export class UserController {
   getHim(@Param("name") name: string) {
     return this.userService.getHim(name);
   }
+
+  @Get("him/:name/histo")
+  getHisHisto(@Param("name") name: string) {
+    return this.userService.getHim(name);
+  }
 }

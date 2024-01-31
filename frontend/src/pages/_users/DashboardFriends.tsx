@@ -15,12 +15,31 @@ import { useDispatch } from "react-redux";
 import { WebSocketContext } from "../../socket/socket";
 import { setSelectedChannelId } from "../../services/selectedChannelSlice";
 import { RiTimer2Line } from "react-icons/ri";
+import History from "./container/HystoryUser";
 
 interface Users {
 	username: string;
 	avatar: string;
 	id: number;
 	status: string;
+	achievements: Achievements[];
+	stats: Stats;
+}
+
+interface Stats {
+	id: number;
+	userId: number;
+	partyPlayed: number;
+	partyWon: number;
+	partyLost: number;
+	history: string[];
+}
+
+interface Achievements {
+	id: number;
+	icon: string;
+	title: string;
+	description: string;
 }
 
 const DashboardFriends = () => {
@@ -34,6 +53,7 @@ const DashboardFriends = () => {
 		lvl: 0,
 		exp: 0,
 	});
+	const [me, setMe] = useState<string>();
 	const { username } = useParams();
 	const [friend, setFriend] = useState<Users | null >();
 	const [friendPending, setFriendPending] = useState<Users | null>();
@@ -42,6 +62,10 @@ const DashboardFriends = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
+				const test = await axios.get(`users/me`);
+			setMe(test.data.username);
+			console.log(test.data.username);
+
 				const response = await axios.get(`users/him/${username}`);
 			setUserData(response.data);
 			
@@ -237,7 +261,7 @@ return (
 						</div>
 						<div className="flex flex-row justify-between mt-2 text-sm text-lilac">
 							<span>Level {userStats.lvl}</span>
-							<span>{userStats.exp}/400</span>
+							<span>{userStats.exp}/100</span>
 						</div>
 					</div>
 
@@ -245,7 +269,7 @@ return (
 						<div className="bg-accent-violet font-kanit font-extrabold flex flex-row items-center p-4 mt-2 h-24 w-full rounded-md ">
 							<p className="text-5xl text-lilac">{userStats.partyPlayed}</p>
 							<div className="pt-7 text-xl text-purple ml-2">
-								<p style={{ marginBottom: '-0.7rem' }}>matches</p>
+								<p style={{ marginBottom: '-0.7rem' }}>games</p>
 								<p>played</p>
 							</div>
 						</div>
@@ -272,13 +296,14 @@ return (
 			
 				<div className="flex-1 bg-violet-black-nav bg-opacity-80 p-4 md:rounded-r-lg">
 					<div className="flex mx-2 flex-row gap-4 md:gap-6">
-						<BadgesUser user={userData}/>
-						<MatchesPlayedTogether/>
+						<BadgesUser userAchievements={userData?.achievements?? []}/>
+						<MatchesPlayedTogether history={userData?.stats.history?? []} username={me?? ""}/>
 					</div>
 					<div className="flex flex-row m-2 gap-4 md:gap-6">
 						<Animation/>
 						<LeaderboardUser/>
 					</div>
+					<History history={userData?.stats.history?? []}/>
 				</div>
 			</div>
 			{/*Dashboard*/}

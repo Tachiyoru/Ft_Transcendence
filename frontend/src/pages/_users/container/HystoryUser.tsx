@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "../../../axios/api";
-import axiosInstance from "../../../axios/api";
 
 interface Histo {
   score: string;
@@ -9,41 +8,30 @@ interface Histo {
   exp: string;
 }
 
-const History = () => {
+interface historyProps {
+  history: string[];
+}
+
+const History: React.FC<historyProps> = ({ history }) => {
   const [matchHistory, setMatchHistory] = useState<Histo[]>([]);
 
   useEffect(() => {
-    const fetchHisto = async () => {
-      try {
-        const response = await axios.get("/users/histo");
-        formatHisto(response.data);
-      } catch (error) {
-        console.error("Error fetching blocked users:", error);
-      }
-    };
+	formatHisto();
+  }, [history]);
 
-    fetchHisto();
-  }, []);
-
-  const formatHisto = (histo: string[]) => {
-	let histoFormated: Histo[] = [];
-	let prevOpp = "";
-	let prevresult = "";
-    histo.map((match) => {
+  const formatHisto = () => {
+    let histoFormated: Histo[] = [];
+    history.map((match) => {
       let parts = match.split(" ");
       let score = parts[0];
       let opponent = parts.slice(1, -2).join(" ");
       let result = parts[parts.length - 2];
       let exp = parts[parts.length - 1];
-	  if (prevOpp === opponent && prevresult === "Defeat" && result === "Victory") {
-			axiosInstance.post(`achievements/add/${4}`);
-	  }
-	  prevOpp = opponent;
-	  prevresult = result;
       histoFormated.push({ score, opponent, result, exp });
     });
     setMatchHistory(histoFormated);
   };
+
 
   return (
     <div className="flex mx-2 flex-row gap-4 md:gap-6">
@@ -57,15 +45,15 @@ const History = () => {
           <div className="flex flex-col">
             {/* MATCH RESUME */}
             <div className="w-full">
-              <table>
-                <thead>
+              <table className="w-full">
+                <tbody className="text-lilac scrollbar-thin scrollbar-thumb-black">
                   <tr className="text-purple">
                     <th className="w-1/6 font-thin">Score</th>
                     <th className="w-80 font-thin">Opponent</th>
                     <th className="w-80 font-thin">Result</th>
                     <th className="w-80 font-thin">Exp</th>
                   </tr>
-                </thead>
+                </tbody>
               </table>
             </div>
             <div className="overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-black">

@@ -1,7 +1,7 @@
 import { GoHomeFill } from "react-icons/go";
 import { RiGamepadFill, RiMessage3Fill } from "react-icons/ri";
 import { FaArrowRightFromBracket, FaUserGroup } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { setLogout } from "../../../services/UserSlice";
 import { useDispatch } from "react-redux";
 import axios from "../../../axios/api";
@@ -37,8 +37,11 @@ const NavItem: React.FC<NavItemProps & { currentPage: string }> = ({ lien, icon:
 	);
 };
 
+
+
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const socket= useContext(WebSocketContext);
 
 	const handleLogout = () => {
@@ -48,7 +51,7 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
 		.then( () => {
 		console.log('Déconnexion réussie');
 		socket.disconnect();
-		window.location.reload();
+		window.location.href = '/sign-in';
 		})
 		.catch(error => {
 		console.error('Erreur lors de la déconnexion côté serveur :', error);

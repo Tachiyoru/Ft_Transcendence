@@ -46,7 +46,6 @@ export class AchievementsService
 			description: "Changed your avatar/username",
 			icon: "src/achievements-6.png",
 		});
-
 		await this.createInitialAchievements({
 			title: "7",
 			description: "Did 42 games",
@@ -57,7 +56,6 @@ export class AchievementsService
 			description: "Serial looser : lose 10 times in a row",
 			icon: "src/achievements-8.png",
 		});
-		const achievements = await this.prismaService.achievement.findMany({});
 	}
 
 

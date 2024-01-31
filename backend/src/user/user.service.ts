@@ -79,10 +79,11 @@ export class UserService {
       role: "ADMIN",
       stats: {
         lvl: 3,
-        partyPlayed: 42,
+        partyPlayed: 43,
         partyWon: 1,
-        partyLost: 41,
+        partyLost: 42,
         history: [
+			"3-0 Creme Victory +5exp",
 			"3-0 Creme Defeat +5exp",
 			"3-0 Tachi Defeat +5exp",
 			"3-0 Tachi Defeat +5exp",
@@ -138,8 +139,8 @@ export class UserService {
       role: "ADMIN",
       stats: {
         lvl: 1,
-        partyPlayed: 1,
-        partyWon: 0,
+        partyPlayed: 2,
+        partyWon: 1,
         partyLost: 1,
         history: [
 			"3-0 Tachi Defeat +5exp",
@@ -367,6 +368,14 @@ export class UserService {
   async getHim(name: string) {
     return this.prisma.user.findUnique({
       where: { username: name },
+	  include: { friends: true, stats: true, achievements: true },
+    });
+  }
+
+  async getHisHisto(name: string) {
+    this.prisma.user.findUnique({
+      where: { username: name },
+	  include: { friends: true, stats: true,  },
     });
   }
 }
