@@ -46,13 +46,6 @@ interface Message {
   author: Users;
 }
 
-interface Users {
-  username: string;
-  avatar: string;
-  id: number;
-  status: string;
-}
-
 const ContentConv = () => {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [channel, setChannel] = useState<Channel | null>(null);

@@ -12,7 +12,7 @@ export class UserService {
 
   async onModuleInit() {
     await this.createInitialUser({
-      avatar: "upload/Tachi.png",
+      avatar: "/upload/Tachi.png",
       username: "Tachi",
       email: "shanley@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -42,7 +42,7 @@ export class UserService {
       },
     });
     await this.createInitialUser({
-      avatar: "upload/Manu.png",
+      avatar: "/upload/Manu.png",
       username: "Mansha",
       email: "mansha@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -57,7 +57,7 @@ export class UserService {
       },
     });
     await this.createInitialUser({
-      avatar: "upload/Clem.png",
+      avatar: "/upload/Clem.png",
       username: "Cremette",
       email: "creme@test.fr",
       hash: "$argon2id$v=19$m=65536,t=3,p=4$AvmmC2DsXmKaxxA15IXN7g$ABNt5kIwlkksuu2T7fNQrZ2Q/Z1iWxQ3DWubhoqPNOU",
@@ -132,7 +132,7 @@ export class UserService {
       where: { id: userId },
     });
     if (user) {
-      if (user.avatar && user.avatar.startsWith("upload")) {
+      if (user.avatar && user.avatar.startsWith("/upload")) {
         await unlink(user.avatar); //attention a la suppression de l'avatar
       }
       await this.prisma.user.delete({
@@ -168,8 +168,8 @@ export class UserService {
     });
     if (file) {
       if (user) {
-        if (user.avatar && user.avatar.startsWith("upload") && 
-			user.avatar != "upload/Tachi.png" && user.avatar != "upload/Manu.png" && user.avatar != "upload/Clem.png") {
+        if (user.avatar && user.avatar.startsWith("/upload") && 
+			user.avatar != "/upload/Tachi.png" && user.avatar != "/upload/Manu.png" && user.avatar != "/upload/Clem.png") {
 			await unlink(user.avatar);
         }
         await this.prisma.user.update({
