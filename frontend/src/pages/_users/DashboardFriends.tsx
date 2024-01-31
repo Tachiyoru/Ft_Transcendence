@@ -40,6 +40,10 @@ const DashboardFriends = () => {
 	const [blockedUser, setBlockedUser] = useState<Users | null>();
 	
 	useEffect(() => {
+		socket.emit("notInGame");
+	},[]);
+
+	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await axios.get(`users/him/${username}`);

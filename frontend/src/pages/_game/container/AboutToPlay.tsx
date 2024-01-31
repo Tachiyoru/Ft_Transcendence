@@ -4,6 +4,8 @@ import { FaUser } from "react-icons/fa6";
 import OhOh from "../../../components/popin/OhOh";
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../../socket/socket";
+import axios from "../../../axios/api";
+import Dashboard from "../../_root/Dashboard";
 
 interface Game {
 	gameId: number;
@@ -21,34 +23,57 @@ interface Game {
 	}
 }
 
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+}
+
 const AboutToPlay = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
-	const { gameId } = useParams();
+	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
 	const [game, setGame] = useState<Game | null>();
-	//const [isReset, setIsReset]  = useState<boolean>(false);
+	const [isReset, setIsReset]  = useState<boolean>(false);
 	const navigate = useNavigate();
+	const [userData, setUserData] = useState<Users>();
+
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, [isReset]);
+
 
 	useEffect(() => {
 		try {
-			socket.emit("findGame", {gameId: gameId})
+			socket.emit("findGame", {gameSocket: gameSocket})
 			socket.on("findGame", (game) => {
-				console.log(game)
 				setGame(game);
 			});
-			// socket.on("GameReset", (error) => {
-			// 	console.log(error)
-			// });
+			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
+			socket.on("verifyGame", (boolean) => {
+			if (!boolean)
+				setGame(null);
+			});
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
-	}, [socket]);
+	}, [socket, userData]);
+
 
 	const handleStartGame = () => {
 		if (game)
 		{		
-			navigate(`/test/${gameId}`);
+			navigate(`/test/${gameSocket}`);
 		}
 	};
 

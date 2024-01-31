@@ -61,7 +61,7 @@ export class Game  {
         // Player 2 Paddle
         this.paddle[1].x = 0;
         this.paddle[1].y = -18;
-        this.paddle[1].z = -230;
+        this.paddle[1].z = -232;
 
         // Player 2 Camera
         this.camera[1].x = 0;
@@ -106,7 +106,7 @@ export class Game  {
     }
 
     destroyGame(prisma: PrismaService)  {
-        if (this.status !== 3)  {
+        if (this.status === 3)  {
             this.saveGame(prisma);
         }
     }
@@ -142,12 +142,21 @@ export class Game  {
         if (player === this.player1.playerSocket && upDown === 1)   {
             switch (input)  {
                 case "ArrowLeft":
-                    this.camera[0].x = this.paddle[0].x -= 5 * this.multiplier;
-                    this.multiplier++;
+                    if (((this.paddle[0].x) - (1 * this.multiplier)) >= -35)   {
+                        this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
+                        this.multiplier++;
+                    } else if (((this.paddle[0].x) - 1) > -35)  {
+                        this.multiplier = 1;
+                }
                 break;
                 case "ArrowRight":
-                    this.camera[0].x = this.paddle[0].x += 5 * this.multiplier;
-                    this.multiplier++;
+                    if (((this.paddle[0].x) + (1 * this.multiplier)) <= 35)    {
+                        this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
+                        this.multiplier++;
+                    } else if (((this.paddle[0].x) + 1) < 35)  {
+                        this.multiplier = 1;
+                    }
+                    console.log(this.paddle[1].x)
                 break;
             }
         }
@@ -164,12 +173,20 @@ export class Game  {
         else if (player === this.player2.playerSocket && upDown === 1)  {
             switch (input)  {
                 case "ArrowLeft":
-                    this.camera[1].x = this.paddle[1].x += 5 * this.multiplier;
-                    this.multiplier++;
+                    if (((this.paddle[1].x) + (1 * this.multiplier)) <= 35)    {
+                        this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
+                        this.multiplier++;
+                    }   else if (((this.paddle[1].x) + 1) < 35)  {
+                        this.multiplier = 1;
+                    }
                 break;
                 case "ArrowRight":
-                    this.camera[1].x = this.paddle[1].x -= 5 * this.multiplier;
-                    this.multiplier++;
+                    if (((this.paddle[1].x) - (1 * this.multiplier)) >= -35)   {
+                        this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
+                        this.multiplier++;
+                    }   else if (((this.paddle[1].x) - 1) > -35)  {
+                        this.multiplier = 1;   
+                    }
                 break;
             }
         }

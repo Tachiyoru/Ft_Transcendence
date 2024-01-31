@@ -1,6 +1,6 @@
 import MainLayout from "../../components/nav/MainLayout";
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useDashboardState } from "../../state/stateManagement";
 import Sidebar from "./container/SideBar";
 import Badges from "./container/Badges";
@@ -8,6 +8,9 @@ import Animation from "./container/Animation";
 import Leaderboard from "./container/Leaderboard";
 import History from "./container/History";
 import { fetchDataUser } from "../../api/apiCalls";
+import { WebSocketContext } from "../../socket/socket";
+import OhOh from "../../components/popin/OhOh";
+
 
 const Dashboard = () => {
   const {
@@ -27,6 +30,11 @@ const Dashboard = () => {
 
   const location = useLocation();
   const currentPage = location.pathname;
+	const socket = useContext(WebSocketContext);
+
+    useEffect(() => {
+      socket.emit("notInGame");
+    },[]);
 
   useEffect(() => {
     fetchDataUser({

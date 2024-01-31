@@ -59,7 +59,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ) {
     const game = await this.gameService.prepareQueListGame(client, req);
     if (game)
-      this.server.emit("CreatedGame", game);
+    {
+      this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
+      this.server.to(game.player2.playerSocket).emit("CreatedGame", game);
+    }
+
   }
 
   
@@ -77,12 +81,62 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage("findGame")
     async gamestart(
-      @MessageBody('gameId', ParseIntPipe) gameId: number
+      @MessageBody('gameSocket') gameSocket: string,
     ) {
-      const game = await this.gameService.findGame(gameId);
-      console.log('ok', game)
-      this.server.emit("findGame", game);
+      const game = await this.gameService.findGame(gameSocket);
+      if  (game)
+      {
+        this.server.to(game.player1.playerSocket).emit("findGame", game);
+        this.server.to(game.player2.playerSocket).emit("findGame", game);
+      }
     }
+
+    @SubscribeMessage("verifyGame")
+    async verifyGame(
+      @MessageBody('gameSocket') gameSocket: string,
+      @MessageBody('userId') userId: number,
+      @ConnectedSocket() client: Socket,
+      )
+      {
+        const boolean = await this.gameService.verifyGame(gameSocket, client, userId);
+        const game = await this.gameService.findGame(gameSocket);
+        if (game)
+        {
+          this.server.to(game.player1.playerSocket).emit("verifyGame", boolean);
+          this.server.to(game.player2.playerSocket).emit("verifyGame", boolean);
+        }
+      }
+
+      @SubscribeMessage("notInGame")
+      async notInGame(
+        @Request() req: any
+        )
+        {
+          const data = await this.gameService.notInGame(req);
+          if (data.game)
+          {
+            this.server.to(data.game.player1.playerSocket).emit("verifyGame", data.boolean);
+            this.server.to(data.game.player2.playerSocket).emit("verifyGame", data.boolean);
+            data.game.destroyGame(this.prisma);
+          }
+        }
+
+      @SubscribeMessage("movesInputs")
+      async movesInputs(
+      @ConnectedSocket() client: Socket,
+      @MessageBody('gameSocket') gameSocket : string,
+      @MessageBody('move') move : string,
+      @MessageBody('upDown') upDown : number
+      ) {
+        const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown);
+        if (game)
+        {
+          this.server.to(game.player1.playerSocket).emit("findGame", game);
+          this.server.to(game.player2.playerSocket).emit("findGame", game);
+        }
+      }
+        
+
 
 
   handleConnection(client: any, ...args: any[]) {

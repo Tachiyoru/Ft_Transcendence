@@ -39,7 +39,7 @@ export class GameService {
       //console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket)
       const game = new Game(gameID, player1Socket, player1User, player2Socket, player2User);
       this.games.push(game);
-      return(game);
+      return (game);
       
     }
 
@@ -54,7 +54,7 @@ export class GameService {
       if (this.waitingRoomGame) {
         // check if one game session is already waiting for an opponent
         if (this.waitingRoomGame.hostId === req.user.id) {
-          return { matchFound: false, waitingSession: this.waitingRoomGame };
+          return null;
         } else {
           gamer.isHost = false;
           const participants = [gamer, this.waitingRoomGame.participants[0]];
@@ -64,9 +64,7 @@ export class GameService {
           const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId);
           return gameSession;
         }
-
       } else {
-        // create a new game session with the host
         const waitingListIds = Array.from(this.waitingChallenge.keys());
         const id =
           waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
@@ -155,9 +153,44 @@ export class GameService {
 //       return (game?.gameId);
 //     }
 
-    async findGame(gameId: number)  {
-      return this.games.find((game) => game.gameId === gameId);
+    async findGame(gameSocket: string)  {
+      const game = this.games.find((game) => game.gameSocket === gameSocket);
+      return (game);
     }
+
+    async verifyGame(gameSocket: string, socket: Socket, userId: number)
+    {
+      console.log(userId)
+      const game = this.games.find((game) => game.gameSocket === gameSocket);
+      if (
+        (game?.player1.playerSocket === socket.id && game?.player1.playerProfile?.id === userId) || 
+        (game?.player2.playerSocket === socket.id && game?.player2.playerProfile?.id === userId)
+      )
+        return (true);
+      else if
+      (
+        (game?.player1.playerSocket !== socket.id && game?.player1.playerProfile?.id === userId) || 
+        (game?.player2.playerSocket !== socket.id && game?.player2.playerProfile?.id === userId) 
+      ){
+        game?.destroyGame(this.prisma);
+        return (false)
+      }
+      else
+        return (false)
+
+    }
+
+    async notInGame(@Request() req: any)
+    {
+      const game = this.games.find((game) => (game.player1.playerProfile?.id || game.player2.playerProfile?.id) === req.user.id);
+      if (game)
+        return ({game: game, boolean: false});    
+      else
+        return ({game: null, boolean: true});  
+
+    }
+
+
 
 //     async checkGameUsers(socket: Socket)  {
 //       let game = await this.prisma.game.findFirst({
@@ -232,19 +265,39 @@ export class GameService {
 //       }
 //     }
 
-//     async movesInputs(gameSocket: string, playerID: string, input: string)  {
-//       const game = await this.findGame(gameSocket);
-      
-//       if (game) {
-//         if (game.player1 === playerID)  {
-//           switch (input)  {
-//             case "ArrowLeft":
-              
-//           }
-//         }
-//         else if (game.player2 === playerID) {
-
-//         }
-//       }
-//     }
+    async movesInputs(gameSocket: string, playerSocket: string, input: string, upDown: number)  {
+      const game = this.games.find((game) => game.gameSocket === gameSocket);
+  
+      if (game) {
+        if (game.player1.playerSocket === playerSocket)  {
+          switch (input)  {
+            case "ArrowLeft":
+              game.moves(input, playerSocket, upDown);
+              console.log('1', game.paddle[0]);
+              return (game)
+            break;
+            case "ArrowRight":
+                game.moves(input, playerSocket, upDown);
+                console.log('2', game.paddle[0]);
+                return (game)
+            break;
+          }
+        }
+        else if (game.player2.playerSocket === playerSocket) {
+          switch (input)  {
+            case "ArrowLeft":
+              game.moves(input, playerSocket, upDown);
+              console.log('3', game.paddle[0]);
+              return (game);
+            break;
+            case "ArrowRight":
+                game.moves(input, playerSocket, upDown);
+                console.log('4', game.paddle[0]);
+                return (game);
+            break;
+          }
+        }
+        return(game)
+      }
+    }
 }

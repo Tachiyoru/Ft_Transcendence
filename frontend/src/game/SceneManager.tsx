@@ -6,65 +6,21 @@ import { HemisphereLight, ColorRepresentation } from "three";
 extend({ HemisphereLight });
 import { useContext, useEffect, useState } from "react";
 import { Physics} from "@react-three/cannon";
-import { WebSocketContext } from "../socket/socket";
+import { WebSocketContext, socket } from "../socket/socket";
 import axios from "../axios/api";
+import { Game, Ball } from "../../../backend/src/game/game.class.ts"
+
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
 	groundColor?: ColorRepresentation;
 	intensity?: number;
 }
+
 interface Users {
 	username: string;
 	avatar: string;
 	id: number;
 	status: string;
-}
-export interface Paddle    {
-    x: number;
-    y: number;
-    z: number;
-}
-
-
-export interface Ball  {
-    x: number;
-    y: number;
-    z: number;
-}
-
-
-export interface Camera    {
-    x: number;
-    y: number;
-    z: number;
-    fov: number;
-    angle: number;
-}
-
-interface Game {
-	gameId: number;
-    gameSocket: string;
-    paddle: Paddle[];
-    camera: Camera[];
-    ball: Ball;
-    pScore: number[];
-    connectedPlayers: number;
-    victory: number;
-    status: number;
-	player1: {
-		playerProfile: {
-			username: string;
-			avatar: string;
-			id: number;
-		}
-	};
-	player2: {
-		playerProfile: {
-			username: string;
-			avatar: string;
-			id: number;
-		}
-	}
 }
 
 const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
@@ -81,7 +37,7 @@ const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
 		return null;
 }
 
-	function Ball({ x, y, z }: Ball) {
+	function BallObj({ x, y, z }: Ball) {
 		return (
 			<mesh position={[x, y, z]}>
 				<sphereGeometry args={[2, 10, 10]} />
@@ -90,29 +46,44 @@ const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
 		);
 	}
 
-	function Paddle({ paddle }: Game) {
+	function PaddleObj({game} : Game) {
 
 		const handleKeyDown = (event: React.KeyboardEvent) => {
 		const keyCode = event.code;
 
 		switch (keyCode) {
 			case 'ArrowLeft':
-				console.log('left')
+				socket.emit("movesInputs", {gameSocket: game.gameSocket, move: keyCode, upDown: 1});
 			break;
 			case 'ArrowRight':
 				console.log('right')
+				socket.emit("movesInputs", {gameSocket: game.gameSocket, move: keyCode, upDown: 1});
 			break;
 			default:
 			break;
 		}
 		};
-		const handleKeyUp = () => {
-			console.log('release');
+		const handleKeyUp = (event: React.KeyboardEvent) => {
+			const keyCode = event.code;
+			
+			switch (keyCode) {
+				case 'ArrowLeft':
+					console.log(keyCode + " : release");
+					socket.emit("movesInputs", {gameSocket: game.gameSocket, move: keyCode, upDown: 2});
+				break;
+				case 'ArrowRight':
+					console.log('release right')
+					socket.emit("movesInputs", {gameSocket: game.gameSocket, move: keyCode, upDown: 2});
+
+				break;
+				default:
+				break;
+		}
 		};
 	
 		useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => handleKeyDown(event);
-		const onKeyUp = () => handleKeyUp();
+		const onKeyUp = (event: KeyboardEvent) => handleKeyUp(event);
 	
 		document.addEventListener('keydown', onKeyDown);
 		document.addEventListener('keyup', onKeyUp);
@@ -125,12 +96,14 @@ const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
 	
 		return (
 			<>
-			{paddle.map((paddle, index) => (
-				<mesh key={index} position={[paddle.x, paddle.y, paddle.z]}>
-				<boxGeometry args={[50, 5, 5]} />
-				<meshStandardMaterial color={index === 0 ? 'red' : 'green'} />
+				<mesh position={[game.paddle[0].x, game.paddle[0].y, game.paddle[0].z]}>
+					<boxGeometry args={[50, 5, 5]} />
+					<meshStandardMaterial color='red' />
 				</mesh>
-			))}
+				<mesh position={[game.paddle[1].x, game.paddle[1].y, game.paddle[1].z]}>
+					<boxGeometry args={[50, 5, 5]} />
+					<meshStandardMaterial color='green' />
+				</mesh>
 			</>
 		);
 	}
@@ -139,7 +112,7 @@ export default function Experience() {
 	const location = useLocation();
 	const currentPage = location.pathname;
 
-	const { gameId } = useParams();
+	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
 	const [game, setGame] = useState<Game | null>();
 	const [userData, setUserData] = useState<Users>();
@@ -158,9 +131,8 @@ export default function Experience() {
 
 	useEffect(() => {
 		try {
-			socket.emit("findGame", {gameId: gameId})
+			socket.emit("findGame", {gameSocket: gameSocket})
 			socket.on("findGame", (game) => {
-				console.log(game)
 				setGame(game);
 			});
 		} catch (error) {
@@ -172,12 +144,9 @@ export default function Experience() {
 		<MainLayout currentPage={currentPage}>
 			{game && 
 			<div className="h-[80vh]">
-				<p>{game.player1.playerProfile.username}</p>
-				<p>{game.player2.playerProfile.username}</p>
-				<p>{game.pScore.join(" : ")}</p>
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
-					{userData && userData.id == game.player1.playerProfile.id && (
+					{userData && userData.id == game.player1.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[0].x, game.camera[0].y, game.camera[0].z]}
@@ -186,7 +155,7 @@ export default function Experience() {
 						near={0.1}
 						far={1000}
 					/>)}
-					{userData && userData.id == game.player2.playerProfile.id && (
+					{userData && userData.id == game.player2.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[1].x, game.camera[1].y, game.camera[1].z]}
@@ -200,9 +169,9 @@ export default function Experience() {
 
 					<ambientLight intensity={0.5} />
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
-					<Ball x={game.ball.x} y={game.ball.y} z={game.ball.z} />
+					<BallObj x={game.ball.x} y={game.ball.y} z={game.ball.z} />
 					<Physics>
-					<Paddle paddle={game.paddle} />
+					<PaddleObj game={game} />
 					</Physics>
 					<mesh position={[0, -20, -146]}>
 						<boxGeometry args={[120, 2, 170]} />

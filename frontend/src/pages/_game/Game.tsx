@@ -47,13 +47,18 @@ const Game = () => {
 
 	const connectServ = () =>	{
 		socket.emit("start");
+		setSelectedIndexes([-1]);
 	}
+
+	useEffect(() => {
+		socket.emit("notInGame");
+	},[]);
 
 	useEffect(() => {
 		socket.on("CreatedGame", (game) => {
 			try {
 			console.log("New Game:", game);
-			navigate(`/gamestart/${game.gameId}`)
+			navigate(`/gamestart/${game.gameSocket}`)
 
 		} catch (error) {
 			console.error("Error", error);
