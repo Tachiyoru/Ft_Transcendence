@@ -221,7 +221,6 @@ export class chatService {
         (friendChannel) => friendChannel.chanId === channel.chanId
       )
     );
-
     return channelsInCommon;
   }
 
@@ -318,7 +317,7 @@ export class chatService {
     if (!chan) {
       throw new Error("Could not find channel");
     }
-    if (req.user === chan.owner || chan.op.includes(req.user.username)) {
+    if (req.user.username === chan.owner.username || chan.op.includes(req.user.username)) {
       const updatedChannel = await this.prisma.channel.update({
         where: { chanId: chanId },
         data: { name: newName },

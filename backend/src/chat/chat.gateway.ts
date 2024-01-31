@@ -109,8 +109,8 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         updatedSettings,
         req
       );
-
       client.emit("edit-channel", updatedChannel);
+      this.allUpdate();
     } catch (error) {
       console.error("Error editing channel:", error.message);
       client.emit("channelError", {
@@ -208,15 +208,15 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const chan = await this.chatService.createChannel(settings, req);
       client.emit("channelCreated", chan);
       //const chanlist = await this.prisma.channel.findMany({
-		//include: { members: true, owner: true, banned: true },
-	 //});
-	//   chanlist.forEach(chan => {
-	// 	console.log("chan", chan.name, "members : ", chan.members);
-		
-	//   });
-	//   console.log("chanlist", chanlist);
-    //   client.emit("my-channel-list", chanlist);
-	this.allUpdate();
+      //include: { members: true, owner: true, banned: true },
+      //});
+      //   chanlist.forEach(chan => {
+      // 	console.log("chan", chan.name, "members : ", chan.members);
+
+      //   });
+      //   console.log("chanlist", chanlist);
+      //   client.emit("my-channel-list", chanlist);
+      this.allUpdate();
       client.join(chan.name);
     } catch (error) {
       client.emit("channelCreateError", {
@@ -329,14 +329,15 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Request() req: any
   ) {
     try {
+      console.log("renameChan launched");
       const result = await this.chatService.renameChan(
         data.chanId,
         data.newName,
         req
       );
-      client.emit("channelRenamed", result);
+      this.allUpdate();
     } catch (error) {
-      client.emit("renameChanError", { message: error.message });
+      //   client.emit("renameChanError", { message: error.message });
     }
   }
 
@@ -351,18 +352,17 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const chanlist = await this.chatService.getChannelsByUserId(
       client.handshake.auth.id
     );
-	console.log("la",  client.handshake.auth.id, client.handshake.auth.username );
     client.emit("my-channel-list", chanlist);
   }
 
   @SubscribeMessage("all-update")
-  async allUpdate():  Promise<void>{
-	const chanlist = await this.prisma.channel.findMany();
-	  console.log("chanliiiiiiiiiiiiiiist", this.connectedUsers);
-	  const emitPromises = this.connectedUsers.map(async (element) => {
-		await this.server.to(element).emit("update-call");
-	  });
-	  await Promise.all(emitPromises);
+  async allUpdate(): Promise<void> {
+    const chanlist = await this.prisma.channel.findMany();
+    console.log("chanliiiiiiiiiiiiiiist", this.connectedUsers);
+    const emitPromises = this.connectedUsers.map(async (element) => {
+      await this.server.to(element).emit("update-call");
+    });
+    await Promise.all(emitPromises);
   }
 
   @SubscribeMessage("find-channels-public-protected")
@@ -417,10 +417,10 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const result = await this.chatService.leaveChannel(data.chanId, req);
       client.emit("channelLeft", result);
       if (result.chan) {
-		this.server.emit("channel", result.chan, result.chan.messages);
-	}
-	this.server.emit("channel", null, null)
-	await this.server.to(result.room).emit("update-call");
+        this.server.emit("channel", result.chan, result.chan.messages);
+      }
+      this.server.emit("channel", null, null);
+      await this.server.to(result.room).emit("update-call");
     } catch (error) {
       client.emit("chanLeftError", { message: error.message });
     }
@@ -601,7 +601,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         req
       );
       this.server.to(message.channelName).emit("recapMessages", message);
-	  this.allUpdate();
+      this.allUpdate();
     } catch (error) {
       client.emit("createMsgError", { message: error.message });
     }
@@ -650,13 +650,10 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage("read")
-  async read(
-    @MessageBody() chanId: number,
-    @ConnectedSocket() client: Socket
-  ) {
-	const username = client.handshake.auth.username;
-	await this.chatService.read(chanId, username);
-	this.allUpdate();
+  async read(@MessageBody() chanId: number, @ConnectedSocket() client: Socket) {
+    const username = client.handshake.auth.username;
+    await this.chatService.read(chanId, username);
+    this.allUpdate();
   }
 
   @SubscribeMessage("un-read")
@@ -664,7 +661,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() chanName: string,
     @ConnectedSocket() client: Socket
   ) {
-	console.log("un-read");
+    console.log("un-read");
     const username = client.handshake.auth.username;
     if (!(await this.chatService.isUnRead(chanName, username))) return false;
     else return true;

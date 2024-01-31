@@ -24,21 +24,50 @@ export class UserService {
         partyWon: 42,
         partyLost: 0,
         history: [
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaaaaaaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-			"3-0 Manshaa Victory +10exp",
-		],
+          "3-0 Creme Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+          "3-0 Manshaa Victory +10exp",
+        ],
       },
     });
     await this.createInitialUser({
@@ -53,7 +82,51 @@ export class UserService {
         partyPlayed: 42,
         partyWon: 1,
         partyLost: 41,
-        history: [],
+        history: [
+			"3-0 Creme Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Tachi Defeat +5exp",
+		],
       },
     });
     await this.createInitialUser({
@@ -68,7 +141,10 @@ export class UserService {
         partyPlayed: 1,
         partyWon: 0,
         partyLost: 1,
-        history: [],
+        history: [
+			"3-0 Tachi Defeat +5exp",
+			"3-0 Manshaa Victory +10exp",
+		],
       },
     });
   }
@@ -88,6 +164,7 @@ export class UserService {
           hash: userinput.hash ?? "",
           tittle: userinput.tittle ?? "",
           role: userinput.role ?? "USER",
+          status: StatusUser.OFFLINE,
           stats: {
             create: {
               lvl: userinput.stats.lvl ?? 1,
@@ -168,9 +245,14 @@ export class UserService {
     });
     if (file) {
       if (user) {
-        if (user.avatar && user.avatar.startsWith("/upload") && 
-			user.avatar != "/upload/Tachi.png" && user.avatar != "/upload/Manu.png" && user.avatar != "/upload/Clem.png") {
-			await unlink(user.avatar);
+        if (
+          user.avatar &&
+          user.avatar.startsWith("/upload") &&
+          user.avatar != "/upload/Tachi.png" &&
+          user.avatar != "/upload/Manu.png" &&
+          user.avatar != "/upload/Clem.png"
+        ) {
+          await unlink(user.avatar);
         }
         await this.prisma.user.update({
           where: {
@@ -193,7 +275,7 @@ export class UserService {
     if (user) {
       if (dto.password) {
         const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
-        console.log(pwdMatches)
+        console.log(pwdMatches);
         if (!pwdMatches) {
           throw new BadRequestException("Invalid password");
         }
@@ -203,7 +285,7 @@ export class UserService {
       }
     }
     const { password, username: newusername } = dto;
-	console.log(userId);
+    console.log(userId);
     const user2 = await this.prisma.user.update({
       where: {
         id: userId,
@@ -217,17 +299,17 @@ export class UserService {
   }
 
   async getHisto(userId: number) {
-	const id: number = userId;
-	const user = await this.prisma.user.findUnique({
-		include: {
-			stats: true,
-		},
-		where: {
-			id: id,
-		},
-	});
-	if  (!user) return;
-	return (user.stats?.history);
+    const id: number = userId;
+    const user = await this.prisma.user.findUnique({
+      include: {
+        stats: true,
+      },
+      where: {
+        id: id,
+      },
+    });
+    if (!user) return;
+    return user.stats?.history;
   }
 
   async getRankingGlobal() {
@@ -258,7 +340,7 @@ export class UserService {
       orderBy: {
         stats: { lvl: "desc" },
       },
-    });	
+    });
     return rank;
   }
 
