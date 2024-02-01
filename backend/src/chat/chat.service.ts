@@ -824,20 +824,15 @@ export class chatService {
     const chan = await this.prisma.channel.findUnique({
       where: { chanId: chanId },
     });
-	console.log(username,"avant", chan?.read);
     const memberslist = chan?.read.filter((user) => user !== username);
     if (memberslist) {
-      const memberArray = memberslist.map((user) =>
-        user !== null ? username : ""
-      );
       await this.prisma.channel.update({
         where: { chanId: chanId },
         data: {
-          read: { set: memberArray },
+          read: { set: memberslist },
         },
       });
 	  console.log(username, " a lu la conv ", chan?.name);
-	  console.log("apres",memberArray);
     }
   }
 

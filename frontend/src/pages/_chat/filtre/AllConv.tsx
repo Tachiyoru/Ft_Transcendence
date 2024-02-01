@@ -83,20 +83,18 @@ const AllConv = () => {
     fetchData();
   }, []);
 
-  socket.on("update-call", channelList => {
-	socket.emit("find-my-channels");
+  socket.on("update-call", (channelList) => {
+    socket.emit("find-my-channels");
 
-	socket.off("update-call");
-});
-
+    socket.off("update-call");
+  });
 
   useEffect(() => {
-	socket.emit("find-my-channels");
+    socket.emit("find-my-channels");
     socket.on("my-channel-list", (channelList) => {
       setAllChannel(channelList);
     });
-	console.log("allChannel",);
-	// socket.emit("all-update");
+    console.log("allChannel");
 
     return () => {
       socket.off("my-channel-list");
@@ -109,7 +107,7 @@ const AllConv = () => {
     if (id.selectedChannelId !== null)
       dispatch(setPrevChannelId(id.selectedChannelId));
     dispatch(setSelectedChannelId(channelId));
-	socket.emit("read", channelId);
+    socket.emit("read", channelId);
     navigate(`/chat/${channelId}`);
   };
 
@@ -138,139 +136,146 @@ const AllConv = () => {
   };
 
   const checkRead = (channel: Channel) => {
-	if (channel.messages.length > 0) {
-	  const lastMessage = channel.messages[channel.messages.length - 1];
-	  if (lastMessage.authorId !== userData.username) {
-		console.log(channel.name, " : read =",channel.read);
-		if (channel.read.includes(userData.username)) {
-		  return (
-			<div className="notification-badge">
-			<div
-			  style={{
-				backgroundColor: "red",
-				width: "8px",
-				height: "8px",
-				borderRadius: "50%",
-				position: "absolute",
-				top: "1px",
-				left: "4px",
-			  }}
-			></div>
-		  </div>
-		  );
-		}
-	  }
-	}
-  }
+    if (channel.messages.length > 0) {
+      const lastMessage = channel.messages[channel.messages.length - 1];
+      if (lastMessage.authorId !== userData.username) {
+        console.log(channel.name, " : read =", channel.read);
+        if (channel.read.includes(userData.username)) {
+          return (
+            <div className="notification-badge">
+              <div
+                style={{
+                  backgroundColor: "red",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: "1px",
+                  left: "4px",
+                }}
+              ></div>
+            </div>
+          );
+        }
+      }
+    }
+  };
 
   return (
     <div className="pl-1 md:pl-5">
-	{allChannel && allChannel.map((channel) => ( channel.members.filter((member) => member.username === userData.username).length > 0 )) &&
-	<>
-      {allChannel.map((channel, index) => (
-        <div
-          key={index}
-          className={` ${
-            channel.chanId === id.selectedChannelId
-              ? "bg-filter rounded-l-md pb-1"
-              : "pb-1"
-          }`}
-          onClick={() => handleChannelClick(channel.chanId)}
-          style={{ cursor: "pointer" }}
-        >
-          <div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
-            {channel.modes === "CHAT" ? (
-              <div className="relative mt-2 h-full rounded-full grid justify-items-center items-center md:mr-4">
-                
-				{channel.members.filter(
-                  (member) => member.username !== userData.username
-                ) &&
-                channel.members.filter(
-                  (member) => member.username !== userData.username
-                )[0].avatar ? (
-                  <div>
-					{checkRead(channel)}
-                    <img
-                      src={
+      {allChannel &&
+        allChannel.map(
+          (channel) =>
+            channel.members.filter(
+              (member) => member.username === userData.username
+            ).length > 0
+        ) && (
+          <>
+            {allChannel.map((channel, index) => (
+              <div
+                key={index}
+                className={` ${
+                  channel.chanId === id.selectedChannelId
+                    ? "bg-filter rounded-l-md pb-1"
+                    : "pb-1"
+                }`}
+                onClick={() => handleChannelClick(channel.chanId)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="flex flex-row h-12 mb-2.5 pl-1 pr-2 md:pl-0.5 md:pr-0 md:mx-2 ">
+                  {channel.modes === "CHAT" ? (
+                    <div className="relative mt-2 h-full rounded-full grid justify-items-center items-center md:mr-4">
+                      {channel.members.filter(
+                        (member) => member.username !== userData.username
+                      ) &&
+                      channel.members.filter(
+                        (member) => member.username !== userData.username
+                      )[0].avatar ? (
+                        <div>
+                          {checkRead(channel)}
+                          <img
+                            src={
+                              channel.members.filter(
+                                (member) =>
+                                  member.username !== userData.username
+                              )[0].avatar
+                            }
+                            className="h-[48px] w-[48px] object-cover rounded-full text-lilac"
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          {checkRead(channel)}
+                          <div className="relative w-full h-full md:w-[45px] md:h-[45px] bg-purple rounded-full grid justify-items-center items-center">
+                            <FaUser className="text-lilac" />
+                          </div>
+                        </div>
+                      )}
+                      {channel.members.filter(
+                        (member) => member.username !== userData.username
+                      ) &&
+                      channel.members.filter(
+                        (member) => member.username !== userData.username
+                      )[0].status === "ONLINE" ? (
+                        <div className="absolute bg-acid-green w-3 h-3 rounded-full right-0 bottom-0.5"></div>
+                      ) : channel.members.filter(
+                          (member) => member.username !== userData.username
+                        ) &&
                         channel.members.filter(
                           (member) => member.username !== userData.username
-                        )[0].avatar
-                      }
-                      className="h-[48px] w-[48px] object-cover rounded-full text-lilac"
-                    />
+                        )[0].status === "OFFLINE" ? (
+                        <div className="absolute w-3 h-3 rounded-full right-0 bottom-0.5"></div>
+                      ) : (
+                        <div className="absolute bg-fushia w-3 h-3 rounded-full right-0 bottom-0.5 flex items-center justify-center">
+                          <RiGamepadFill className="text-white w-2 h-2" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative mt-2 h-full rounded-full grid justify-items-center items-center md:mr-4">
+                      <div className="w-[45px] h-[45px] bg-purple rounded-full flex items-center">
+                        {checkRead(channel)}
+                        <FaUserGroup className="text-lilac w-5 h-5 m-auto" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="pt-3 hidden md:block">
+                    <div className="flex flex-row justify-between items-center">
+                      <p className="text-base text-lilac">
+                        {/*CHAN NAME*/}
+                        {channel.modes === "CHAT"
+                          ? channel.members.filter(
+                              (member) => member.username !== userData.username
+                            )[0].username
+                          : channel.name.length > 10
+                          ? `${channel.name.slice(0, 10)}...`
+                          : channel.name}
+                      </p>
+                      {/*CHAN PROPERTY*/}
+                      {channel.modes === "PRIVATE" ? (
+                        <p className="text-xs text-lilac text-opacity-60 ml-4">
+                          Private
+                        </p>
+                      ) : channel.modes === "GROUPCHAT" ? (
+                        <p className="text-xs text-lilac text-opacity-60 ml-4">
+                          Public
+                        </p>
+                      ) : channel.modes === "PROTECTED" ? (
+                        <p className="text-xs text-lilac text-opacity-60 ml-4">
+                          Protected
+                        </p>
+                      ) : null}
+                    </div>
+                    {/*LAST MESSAGE*/}
+                    <div className="flex flex-row justify-between w-[140px]">
+                      {renderLastMessage(channel)}
+                    </div>
                   </div>
-                ) : (
-					<div>
-					{checkRead(channel)}
-                  	<div className="relative w-full h-full md:w-[45px] md:h-[45px] bg-purple rounded-full grid justify-items-center items-center">
-                    <FaUser className="text-lilac" />
-                  </div>
-                  </div>
-                )}
-                {channel.members.filter(
-                  (member) => member.username !== userData.username
-                ) &&
-                channel.members.filter(
-                  (member) => member.username !== userData.username
-                )[0].status === "ONLINE" ? (
-                  <div className="absolute bg-acid-green w-3 h-3 rounded-full right-0 bottom-0.5"></div>
-                ) : channel.members.filter(
-                    (member) => member.username !== userData.username
-                  ) &&
-                  channel.members.filter(
-                    (member) => member.username !== userData.username
-                  )[0].status === "OFFLINE" ? (
-                  <div className="absolute w-3 h-3 rounded-full right-0 bottom-0.5"></div>
-                ) : (
-                  <div className="absolute bg-fushia w-3 h-3 rounded-full right-0 bottom-0.5 flex items-center justify-center">
-                    <RiGamepadFill className="text-white w-2 h-2" />
-                  </div>
-                )}
+                </div>
               </div>
-            ) : (
-				<div className="relative mt-2 h-full rounded-full grid justify-items-center items-center md:mr-4">
-					<div className="w-[45px] h-[45px] bg-purple rounded-full flex items-center">
-						{checkRead(channel)}
-							<FaUserGroup className="text-lilac w-5 h-5 m-auto" />
-					</div>
-				</div>
-            )}
-            <div className="pt-3 hidden md:block">
-              <div className="flex flex-row justify-between items-center">
-                <p className="text-base text-lilac">
-                  {/*CHAN NAME*/}
-                  {channel.modes === "CHAT"
-                    ? channel.members.filter(
-                        (member) => member.username !== userData.username
-                      )[0].username
-                    : channel.name.length > 10
-                    ? `${channel.name.slice(0, 10)}...`
-                    : channel.name}
-                </p>
-                {/*CHAN PROPERTY*/}
-                {channel.modes === "PRIVATE" ? (
-                  <p className="text-xs text-lilac text-opacity-60 ml-4">
-                    Private
-                  </p>
-                ) : channel.modes === "GROUPCHAT" ? (
-                  <p className="text-xs text-lilac text-opacity-60 ml-4">
-                    Public
-                  </p>
-                ) : channel.modes === "PROTECTED" ? (
-                  <p className="text-xs text-lilac text-opacity-60 ml-4">
-                    Protected
-                  </p>
-                ) : null}
-              </div>
-              {/*LAST MESSAGE*/}
-              <div className="flex flex-row justify-between w-[140px]">
-                {renderLastMessage(channel)}
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-	  </>}
+            ))}
+          </>
+        )}
     </div>
   );
 };

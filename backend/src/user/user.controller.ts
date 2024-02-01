@@ -27,6 +27,12 @@ export class UserController {
     return user;
   }
 
+  @Get("mee")
+  getMePlus(@GetUser() user: User) {
+	const update = this.userService.getMePlus(user.id);
+    return update;
+  }
+
   @Get("all")
   getAllUsers(@GetUser() user: User) {
     return this.userService.getAllUsers(user.id);

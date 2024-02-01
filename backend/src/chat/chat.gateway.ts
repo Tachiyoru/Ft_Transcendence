@@ -207,15 +207,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chan = await this.chatService.createChannel(settings, req);
       client.emit("channelCreated", chan);
-      //const chanlist = await this.prisma.channel.findMany({
-      //include: { members: true, owner: true, banned: true },
-      //});
-      //   chanlist.forEach(chan => {
-      // 	console.log("chan", chan.name, "members : ", chan.members);
-
-      //   });
-      //   console.log("chanlist", chanlist);
-      //   client.emit("my-channel-list", chanlist);
       this.allUpdate();
       client.join(chan.name);
     } catch (error) {
@@ -337,7 +328,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       this.allUpdate();
     } catch (error) {
-      //   client.emit("renameChanError", { message: error.message });
+        client.emit("renameChanError", { message: error.message });
     }
   }
 
@@ -361,6 +352,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("chanliiiiiiiiiiiiiiist", this.connectedUsers);
     const emitPromises = this.connectedUsers.map(async (element) => {
       await this.server.to(element).emit("update-call");
+	  await this.server.to(element).emit("actu");
     });
     await Promise.all(emitPromises);
   }

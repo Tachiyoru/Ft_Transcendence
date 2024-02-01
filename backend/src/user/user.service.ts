@@ -180,6 +180,13 @@ export class UserService {
     }
   }
 
+  async getMePlus(userId: number) {
+	return this.prisma.user.findUnique({
+		where: { id: userId },
+		include: { friends: true, stats: true, achievements: true , channel: true},
+	  });
+  }
+
   async getUserById(userId: number) {
     return this.prisma.user.findUnique({
       where: { id: userId },

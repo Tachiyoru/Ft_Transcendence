@@ -20,6 +20,7 @@ interface Channel {
   owner: Owner;
   members: Users[];
   op: string[];
+  read: string[];
   password: string;
   muted: number[];
   banned: Users[];
@@ -142,20 +143,26 @@ const ContentConv = () => {
         prev: prevChannelId,
       });
 
+	  let chan = channel;
+
       const handleChannelAndMessages = (
         channelInfo: Channel,
         messageList: Message[]
       ) => {
         setChannel(channelInfo);
         console.log("channelInfo = ", channelInfo);
+		chan = channelInfo;
         setMessageList(messageList);
-      };
-      socket.on("channel", handleChannelAndMessages);
-      socket.on("recapMessages", (newMessage: Message) => {
-        setMessageList((prevMessages) => [...prevMessages, newMessage]);
-        console.log("newMessage = ", newMessage);
-        if (newMessage.channelName === channel?.name) {
-          socket.emit("read", channel.chanId);
+	};
+	socket.on("channel", handleChannelAndMessages);
+	socket.on("recapMessages", (newMessage: Message) => {
+		setMessageList((prevMessages) => [...prevMessages, newMessage]);
+        console.log("newMessage = ", newMessage.channelName, chan);
+        console.log("dois suppr la pastille");
+		console.log("channelInfo2 = ", chan);
+        if (newMessage.channelName === chan?.name && newMessage.authorId !== userData.username) {
+			console.log("pas de pastille", chan.name);
+          socket.emit("read", chan.chanId);
         }
       });
       socket.on("typing", (username) => {
