@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userData, userStats }) => {
         </div>
         <div className="flex flex-row justify-between mt-2 text-sm text-lilac">
           <span>Level {userStats.lvl}</span>
-          <span>{userStats.exp}/400</span>
+          <span>{userStats.exp}/100</span>
         </div>
       </div>
 

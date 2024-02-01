@@ -7,7 +7,6 @@ import
 	NotificationType,
 	NotificationContentFunctions,
 } from "./content-notification";
-import { NotificationGateway } from "./notification.gateway";
 
 @Injectable()
 export class NotificationService
