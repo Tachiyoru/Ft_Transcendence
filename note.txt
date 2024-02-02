@@ -1,1 +1,2 @@
 check tout les useEffect pour trouver les boucles infinies
+notif et previsu message de mec bloque

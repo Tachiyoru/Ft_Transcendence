@@ -1,20 +1,21 @@
-import { useState, ChangeEvent, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, ChangeEvent, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AiOutlineLock,
   AiOutlineEye,
   AiOutlineEyeInvisible,
   AiOutlineCheck,
-} from 'react-icons/ai';
-import { useForm } from 'react-hook-form';
-import axios from '../../../axios/api';
-import UserNameField from '../fields/UserNameField';
-import EmailField from '../fields/EmailField';
-import SocialIcons from '../fields/SocialIcons';
+} from "react-icons/ai";
+import { set, useForm } from "react-hook-form";
+import axios from "../../../axios/api";
+import UserNameField from "../fields/UserNameField";
+import EmailField from "../fields/EmailField";
+import SocialIcons from "../fields/SocialIcons";
 
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../../../services/UserSlice';
-import { WebSocketContext } from '../../../socket/socket';
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../../services/UserSlice";
+import { WebSocketContext } from "../../../socket/socket";
+import { error } from "console";
 
 interface IdataRegister {
   username: string;
@@ -27,9 +28,9 @@ const SignupForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [resStatus, setResStatus] = useState('');
+  const [resStatus, setResStatus] = useState("");
 
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState(false);
 
   const [passwordIsVisible, setPasswordIsVisible] = useState(false);
@@ -37,6 +38,7 @@ const SignupForm = () => {
   const [confirmPasswordHasContent, setConfirmPasswordHasContent] =
     useState(false);
   const [showUsernameErrors, setShowUsernameErrors] = useState(false);
+  const [showPwdErrors, setShowPwdErrors] = useState(false);
   const passwordHasLowercaseLetter = /[a-z]/.test(password);
   const passwordHasUppercaseLetter = /[A-Z]/.test(password);
   const passwordHasSpecialCharacter =
@@ -47,81 +49,99 @@ const SignupForm = () => {
   const {
     register,
     handleSubmit,
+	setError,
     formState: { errors, isValid },
   } = useForm<IdataRegister>();
-  
-  const  SubmitHandler = async (data: IdataRegister) => {
-	if (data.password !== data.confirmPassword) {
-		setResStatus('Passwords do not match');
-		return;
-	  }
-      await axios
-      .post('/auth/signup', data)
+
+  const SubmitHandler = async (data: IdataRegister) => {
+    if (data.password !== data.confirmPassword) {
+      setResStatus("Passwords do not match");
+      return;
+    }
+	setShowUsernameErrors(false);
+	console.log("efface erreur")
+    await axios
+      .post("/auth/signup", data)
       .then((response) => {
-        if (response.status === 201) {
-          setResStatus('Successful Registration!');
+          setResStatus("Successful Registration!");
           console.log(response.data);
-          dispatch(loginSuccess(response.data))
-          navigate('/');
-		  window.location.reload();
+          dispatch(loginSuccess(response.data));
+          navigate("/");
+          window.location.reload();
+	})
+	.catch(function (error) {
+		if (error.response.status === 403){
+			setShowUsernameErrors(true);
+			console.log("existe deja");
+			setError("username", {
+				type: "manual",
+				message: "Name or Email already exist"
+			  });
+		} else if (error.response.status === 400){
+			setError("username", {
+				type: "manual",
+				message: error.response.data.message
+			  });
+			setShowUsernameErrors(true);
         } else {
-          setResStatus('Error');
-        }
-      })
-      .catch(function (error) {
-        setResStatus('Error');
-        console.log(error.response.data.message);
+        	setResStatus("Error");
+		}
       });
   };
 
+  let confirmPasswordValue = "";
+
+  const [isPasswordModified, setPasswordModified] = useState(false);
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.currentTarget.value;
     setPassword(newPassword);
     setPasswordHasContent(newPassword.length > 0);
-    setShowUsernameErrors(true);
+    setShowPwdErrors(true);
+    if (confirmPasswordValue.length !== password.length) {
+      setPasswordModified(false);
+      handleConfirmPassword(e);
+    }
   };
 
-  const [isPasswordModified, setPasswordModified] = useState(false);
   const handleConfirmPassword = (e: ChangeEvent<HTMLInputElement>) => {
-    const confirmPasswordValue = e.currentTarget.value;
+    confirmPasswordValue = e.currentTarget.value;
     setConfirmPassword(confirmPasswordValue === password);
     setConfirmPasswordHasContent(confirmPasswordValue.length > 0);
-	console.log(confirmPasswordValue.length);
-	console.log(isPasswordModified);
-	if (confirmPasswordValue.length === password.length )
-		setPasswordModified(true);
+    if (confirmPasswordValue.length === password.length)
+      setPasswordModified(true);
   };
 
-
   const handle42Click = async () => {
-    try{
-      const response = window.location.href = "http://paul-f4ar2s4:5001/auth/42/callback";
-      if (response)
-      {
-        dispatch(loginSuccess(response))
+    try {
+      const response = (window.location.href =
+        "http://paul-f4ar2s4:5001/auth/42/callback");
+      if (response) {
+        dispatch(loginSuccess(response));
       }
     } catch {
-      setResStatus('Error');
+      setResStatus("Error");
     }
   };
 
   const handleGitClick = async () => {
-    try{
-      const response = window.location.href = "http://paul-f4ar2s4:5001/auth/github/callback";
-      if (response)
-      {
-        dispatch(loginSuccess(response))
+    try {
+      const response = (window.location.href =
+        "http://paul-f4ar2s4:5001/auth/github/callback");
+      if (response) {
+        dispatch(loginSuccess(response));
       }
     } catch {
-      setResStatus('Error');
+      setResStatus("Error");
     }
   };
 
   return (
-    <div className='bg-violet-black-nav min-h-screen flex justify-center items-center'>
+    <div className="bg-violet-black-nav min-h-screen flex justify-center items-center">
       <section className="w-full max-w-sm border-container">
         <div className="mx-auto px-16 py-10">
-          <h1 className="text-xl font-audiowide font-outline-2 text-white text-center mb-8">SIGN UP</h1>
+          <h1 className="text-xl font-audiowide font-outline-2 text-white text-center mb-8">
+            SIGN UP
+          </h1>
           <form onSubmit={handleSubmit(SubmitHandler)}>
             {/*Form name*/}
             <UserNameField
@@ -146,16 +166,16 @@ const SignupForm = () => {
               <div className="flex flex-row items-center border-b border-lilac">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
-                  type={passwordIsVisible ? 'text' : 'password'}
+                  type={passwordIsVisible ? "text" : "password"}
                   id="password"
-                  {...register('password', {
+                  {...register("password", {
                     required: {
                       value: true,
-                      message: 'Password is required',
+                      message: "Password is required",
                     },
                     minLength: {
                       value: 6,
-                      message: 'Password length must be at least 6 characters',
+                      message: "Password length must be at least 6 characters",
                     },
                   })}
                   placeholder="Enter Password"
@@ -163,10 +183,10 @@ const SignupForm = () => {
                   onChange={handlePasswordChange}
                 />
                 <button
-				  type="button"
+                  type="button"
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
-                    setShowUsernameErrors(false);
+                    setShowPwdErrors(false);
                   }}
                 >
                   {passwordIsVisible ? (
@@ -182,7 +202,7 @@ const SignupForm = () => {
                   <li
                     className="flex align-items text-xs mt-4"
                     style={{
-                      color: passwordHasLowercaseLetter ? '#D8F828' : '#FF4501',
+                      color: passwordHasLowercaseLetter ? "#D8F828" : "#FF4501",
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -191,7 +211,7 @@ const SignupForm = () => {
                   <li
                     className="flex align-items text-xs"
                     style={{
-                      color: passwordHasUppercaseLetter ? '#D8F828' : '#FF4501',
+                      color: passwordHasUppercaseLetter ? "#D8F828" : "#FF4501",
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -202,8 +222,8 @@ const SignupForm = () => {
                     style={{
                       color:
                         passwordHasSpecialCharacter || passwordHasNumber
-                          ? '#D8F828'
-                          : '#FF4501',
+                          ? "#D8F828"
+                          : "#FF4501",
                     }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
@@ -211,7 +231,9 @@ const SignupForm = () => {
                   </li>
                   <li
                     className="flex align-items text-xs"
-                    style={{ color: passwordHasValidLength ? '#D8F828' : '#FF4501' }}
+                    style={{
+                      color: passwordHasValidLength ? "#D8F828" : "#FF4501",
+                    }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
                     Minimum 6 characters
@@ -219,7 +241,7 @@ const SignupForm = () => {
                 </ul>
               )}
 
-              {showUsernameErrors && errors.password?.message && (
+              {showPwdErrors && errors.password?.message && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.password?.message}
                 </p>
@@ -230,12 +252,12 @@ const SignupForm = () => {
               <div className="flex flex-row items-center border-lilac border-b">
                 <AiOutlineLock className="w-4 h-4 text-lilac" />
                 <input
-                  type={passwordIsVisible ? 'text' : 'password'}
+                  type={passwordIsVisible ? "text" : "password"}
                   id="confirmPassword"
-                  {...register('confirmPassword', {
+                  {...register("confirmPassword", {
                     required: {
                       value: true,
-                      message: 'Confirm Password is required',
+                      message: "Confirm Password is required",
                     },
                   })}
                   placeholder="Confirm Password"
@@ -243,7 +265,7 @@ const SignupForm = () => {
                   onChange={handleConfirmPassword}
                 />
                 <button
-				  type="button"
+                  type="button"
                   onClick={() => {
                     setPasswordIsVisible((prevState) => !prevState);
                     setShowUsernameErrors(false);
@@ -260,7 +282,7 @@ const SignupForm = () => {
                 <ul>
                   <li
                     className="flex align-items text-xs mt-4"
-                    style={{ color: confirmPassword ? '#D8F828' : 'red' }}
+                    style={{ color: confirmPassword ? "#D8F828" : "red" }}
                   >
                     <AiOutlineCheck className="mt-0.5 mr-2" />
                     Confirm password
@@ -274,8 +296,8 @@ const SignupForm = () => {
                 </p>
               )}
             </div>
-            
-            <div className='flex flex-col items-center mb-6'>
+
+            <div className="flex flex-col items-center mb-6">
               <button
                 type="submit"
                 disabled={!isPasswordModified}
@@ -284,7 +306,6 @@ const SignupForm = () => {
                 Create an account
               </button>
             </div>
-
 
             <div className="flex items-center mb-2 ">
               <div className="border-t flex-grow border-lilac"></div>
@@ -300,12 +321,11 @@ const SignupForm = () => {
           </form>
 
           <p className="text-sm text-center text-lilac mb-8">
-            You have an account?{' '}
+            You already have an account?{" "}
             <Link to="/sign-in" className="text-lilac underline">
               Login now
             </Link>
           </p>
-
         </div>
       </section>
     </div>
