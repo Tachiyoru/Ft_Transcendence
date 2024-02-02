@@ -32,6 +32,7 @@ const SigninForm = () => {
   const {
     register,
     handleSubmit,
+	setError,
     formState: { errors, isValid },
   } = useForm<IdataLogin>();
 
@@ -41,14 +42,10 @@ const SigninForm = () => {
       .post("auth/signin", data)
       .then((response) => {
         console.log(response.status);
-        if (response.status === 201) {
           setResStatus("Successful Registration!");
           dispatch(loginSuccess(response.data));
           navigate("/");
 		  window.location.reload();
-        } else {
-          setResStatus("Error");
-        }
       })
       .catch(function (error) {
         setResStatus("Error");

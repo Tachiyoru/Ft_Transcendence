@@ -58,8 +58,6 @@ const SignupForm = () => {
       setResStatus("Passwords do not match");
       return;
     }
-	setShowUsernameErrors(false);
-	console.log("efface erreur")
     await axios
       .post("/auth/signup", data)
       .then((response) => {
