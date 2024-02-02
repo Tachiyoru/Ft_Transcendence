@@ -9,6 +9,8 @@ import Winner from "../../components/popin/Victory";
 import Defeat from "../../components/popin/Defeat";
 import Draw from "../../components/popin/Draw";
 import { WebSocketContext } from "../../socket/socket";
+import axiosInstance from "../../axios/api";
+
 
 const Game = () => {
 	const location = useLocation();
@@ -19,6 +21,7 @@ const Game = () => {
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
+	const [friendsList, setFriendsList] = useState <{ username: string; }[]>([]);
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -28,7 +31,20 @@ const Game = () => {
         } else {
             setShowBackIndex(index);
         }
+		};
+	
+	useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get<{ username: string }[]>("/users/all");
+        setFriendsList(response.data);
+				console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching user list:", error);
+      }
     };
+    fetchUserData();
+  }, []);
 
 	const setClickedIndex = (index: number) => {
 		let updatedIndexes = [...selectedIndexes];
