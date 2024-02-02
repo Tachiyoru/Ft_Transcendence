@@ -8,7 +8,11 @@ import { Game } from './game.class';
 import { Server } from 'socket.io';
 import {
   WaitingGameSession,
-  Gamer
+  Gamer,
+  Ball,
+  Paddle,
+  Camera,
+  Player
 } from './interfaces';
 
 export interface GameSessionQResponse {
@@ -33,7 +37,6 @@ export class GameService {
         isHost,
       };
     }
-
     
     async createGame(gameID: number, player1User: User, player1Socket: string, player2User: User, player2Socket: string)  {
       //console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket)
@@ -61,7 +64,7 @@ export class GameService {
           // remove the waiting game session
           this.waitingRoomGame = undefined;
           const gameDB = await this.prisma.game.create({data: {}});
-          const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId);
+          const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId); 
           return gameSession;
         }
       } else {
@@ -190,6 +193,14 @@ export class GameService {
 
     }
 
+    async LaunchBall()
+    {
+      const game = this.games.find((game) => (game.player1.playerProfile?.id || game.player2.playerProfile?.id) === req.user.id);
+
+      game.initBall();
+
+    }
+
 
 
 //     async checkGameUsers(socket: Socket)  {
@@ -265,36 +276,31 @@ export class GameService {
 //       }
 //     }
 
-    async movesInputs(gameSocket: string, playerSocket: string, input: string, upDown: number)  {
+    async movesInputs(gameSocket: string, playerSocket: string, input: string, upDown: boolean, server: Server)  {
       const game = this.games.find((game) => game.gameSocket === gameSocket);
-  
       if (game) {
         if (game.player1.playerSocket === playerSocket)  {
           switch (input)  {
             case "ArrowLeft":
-              game.moves(input, playerSocket, upDown);
-              console.log('1', game.paddle[0]);
+              if (upDown)
+                game.move(input, playerSocket, server);
               return (game)
-            break;
             case "ArrowRight":
-                game.moves(input, playerSocket, upDown);
-                console.log('2', game.paddle[0]);
-                return (game)
-            break;
+              if (upDown)
+                game.move(input, playerSocket, server);
+              return (game)
           }
         }
         else if (game.player2.playerSocket === playerSocket) {
           switch (input)  {
             case "ArrowLeft":
-              game.moves(input, playerSocket, upDown);
-              console.log('3', game.paddle[0]);
+              if (upDown)
+                game.move(input, playerSocket, server);
               return (game);
-            break;
             case "ArrowRight":
-                game.moves(input, playerSocket, upDown);
-                console.log('4', game.paddle[0]);
-                return (game);
-            break;
+              if (upDown)
+                game.move(input, playerSocket, server);
+              return (game);
           }
         }
         return(game)

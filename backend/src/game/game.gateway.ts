@@ -58,6 +58,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @Request() req: any
   ) {
     const game = await this.gameService.prepareQueListGame(client, req);
+    console.log(game)
     if (game)
     {
       this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
@@ -121,14 +122,27 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
         }
 
+      @SubscribeMessage("notInGame")
+      async LaunchBall(
+        @MessageBody('gameSocket') gameSocket: string,
+        )
+        {
+          const game = await this.gameService.LaunchBall();
+          if (game)
+          {
+            this.server.to(game.player1.playerSocket).emit();
+            this.server.to(game.player2.playerSocket).emit();
+          }
+        }
+
       @SubscribeMessage("movesInputs")
       async movesInputs(
       @ConnectedSocket() client: Socket,
       @MessageBody('gameSocket') gameSocket : string,
       @MessageBody('move') move : string,
-      @MessageBody('upDown') upDown : number
+      @MessageBody('upDown') upDown : boolean
       ) {
-        const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown);
+        const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown, this.server);
         if (game)
         {
           this.server.to(game.player1.playerSocket).emit("findGame", game);

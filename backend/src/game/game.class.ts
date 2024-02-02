@@ -1,33 +1,9 @@
 import { User } from "@prisma/client";
 import { PrismaService } from '../prisma/prisma.service';
-
-interface Player    {
-    playerSocket: string;
-    playerProfile: User | null;
-}
-
-
-export interface Paddle    {
-    x: number;
-    y: number;
-    z: number;
-}
-
-
-export interface Ball  {
-    x: number;
-    y: number;
-    z: number;
-}
-
-
-export interface Camera    {
-    x: number;
-    y: number;
-    z: number;
-    fov: number;
-    angle: number;
-}
+import { Paddle, Camera, Ball, Player, Velocity } from "./interfaces";
+import { Server } from 'socket.io';
+import { WebSocketServer } from '@nestjs/websockets';
+import { delay } from "rxjs";
 
 export class Game  {
     gameId: number;
@@ -41,7 +17,12 @@ export class Game  {
     connectedPlayers: number;
     victory: number;
     status: number;
-    multiplier: number;
+    multiplier: number = 1;
+    releasedp1: number = 0;
+    releasedp2: number = 0;
+    velocity: Velocity = {x: 0, z: 0};
+    stopped: boolean = false;
+
 
     constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
@@ -117,6 +98,15 @@ export class Game  {
         this.ball.z = 0;
     }
 
+    startBallMovement()	{
+		var direction = Math.random() > 0.5 ? -1 : 1;
+		this.velocity = {
+			x : 0,
+			z : direction * 20
+		};
+		this.stopped = false;
+	}
+    
     scored(playerScored: string, prisma: PrismaService)    {
         if (playerScored === this.player1.playerSocket)
             this.pScore[0]++;
@@ -138,29 +128,39 @@ export class Game  {
         }
     }
 
-    moves(input: string, player: string, upDown: number)    {
-        if (player === this.player1.playerSocket && upDown === 1)   {
+    move(input: string, player: string, server: Server) {
+        if (player === this.player1.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
-                    if (((this.paddle[0].x) - (1 * this.multiplier)) >= -35)   {
-                        this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
-                        this.multiplier++;
-                    } else if (((this.paddle[0].x) - 1) > -35)  {
-                        this.multiplier = 1;
-                }
+                    if (this.multiplier < 3)
+                        this.multiplier += 0.3;
+                    this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
                 break;
                 case "ArrowRight":
-                    if (((this.paddle[0].x) + (1 * this.multiplier)) <= 35)    {
-                        this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
-                        this.multiplier++;
-                    } else if (((this.paddle[0].x) + 1) < 35)  {
-                        this.multiplier = 1;
-                    }
-                    console.log(this.paddle[1].x)
+                    if (this.multiplier < 3)
+                        this.multiplier += 0.3;
+                    this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
                 break;
             }
         }
-        else if (player === this.player1.playerSocket && upDown === 2)   {
+        if (player === this.player2.playerSocket)   {
+            switch (input)  {
+                case "ArrowLeft":
+                    if (this.multiplier < 3)
+                        this.multiplier += 0.3;
+                    this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
+                break;
+                case "ArrowRight":
+                    if (this.multiplier < 3)
+                        this.multiplier += 0.3;
+                    this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
+                break;
+            }
+        }
+    }
+
+    stop(input: string, player: string, server: Server) {
+        if (player === this.player1.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
                     this.multiplier = 1;
@@ -170,27 +170,7 @@ export class Game  {
                 break;
             }
         }
-        else if (player === this.player2.playerSocket && upDown === 1)  {
-            switch (input)  {
-                case "ArrowLeft":
-                    if (((this.paddle[1].x) + (1 * this.multiplier)) <= 35)    {
-                        this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
-                        this.multiplier++;
-                    }   else if (((this.paddle[1].x) + 1) < 35)  {
-                        this.multiplier = 1;
-                    }
-                break;
-                case "ArrowRight":
-                    if (((this.paddle[1].x) - (1 * this.multiplier)) >= -35)   {
-                        this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
-                        this.multiplier++;
-                    }   else if (((this.paddle[1].x) - 1) > -35)  {
-                        this.multiplier = 1;   
-                    }
-                break;
-            }
-        }
-        else if (player === this.player2.playerSocket && upDown === 2)  {
+        if (player === this.player2.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
                     this.multiplier = 1;
@@ -201,4 +181,68 @@ export class Game  {
             }
         }
     }
+
+    // moves(input: string, player: string, upDown: number)    {
+    //     if (player === this.player1.playerSocket && upDown === 1)   {
+    //         switch (input)  {
+    //             case "ArrowLeft":
+    //                 if (((this.paddle[0].x) - (1 * this.multiplier)) >= -35)   {
+    //                     this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
+    //                     this.multiplier++;
+    //                 } else if (((this.paddle[0].x) - 1) > -35)  {
+    //                     this.multiplier = 1;
+    //             }
+    //             break;
+    //             case "ArrowRight":
+    //                 if (((this.paddle[0].x) + (1 * this.multiplier)) <= 35)    {
+    //                     this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
+    //                     this.multiplier++;
+    //                 } else if (((this.paddle[0].x) + 1) < 35)  {
+    //                     this.multiplier = 1;
+    //                 }
+    //                 console.log(this.paddle[1].x)
+    //             break;
+    //         }
+    //     }
+    //     else if (player === this.player1.playerSocket && upDown === 2)   {
+    //         switch (input)  {
+    //             case "ArrowLeft":
+    //                 this.multiplier = 1;
+    //             break;
+    //             case "ArrowRight":
+    //                 this.multiplier = 1;
+    //             break;
+    //         }
+    //     }
+    //     else if (player === this.player2.playerSocket && upDown === 1)  {
+    //         switch (input)  {
+    //             case "ArrowLeft":
+    //                 if (((this.paddle[1].x) + (1 * this.multiplier)) <= 35)    {
+    //                     this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
+    //                     this.multiplier++;
+    //                 }   else if (((this.paddle[1].x) + 1) < 35)  {
+    //                     this.multiplier = 1;
+    //                 }
+    //             break;
+    //             case "ArrowRight":
+    //                 if (((this.paddle[1].x) - (1 * this.multiplier)) >= -35)   {
+    //                     this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
+    //                     this.multiplier++;
+    //                 }   else if (((this.paddle[1].x) - 1) > -35)  {
+    //                     this.multiplier = 1;   
+    //                 }
+    //             break;
+    //         }
+    //     }
+    //     else if (player === this.player2.playerSocket && upDown === 2)  {
+    //         switch (input)  {
+    //             case "ArrowLeft":
+    //                 this.multiplier = 1;
+    //             break;
+    //             case "ArrowRight":
+    //                 this.multiplier = 1;
+    //             break;
+    //         }
+    //     }
+    // }
 }

@@ -76,9 +76,9 @@ export class AuthController {
     );
     await this.authService.callForgeTokens(user2, res);
     if (!user2.isTwoFaEnabled)
-      res.redirect('http://paul-f4ar1s4:5173/');
+      res.redirect('http://paul-f4ar7s9:5173/');
     else
-      res.redirect('http://paul-f4ar1s4:5173/sign-in-2fa');
+      res.redirect('http://paul-f4ar7s9:5173/sign-in-2fa');
     return user2;
   }
 
