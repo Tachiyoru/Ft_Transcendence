@@ -1,11 +1,11 @@
-import { FaMagnifyingGlass, FaBell, FaTrophy, FaUserPlus } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaBell, FaTrophy, FaUserPlus, FaXmark, FaCheck } from "react-icons/fa6";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
 import { WebSocketContext } from "../../../socket/socket";
-import { RiMessage3Fill } from "react-icons/ri";
+import { RiGamepadFill, RiMessage3Fill } from "react-icons/ri";
 import { LuBadgeCheck } from "react-icons/lu";
 
 interface NavItemProps {
@@ -114,6 +114,7 @@ const NavHorizontal = () => {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
+	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const [selectedNotificationId, setSelectedNotificationId] = useState<
     number | null
@@ -167,17 +168,18 @@ const socket = useContext(WebSocketContext);
     };
   }, [menuRef]);
 
-  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
-
   useEffect(() => {
       socket.emit("unread-notification");
       socket.on("unread-notification-array", (notification) => {
-        if (notification) setUnreadNotifications(notification.length);
-      });
+				if (notification)
+					setUnreadNotifications(notification.length);
+			});
 	  return () => {
 		  socket.off("unread-notification-array");
 	  }
-  }, [socket]);
+	}, [socket]);
+
+	console.log("useEffect AFTER ", unreadNotifications);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
@@ -209,7 +211,7 @@ const socket = useContext(WebSocketContext);
 		else if (type == 1)
 			return "/friends#tous"
 		else if (type == 2)
-			return "/game"
+			return ""
 		else if (type == 3)
 			return "/"
 		else if (type == 4)
@@ -218,35 +220,25 @@ const socket = useContext(WebSocketContext);
 			return "/chat"
 		else if (type == 6)
 			return "/chat"
-    else return "/";
+		else
+			return "/";
   };
 
+	const markNotificationAsRead = async (notificationId: number) => {
+		console.log("markNotificationAsRead")
+		socket.emit("update-notification-number", { notifId: notificationId });
+	};
+	
   const handleNotificationItemClick = (
-    notificationId: number,
+		notificationId: number,
     notificationType: number
-  ) => {
-    setSelectedNotificationId(notificationId);
-
-    const markNotificationAsRead = async () => {
-      try {
-        const { id: userId } = await getLoggedInUserInfo();
-        await axios.patch(`notification/read/${userId}/${notificationId}`, {
-          read: true,
-        });
-        setUnreadNotifications(unreadNotifications - 1);
-        const updatedNotifications = notifications.map((notification) =>
-          notification.id === notificationId
-            ? { ...notification, read: true }
-            : notification
-        );
-        setNotifications(updatedNotifications);
-
-      } catch (error) {
-        console.error("Error marking notification as read:", error);
-      }
-    };
-
-    markNotificationAsRead();
+		) =>
+		{
+			if (notificationType === 2)
+			return ;
+		setSelectedNotificationId(notificationId);
+    markNotificationAsRead(notificationId);
+		setSelectedSection(null);
   };
 
   const getContent = () => {
@@ -262,9 +254,8 @@ const socket = useContext(WebSocketContext);
             <ul>
               {notifications.map((notification) => (
                 <li
-                  style={{ cursor: "pointer" }}
                   key={notification.id}
-                  className={`flex flex-row text-fushia text-xs py-2 hover:underline ${
+                  className={`flex flex-row text-fushia text-xs py-2 ${
                     notification.read ? "text-opacity-40 text-lilac" : ""
                   }`}
                   onClick={() =>
@@ -278,10 +269,44 @@ const socket = useContext(WebSocketContext);
                     {notification.type === 0 && <FaUserPlus className="mr-2 w-5 h-5"/>}
                     {notification.type === 1 && <FaUserPlus className="mr-2 w-5 h-5"/>}
                     {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-5"/>}
-                    {notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5"/>}
-                    <Link to={getNotificationRedirect(notification.type)}>
-					  <span>{notification.content}</span>
-					</Link>
+										{notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5" />}
+									{notification.type === 2 && <RiGamepadFill className="mr-2 w-7 h-5" />}
+									<div>
+										{notification.type === 2 ? (<span>{notification.content}</span>) : (
+										<Link to={getNotificationRedirect(notification.type)}>
+											<span className="hover:underline">{notification.content}</span>
+									</Link>
+										)}
+											{notification.type === 2 && (
+											<div className="flex flex-row gap-x-6 mt-1">
+												<Link to={'/game'}
+													onClick={() =>
+													{
+														markNotificationAsRead(notification.id);
+														setSelectedSection(null);
+													}}
+												>
+												<div 
+													className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
+													style={{cursor: 'pointer'}}
+													>
+													<FaCheck className="w-[10px] h-[10px] text-acid-green"/>
+													</div>
+													</Link>
+												<div 
+													className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
+													onClick={() =>
+													{
+														markNotificationAsRead(notification.id);
+														setSelectedSection(null);
+													}}
+													style={{cursor: 'pointer'}}
+													>
+													<FaXmark className="w-[10px] h-[10px] text-red-orange"/>
+												</div>
+											</div>
+											)}
+									</div>
                 </li>
               ))}
             </ul>
@@ -321,7 +346,7 @@ const socket = useContext(WebSocketContext);
                     <Link to={`/user/${user.username}`}>
                         <li
                           key={index}
-                          className="px-2 py-1  hover:bg-purple cursor-pointer"
+                          className="px-2 py-1 hover:bg-purple cursor-pointer"
                           onClick={() => handleUserClick()}
                         >
                           {user.username}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaArrowTurnUp, FaUser, FaUserPlus } from "react-icons/fa6";
 import AllFriends from "./AllFriends";
 import Invitations from "./Invitations";
@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { RiTimer2Line } from "react-icons/ri";
+import { WebSocketContext } from "../../../socket/socket";
 
 type FilterType = "tous" | "invitations" | "blocked";
 
@@ -36,7 +37,9 @@ const SetFriends: React.FC = () => {
   >([]);
   const dispatch = useDispatch();
   const listUsersPending = useSelector((state: RootState) => state.friend.listUsersPending);
-  const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
+	const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
+	const socket = useContext(WebSocketContext);
+
 
 
   useEffect(() => {
@@ -159,10 +162,10 @@ const SetFriends: React.FC = () => {
     try {
       await axios.post(
         `/friends-list/friend-request/${selectedUser.id}`
-      );
-      dispatch(setListUsersPending([...listUsersPending, selectedUser]));
+			);
+			dispatch(setListUsersPending([...listUsersPending, selectedUser]));
     } catch (error) {
-      console.error("Error adding friend:", error);
+			console.error("Error adding friend:", error);
     }
   };
 

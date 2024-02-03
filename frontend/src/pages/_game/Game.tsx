@@ -10,7 +10,7 @@ import Defeat from "../../components/popin/Defeat";
 import Draw from "../../components/popin/Draw";
 import { WebSocketContext } from "../../socket/socket";
 import axiosInstance from "../../axios/api";
-
+import UserNameField from "../_auth/fields/UserNameField";
 
 const Game = () => {
 	const location = useLocation();
@@ -21,7 +21,7 @@ const Game = () => {
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
-	const [friendsList, setFriendsList] = useState <{ username: string; }[]>([]);
+	const [friendsList, setFriendsList] = useState<{ username: string; }[]>([]);
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -32,13 +32,12 @@ const Game = () => {
             setShowBackIndex(index);
         }
 		};
-	
+
 	useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axiosInstance.get<{ username: string }[]>("/users/all");
         setFriendsList(response.data);
-				console.log(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
@@ -46,21 +45,28 @@ const Game = () => {
     fetchUserData();
   }, []);
 
-	const setClickedIndex = (index: number) => {
+	const setClickedIndex = (index: number, user: {username: string, id: number}) => {
 		let updatedIndexes = [...selectedIndexes];
-		
+
 		const indexExists = updatedIndexes.indexOf(index);
-		
+		console.log(user.username, user.id);
+		// envoyer une notification à l'utilisateur sélectionné
+		const sendNotification = async () =>
+		{
+			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: "Mansha", type: 2 });
+		}
+		sendNotification();
+
 		if (indexExists === -1) {
 			updatedIndexes.push(index);
 		} else {
 			updatedIndexes = updatedIndexes.filter((i) => i !== index);
 		}
-		
+
 		setSelectedIndexes(updatedIndexes);
 		console.log(selectedIndexes)
 	};
-		
+
 	const connectServ = () =>	{
 		socket.emit("saucisse");
 		console.log(socket.id);
@@ -119,7 +125,7 @@ const Game = () => {
 
 			{/*GAME*/}
 			<div className="mt-12">
-				<div className="flex flex-row space-x-4">
+				<div className="flex flex-row space-x-4 cursor-default">
 					
 					{/*GAME 1*/}
 					<div className={`flex w-full h-96 p-4 rounded-lg grid grid-rows-[2fr,auto] bg-filter bg-opacity-75 ${showBackIndex === 0 ? 'hidden' : ''}`}>
@@ -153,13 +159,13 @@ const Game = () => {
 						<div className="w-full h-2/3 bg-filter my-4">
 							<h3 className='absolute top-0 text-lilac text-xl font-audiowide pl-2'>choose a player</h3>
 							<div className="py-4">
-							{names.map((name, index) => (
+							{friendsList.map((user, index) => (
 									<div key={index}>
 										<div
-											className="flex flex-row justify-content items-center px-2 py-1"
+											className="flex flex-row justify-content items-center px-2 py-1 cursor-pointer"
 											onMouseEnter={() => setHoveredIndex(index)}
 											onMouseLeave={() => setHoveredIndex(null)}
-											onClick={() => setClickedIndex(index)}
+											onClick={() => setClickedIndex(index, user)}
 										>
 											<div className="mr-2">
 											{index === hoveredIndex ? (
@@ -169,7 +175,7 @@ const Game = () => {
 											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
 												<FaUser className="w-[8px] h-[8px] text-lilac" />
 											</div>
-										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex ? 'text-lilac' : 'text-lilac opacity-60'}`}>{name}</p>
+										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex ? 'text-lilac' : 'text-lilac opacity-60'}`}>{user.username}</p>
 										</div>
 									
 								</div>
@@ -183,7 +189,7 @@ const Game = () => {
 									<span className="mx-4 text-sm text-lilac">OR</span>
 									<div className="border-t w-12 border-lilac"></div>
 									</div>
-									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
+									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md cursor-pointer">
 									<div onClick={() => { connectServ(); toggleCard(0); }} className="text-xs text-lilac">Random player</div>
 									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 									</div>
@@ -270,7 +276,7 @@ const Game = () => {
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</button>
 							<div className="border-t border-lilac"></div>
-							<div className="flex flex-row justify-between items-center">
+							<div className="flex flex-row justify-between items-center cursor-pointer">
 								<div className="text-xs text-lilac">Random player</div>
 								<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 							</div>
@@ -290,7 +296,7 @@ const Game = () => {
 							{names.map((name, index) => (
 									<div key={index}>
 										<div
-											className="flex flex-row justify-content items-center px-2 py-1"
+											className="flex flex-row justify-content items-center px-2 py-1 cursor-pointer"
 											onMouseEnter={() => setHoveredIndex(index)}
 											onMouseLeave={() => setHoveredIndex(null)}
 											onClick={() => setClickedIndex(index)}
@@ -317,7 +323,7 @@ const Game = () => {
 									<span className="mx-4 text-sm text-lilac">OR</span>
 									<div className="border-t w-12 border-lilac"></div>
 									</div>
-									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md">
+									<div className="flex flex-row justify-between items-center bg-purple p-2 mx-4 rounded-md cursor-pointer">
 									<div className="text-xs text-lilac">Random player</div>
 									<IoIosArrowForward className="w-2 h-2 text-lilac"/>
 									</div>

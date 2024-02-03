@@ -35,6 +35,7 @@ export class NotificationController
 		return this.notificationService.getAllNotifications();
 	}
 
+	
 	@Post("add/:id")
 	async addNotificationByUserId(
 		@Param("id", ParseIntPipe) userId: number,
@@ -42,6 +43,7 @@ export class NotificationController
 		@Body("type", ParseIntPipe) notifType: number
 	): Promise<Notification>
 	{
+		console.log("addNotificationByUserId : ", userId, notificationDto, notifType);
 		return this.notificationService.addNotificationByUserId(
 			userId,
 			notificationDto,
