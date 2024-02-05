@@ -1,8 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WebSocketContext } from "../socket/socket";
 import { useFrame } from "@react-three/fiber";
-import { Game } from "../../../backend/src/game/game.class";
+import { Paddle } from "../../../backend/src/game/interfaces";
 
 function DetectPress(key: string) {
 	const [isDown, setIsDown] = useState<boolean>(false);
@@ -39,26 +39,49 @@ function DetectPress(key: string) {
 	return (isDown);
 }
 
-export default function Paddle({game}: Game) {
+export default function PaddlePos() {
 
 	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
-
+	const ref = useRef();
+	const refPaddle2 = useRef();
+	const [paddles, setPaddles] = useState({ paddle1: { x: 0, y: -18, z: -60 }, paddle2: { x: 0, y: -18, z: -232 } });
+	
 	const arrowLeftState = DetectPress("ArrowLeft");
 	const arrowRightState = DetectPress("ArrowRight");
+
+	useFrame(() => {
+		if (arrowLeftState)
+			socket.emit("movesInputs", { gameSocket: gameSocket, move: "ArrowLeft", upDown: arrowLeftState });
+		if (arrowRightState)
+			socket.emit("movesInputs", { gameSocket: gameSocket, move: "ArrowRight", upDown: arrowRightState });
+	});
 	
-	if (arrowLeftState)
-		socket.emit("movesInputs", {gameSocket: gameSocket, move: "ArrowLeft", upDown: arrowLeftState});
-	if (arrowRightState)
-		socket.emit("movesInputs", {gameSocket: gameSocket, move: "ArrowRight", upDown: arrowRightState});
 	
-	return(
+	useEffect(() => {
+		socket.on("findpos", findPosHandler => {
+			if (ref.current && ref.current.position) {
+				ref.current.position.x = findPosHandler[0].x;
+				ref.current.position.y = findPosHandler[0].y;
+				ref.current.position.z = findPosHandler[0].z;
+			}
+
+			if (refPaddle2.current && refPaddle2.current.position){
+				refPaddle2.current.position.x = findPosHandler[1].x;
+				refPaddle2.current.position.y = findPosHandler[1].y;
+				refPaddle2.current.position.z = findPosHandler[1].z;
+			}
+		});
+			
+		}, [socket]);
+
+		return(
 		<>
-		<mesh position={[game.paddle[0].x, game.paddle[0].y, game.paddle[0].z]}>
+		<mesh ref={ref} position={[paddles.paddle1.x, paddles.paddle1.y, paddles.paddle1.z]}>
 			<boxGeometry args={[50, 5, 5]} />
 			<meshStandardMaterial color='red' />
 		</mesh>
-		<mesh position={[game.paddle[1].x, game.paddle[1].y, game.paddle[1].z]}>
+		<mesh ref={refPaddle2} position={[paddles.paddle2.x, paddles.paddle2.y, paddles.paddle2.z]}>
 			<boxGeometry args={[50, 5, 5]} />
 			<meshStandardMaterial color='green' />
 		</mesh>

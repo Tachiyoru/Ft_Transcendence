@@ -7,6 +7,7 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { UseGuards, Request, ParseIntPipe} from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { disconnect } from 'process';
+import { delay } from 'rxjs';
 
 @WebSocketGateway({
   cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
@@ -122,18 +123,51 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
         }
 
-      @SubscribeMessage("notInGame")
+      @SubscribeMessage("launchBall")
       async LaunchBall(
-        @MessageBody('gameSocket') gameSocket: string,
+        @Request() req: any,
         )
         {
-          const game = await this.gameService.LaunchBall();
+          const game = await this.gameService.LaunchBall(req);
           if (game)
           {
-            this.server.to(game.player1.playerSocket).emit();
-            this.server.to(game.player2.playerSocket).emit();
+            let velocity = 0.01;
+            delay(50)
+            var i = setInterval(() => {
+              game.ball.z += (game.ball.z * velocity);
+              let newz = game.ball.z;
+              
+              if (
+                ((Math.floor(newz) < -231 && Math.abs(game.ball.x - game.paddle[1].x) <= 50 / 2) ||
+                (Math.floor(newz) > -62 && Math.abs(game.ball.x - game.paddle[0].x) <= 50 / 2))
+              ) {
+                  velocity *= -1;
+                  //game.ball.z += (game.ball.z * velocity);
+              }
+              else if (Math.abs(newz) > -231 || Math.abs(newz) < -61) {
+                if (newz < -231) {
+                    ++game.pScore[0];
+                    game.resetBallPosition();
+                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+                }
+                else if ((newz > -61)){
+                    ++game.pScore[1];
+                    game.resetBallPosition()
+                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+                }
+              }
+
+
+              this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
+              this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
+
+              this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
+              this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
+            }, 50);
           }
-        }
+      }
 
       @SubscribeMessage("movesInputs")
       async movesInputs(
@@ -143,23 +177,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       @MessageBody('upDown') upDown : boolean
       ) {
         const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown, this.server);
-        if (game)
-        {
-          this.server.to(game.player1.playerSocket).emit("findGame", game);
-          this.server.to(game.player2.playerSocket).emit("findGame", game);
-        }
       }
-        
 
+      handleConnection(client: any, ...args: any[]) {
+        console.log(`Client connected: ${client.id}`);
+      }
 
-
-  handleConnection(client: any, ...args: any[]) {
-    console.log(`Client connected: ${client.id}`);
-  }
-
-  handleDisconnect(client: any) {
-    console.log(`Client disconnected: ${client.id}`);
-  }
+      handleDisconnect(client: any) {
+        console.log(`Client disconnected: ${client.id}`);
+      }
   
   // @SubscribeMessage('start_game')
   // handleGameStart(client: any, payload: any): void {

@@ -14,6 +14,8 @@ import {
   Camera,
   Player
 } from './interfaces';
+import { delay } from 'rxjs';
+
 
 export interface GameSessionQResponse {
   matchFound: boolean;
@@ -193,12 +195,11 @@ export class GameService {
 
     }
 
-    async LaunchBall()
+    async LaunchBall(@Request() req: any)
     {
       const game = this.games.find((game) => (game.player1.playerProfile?.id || game.player2.playerProfile?.id) === req.user.id);
-
-      game.initBall();
-
+      
+      return(game);
     }
 
 

@@ -9,8 +9,9 @@ import { Physics} from "@react-three/cannon";
 import { WebSocketContext, socket } from "../socket/socket";
 import axios from "../axios/api";
 import { Game } from "../../../backend/src/game/game.class.ts"
-import { Ball, ArrowState } from "../../../backend/src/game/interfaces"
-import Paddle from "./Paddle.tsx";
+import { Ball, ArrowState, Paddle } from "../../../backend/src/game/interfaces"
+import PaddlePos from "./Paddle.tsx";
+import BallObj from "./Ball.tsx";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -39,15 +40,6 @@ const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
 	
 		return null;
 	}
-	
-	function BallObj({ x, y, z }: Ball) {
-		return (
-		<mesh position={[x, y, z]}>
-			<sphereGeometry args={[2, 10, 10]} />
-			<meshStandardMaterial color={'white'}/>
-		</mesh>
-	);
-}
 
 
 export default function Experience() {
@@ -57,10 +49,12 @@ export default function Experience() {
 	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
 	const [game, setGame] = useState<Game | null>();
+	const [score, setScore] = useState<number[]>([0,0]);
 	const [userData, setUserData] = useState<Users>();
 	
 	const launchBall = () => {
 		socket.emit('launchBall');
+		console.log('ok')
 	};
 
 	useEffect(() => {
@@ -81,6 +75,10 @@ export default function Experience() {
 			socket.on("findGame", (game) => {
 				setGame(game);
 			});
+			socket.on("gamescore", (score) => {
+				setScore(score);
+			});
+			
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
@@ -91,6 +89,7 @@ export default function Experience() {
 			{game && 
 			<div className="h-[80vh]">
 				<div onClick={launchBall}>Start Game</div>
+				{score.join(':')}
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
 					{userData && userData.id == game.player1.playerProfile?.id && (
@@ -116,9 +115,9 @@ export default function Experience() {
 
 					<ambientLight intensity={0.5} />
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
-					<BallObj x={game.ball.x} y={game.ball.y} z={game.ball.z} />
+					<BallObj/>
 					<Physics>
-					<Paddle game={game}/>
+					<PaddlePos/>
 					</Physics>
 					<mesh position={[0, -20, -146]}>
 						<boxGeometry args={[120, 2, 170]} />

@@ -94,8 +94,8 @@ export class Game  {
 
     resetBallPosition() {
         this.ball.x = 0;
-        this.ball.y = 0;
-        this.ball.z = 0;
+        this.ball.y = -17;
+        this.ball.z = -146;
     }
 
     startBallMovement()	{
@@ -134,26 +134,31 @@ export class Game  {
                 case "ArrowLeft":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
+                    if ((this.paddle[0].x + this.multiplier > -31))
+                        this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
                 break;
                 case "ArrowRight":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
+                    if ((this.paddle[0].x + this.multiplier < 35))
+                        this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
                 break;
             }
         }
+
         if (player === this.player2.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
+                    if ((this.paddle[1].x + this.multiplier < 35))
+                        this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
                 break;
                 case "ArrowRight":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
+                    if ((this.paddle[1].x + this.multiplier > -31))
+                        this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
                 break;
             }
         }
