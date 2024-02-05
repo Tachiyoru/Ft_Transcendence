@@ -56,11 +56,13 @@ export class UserController {
   @Patch("add-avatar")
   @UseInterceptors(FilesInterceptor("image"))
   uploadFile(
-    @GetUser("id") userId: number,
+    @GetUser() user: User,
     @UploadedFiles() file: Express.Multer.File[]
   ) {
     const filepath = file[0].path;
-    this.userService.editAvatar(userId, filepath);
+    this.userService.editAvatar(user.id, filepath);
+    console.log(filepath, user.avatar)
+    return (filepath)
   }
 
   @Patch("edit")

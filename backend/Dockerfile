@@ -4,12 +4,12 @@ WORKDIR /usr/src/app
 
 VOLUME /upload
 
-COPY package*.json ./
+# COPY package*.json ./
 
-RUN npm install glob rimraf
+# RUN npm install glob rimraf
 
-RUN npm install
+# RUN npm install
 
-COPY . .
+# COPY . .
 
-RUN npm run build
+# RUN npm run build

@@ -49,11 +49,17 @@ export class AuthService {
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
-	const updatedUser = await this.prisma.user.update({
-		where : { id : user.id },
-		data : {status : 'ONLINE'}
-	});
-    return (this.forgeTokens(updatedUser, res), console.log("user connected"));
+    if (!user.isTwoFaEnabled)
+		{
+        const updatedUser = await this.prisma.user.update({
+        where : { id : user.id },
+        data : {status : 'ONLINE'}
+      });
+      return (this.forgeTokens(updatedUser, res), console.log("user connected"));
+    }
+    await this.forgeTokens(user, res);
+		console.log("2FA enabled for this account");
+		return user;
   }
 
   async authExtUserCreate(userInfo: any, imageLink: string) {

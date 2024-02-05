@@ -20,7 +20,8 @@ services:
       context: ./backend
       target: development
       dockerfile: ./Dockerfile
-    command: npm run start:migrate:dev
+    command: sh -c "npm install && npm run start:migrate:dev"
+    working_dir : /usr/src/app 
     ports:
       - 5001:5001
       - 5555:5555
@@ -31,7 +32,7 @@ services:
     volumes:
       - ./backend:/usr/src/app
       - ./upload:/usr/src/app/upload
-      - /usr/src/app/node_modules
+      - node_back:/usr/src/app/node_modules
     networks:
       - backend_network
       - frontend_network
@@ -43,7 +44,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    command: npm run dev
+    command: sh -c "npm install && npm run dev"
     depends_on:
       - backend
     env_file:
@@ -62,4 +63,5 @@ networks:
   frontend_network:
 
 volumes:
-  database:
+  database: {}
+  node_back: {}

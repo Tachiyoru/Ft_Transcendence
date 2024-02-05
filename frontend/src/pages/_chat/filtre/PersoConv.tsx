@@ -81,7 +81,19 @@ const PersoConv = () => {
 		return () => {
 		socket.off("my-channel-list");
 		};
-	}, []);
+	}, [allChannel, socket]);
+
+	useEffect(() => {
+		socket.emit("last-message", allChannel);
+		socket.on("last-channel-mesage", (channelList) => {
+		setAllChannel(channelList);
+    });
+
+	
+	return () => {
+		socket.off("my-channel-list");
+	};
+	}, [allChannel, socket]);
 
 
 	const renderLastMessage = (channel: Channel) => {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
 import { MdWallet } from 'react-icons/md';
+import { Link } from 'react-router-dom';
 
 interface Props {
 	error: boolean;
@@ -44,7 +45,9 @@ const OhOh: React.FC<Props> = ({error}) => {
 						<p className='mt-2'>An error has occured</p>
 						<div className='flex flex-row items-center gap-x-2 mt-6'>
 							<FaArrowRightFromBracket className="transform rotate-180" size={10}/>
-							<p className='underline'>Go back to homapage</p>
+							<Link to={'/'}>
+								<p className='underline'>Go back to homapage</p>
+							</Link>
 						</div>
 					</div>
 				</div>

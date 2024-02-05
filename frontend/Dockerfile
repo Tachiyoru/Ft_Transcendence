@@ -8,11 +8,11 @@ RUN apt-get update
 WORKDIR /usr/src/app
 
 # Installs project dependencies
-COPY package.json package-lock.json ./
-RUN npm install glob rimraf
+# COPY package.json package-lock.json ./
+# RUN npm install glob rimraf
 
-RUN npm install
-COPY . .
+# RUN npm install
+# COPY . .
 
 # RUN npm run build
 CMD ["npm", "run", "dev"]

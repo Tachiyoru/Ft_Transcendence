@@ -24,6 +24,7 @@ interface IdataRegister {
   confirmPassword: string;
 }
 
+
 const SignupForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();

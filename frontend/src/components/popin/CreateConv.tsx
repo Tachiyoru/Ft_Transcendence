@@ -142,7 +142,7 @@ const CreateConv: React.FC = () => {
     }, []);
 
   return (
-    <div>
+    <div className="relative">
       <button onClick={togglePopin}>
         <FaRegPenToSquare className="mb-1 text-lilac m-2" size={16} />
       </button>

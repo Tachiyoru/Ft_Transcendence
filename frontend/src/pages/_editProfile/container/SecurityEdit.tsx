@@ -13,7 +13,7 @@ const SecurityEdit = () => {
 	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
 	const [loading, setLoading] = useState(true);
   const [tokenGoogle, setTokenGoogle] = useState<string>("");
-	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean, username: string} | undefined, >();
+	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean, username: string} | undefined>();
   const [isQrCode, setIsQrCode] = useState<boolean>(false);
   const [isTwoFaEnabled, setIsTwoFaEnabled] = useState<boolean>(false);
   const [error, setError] = useState<string>('');

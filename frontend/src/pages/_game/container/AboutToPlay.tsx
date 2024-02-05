@@ -4,42 +4,78 @@ import { FaUser } from "react-icons/fa6";
 import OhOh from "../../../components/popin/OhOh";
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../../socket/socket";
+import axios from "../../../axios/api";
+import Dashboard from "../../_root/Dashboard";
 
 interface Game {
 	gameId: number;
-	player1: string;
-	player1User : {
-		username: string;
-		avatar: string;
+	player1: {
+		playerProfile: {
+			username: string;
+			avatar: string;
+		}
 	};
-	player2User : {
-		username: string;
-		avatar: string;
+	player2: {
+		playerProfile: {
+			username: string;
+			avatar: string;
+		}
 	}
+}
+
+interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
 }
 
 const AboutToPlay = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
-	let { gameSocket } = useParams();
+	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
 	const [game, setGame] = useState<Game | null>();
 	const [isReset, setIsReset]  = useState<boolean>(false);
 	const navigate = useNavigate();
+	const [userData, setUserData] = useState<Users>();
+
+	useEffect(() => {
+		const fetchData = async () => {
+		try {
+			const userDataResponse = await axios.get('/users/me');
+			setUserData(userDataResponse.data);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+		};
+		fetchData();
+	}, [isReset]);
+
 
 	useEffect(() => {
 		try {
-			socket.emit("gamestart", {gameSocket: gameSocket})
-			socket.on("gamestart", (game) => {
+			socket.emit("findGame", {gameSocket: gameSocket})
+			socket.on("findGame", (game) => {
 				setGame(game);
 			});
-			socket.on("GameReset", (error) => {
-				console.log(error)
+			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
+			socket.on("verifyGame", (boolean) => {
+			if (!boolean)
+				setGame(null);
 			});
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
-	}, [socket]);
+	}, [socket, userData]);
+
+
+	const handleStartGame = () => {
+		if (game)
+		{		
+			navigate(`/test/${gameSocket}`);
+		}
+	};
 
 	return (
 		<MainLayout currentPage={currentPage}>
@@ -50,11 +86,11 @@ const AboutToPlay = () => {
 				<h3 className="font-audiowide text-2xl mb-12">Get ready</h3>
 				<div className="flex flex-row justify-center gap-14 mb-32">
 					<div className='flex flex-col items-center'>
-						{game.player1User.avatar ?
+						{game.player1.playerProfile.avatar ?
 							(
 								<div>
 								<img
-									src={game.player1User.avatar}
+									src={game.player1.playerProfile.avatar}
 									className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
 								/>
 								</div>	
@@ -64,14 +100,14 @@ const AboutToPlay = () => {
 								</div>
 							)
 						}
-						<p className='text-base mt-2'>{game.player1User.username}</p>
+						<p className='text-base mt-2'>{game.player1.playerProfile.username}</p>
 					</div>
 					<div className='flex flex-col items-center'>
-						{game.player2User.avatar ?
+						{game.player2.playerProfile.avatar ?
 							(
 								<div>
 								<img
-									src={game.player2User.avatar}
+									src={game.player2.playerProfile.avatar}
 									className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
 								/>
 								</div>	
@@ -81,11 +117,16 @@ const AboutToPlay = () => {
 								</div>
 							)
 						}
-						<p className='text-base mt-2'>{game.player2User.username}</p>
+						<p className='text-base mt-2'>{game.player2.playerProfile.username}</p>
 					</div>
 				</div>
 			</div>
-			<p className="font-audiowide text-purple">Your game is <br/> about to begin</p>
+			<p
+				className="font-audiowide text-purple underline hover:text-red-orange"
+				onClick={handleStartGame}
+				>
+				Start Game
+			</p>
 			</div>
 		) : <OhOh error={true}/> }
 		</div>

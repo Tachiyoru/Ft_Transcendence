@@ -21,6 +21,8 @@ interface IdataLogin {
   password: string;
 }
 
+const FORTYTWOUrl = import.meta.env.FORTYTWO_CALLBACK_URL as string
+
 const SigninForm = () => {
   const dispatch = useDispatch();
   const [resStatus, setResStatus] = useState("");
@@ -36,19 +38,34 @@ const SigninForm = () => {
     formState: { errors, isValid },
   } = useForm<IdataLogin>();
 
-  const submitHandler = async (data: IdataLogin) => {
-    await axios
-      .post("auth/signin", data)
-      .then((response) => {
-          setResStatus("Successful Registration!");
-          dispatch(loginSuccess(response.data));
-          navigate("/");
-		  window.location.reload();
-      })
-      .catch(function (error) {
-        setResStatus("Error");
-      });
-  };
+	const submitHandler = (data: IdataLogin) => {
+		axios
+		.post("auth/signin", data)
+		.then( (response) => {
+			if (response.status === 201)
+			{
+				console.log('ok', response.data);
+				if (response.data.isTwoFaEnabled)
+				{
+					dispatch(loginSuccess(response.data))
+					navigate("/sign-in-2fa");
+				}
+				else
+				{
+					setResStatus("Successful Registration!");
+					dispatch(loginSuccess(response.data))
+					navigate("/");
+          window.location.reload();
+				}
+		} else {
+			setResStatus("Error");
+		}
+		})
+		.catch(function (error) {
+      setResStatus("Error");
+      console.log(error);
+		});
+	};
 
   const handlePasswordChange = (e) => {
     const newPassword = e.currentTarget.value;
@@ -60,9 +77,9 @@ const SigninForm = () => {
 
 
   const handle42Click = async () => {
+
     try {
-      const response =  (window.location.href =
-        "http://paul-f4ar2s4:5001/auth/42/callback");
+      const response =  (window.location.href = 'http://paul-f4ar7s9:5001/auth/42/callback');
       if (response) {
         dispatch(loginSuccess(response));
       }
@@ -74,7 +91,7 @@ const SigninForm = () => {
   const handleGitClick = async () => {
     try {
       const response = (window.location.href =
-        "http://paul-f4ar2s4:5001/auth/github/callback");
+        "http://paul-f4ar7s9:5001/auth/github/callback");
       if (response) dispatch(loginSuccess(response));
     } catch {
       setResStatus("Error");
