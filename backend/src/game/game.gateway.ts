@@ -131,34 +131,58 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           const game = await this.gameService.LaunchBall(req);
           if (game)
           {
-            let velocity = 0.01;
+            let velocity = [0.01, 0];
             delay(50)
             var i = setInterval(() => {
-              game.ball.z += (game.ball.z * velocity);
-              let newz = game.ball.z;
+              game.ball.z += (game.ball.z * velocity[0]);
+              game.ball.x += velocity[1];
               
-              if (
-                ((Math.floor(newz) < -231 && Math.abs(game.ball.x - game.paddle[1].x) <= 50 / 2) ||
-                (Math.floor(newz) > -62 && Math.abs(game.ball.x - game.paddle[0].x) <= 50 / 2))
-              ) {
-                  velocity *= -1;
-                  //game.ball.z += (game.ball.z * velocity);
+              console.log(game.paddle[1].x)
+              // if (game.pScore[0] == 3 || game.pScore[1] == 3) {
+              //   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
+              // }
+              // }, 50); 
+              if (Math.floor(game.ball.x) === 60 || Math.floor(game.ball.x) === -60)
+                velocity[1] *= -1;
+              else if
+              (
+                (Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x) === Math.floor(game.paddle[1].x + 31 / 2)) ||
+                (Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x) === Math.floor(game.paddle[0].x + 31 / 2))
+              )
+              {
+                    velocity[0] *= -1;
+                    velocity[1] = 1 ;
               }
-              else if (Math.abs(newz) > -231 || Math.abs(newz) < -61) {
-                if (newz < -231) {
+              else if
+              (
+                (Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x) === Math.floor(-game.paddle[1].x + 31 / 2)) ||
+                (Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x) === Math.floor(-game.paddle[0].x + 31 / 2))
+              )
+              {
+                    velocity[0] *= -1;
+                    velocity[1] = -1;
+              } 
+              else if (
+                ((Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x - game.paddle[1].x) <= 31 / 2) ||
+                (Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x - game.paddle[0].x) <= 31 / 2))
+              )
+                  velocity[0] *= -1;
+              else if (Math.abs(game.ball.z) > -231 || Math.abs(game.ball.z) < -61) {
+                if (game.ball.z < -231) {
                     ++game.pScore[0];
                     game.resetBallPosition();
+                    velocity[1] = 0;
                     this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
                     this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
                 }
-                else if ((newz > -61)){
+                else if ((game.ball.z > -61)){
                     ++game.pScore[1];
                     game.resetBallPosition()
+                    velocity[1] = 0;
                     this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
                     this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
                 }
               }
-
 
               this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
               this.server.to(game.player2.playerSocket).emit("findposball", game.ball);

@@ -1,8 +1,8 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WebSocketContext } from "../socket/socket";
-import { useFrame } from "@react-three/fiber";
-import { Paddle } from "../../../backend/src/game/interfaces";
+import { useFrame, useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three-stdlib";
 
 function DetectPress(key: string) {
 	const [isDown, setIsDown] = useState<boolean>(false);
@@ -47,6 +47,9 @@ export default function PaddlePos() {
 	const refPaddle2 = useRef();
 	const [paddles, setPaddles] = useState({ paddle1: { x: 0, y: -18, z: -60 }, paddle2: { x: 0, y: -18, z: -232 } });
 	
+	const paddleobj1 = useLoader(GLTFLoader, '/src/paddlePink.glb')
+	const paddleobj2 = useLoader(GLTFLoader, '/src/paddleBlue.glb')
+
 	const arrowLeftState = DetectPress("ArrowLeft");
 	const arrowRightState = DetectPress("ArrowRight");
 
@@ -77,14 +80,28 @@ export default function PaddlePos() {
 
 		return(
 		<>
-		<mesh ref={ref} position={[paddles.paddle1.x, paddles.paddle1.y, paddles.paddle1.z]}>
+		{/* {/* <mesh ref={ref} position={[paddles.paddle1.x, paddles.paddle1.y, paddles.paddle1.z]}>
 			<boxGeometry args={[50, 5, 5]} />
 			<meshStandardMaterial color='red' />
-		</mesh>
-		<mesh ref={refPaddle2} position={[paddles.paddle2.x, paddles.paddle2.y, paddles.paddle2.z]}>
-			<boxGeometry args={[50, 5, 5]} />
+		</mesh> */}
+		{/* <mesh ref={refPaddle2} position={[paddles.paddle2.x, paddles.paddle2.y, paddles.paddle2.z]}>
+			<boxGeometry args={[30, 5, 5]} />
 			<meshStandardMaterial color='green' />
-		</mesh>
+		</mesh> */}
+		<primitive
+			ref={ref}
+			object={paddleobj1.scene}
+			position={[paddles.paddle1.x, paddles.paddle1.y, paddles.paddle1.z]}
+			rotation={[0, Math.PI / 2 ,0]}
+			scale={3}
+        />
+		<primitive
+			ref={refPaddle2}
+			object={paddleobj2.scene}
+			position={[paddles.paddle2.x, paddles.paddle2.y, paddles.paddle2.z]}
+			rotation={[0, Math.PI / 2 ,0]}
+			scale={3}
+        />
 		</>
 	)
 }

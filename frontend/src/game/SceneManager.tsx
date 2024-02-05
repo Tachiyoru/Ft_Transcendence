@@ -1,17 +1,17 @@
-import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, extend, useThree } from "@react-three/fiber";
 import MainLayout from "../components/nav/MainLayout";
 import { useLocation, useParams } from "react-router-dom";
 import { PerspectiveCamera } from '@react-three/drei';
 import { HemisphereLight, ColorRepresentation } from "three";
 extend({ HemisphereLight });
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Physics} from "@react-three/cannon";
-import { WebSocketContext, socket } from "../socket/socket";
+import { WebSocketContext } from "../socket/socket";
 import axios from "../axios/api";
 import { Game } from "../../../backend/src/game/game.class.ts"
-import { Ball, ArrowState, Paddle } from "../../../backend/src/game/interfaces"
 import PaddlePos from "./Paddle.tsx";
 import BallObj from "./Ball.tsx";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -40,6 +40,12 @@ const CustomHemisphereLight: React.FC<CustomHemisphereLightProps> = (props) => {
 	
 		return null;
 	}
+
+const Map = async () => {
+	const loader = new GLTFLoader();
+	const loadedData = await loader.loadAsync('/src/map.glb');
+	return (loadedData);   
+}
 
 
 export default function Experience() {
@@ -119,10 +125,10 @@ export default function Experience() {
 					<Physics>
 					<PaddlePos/>
 					</Physics>
-					<mesh position={[0, -20, -146]}>
+					{/* <mesh position={[0, -20, -146]}>
 						<boxGeometry args={[120, 2, 170]} />
 						<meshLambertMaterial color={0x460994} />
-					</mesh>
+					</mesh> */}
 				</Canvas>
 			</div>
 			}
