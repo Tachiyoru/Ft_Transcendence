@@ -49,8 +49,11 @@ export class AuthService {
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
-    user.status = StatusUser.ONLINE;
-    return (this.forgeTokens(user, res), console.log("user connected"));
+	const updatedUser = await this.prisma.user.update({
+		where : { id : user.id },
+		data : {status : 'ONLINE'}
+	});
+    return (this.forgeTokens(updatedUser, res), console.log("user connected"));
   }
 
   async authExtUserCreate(userInfo: any, imageLink: string) {
