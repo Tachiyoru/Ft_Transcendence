@@ -60,10 +60,13 @@ const AllConv = () => {
   const [userData, setUserData] = useState<{ username: string }>({
     username: "",
   });
-  const [allNoFriends, setNoFriends] = useState<User[]>([]);
+  const [allBlockedUsers, setBlockedUsers] = useState<User[]>([]);
+//   const [allNoFriends, setNoFriends] = useState<User[]>([]);
+const [actuReceived, setActuReceived] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
+	setActuReceived(false);
       try {
         const userDataResponse = await axios.get("/users/me");
         setUserData(userDataResponse.data);
@@ -71,22 +74,30 @@ const AllConv = () => {
         console.error("Error fetching user data:", error);
       }
 
-      axios
-        .get<User[]>("friends-list/non-friends")
+    //   axios
+    //     .get<User[]>("friends-list/non-friends")
+    //     .then((response) => {
+    //       setNoFriends(response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.error("Erreur lors de la récupération des non-amis:", error);
+    //     });
+		await axios
+        .get<User[]>("friends-list/blocked-users")
         .then((response) => {
-          setNoFriends(response.data);
+			setBlockedUsers(response.data);
         })
         .catch((error) => {
           console.error("Erreur lors de la récupération des non-amis:", error);
         });
     };
     fetchData();
-  }, []);
+  }, [actuReceived]);
 
   socket.on("update-call", (channelList) => {
     socket.emit("find-my-channels");
-
     socket.off("update-call");
+	setActuReceived(true);
   });
 
   useEffect(() => {
@@ -94,7 +105,6 @@ const AllConv = () => {
     socket.on("my-channel-list", (channelList) => {
       setAllChannel(channelList);
     });
-    console.log("allChannel");
 
     return () => {
       socket.off("my-channel-list");
@@ -112,6 +122,19 @@ const AllConv = () => {
   };
 
   const renderLastMessage = (channel: Channel) => {
+	if (allBlockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
+	  const lastMessage = channel.messages[channel.messages.length - 1];
+	  const chanName =
+		lastMessage.authorId === userData.username
+		  ? "me"
+		  : lastMessage.authorId;
+	  return (
+		<>
+		  <p className="text-sm pt-1 text-lilac text-opacity-60">Message blocked</p>
+		  <TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
+		</>
+	  );
+	}
     if (channel.messages.length > 0) {
       const lastMessage = channel.messages[channel.messages.length - 1];
       const chanName =
@@ -136,10 +159,12 @@ const AllConv = () => {
   };
 
   const checkRead = (channel: Channel) => {
+	if (allBlockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
+		return ;
+	}
     if (channel.messages.length > 0) {
       const lastMessage = channel.messages[channel.messages.length - 1];
       if (lastMessage.authorId !== userData.username) {
-        console.log(channel.name, " : read =", channel.read);
         if (channel.read.includes(userData.username)) {
           return (
             <div className="notification-badge">

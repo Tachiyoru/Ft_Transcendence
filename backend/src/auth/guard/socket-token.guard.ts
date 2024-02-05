@@ -32,7 +32,6 @@ export class SocketTokenGuard implements CanActivate {
       token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
     }
     if (!token) {
-		console.log("no token");
       throw new UnauthorizedException();
     }
     
@@ -67,11 +66,9 @@ export class SocketTokenGuard implements CanActivate {
 
   static validateToken(client: Socket) {
     const token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
-    console.log("validatetoken : ", token);
     if (!token) {
       throw new UnauthorizedException();
     }
-    console.log("token : ", token);
     return SocketTokenGuard.verifyToken(
       token,
       new JwtService(),

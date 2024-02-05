@@ -76,8 +76,6 @@ const CreateConv: React.FC = () => {
 
   const handleSubmit = () => {
     const selectedItems = Object.values(checkedItems);
-    console.log("Selection:", selectedItems);
-
     const channelData = {
       members: selectedItems,
       mode: "",

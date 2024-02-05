@@ -64,12 +64,10 @@ export const fetchDataUser = async ({
 
     if (userStatResponse.data) {
       //first game
-	  console.log(userStatResponse.data, userAchievements.data, userAchievements.data.some((achievement) => achievement.id === 5));
       if (
         userStatResponse.data.partyPlayed >= 1 &&
         !userAchievements.data.some((achievement) => achievement.idType === 5)
       ) {
-		console.log("first game");
         await axios.post(`achievements/add/${5}`);
       }
       //win 10 parties
@@ -103,7 +101,6 @@ export const fetchDataUser = async ({
     }
     const userAchievementsup = await axios.get("/achievements/mine");
     setUserAchievements(userAchievementsup.data);
-	console.log(userAchievementsup.data);
   } catch (error) {
     console.error("Error fetching user data:", error);
   } finally {

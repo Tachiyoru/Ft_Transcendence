@@ -94,7 +94,6 @@ export const getNotifications = async (
   id: number
 ): Promise<Notification[]> => {
   try {
-	console.log("id", id);
     const response = await axios.get<Notification[]>(`/notification/${id}`);
     return response.data;
   } catch (error) {
@@ -179,13 +178,11 @@ const socket = useContext(WebSocketContext);
 	  }
 	}, [socket]);
 
-	console.log("useEffect AFTER ", unreadNotifications);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
       try {
         const { id: userId } = await getLoggedInUserInfo();
-		console.log("userIdddddd");
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
 
@@ -225,7 +222,6 @@ const socket = useContext(WebSocketContext);
   };
 
 	const markNotificationAsRead = async (notificationId: number) => {
-		console.log("markNotificationAsRead")
 		socket.emit("update-notification-number", { notifId: notificationId });
 	};
 	

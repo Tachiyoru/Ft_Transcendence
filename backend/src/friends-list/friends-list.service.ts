@@ -105,16 +105,13 @@ export class FriendsListService
 				}
 			}
 		);
-		console.log(user)
 		if (notificationId)
 		{
-			console.log('notificationId', notificationId);
 			const updatedUser = await this.prismaService.user.findUnique({
 				where: { id: user.id },
 				include: { notifications: true },
 			});
 			if (updatedUser)
-				console.log('updatedUser notification list : ', updatedUser.notifications);
 			return (updatedUser);
 		}
 

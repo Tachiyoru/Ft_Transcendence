@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   FaArrowTurnUp,
   FaMagnifyingGlass,
@@ -8,6 +8,7 @@ import AllConv from "../filtre/AllConv";
 import PersoConv from "../filtre/PersoConv";
 import ChannelConv from "../filtre/ChannelConv";
 import CreateConv from "../../../components/popin/CreateConv";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface SidebarLeftProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -21,13 +22,16 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   isTyping,
 }) => {
   const [filtreActif, setFiltreActif] = useState<FilterType>("all");
+  const socket = useContext(WebSocketContext);
+  const [actuReceived, setActuReceived] = useState<boolean>(false);
 
   useEffect(() => {
     const hash = window.location.hash.substr(1) as FilterType;
     if (hash && ["all", "personnal", "channel"].includes(hash)) {
       setFiltreActif(hash);
     }
-  }, []);
+    setActuReceived(false);
+  }, [actuReceived]);
 
   const handleFiltre = (type: FilterType) => {
     setFiltreActif(type);

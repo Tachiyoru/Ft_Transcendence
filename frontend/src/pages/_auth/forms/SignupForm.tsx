@@ -62,7 +62,6 @@ const SignupForm = () => {
       .post("/auth/signup", data)
       .then((response) => {
           setResStatus("Successful Registration!");
-          console.log(response.data);
           dispatch(loginSuccess(response.data));
           navigate("/");
           window.location.reload();
@@ -70,7 +69,6 @@ const SignupForm = () => {
 	.catch(function (error) {
 		if (error.response.status === 403){
 			setShowUsernameErrors(true);
-			console.log("existe deja");
 			setError("username", {
 				type: "manual",
 				message: "Name or Email already exist"

@@ -77,19 +77,16 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	};
 
 	const handleAddOp = () => {
-		console.log('add op')
 		socket.emit('addOp', { chanId: channel.chanId, username: user.username });
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleRemoveOp = () => {
-		console.log('remove op')
 		socket.emit('removeOp', { chanId: channel.chanId, username: user.username });
 		setPopinOpen(!popinOpen);
 	};
 
 	const handleClick = () => {
-		console.log(channel.op)
 	if (channel.op.find(opMember => opMember === user.username)) {
 		handleRemoveOp();
 	} else {
@@ -129,7 +126,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	const handleClickSendMessage = () => {
 		socket.emit('getOrCreateChatChannel', { username2: user.username, id: user.id }); 
 		socket.on('chatChannelCreated', (data) => {
-			console.log('Chat channel created:', data);
 			dispatch(setSelectedChannelId(data.channelId));
 		});
 	}
@@ -137,7 +133,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	const handleClickBan = () => {
 		socket.emit('banUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userBanned', (data) => {
-			console.log('Ban', data);
 		});
 		setPopinOpen(!popinOpen);
 	}
@@ -145,7 +140,6 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	const handleClickKick = () => {
 		socket.emit('kickUser', { chanId: channel.chanId, username: user.username }); 
 		socket.on('userKicked', (data) => {
-			console.log('Kick', data);
 		});
 		setPopinOpen(!popinOpen);
 	}
@@ -171,14 +165,12 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	const unMuteUser = async () => {
 		socket.emit("unMuteMember", { chanId: channel.chanId, userId: user.id });
 		socket.on("memberUnMuted", (users) => {
-			console.log("unMute", users);
 		})
 	};
 
 	const muteUser = async () => {
 		socket.emit("muteMember", { chanId: channel.chanId, userId: user.id });
 		socket.on("memberMuted", (users) => {
-			console.log("Mute", users);
 		});
 
 	};

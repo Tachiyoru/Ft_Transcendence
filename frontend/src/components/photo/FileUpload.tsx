@@ -21,7 +21,6 @@ const FileUpload = () => {
           },
         });
         await axios.post(`achievements/add/${6}`);
-        console.log("File uploaded successfully:", response.data);
       } catch (error) {
         console.error("Error uploading file:", error);
       }

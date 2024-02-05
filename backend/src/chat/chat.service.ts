@@ -25,7 +25,6 @@ export class chatService {
         ", " +
         req.user.username;
     }
-    console.log(settings.name);
     const existingChannel = await this.prisma.channel.findUnique({
       where: { name: settings.name },
     });
@@ -805,7 +804,6 @@ export class chatService {
       const memberArray = memberslist.map((user) =>
         user.username !== null ? user.username : ""
       );
-      console.log(memberArray);
 
       if (memberArray && memberArray.length > 0) {
         await this.prisma.channel.update({
@@ -832,7 +830,6 @@ export class chatService {
           read: { set: memberslist },
         },
       });
-	  console.log(username, " a lu la conv ", chan?.name);
     }
   }
 

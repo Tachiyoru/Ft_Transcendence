@@ -46,7 +46,6 @@ export class AuthService {
       where: { email: dto.email },
       include: { friends: true, stats: true, achievements: true },
     });
-    if (user) console.log("user exist");
     if (!user) throw new ForbiddenException("User not found");
     const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
     if (!pwdMatches) throw new ForbiddenException("Wrong password");
@@ -140,7 +139,7 @@ export class AuthService {
       data : {status : 'OFFLINE'}
     })
     userA.status = StatusUser.OFFLINE;
-	console.log("user disconnected");
+	// console.log("user disconnected");
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
     return "Successfully logged out";

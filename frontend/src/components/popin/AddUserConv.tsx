@@ -102,8 +102,6 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
 
   const handleSubmit = () => {
     const selectedItems = Object.values(checkedItems);
-    console.log("Selection:", selectedItems);
-
     const channelData = {
       chanName: channel.name,
       chanId: channel.chanId,

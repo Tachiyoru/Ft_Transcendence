@@ -71,7 +71,6 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	}, []);
 
 	const editChannel = () => {
-		console.log(channelType)
 		const chanelId = channel.chanId;
 
 		socket.emit('editChannel', {
@@ -85,7 +84,6 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 
 	const handleSubmit = () => {
 		try {
-				console.log("new name is suppose to be : ", channelName);
 				socket.emit("renameChan", { chanId: channel.chanId, newName: channelName });
 		} catch (error) {
 		console.error("Error fetching user list:", error);

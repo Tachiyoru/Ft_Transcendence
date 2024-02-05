@@ -15,7 +15,6 @@ const ForgetPassword = () => {
     } = useForm<IdataRecoverPassword >();
 
   const submitHandler = (data: IdataRecoverPassword) => {
-    console.log(data);
   };  
 
   return (

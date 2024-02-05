@@ -30,8 +30,6 @@ export class TwoFAService
 		);
 
 		await this.set2FaSecret(secret, user.id);
-		// console.log('otpAuthUrl : ', otpAuthUrl);
-		console.log("user.twoFaSecret : ", user.twoFASecret);
 		return otpAuthUrl;
 	}
 
@@ -45,10 +43,7 @@ export class TwoFAService
 		try
 		{
 			const secret: string = user.twoFASecret || "";
-			console.log('verify2FACode -> token : ', token);
-			console.log('verify2FACode -> secret : ', secret);
 			const isValid = authenticator.verify({ token, secret });
-			console.log("verify2FACode -> isValid : ", isValid);
 			return isValid;
 		} catch (err)
 		{

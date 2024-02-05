@@ -17,6 +17,7 @@ interface NavItemProps {
 interface Channel {
   name: string;
   read: string[];
+  members: User[];
 }
 
 interface User {
@@ -25,6 +26,7 @@ interface User {
   email: string;
   createdAt: string;
   channel: Channel[];
+  blockedList: User[];
 }
 
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
@@ -33,6 +35,7 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
   const socket = useContext(WebSocketContext);
   const [userData, setUserData] = useState<User>();
   const [actuReceived, setActuReceived] = useState<boolean>(false);
+  const [blockedUsers, setBlockedUsers] = useState<User[]>([]);
 
   const navItemsInfo = [
     { name: "Dashboard", type: "link", lien: "/", icon: GoHomeFill, badges: 0 },
@@ -75,11 +78,18 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
     </div>
   );
   useEffect(() => {
-    console.log("actuReceived");
     const fetchData = async () => {
       try {
         const userDataResponse = await axios.get("/users/mee");
         setUserData(userDataResponse.data);
+		await axios
+        .get<User[]>("friends-list/blocked-users")
+        .then((response) => {
+			setBlockedUsers(response.data);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération des non-amis:", error);
+        });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -91,7 +101,8 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
   const checkRead = () => {
     if (userData) {
       for (const channel of userData.channel) {
-        console.log("inspec chan for read =",channel.name, " : read =", channel.read);
+		if (blockedUsers && blockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
+			return null;}
         if (channel.read.includes(userData.username)) {
           return renderBadge();
         }
@@ -122,7 +133,6 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
       : "text-accent-violet";
 
     if (!lien) {
-      console.log("lien null");
       return null;
     }
     return (

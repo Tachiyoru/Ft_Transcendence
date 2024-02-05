@@ -12,14 +12,10 @@ export const Websocket = () => {
       console.log("disconnected from server");
       socket.emit("gotDisconnected");
     });
-    socket.on("message", (message: string) => {
-      console.log(message);
-    });
     
     return () => {
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("message");
     };
   }, []);
 

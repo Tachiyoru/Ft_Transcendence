@@ -32,7 +32,6 @@ export class AchievementsController {
   async getAchievementsByUserId(
     @Param("id", ParseIntPipe) userId: number
   ): Promise<Achievement[]> {
-	console.log("aaaaaa", userId);
     return this.achievementsService.getAchievementsByUserId(userId);
   }
 

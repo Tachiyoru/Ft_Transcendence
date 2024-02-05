@@ -17,9 +17,7 @@ const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) => {
   const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
 
   const handleBadgeClick = async (badgeId: number) => {
-    console.log("handleBadgeClick", badgeId);
     setSelectedBadgeId(badgeId);
-    console.log(`Badge selected: ${badgeId}`);
     await axios.patch(`achievements/settitle/${badgeId}`);
     badgeId = 0;
   };

@@ -183,7 +183,7 @@ export class UserService {
   async getMePlus(userId: number) {
 	return this.prisma.user.findUnique({
 		where: { id: userId },
-		include: { friends: true, stats: true, achievements: true , channel: true},
+		include: { friends: true, stats: true, achievements: true , channel: {include: {members: true},}, blockedList: true },
 	  });
   }
 
@@ -283,7 +283,6 @@ export class UserService {
     if (user) {
       if (dto.password) {
         const pwdMatches = await argon.verify(user.hash ?? "", dto.password);
-        console.log(pwdMatches);
         if (!pwdMatches) {
           throw new BadRequestException("Invalid password");
         }
@@ -293,7 +292,6 @@ export class UserService {
       }
     }
     const { password, username: newusername } = dto;
-    console.log(userId);
     const user2 = await this.prisma.user.update({
       where: {
         id: userId,

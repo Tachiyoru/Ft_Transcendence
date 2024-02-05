@@ -116,7 +116,6 @@ const ContentConv = () => {
     e.preventDefault();
     if (!channel) return;
     socket.emit("create-message", { content: message, chanName: channel.name });
-    console.log("message = ", message);
     setMessage("");
     setIsTyping("");
   };
@@ -127,7 +126,6 @@ const ContentConv = () => {
       password: passwordInput,
     });
     socket.on("channelJoined", (updatedChannel) => {
-      console.log(updatedChannel);
       setCheckUserInChannel(true);
     });
     socket.on("channelJoinedError", (error) => {
@@ -150,18 +148,13 @@ const ContentConv = () => {
         messageList: Message[]
       ) => {
         setChannel(channelInfo);
-        console.log("channelInfo = ", channelInfo);
 		chan = channelInfo;
         setMessageList(messageList);
 	};
 	socket.on("channel", handleChannelAndMessages);
 	socket.on("recapMessages", (newMessage: Message) => {
 		setMessageList((prevMessages) => [...prevMessages, newMessage]);
-        console.log("newMessage = ", newMessage.channelName, chan);
-        console.log("dois suppr la pastille");
-		console.log("channelInfo2 = ", chan);
         if (newMessage.channelName === chan?.name && newMessage.authorId !== userData.username) {
-			console.log("pas de pastille", chan.name);
           socket.emit("read", chan.chanId);
         }
       });

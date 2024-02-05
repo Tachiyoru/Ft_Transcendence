@@ -186,7 +186,6 @@ export class NotificationService
 		await this.deleteNotificationById(userId, notificationId);
 
 		const myNotifs = await this.getMyNotifications(user);
-		console.log("myNotifs : ", myNotifs);
 
 		return myNotifs;
 	}

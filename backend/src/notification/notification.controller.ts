@@ -43,7 +43,6 @@ export class NotificationController
 		@Body("type", ParseIntPipe) notifType: number
 	): Promise<Notification>
 	{
-		console.log("addNotificationByUserId : ", userId, notificationDto, notifType);
 		return this.notificationService.addNotificationByUserId(
 			userId,
 			notificationDto,
@@ -80,7 +79,6 @@ export class NotificationController
 		@Param("id", ParseIntPipe) userId: number
 	): Promise<Notification[]>
 	{
-		console.log("getNotificationsById : ", userId);
 		return this.notificationService.getNotificationsById(userId);
 	}
 }

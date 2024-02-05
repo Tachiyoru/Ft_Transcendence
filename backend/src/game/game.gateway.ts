@@ -20,7 +20,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly prisma: PrismaService) {};
 
   afterInit(server: Server) {
-    console.log('Init');
   }
 
   @SubscribeMessage("saucisse")
@@ -28,7 +27,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() client : Socket,
     @Request() req: any
   ) {
-    console.log("Player : " + client.id + " connected to the game.")
     const gameReady = await this.gameService.connection(client, req);
     if (gameReady)  {
       this.server.to(gameReady.player1).emit('GameFull', gameReady);

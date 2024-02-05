@@ -1,7 +1,6 @@
 import { WebSocketContext } from "../socket/socket";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 
-console.log("LELELELELELELEEL");
 const TryConnect = () => {
 	const socket = useContext(WebSocketContext);
 	socket.emit('connection', "Lul");

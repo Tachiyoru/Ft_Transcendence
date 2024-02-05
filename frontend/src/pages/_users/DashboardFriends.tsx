@@ -64,14 +64,10 @@ const DashboardFriends = () => {
 			try {
 				const test = await axios.get(`users/me`);
 			setMe(test.data.username);
-			console.log(test.data.username);
-
 				const response = await axios.get(`users/him/${username}`);
 			setUserData(response.data);
-			
 			const responsestat = await axios.get(`stats/${username}`);
 			setUserStats(responsestat.data);
-			
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}

@@ -28,14 +28,12 @@ export class TokenGuard implements CanActivate {
       token = client.handshake.headers.cookie
         ?.split("=")[1]
         .split(";")[0];
-		console.log("token dans get type ws")
     } else {
 		token = this.extractTokenFromCookie(request);
     }
 	const response = context.switchToHttp().getResponse();
     if (!token) {
 		token = this.extractTokenFromCookie(request);
-		console.log("token dans get type http" ,response)
 		if (!token)
       	throw new UnauthorizedException();
     }
@@ -66,7 +64,6 @@ export class TokenGuard implements CanActivate {
     let token;
     if (context.getType() === "ws") {
       const client: Socket = context.switchToWs().getClient();
-	  console.log("refresh dans get type ws", client.handshake.headers.cookie)
       token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
     }else {
       token = request.cookies?.refresh_token;

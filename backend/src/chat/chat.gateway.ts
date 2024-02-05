@@ -133,7 +133,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         username2,
         id
       );
-      console.log("channelId = ", channelId);
       client.emit("chatChannelCreated", { channelId });
     } catch (error) {
       console.error(
@@ -300,7 +299,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Request() req: any
   ) {
     try {
-      console.log("test");
       const result = await this.chatService.removeOp(
         data.chanId,
         data.username,
@@ -320,7 +318,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Request() req: any
   ) {
     try {
-      console.log("renameChan launched");
       const result = await this.chatService.renameChan(
         data.chanId,
         data.newName,
@@ -349,7 +346,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("all-update")
   async allUpdate(): Promise<void> {
     const chanlist = await this.prisma.channel.findMany();
-    console.log("chanliiiiiiiiiiiiiiist", this.connectedUsers);
     const emitPromises = this.connectedUsers.map(async (element) => {
       await this.server.to(element).emit("update-call");
 	  await this.server.to(element).emit("actu");
@@ -511,9 +507,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         data.chanId,
         data.userId
       );
-      console.log("mute");
       this.server.emit("memberMuted", result);
-      console.log(result);
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("muteMemberError", { message: error.message });
@@ -530,7 +524,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         data.chanId,
         data.userId
       );
-      console.log("unmute");
       this.server.emit("memberUnMuted", result);
       this.server.emit("channel", result, result.messages);
     } catch (error) {
@@ -572,7 +565,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { chanName: string }
   ) {
     try {
-      console.log("chan name is", data.chanName);
       const messagesList = await this.chatService.findAllChanMessages(
         data.chanName
       );
@@ -653,7 +645,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() chanName: string,
     @ConnectedSocket() client: Socket
   ) {
-    console.log("un-read");
     const username = client.handshake.auth.username;
     if (!(await this.chatService.isUnRead(chanName, username))) return false;
     else return true;

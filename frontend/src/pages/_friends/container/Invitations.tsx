@@ -10,8 +10,6 @@ const Invitations = () => {
 	const fetchUserData = async () => {
 		try {
 		const response = await axios.get<{ id: number; username: string }[]>('/friends-list/pending-list');
-		console.log(response.data);
-		
 		setListUsers(response.data);
 		} catch (error) {
 		console.error('Error fetching user list:', error);

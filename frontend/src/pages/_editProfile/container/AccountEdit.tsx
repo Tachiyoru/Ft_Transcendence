@@ -48,17 +48,14 @@ const AccountEdit = () => {
 
 		if (username) {
 			filteredData.username = username;
-			console.log("username : ", filteredData.username);
 		}
 
 		if (email) {
 			filteredData.email = email;
-			console.log("email : ", filteredData.email);
 		}
 
 		await axios.patch("/users/edit", filteredData);
 
-		console.log("User data updated successfully:", filteredData);
 		} catch (error) {
 		console.error("Error updating user data:", error);
 		} finally {

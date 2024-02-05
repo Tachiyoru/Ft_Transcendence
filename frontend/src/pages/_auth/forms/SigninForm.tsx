@@ -37,11 +37,9 @@ const SigninForm = () => {
   } = useForm<IdataLogin>();
 
   const submitHandler = async (data: IdataLogin) => {
-    console.log(data);
     await axios
       .post("auth/signin", data)
       .then((response) => {
-        console.log(response.status);
           setResStatus("Successful Registration!");
           dispatch(loginSuccess(response.data));
           navigate("/");
@@ -49,7 +47,6 @@ const SigninForm = () => {
       })
       .catch(function (error) {
         setResStatus("Error");
-        console.log(error);
       });
   };
 

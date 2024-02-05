@@ -16,7 +16,6 @@ export class StatsService {
   }
 
   async getStatsById(userId: string) {
-    console.log(userId)
     const user = await this.prismaService.user.findUnique({
       where: { username: userId },
       include: { stats: true },

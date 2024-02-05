@@ -23,7 +23,6 @@ const SecurityEdit = () => {
 		try {
 			const userDataResponse = await axios.get('/users/me');
 			setUserData(userDataResponse.data);
-      console.log(userDataResponse.data)
       if (userDataResponse.data.otpAuthUrl)
         setIsQrCode(true);
       if(userDataResponse.data.isTwoFaEnabled)
@@ -55,7 +54,6 @@ const SecurityEdit = () => {
     
         await axios.patch('/users/edit', { password: data.password, newPassword: data.newPassword});
     
-        console.log('User data updated successfully:', data);
       } catch (error) {
           console.error(error.response.data.message);
           setError('Invalid password');
