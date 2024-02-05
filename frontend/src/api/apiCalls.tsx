@@ -22,7 +22,7 @@ interface FetchDataParams {
     React.SetStateAction<{ username: string }[]>
   >;
   setUserAchievements: React.Dispatch<
-    React.SetStateAction<{ icon: string; id: number }[]>
+    React.SetStateAction<{ icon: string; id: number, idType: number}[]>
   >;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -67,7 +67,7 @@ export const fetchDataUser = async ({
 	  console.log(userStatResponse.data, userAchievements.data, userAchievements.data.some((achievement) => achievement.id === 5));
       if (
         userStatResponse.data.partyPlayed >= 1 &&
-        !userAchievements.data.some((achievement) => achievement.id === 5)
+        !userAchievements.data.some((achievement) => achievement.idType === 5)
       ) {
 		console.log("first game");
         await axios.post(`achievements/add/${5}`);
@@ -75,14 +75,14 @@ export const fetchDataUser = async ({
       //win 10 parties
       if (
         userStatResponse.data.partyWon >= 10 &&
-        !userAchievements.data.some((achievement) => achievement.id === 2)
+        !userAchievements.data.some((achievement) => achievement.idType === 2)
       ) {
         await axios.post(`achievements/add/${2}`);
       }
       //did 42 parties
       if (
         userStatResponse.data.partyPlayed >= 42 &&
-        !userAchievements.data.some((achievement) => achievement.id === 7)
+        !userAchievements.data.some((achievement) => achievement.idType === 7)
       ) {
         await axios.post(`achievements/add/${7}`);
       }

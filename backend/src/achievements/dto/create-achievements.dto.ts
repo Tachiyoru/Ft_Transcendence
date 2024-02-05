@@ -1,6 +1,6 @@
 export interface AchievementCreateImput
 {
-	title: string;
+	idType: number;
 	icon: string;
 	description: string;
 }

@@ -82,10 +82,10 @@ model User {
 
 model Achievement {
     id          Int    @id @default(autoincrement())
+    idType      Int
     user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId      Int?
-    title       String @unique
-    description String @unique
+    description String
     icon        String
 
     @@map("Achievements")

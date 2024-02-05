@@ -23,6 +23,7 @@ services:
     command: npm run start:migrate:dev
     ports:
       - 5001:5001
+      - 5555:5555
     depends_on:
       - trsc_db
     env_file:
