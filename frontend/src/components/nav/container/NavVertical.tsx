@@ -82,14 +82,17 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
       try {
         const userDataResponse = await axios.get("/users/mee");
         setUserData(userDataResponse.data);
-		await axios
-        .get<User[]>("friends-list/blocked-users")
-        .then((response) => {
-			setBlockedUsers(response.data);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la récupération des non-amis:", error);
-        });
+        await axios
+          .get<User[]>("friends-list/blocked-users")
+          .then((response) => {
+            setBlockedUsers(response.data);
+          })
+          .catch((error) => {
+            console.error(
+              "Erreur lors de la récupération des non-amis:",
+              error
+            );
+          });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -101,8 +104,18 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
   const checkRead = () => {
     if (userData) {
       for (const channel of userData.channel) {
-		if (blockedUsers && blockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
-			return null;}
+        if (
+          blockedUsers &&
+          blockedUsers.filter(
+            (user) =>
+              user.username ===
+              channel.members.filter(
+                (member) => member.username !== userData.username
+              )[0].username
+          ).length > 0
+        ) {
+          return null;
+        }
         if (channel.read.includes(userData.username)) {
           return renderBadge();
         }
@@ -156,6 +169,7 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
         console.log("Déconnexion réussie");
         socket.disconnect();
         window.location.href = "/sign-in";
+		// window.location.reload();
       })
       .catch((error) => {
         console.error("Erreur lors de la déconnexion côté serveur :", error);

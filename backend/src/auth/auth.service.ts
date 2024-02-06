@@ -166,6 +166,7 @@ export class AuthService
 		// console.log("user disconnected");
 		// response.clearCookie("access_token");
 		// response.clearCookie("refresh_token");
+		// console.log(response);
 		return "Successfully logged out";
 	}
 }
