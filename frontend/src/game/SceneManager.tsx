@@ -12,6 +12,8 @@ import { Game } from "../../../backend/src/game/game.class.ts"
 import PaddlePos from "./Paddle.tsx";
 import BallObj from "./Ball.tsx";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import Defeat from "../components/popin/Defeat.tsx";
+import Winner from "../components/popin/Victory.tsx";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -57,14 +59,13 @@ export default function Experience() {
 	const [game, setGame] = useState<Game | null>();
 	const [score, setScore] = useState<number[]>([0,0]);
 	const [userData, setUserData] = useState<Users>();
-	
-	const launchBall = () => {
-		socket.emit('launchBall');
-		console.log('ok')
-	};
+	const [popinLooser, setTogglePopinLooser] = useState(false);
+	const [popinWinner, setTogglePopinWinner] = useState(false);
+	const [start, setStart] = useState(false);
+		
 
 	useEffect(() => {
-		const fetchData = async () => {
+	const fetchData = async () => {
 		try {
 			const userDataResponse = await axios.get('/users/me');
 			setUserData(userDataResponse.data);
@@ -72,43 +73,55 @@ export default function Experience() {
 			console.error('Error fetching user data:', error);
 		}
 		};
+	
 		fetchData();
-	}, []);
-
-	useEffect(() => {
+	
 		try {
-			socket.emit("findGame", {gameSocket: gameSocket})
+			socket.emit("findGame", { gameSocket: gameSocket })
 			socket.on("findGame", (game) => {
 				setGame(game);
 			});
 			socket.on("gamescore", (score) => {
 				setScore(score);
 			});
-			
+			socket.on('finish', (boolean: boolean) => {
+				if (boolean) {
+					setTogglePopinWinner(true);
+				} else {
+					setTogglePopinLooser(true);
+				}
+			});
+
+			if (!start)
+			{
+				socket.emit('launchBall');
+				setStart(true);
+			}
+	
 		} catch (error) {
-			console.error('Erreur lors de la récupération des données:', error);
+			console.error('Error while retrieving data:', error);
 		}
-	}, [socket]);
+	}, [socket, gameSocket]);
+
 
 	return (
 		<MainLayout currentPage={currentPage}>
 			{game && 
 			<div className="h-[80vh]">
-				<div onClick={launchBall}>Start Game</div>
-				{score.join(':')}
+			{score.join(':')}
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
 					{userData && userData.id == game.player1.playerProfile?.id && (
-					<PerspectiveCamera 
+						<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[0].x, game.camera[0].y, game.camera[0].z]}
 						fov={60}
 						aspect={window.innerWidth / window.innerHeight}
 						near={0.1}
 						far={1000}
-					/>)}
+						/>)}
 					{userData && userData.id == game.player2.playerProfile?.id && (
-					<PerspectiveCamera 
+						<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[1].x, game.camera[1].y, game.camera[1].z]}
 						fov={60}
@@ -117,7 +130,7 @@ export default function Experience() {
 						far={1000}
 						rotation={[0, Math.PI, 0]}
 						/>
-					)}
+						)}
 
 					<ambientLight intensity={0.5} />
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
@@ -130,11 +143,14 @@ export default function Experience() {
 						<meshLambertMaterial color={0x460994} />
 					</mesh> */}
 				</Canvas>
+				{popinWinner && game && <Winner game={game}/>}
+				{popinLooser && game && <Defeat game={game}/>}
 			</div>
 			}
 		</MainLayout>
 	);
 }
+
 
 // (function (window, document, THREE)	{
 // 	var container = document.getElementById('gameCanvas'),

@@ -197,3 +197,11 @@ select:-webkit-autofill:focus {
 .element-to-animate:after {
     animation: social-button-beat 1.5s ease-out .4s infinite;
 }
+
+::-webkit-scrollbar {
+	width: 8px; /* Largeur de la barre de défilement */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+	background-color: black; /* Couleur du pouce de la barre de défilement */
+  }

@@ -3,6 +3,7 @@ import axios from "../../../axios/api";
 import { loginSuccess } from "../../../services/UserSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { AiOutlineLock } from "react-icons/ai";
 
 const SigninForm2Fa = () =>
 {
@@ -25,26 +26,36 @@ const SigninForm2Fa = () =>
 	};
 
 	return (
-		<div className="flex flex-row">
-			<div>
-				<input
-					type="text"
-					placeholder="Search..."
-					value={tokenGoogle}
-					onChange={(e) => {
-						setTokenGoogle(e.target.value);
-					}}
-					className="bg-dark-violet text-lilac rounded-md focus:outline-none text-sm p-2"
-				/>
-				{resStatus && <p className="text-red-orange">{resStatus}</p>}
-				</div>
-				<button
-						disabled={tokenGoogle.length === 0}
-						className='ml-2 bg-purple text-lilac rounded-md text-sm p-2'
-						onClick={handleSubmitTwoFa}
-						>
-							Save Change
-				</button>
+		<div className="bg-violet-black-nav min-h-screen flex justify-center items-center">
+			<section className="w-full max-w-sm border-container">
+				<div className="mx-auto px-16 py-10">
+					<h1 className="text-xl font-audiowide font-outline-2 text-white text-center mb-8">
+						2FA AUTH
+					</h1>
+						<div className="flex flex-col items-center">
+						<div className="flex flex-row items-center border-b border-lilac">
+							<AiOutlineLock className="w-4 h-4 text-lilac  mb-2" />
+							<input
+								type="text"
+								placeholder="Enter authentification code"
+								value={tokenGoogle}
+								onChange={(e) => {
+									setTokenGoogle(e.target.value);
+								}}
+								className="bg-transparent ml-2 mb-2 placeholder:text-lilac placeholder:text-opacity-40 text-lilac focus:outline-none text-sm p-2 m-auto"
+							/>
+						</div>
+						{resStatus && <p className="text-red-orange text-xs mt-1">{resStatus}</p>}
+						<button
+								disabled={tokenGoogle.length === 0}
+								className=' bg-purple text-lilac rounded-md text-sm py-2 px-4 mt-10 disabled:bg-dark-violet disabled:text-violet-black'
+								onClick={handleSubmitTwoFa}
+								>
+									Save Change
+						</button>
+						</div>
+					</div>
+				</section>
 		</div>
 	)
 }

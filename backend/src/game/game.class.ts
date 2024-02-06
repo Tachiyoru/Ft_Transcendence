@@ -23,7 +23,6 @@ export class Game  {
     velocity: Velocity = {x: 0, z: 0};
     stopped: boolean = false;
 
-
     constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
         this.gameSocket = "Game" + player1;

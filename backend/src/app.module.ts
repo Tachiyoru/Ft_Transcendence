@@ -23,11 +23,12 @@ import { GameModule } from "./game/game.module";
     StatsModule,
     FriendsListModule,
     chatModule,
-	NotificationModule,
-    // GameModule
+    NotificationModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
 })
 
 export class AppModule {}
+

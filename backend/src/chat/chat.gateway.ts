@@ -81,6 +81,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         banned: true,
       },
     });
+    
     if (!chan) return null;
     const messagesList = chan.messages;
     if (prevId) {

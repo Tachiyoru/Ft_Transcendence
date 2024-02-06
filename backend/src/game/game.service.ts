@@ -21,6 +21,8 @@ export interface GameSessionQResponse {
   matchFound: boolean;
   waitingSession?: WaitingGameSession;
 }
+
+
 @Injectable()
 export class GameService {
   private waitingRoomGame: WaitingGameSession | undefined = undefined;
@@ -48,13 +50,21 @@ export class GameService {
       
     }
 
-    async prepareQueListGame(socket: Socket, @Request() req: any) {
+    async gameToRemove(gameId: number)
+    {
+      const indexToRemove = this.games.findIndex(game => game.gameId === gameId);
 
+      if (indexToRemove !== -1)
+        this.games.splice(indexToRemove, 1);
+    }
+
+    async prepareQueListGame(socket: Socket, @Request() req: any) {
       const gamer = this.createGamer(
         req.user,
         socket.id,
         true,
       );
+
       // check someone is not already waiting in the waiting room
       if (this.waitingRoomGame) {
         // check if one game session is already waiting for an opponent
@@ -182,9 +192,9 @@ export class GameService {
       }
       else
         return (false)
-
     }
 
+    
     async notInGame(@Request() req: any)
     {
       const game = this.games.find((game) => (game.player1.playerProfile?.id || game.player2.playerProfile?.id) === req.user.id);
@@ -198,9 +208,10 @@ export class GameService {
     async LaunchBall(@Request() req: any)
     {
       const game = this.games.find((game) => (game.player1.playerProfile?.id || game.player2.playerProfile?.id) === req.user.id);
-      
+    
       return(game);
     }
+
 
 
 

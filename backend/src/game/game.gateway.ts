@@ -23,6 +23,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   afterInit(server: Server) {
   }
 
+
   // @SubscribeMessage("saucisse")
   // async connection(
   //   @ConnectedSocket() client : Socket,
@@ -122,6 +123,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
         }
 
+      @SubscribeMessage("readyToStart")
+      async bothPlayerReadyToStart(
+        @Request() req: any,
+        @MessageBody('gameSocket') gameSocket: string,
+      )
+      {
+        const game = await this.gameService.findGame(gameSocket);
+        if (game && (game?.player1.playerProfile === req.user || game?.player2.playerProfile === req.user))
+        {
+          this.server.to(game.player1.playerSocket).emit("bothReadyToStart", req.user.id);
+          this.server.to(game.player2.playerSocket).emit("bothReadyToStart", req.user.id);
+        }
+      }
+
       @SubscribeMessage("launchBall")
       async LaunchBall(
         @Request() req: any,
@@ -136,11 +151,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
               game.ball.z += (game.ball.z * velocity[0]);
               game.ball.x += velocity[1];
               
-              console.log(game.paddle[1].x)
-              // if (game.pScore[0] == 3 || game.pScore[1] == 3) {
-              //   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
-              // }
-              // }, 50); 
+              if (game.pScore[0] === 3 || game.pScore[1] === 3) {
+                if (game.pScore[0] === 3)
+                {
+                  game.victory = 1;
+                  game.saveGame(this.prisma);
+                  this.server.to(game.player1.playerSocket).emit("finish", true);
+                  this.server.to(game.player2.playerSocket).emit("finish", false);
+                  this.server.to(game.player1.playerSocket).emit("findGame", game);
+                  this.server.to(game.player2.playerSocket).emit("findGame", game);
+                  this.gameService.gameToRemove(game.gameId);
+                }
+                if (game.pScore[1] === 3)
+                {
+                  game.victory = 2;
+                  game.saveGame(this.prisma);
+                  this.server.to(game.player1.playerSocket).emit("finish", false);
+                  this.server.to(game.player2.playerSocket).emit("finish", true);
+                  this.server.to(game.player1.playerSocket).emit("findGame", game);
+                  this.server.to(game.player2.playerSocket).emit("findGame", game);
+                  this.gameService.gameToRemove(game.gameId);
+                }
+                clearInterval(i);
+              }
+
               if (Math.floor(game.ball.x) === 60 || Math.floor(game.ball.x) === -60)
                 velocity[1] *= -1;
               else if

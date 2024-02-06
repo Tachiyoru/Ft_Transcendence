@@ -13,12 +13,14 @@ interface Game {
 		playerProfile: {
 			username: string;
 			avatar: string;
+			id: number;
 		}
 	};
 	player2: {
 		playerProfile: {
 			username: string;
 			avatar: string;
+			id: number;
 		}
 	}
 }
@@ -39,6 +41,9 @@ const AboutToPlay = () => {
 	const [isReset, setIsReset]  = useState<boolean>(false);
 	const navigate = useNavigate();
 	const [userData, setUserData] = useState<Users>();
+	let playerReadyToStart = 0;
+	const [isGameStarted, setGameStarted] = useState(false);
+
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -64,6 +69,12 @@ const AboutToPlay = () => {
 			if (!boolean)
 				setGame(null);
 			});
+			socket.on('bothReadyToStart', (data) => {
+				playerReadyToStart++;
+				if (playerReadyToStart === 2) {
+					navigate(`/test/${gameSocket}`);
+				}
+			})
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
@@ -72,8 +83,9 @@ const AboutToPlay = () => {
 
 	const handleStartGame = () => {
 		if (game)
-		{		
-			navigate(`/test/${gameSocket}`);
+		{
+			socket.emit('readyToStart', {gameSocket: gameSocket});
+			setGameStarted(true);
 		}
 	};
 
@@ -121,12 +133,12 @@ const AboutToPlay = () => {
 					</div>
 				</div>
 			</div>
-			<p
-				className="font-audiowide text-purple underline hover:text-red-orange"
-				onClick={handleStartGame}
+			<div
+				className={`font-audiowide text-purple ${isGameStarted ? 'cursor-not-allowed' : 'underline hover:text-red-orange'}`}
+				onClick={isGameStarted ? undefined : handleStartGame}
 				>
-				Start Game
-			</p>
+				{isGameStarted ? 'We wait for the other participant' : 'Start Game'}
+			</div>
 			</div>
 		) : <OhOh error={true}/> }
 		</div>
