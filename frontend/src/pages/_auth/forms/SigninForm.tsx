@@ -53,7 +53,7 @@ const SigninForm = () => {
 					setResStatus("Successful Registration!");
 					dispatch(loginSuccess(response.data))
 					navigate("/");
-          window.location.reload();
+					window.location.reload();
 				}
 		} else {
 			setResStatus("Error");

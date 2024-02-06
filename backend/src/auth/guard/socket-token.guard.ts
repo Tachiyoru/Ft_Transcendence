@@ -47,7 +47,6 @@ export class SocketTokenGuard implements CanActivate {
       if (!user) {
         throw new UnauthorizedException("User not found");
       }
-
       client.handshake.auth = user;
       request.user = user;
       return true;
