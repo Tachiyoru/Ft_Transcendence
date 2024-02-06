@@ -5,7 +5,7 @@ import { UserModule } from "./user/user.module";
 import { AuthModule } from "./auth/auth.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
-import { chatModule } from "./chat/chat.module";
+import { ChatModule } from "./chat/chat.module";
 import { JwtService } from "@nestjs/jwt";
 import { FriendsListModule } from "./friends-list/friends-list.module";
 import { NotificationModule } from "./notification/notification.module";
@@ -14,20 +14,20 @@ import { StatsModule } from "./stats/stats.module";
 import { GameModule } from "./game/game.module";
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    PrismaModule,
-    UserModule,
-    AchievementsModule,
-    AuthModule,
-    StatsModule,
-    FriendsListModule,
-    chatModule,
-	NotificationModule,
-    // GameModule
-  ],
-  controllers: [AppController],
-  providers: [AppService, JwtService],
+	imports: [
+		ConfigModule.forRoot({ isGlobal: true }),
+		PrismaModule,
+		UserModule,
+		AchievementsModule,
+		AuthModule,
+		StatsModule,
+		FriendsListModule,
+		ChatModule,
+		GameModule,
+		NotificationModule
+	],
+	controllers: [AppController],
+	providers: [AppService, JwtService],
 })
 
 export class AppModule {}

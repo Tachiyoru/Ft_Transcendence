@@ -15,23 +15,16 @@ import {
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
 import {
-  Controller,
-  Get,
-  Put,
-  Param,
-  ParseIntPipe,
   Request,
   UseGuards,
 } from "@nestjs/common";
-import { Channel, Mode, User } from "@prisma/client";
+import { Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
 import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
-import { TokenGuard } from "src/auth/guard";
-import { subscribe } from "diagnostics_channel";
 
 @WebSocketGateway({
   cors: { origin: "http://paul-f4ar2s4:5173", credentials: true },
@@ -51,7 +44,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket) {
     const userId = client.id;
     this.connectedUsers.push(userId);
-    console.log(`Client connected: ${userId}`);
+    console.log(`Chat Client connected: ${userId}`);
   }
 
   @SubscribeMessage("gotDisconnected")

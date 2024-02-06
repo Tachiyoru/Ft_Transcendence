@@ -7,4 +7,4 @@ import { NotificationService } from "src/notification/notification.service";
 @Module({
 	providers: [chatGateway, chatService, JwtService, NotificationService],
 })
-export class chatModule {}
+export class ChatModule {}

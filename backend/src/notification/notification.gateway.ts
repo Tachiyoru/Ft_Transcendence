@@ -1,4 +1,4 @@
-import { Body, Param, UseGuards } from '@nestjs/common';
+import { Body, UseGuards } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, SubscribeMessage, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SocketTokenGuard } from 'src/auth/guard/socket-token.guard';

@@ -4,14 +4,10 @@ import
 	Controller,
 	ForbiddenException,
 	Get,
-	Param,
 	Post,
-	Res,
 	UseGuards,
 } from "@nestjs/common";
 import { TwoFAService } from "./two-fa.service";
-import { AuthService } from "src/auth/auth.service";
-import { Response } from "express";
 import { User } from "@prisma/client";
 import { TokenGuard } from "../guard";
 import { GetUser } from "../decorator";
@@ -22,7 +18,6 @@ export class TwoFaController
 {
 	constructor(
 		private readonly twoFAService: TwoFAService,
-		private readonly authService: AuthService
 	) {}
 
 

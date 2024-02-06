@@ -9,18 +9,20 @@ const SigninForm2Fa = () =>
 	const [tokenGoogle, setTokenGoogle] = useState<string>("");
 	const [resStatus, setResStatus] = useState<string>('');
 	const navigate = useNavigate();
-
+	const dispatch = useDispatch();
+	
 	const handleSubmitTwoFa = async () =>
 	{
 		try {
 			console.log(tokenGoogle)
-				const isValid = await axios.post('/two-fa/authenticate', { token: tokenGoogle });
-				console.log(isValid);
+			const isValid = await axios.post('/two-fa/authenticate', { token: tokenGoogle });
 			setResStatus("Successful Registration!");
+			dispatch(loginSuccess(isValid.data));
 			navigate("/");
+			window.location.reload();
 		} catch (error) {
-				setResStatus("Failed Registration...");
-		console.error("Error two-fa verification", error);
+			setResStatus("Failed Registration...");
+			console.error("Error two-fa verification", error);
 		}
 	};
 

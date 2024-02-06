@@ -44,10 +44,8 @@ const SigninForm = () => {
 		.then( (response) => {
 			if (response.status === 201)
 			{
-				console.log('ok', response.data);
-				if (response.data.isTwoFaEnabled)
+				if (response.data.user && response.data.user.isTwoFaEnabled)
 				{
-					dispatch(loginSuccess(response.data))
 					navigate("/sign-in-2fa");
 				}
 				else

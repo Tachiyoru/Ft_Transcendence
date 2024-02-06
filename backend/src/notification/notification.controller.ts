@@ -35,7 +35,6 @@ export class NotificationController
 		return this.notificationService.getAllNotifications();
 	}
 
-	
 	@Post("add/:id")
 	async addNotificationByUserId(
 		@Param("id", ParseIntPipe) userId: number,

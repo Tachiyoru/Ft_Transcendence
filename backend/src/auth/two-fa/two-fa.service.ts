@@ -1,11 +1,10 @@
-import { Get, Injectable, Options, Param } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { User } from "@prisma/client";
 import { authenticator } from "otplib";
 import { AuthService } from "src/auth/auth.service";
 import { GetUser } from "src/auth/decorator";
-import { toDataURL, toFileStream } from "qrcode";
-import { Response } from "express";
+import { toDataURL } from "qrcode";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()

@@ -11,7 +11,6 @@ import {
 import { AchievementsService } from "./achievements.service";
 import { TokenGuard } from "src/auth/guard";
 import { GetUser } from "src/auth/decorator";
-import { MessageBody } from "@nestjs/websockets";
 
 @Controller("achievements")
 @UseGuards(TokenGuard)

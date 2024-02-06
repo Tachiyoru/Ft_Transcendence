@@ -17,7 +17,6 @@ export class SocketTokenGuard implements CanActivate {
     private prisma: PrismaService
   ) {}
 
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     if (request.user) return true;

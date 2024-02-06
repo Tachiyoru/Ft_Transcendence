@@ -6,8 +6,8 @@ import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
-    providers: [GameGateway, GameService, PrismaService, JwtService],
-    // controllers: [GameController],
-    exports: [GameService],
+	providers: [GameGateway, GameService, PrismaService, JwtService],
+	// controllers: [GameController],
+	exports: [GameService],
 })
 export class GameModule {}
