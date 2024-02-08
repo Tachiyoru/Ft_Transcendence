@@ -15,15 +15,6 @@ export class NotificationGateway
 	) {}
 	@WebSocketServer() server: Server;
 
-	afterInit()
-	{
-		this.server.on("connection", (socket) =>
-		{
-			console.log("cooooooooooooonnected as socket :", socket.id);
-		});
-
-	}
-
 	@SubscribeMessage('unread-notification')
 	async sendUnreadNotification(@ConnectedSocket() client: Socket)
 	{
