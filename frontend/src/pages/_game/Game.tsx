@@ -23,7 +23,7 @@ const Game = () => {
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
 	const [friendsList, setFriendsList] = useState<{ username: string; }[]>([]);
-	const [userData, setUserData] = useState<{ username: string; } | null>(null);
+	const [userData, setUserData] = useState<{ username: string; id: number } | null>(null);
 	const [invitedFriend, setInvitedFriend] = useState<{ username: string; } | null>(null);
 
 	const names = ['Shan', 'Manu', 'Bob'];
@@ -54,7 +54,7 @@ const Game = () => {
 		const fetchUserData = async () =>
 		{
 			try {
-				const response = await axiosInstance.get<{ username: string; }>("/users/me");
+				const response = await axiosInstance.get<{ username: string; id: number }>("/users/me");
 				setUserData(response.data);
 
 			} catch (error) {
@@ -73,9 +73,16 @@ const Game = () => {
 		// envoyer une notification à l'utilisateur sélectionné
 		const sendNotification = async () =>
 		{
-			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2 });
+			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
 		}
 		sendNotification();
+
+		const createInviteGame = async () =>
+		{
+			socket.emit("createInviteGame", user.id);
+		}
+
+		createInviteGame();
 
 		if (indexExists === -1) {
 			updatedIndexes.push(index);

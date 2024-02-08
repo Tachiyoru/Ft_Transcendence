@@ -59,7 +59,7 @@ export class NotificationService
 	async addNotificationByUserId(
 		userId: number,
 		notificationDto: CreateNotificationDto,
-		notifType: number
+		notifType: number,
 	)
 	{
 		const user = await this.prismaService.user.findUnique({
@@ -81,6 +81,7 @@ export class NotificationService
 						id: user.id,
 					},
 				},
+				fromId: notificationDto.fromUserId,
 				type: notifType,
 				content: updatedContent,
 			},
@@ -210,4 +211,17 @@ export class NotificationService
 
 		return deletedNotification;
 	}
+
+	async getSingleNotificationById(notificationId: number)
+	{
+		const notification = await this.prismaService.notification.findUnique({
+			where: { id: notificationId },
+		});
+
+		if (!notification)
+			throw new Error("Notification not found");
+
+		return (notification);
+	}
+
 }

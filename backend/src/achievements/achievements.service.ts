@@ -84,18 +84,6 @@ export class AchievementsService
 		return achievementsList;
 	}
 
-	async getMyAchievements(user: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: { achievements: true },
-		});
-
-		if (!me) throw new Error("User not found");
-
-		return me.achievements;
-	}
-
 	async getLockedAchievements(user: User)
 	{
 		const achievementsList = await this.getAchievementsList();
@@ -114,6 +102,20 @@ export class AchievementsService
 		);
 		console.log("locked Achievements : ", lockedAchievements);
 		return (lockedAchievements);
+	}
+
+
+	async getMyAchievements(user: User)
+	{
+		const me = await this.prismaService.user.findUnique({
+			where: { id: user.id },
+			include: { achievements: true },
+		});
+
+		if (!me)
+			throw new Error("User not found");
+
+		return me.achievements;
 	}
 
 	async getAchievementsByUserId(userId: number)
@@ -140,13 +142,15 @@ export class AchievementsService
 				achievements: true,
 			},
 		});
-		if (!user) throw new Error("User not found");
+		if (!user)
+			throw new Error("User not found");
 		const achievement = await this.prismaService.achievement.findUnique({
 			where: {
 				id: achievementId,
 			},
 		});
-		if (!achievement) throw new Error("Achievement not found");
+		if (!achievement)
+			throw new Error("Achievement not found");
 		const userAchievements = user.achievements;
 		const achievementAlreadyExists = userAchievements.find(
 			(achievement) => achievement.idType === achievementId

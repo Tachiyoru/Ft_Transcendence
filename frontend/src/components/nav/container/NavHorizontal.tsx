@@ -19,6 +19,7 @@ interface NavItemProps {
 interface Notification {
   id: number;
   content: string;
+	fromId?: number;
   read: boolean;
   type: number;
   // Ajoutez d'autres propriétés de notification si nécessaire
@@ -110,16 +111,12 @@ const NavHorizontal = () => {
   const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
   const [searchValue, setSearchValue] = useState<string>(""); // État pour la valeur de recherche
   const [showUserList, setShowUserList] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<string>("");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
 	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
-  const [selectedNotificationId, setSelectedNotificationId] = useState<
-    number | null
-  >(null);
 
-const socket = useContext(WebSocketContext);
+	const socket = useContext(WebSocketContext);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -192,7 +189,38 @@ const socket = useContext(WebSocketContext);
         console.error("Error fetching and setting notifications:", error);
       }
     }
-  }, [selectedSection, notificationVisible]);
+	}, [selectedSection, notificationVisible]);
+
+	const fetchSingleNotification = async (notificationId: number | null) =>
+	{
+		if (!notificationId)
+			return ;
+		try
+		{
+			const response = await axios.get<Notification>(`/notification/single/${notificationId}`);
+			return (response.data);
+		}
+		catch (error)
+		{
+			console.error("Error fetching single notification:", error);
+			return (null);
+		}
+	}
+	
+	const checkInvitedGame = async (notificationId: number) =>
+	{
+		try
+		{
+			const notification = await fetchSingleNotification(notificationId);
+			console.log("Notification fetched : ", notification);
+			if (notification && notification.fromId)
+				socket.emit("checkInvitedGame", notification.fromId);
+		}
+		catch (error)
+		{
+			console.error("Error checking invited game notification:", error);
+		}
+	}
 
   useEffect(() => {
     if (selectedSection === "Notifications") {
@@ -200,8 +228,6 @@ const socket = useContext(WebSocketContext);
     }
   }, [selectedSection, handleNotificationClick]);
 
-  const [notificationRedirect, setNotificationRedirect] = useState<string>("/");
-  0;
   const getNotificationRedirect = (type: number) => {
 		if (type == 0)
 			return "/friends#invitations";
@@ -224,18 +250,17 @@ const socket = useContext(WebSocketContext);
 	const markNotificationAsRead = async (notificationId: number) => {
 		socket.emit("update-notification-number", { notifId: notificationId });
 	};
-	
-  const handleNotificationItemClick = (
+
+  const handleNotificationItemClick = async (
 		notificationId: number,
     notificationType: number
 		) =>
-		{
-			if (notificationType === 2)
+	{
+		if (notificationType === 2)
 			return ;
-		setSelectedNotificationId(notificationId);
-    markNotificationAsRead(notificationId);
+		markNotificationAsRead(notificationId);
 		setSelectedSection(null);
-  };
+	};
 
   const getContent = () => {
     if (selectedSection === "Notifications") {
@@ -278,6 +303,7 @@ const socket = useContext(WebSocketContext);
 												<Link to={'/game'}
 													onClick={() =>
 													{
+														checkInvitedGame(notification.id);
 														markNotificationAsRead(notification.id);
 														setSelectedSection(null);
 													}}
