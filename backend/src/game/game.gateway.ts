@@ -13,17 +13,13 @@ import { delay } from 'rxjs';
 	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
 })
 @UseGuards(SocketTokenGuard)
-export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+export class GameGateway
 {
 	@WebSocketServer() server: Server;
 
 	constructor(
 		private gameService: GameService,
 		private readonly prisma: PrismaService) {};
-
-	afterInit(server: Server)
-	{
-	}
 
 	// @SubscribeMessage("saucisse")
 	// async connection(
