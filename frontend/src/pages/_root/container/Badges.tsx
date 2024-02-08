@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "../../../axios/api";
+import { set } from "react-hook-form";
 
 interface Badge {
   id: number;
+  idType: number;
   icon: string;
   title: string;
   description: string;
@@ -13,26 +15,28 @@ interface BadgesSectionProps {
   //   onSelectBadge: (badgeId: number) => void;
 }
 
-const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) => {
-  const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
+const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) =>
+{
+	const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
+	// const [achievementLocked, setAchievementLocked] = useState<Badge[]>([]);
+	const handleBadgeClick = async (badgeId: number) =>
+	{
+		setSelectedBadgeId(badgeId);
+		await axios.patch(`achievements/settitle/${badgeId}`);
+		badgeId = 0;
+	};
+	const badgeIds = userAchievements.map(badge => badge.idType);
 
-  const handleBadgeClick = async (badgeId: number) => {
-    setSelectedBadgeId(badgeId);
-    await axios.patch(`achievements/settitle/${badgeId}`);
-    badgeId = 0;
-  };
-  const badgeIds = userAchievements.map(badge => badge.id);
-
-  const achievementTitles = [
-    "Link your profile to 42 or Github",
-    "10 times winner",
-    "Top 3 worldwide",
-    "Take revenge",
-    "First game",
-    "Changed your avatar/username",
-    "Did 42 games",
-    "Serial looser : lose 10 times in a row",
-  ];
+	const achievementTitles = [
+		"Link your profile to 42 or Github",
+		"10 times winner",
+		"Top 3 worldwide",
+		"Take revenge",
+		"First game",
+		"Changed your avatar/username",
+		"Did 42 games",
+		"Serial looser : lose 10 times in a row",
+	];
 
   return (
     <div className="w-full lg:w-60 relative">
@@ -55,13 +59,13 @@ const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) => {
               <img src={badge.icon} alt={badge.title} />
             </div>
           ))}
-            {[...Array(8)].map((_, index) => (
-              !badgeIds.includes(index + 1) && (
-                <div key={index} className="w-12 h-12 m-1 opacity-20" title={achievementTitles[index]}>
-                  <img src={`/src/achievements-${index + 1}.png`} alt={achievementTitles[index]} />
-                </div>
-              )
-            ))}
+						{[...Array(8)].map((_, index) => (
+							!badgeIds.includes(index + 1) && (
+								<div key={index} className="w-12 h-12 m-1 opacity-20" title={achievementTitles[index]}>
+									<img src={`/src/achievements-${index + 1}.png`} alt={achievementTitles[index]} />
+								</div>
+							)
+						))}
         </div>
       </div>
     </div>
