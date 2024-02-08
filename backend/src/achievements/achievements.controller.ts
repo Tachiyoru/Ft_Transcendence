@@ -27,6 +27,12 @@ export class AchievementsController {
     return this.achievementsService.getMyAchievements(user);
   }
 
+	@Get("/locked")
+	async getLockedAchievements(@GetUser() user: User): Promise<Achievement[]>
+	{
+		return this.achievementsService.getLockedAchievements(user);
+	}
+	
   @Get("/:id")
   async getAchievementsByUserId(
     @Param("id", ParseIntPipe) userId: number

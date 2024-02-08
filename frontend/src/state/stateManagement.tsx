@@ -11,7 +11,7 @@ export const useDashboardState = () => {
 	});
 	const [userRankingGlobal, setUserRankingGlobal] = useState<{ username: string; id: number}[]>([]);
 	const [userRankingFriends, setUserRankingFriends] = useState<{ username: string; }[]>([]);
-	const [userAchievements, setUserAchievements] = useState<{ icon: string; id: number }[]>([]);
+	const [userAchievements, setUserAchievements] = useState<{ icon: string; id: number; idType:number }[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	return {

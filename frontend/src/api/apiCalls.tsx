@@ -59,50 +59,56 @@ export const fetchDataUser = async ({
       await axios.post(`achievements/add/${3}`);
     }
 
-    const userAchievements = await axios.get("/achievements/mine");
-    setUserAchievements(userAchievements.data);
+    const userAchievementsResponse = await axios.get("/achievements/mine");
+		const userAchievementsData = userAchievementsResponse.data;
+    // setUserAchievements(userAchievementsResponse.data);
 
-    if (userStatResponse.data) {
+    if (userStatResponse.data && userAchievementsData) {
       //first game
       if (
-        userStatResponse.data.partyPlayed >= 1 &&
-        !userAchievements.data.some((achievement) => achievement.idType === 5)
-      ) {
-        await axios.post(`achievements/add/${5}`);
-      }
-      //win 10 parties
-      if (
-        userStatResponse.data.partyWon >= 10 &&
-        !userAchievements.data.some((achievement) => achievement.idType === 2)
-      ) {
-        await axios.post(`achievements/add/${2}`);
-      }
-      //did 42 parties
-      if (
-        userStatResponse.data.partyPlayed >= 42 &&
-        !userAchievements.data.some((achievement) => achievement.idType === 7)
-      ) {
-        await axios.post(`achievements/add/${7}`);
-      }
-      //lose 10 parties in a row
-      let consecutiveDefeats = 0;
-      const history = userStatResponse.data.history;
-      for (let i = 0; i < history.length; i++) {
-        const currentItem = history[i];
-        const nextItem = history[i + 1];
-        if (currentItem.includes(`Defeat`)) {
-          consecutiveDefeats++;
-          if (consecutiveDefeats === 10)
-            await axios.post(`achievements/add/${8}`);
-        } else {
-          consecutiveDefeats = 0;
-        }
-      }
-    }
-    const userAchievementsup = await axios.get("/achievements/mine");
-    setUserAchievements(userAchievementsup.data);
-  } catch (error) {
-    console.error("Error fetching user data:", error);
+				userStatResponse.data.partyPlayed >= 1 &&
+        !userAchievementsData.some((achievement) => achievement.idType === 5)
+				) {
+					await axios.post(`achievements/add/${5}`);
+				}
+				//win 10 parties
+				if (
+					userStatResponse.data.partyWon >= 10 &&
+					!userAchievementsData.some((achievement) => achievement.idType === 2)
+					) {
+						await axios.post(`achievements/add/${2}`);
+					}
+					//did 42 parties
+					if (
+						userStatResponse.data.partyPlayed >= 42 &&
+						!userAchievementsData.some((achievement) => achievement.idType === 7)
+						) {
+							await axios.post(`achievements/add/${7}`);
+						}
+						//lose 10 parties in a row
+						let consecutiveDefeats = 0;
+						const history = userStatResponse.data.history;
+						for (let i = 0; i < history.length; i++) {
+							const currentItem = history[i];
+							const nextItem = history[i + 1];
+							if (currentItem.includes(`Defeat`)) {
+								consecutiveDefeats++;
+								if (consecutiveDefeats === 10)
+								await axios.post(`achievements/add/${8}`);
+						} else {
+							consecutiveDefeats = 0;
+						}
+					}
+				}
+
+				const updatedAchievements = await axios.get("/achievements/mine");
+				const filteredAchievements = [...updatedAchievements.data].filter(
+        (achievement, index, self) =>
+          index === self.findIndex((a) => a.idType === achievement.idType)
+      	);
+				setUserAchievements(filteredAchievements);
+			} catch (error) {
+				console.error("Error fetching user data:", error);
   } finally {
     setLoading(false);
   }
