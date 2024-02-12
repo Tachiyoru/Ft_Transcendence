@@ -163,10 +163,9 @@ export class AuthService
 			where: { id: userA.id },
 			data: { status: 'OFFLINE' }
 		});
-		// console.log("user disconnected");
-		// response.clearCookie("access_token");
-		// response.clearCookie("refresh_token");
-		// console.log(response);
+		console.log("user disconnected");
+		response.clearCookie("access_token");
+		response.clearCookie("refresh_token");
 		return "Successfully logged out";
 	}
 }
