@@ -1,5 +1,5 @@
 import MainLayout from "../../components/nav/MainLayout";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { useDashboardState } from "../../state/stateManagement";
 import Sidebar from "./container/SideBar";
@@ -59,7 +59,9 @@ const Dashboard = () => {
   }
 
   if (!userData) {
-    return <div>Error loading user data</div>;
+	
+    return <Navigate to='/sign-in'/>;
+	// return <div>Error loading user data</div>;
   }
 
   return (

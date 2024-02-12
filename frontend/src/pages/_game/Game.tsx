@@ -73,6 +73,7 @@ const Game = () => {
 		const sendNotification = async () =>
 		{
 			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+			socket.emit("all-update")
 		}
 		sendNotification();
 

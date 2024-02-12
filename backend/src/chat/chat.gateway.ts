@@ -14,10 +14,7 @@ import {
   createChannel,
 } from "./dto/create-message.dto";
 import { Server, Socket } from "socket.io";
-import {
-  Request,
-  UseGuards,
-} from "@nestjs/common";
+import { Request, UseGuards } from "@nestjs/common";
 import { Mode, User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { addUserToChannelDto } from "./dto/add-to-channel.dto";
@@ -259,7 +256,13 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           NotificationType.INTEGRATED_TO_CHANNEL
         );
       }
-      client.emit("usersAdded", result);
+    //   client.emit("usersAdded", result);
+	const chanlist = await this.prisma.channel.findMany();
+    const emitPromises = this.connectedUsers.map(async (element) => {
+      await this.server.to(element).emit("update-call");
+      await this.server.to(element).emit("actu");
+      await this.server.to(element).emit("actu-notif");
+    });
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("addUsersError", { message: error.message });
@@ -318,7 +321,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       this.allUpdate();
     } catch (error) {
-        client.emit("renameChanError", { message: error.message });
+      client.emit("renameChanError", { message: error.message });
     }
   }
 
@@ -338,10 +341,11 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("all-update")
   async allUpdate(): Promise<void> {
-    const chanlist = await this.prisma.channel.findMany();
+	const chanlist = await this.prisma.channel.findMany();
     const emitPromises = this.connectedUsers.map(async (element) => {
       await this.server.to(element).emit("update-call");
-	  await this.server.to(element).emit("actu");
+      await this.server.to(element).emit("actu");
+      await this.server.to(element).emit("actu-notif");
     });
     await Promise.all(emitPromises);
   }
@@ -420,6 +424,11 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         req
       );
       client.emit("userBanned", result);
+	  const chanlist = await this.prisma.channel.findMany();
+	  const emitPromises = this.connectedUsers.map(async (element) => {
+		await this.server.to(element).emit("update-call");
+		await this.server.to(element).emit("actu");
+	  });
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("banUserError", { message: error.message });
@@ -439,6 +448,11 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         req
       );
       client.emit("userUnBanned", result);
+	  const chanlist = await this.prisma.channel.findMany();
+	  const emitPromises = this.connectedUsers.map(async (element) => {
+		await this.server.to(element).emit("update-call");
+		await this.server.to(element).emit("actu");
+	  });
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("unBanUserError", { message: error.message });
@@ -458,6 +472,11 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         req
       );
       client.emit("userKicked", result);
+	  const chanlist = await this.prisma.channel.findMany();
+	  const emitPromises = this.connectedUsers.map(async (element) => {
+		await this.server.to(element).emit("update-call");
+		await this.server.to(element).emit("actu");
+	  });
       this.server.emit("channel", result, result.messages);
     } catch (error) {
       client.emit("kickUserError", { message: error.message });

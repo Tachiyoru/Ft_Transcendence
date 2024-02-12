@@ -3,6 +3,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, SubscribeMessag
 import { Server, Socket } from 'socket.io';
 import { SocketTokenGuard } from 'src/auth/guard/socket-token.guard';
 import { NotificationService } from './notification.service';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @WebSocketGateway({
 	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
@@ -21,6 +22,23 @@ export class NotificationGateway
 		const unreadNotifications = await this.notificationService.getUnreadNotifications(client.handshake.auth.id);
 		this.server.to(client.id).emit('unread-notification-array', unreadNotifications);
 	}
+
+	// @SubscribeMessage('add-notification')
+	// async addNotificationByUserId(
+	// 	// @Param("id", ParseIntPipe) userId: number,
+	// 	@ConnectedSocket() client: Socket,
+	// 	@Body() userId: number ,notificationDto: CreateNotificationDto, notifType: number
+	// )
+	// {
+	// 	const notif = this.notificationService.addNotificationByUserId(
+	// 		userId,
+	// 		notificationDto,
+	// 		notifType
+	// 	);
+	// 	client.emit("actu-notification");
+	// 	return notif;
+	// }
+
 
 	@SubscribeMessage('update-notification-number')
 	async updateNotificationNumber(
