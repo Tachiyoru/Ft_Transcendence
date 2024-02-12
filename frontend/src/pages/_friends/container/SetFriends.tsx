@@ -127,13 +127,17 @@ const SetFriends: React.FC = () => {
       const count = await hasNewInvitations();
       setHasNewInvitationsCount(count);
     };
-
     updateNewInvitationsCount();
   }, [filtreActif]);
 
   const handleInputClick = () => {
     setIsDropdownOpen(true);
   };
+
+  const notifMoins = () => {
+	const count = hasNewInvitationsCount - 1;
+	setHasNewInvitationsCount(count)
+  }
 
   const filteredUsers = listUsersNotFriend.filter((user) =>
     user.username.toLowerCase().includes(searchText.toLowerCase())
@@ -164,6 +168,7 @@ const SetFriends: React.FC = () => {
         `/friends-list/friend-request/${selectedUser.id}`
 			);
 			dispatch(setListUsersPending([...listUsersPending, selectedUser]));
+			socket.emit("all-update")
     } catch (error) {
 			console.error("Error adding friend:", error);
     }
@@ -202,6 +207,7 @@ const SetFriends: React.FC = () => {
                 value={searchText}
               />
               <span className="absolute inset-y-0 left-0 pl-3 pt-3.5 flex items-center">
+				
                 {isTyping || isDropdownOpen ? (
                   <FaArrowTurnUp className="text-accent-violet mt-1 w-3 h-3 transform rotate-90" />
                 ) : (

@@ -51,7 +51,7 @@ export class AchievementsController
 		@Param("id", ParseIntPipe) id: number
 	): Promise<User>
 	{
-		return await this.achievementsService.addAchievementByUserId(user.id, id);
+		return this.achievementsService.addAchievementByUserId(user.id, id);
 	}
 }
 

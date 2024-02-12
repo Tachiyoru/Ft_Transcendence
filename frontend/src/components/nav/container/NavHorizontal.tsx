@@ -1,4 +1,11 @@
-import { FaMagnifyingGlass, FaBell, FaTrophy, FaUserPlus, FaXmark, FaCheck } from "react-icons/fa6";
+import {
+  FaMagnifyingGlass,
+  FaBell,
+  FaTrophy,
+  FaUserPlus,
+  FaXmark,
+  FaCheck,
+} from "react-icons/fa6";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,7 +26,7 @@ interface NavItemProps {
 interface Notification {
   id: number;
   content: string;
-	fromId?: number;
+  fromId?: number;
   read: boolean;
   type: number;
   // Ajoutez d'autres propriétés de notification si nécessaire
@@ -87,13 +94,11 @@ export const getLoggedInUserInfo = async (): Promise<{ id: number }> => {
     return response.data;
   } catch (error) {
     console.error("Error fetching logged-in user info:", error);
-    return { id: -1 }; 
+    return { id: -1 };
   }
 };
 
-export const getNotifications = async (
-  id: number
-): Promise<Notification[]> => {
+export const getNotifications = async (id: number): Promise<Notification[]> => {
   try {
     const response = await axios.get<Notification[]>(`/notification/${id}`);
     return response.data;
@@ -113,10 +118,11 @@ const NavHorizontal = () => {
   const [showUserList, setShowUserList] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
-	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [actuReceived, setActuReceived] = useState<boolean>(false);
 
-	const socket = useContext(WebSocketContext);
+  const socket = useContext(WebSocketContext);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -128,7 +134,14 @@ const NavHorizontal = () => {
       }
     };
     fetchUserData();
-  }, []);
+    setActuReceived(false);
+  }, [actuReceived]);
+
+  socket.on("actu-notif", (channelList) => {
+    socket.emit("unread-notification");
+	console.log("actu-notif received");
+    socket.off("actu-notif");
+  });
 
   const filteredUsers = listUsers.filter((user) =>
     user.username.toLowerCase().includes(searchValue.toLowerCase())
@@ -165,16 +178,14 @@ const NavHorizontal = () => {
   }, [menuRef]);
 
   useEffect(() => {
-      socket.emit("unread-notification");
-      socket.on("unread-notification-array", (notification) => {
-				if (notification)
-					setUnreadNotifications(notification.length);
-			});
-	  return () => {
-		  socket.off("unread-notification-array");
-	  }
-	}, [socket]);
-
+    socket.emit("unread-notification");
+    socket.on("unread-notification-array", (notification) => {
+      if (notification) setUnreadNotifications(notification.length);
+    });
+    return () => {
+      socket.off("unread-notification-array");
+    };
+  }, [socket]);
 
   const handleNotificationClick = useCallback(async () => {
     if (selectedSection === "Notifications") {
@@ -189,37 +200,30 @@ const NavHorizontal = () => {
         console.error("Error fetching and setting notifications:", error);
       }
     }
-	}, [selectedSection, notificationVisible]);
+  }, [selectedSection, notificationVisible]);
 
-	const fetchSingleNotification = async (notificationId: number | null) =>
-	{
-		if (!notificationId)
-			return ;
-		try
-		{
-			const response = await axios.get<Notification>(`/notification/single/${notificationId}`);
-			return (response.data);
-		}
-		catch (error)
-		{
-			console.error("Error fetching single notification:", error);
-			return (null);
-		}
-	}
-	
-	const checkInvitedGame = async (notificationId: number) =>
-	{
-		try
-		{
-			const notification = await fetchSingleNotification(notificationId);
-			if (notification && notification.fromId)
-				socket.emit("checkInvitedGame", notification.fromId);
-		}
-		catch (error)
-		{
-			console.error("Error checking invited game notification:", error);
-		}
-	}
+  const fetchSingleNotification = async (notificationId: number | null) => {
+    if (!notificationId) return;
+    try {
+      const response = await axios.get<Notification>(
+        `/notification/single/${notificationId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching single notification:", error);
+      return null;
+    }
+  };
+
+  const checkInvitedGame = async (notificationId: number) => {
+    try {
+      const notification = await fetchSingleNotification(notificationId);
+      if (notification && notification.fromId)
+        socket.emit("checkInvitedGame", notification.fromId);
+    } catch (error) {
+      console.error("Error checking invited game notification:", error);
+    }
+  };
 
   useEffect(() => {
     if (selectedSection === "Notifications") {
@@ -228,111 +232,116 @@ const NavHorizontal = () => {
   }, [selectedSection, handleNotificationClick]);
 
   const getNotificationRedirect = (type: number) => {
-		if (type == 0)
-			return "/friends#invitations";
-		else if (type == 1)
-			return "/friends#tous"
-		else if (type == 2)
-			return ""
-		else if (type == 3)
-			return "/"
-		else if (type == 4)
-			return "/chat"
-		else if (type == 5)
-			return "/chat"
-		else if (type == 6)
-			return "/chat"
-		else
-			return "/";
+    if (type == 0) return "/friends#invitations";
+    else if (type == 1) return "/friends#tous";
+    else if (type == 2) return "";
+    else if (type == 3) return "/";
+    else if (type == 4) return "/chat";
+    else if (type == 5) return "/chat";
+    else if (type == 6) return "/chat";
+    else return "/";
   };
 
-	const markNotificationAsRead = async (notificationId: number) => {
-		socket.emit("update-notification-number", { notifId: notificationId });
-	};
+  const markNotificationAsRead = async (notificationId: number) => {
+    socket.emit("update-notification-number", { notifId: notificationId });
+  };
 
   const handleNotificationItemClick = async (
-		notificationId: number,
+    notificationId: number,
     notificationType: number
-		) =>
-	{
-		if (notificationType === 2)
-			return ;
-		markNotificationAsRead(notificationId);
-		setSelectedSection(null);
-	};
+  ) => {
+    if (notificationType === 2) return;
+    markNotificationAsRead(notificationId);
+    setSelectedSection(null);
+  };
 
   const getContent = () => {
     if (selectedSection === "Notifications") {
       return (
         <>
-        {notifications.length > 0 ? (
-          <div
-            ref={menuRef}
-            className="shadow-md bg-dark-violet w-44 rounded-lg py-2 px-4 absolute right-2 mt-1"
-            style={{ cursor: "default", zIndex: 1 }}
-          >
-            <ul>
-              {notifications.map((notification) => (
-                <li
-                  key={notification.id}
-                  className={`flex flex-row text-fushia text-xs py-2 ${
-                    notification.read ? "text-opacity-40 text-lilac" : ""
-                  }`}
-                  onClick={() =>
-                    handleNotificationItemClick(
-                      notification.id,
-                      notification.type
-                    )
-                  }
-                >
-                    {notification.type === 3 && <FaTrophy className="mr-2 w-7 h-5"/>}
-                    {notification.type === 0 && <FaUserPlus className="mr-2 w-5 h-5"/>}
-                    {notification.type === 1 && <FaUserPlus className="mr-2 w-5 h-5"/>}
-                    {notification.type === 5 && <RiMessage3Fill className="mr-2 w-7 h-5"/>}
-										{notification.type === 6 && <LuBadgeCheck className="mr-2 w-7 h-5" />}
-									{notification.type === 2 && <RiGamepadFill className="mr-2 w-7 h-5" />}
-									<div>
-										{notification.type === 2 ? (<span>{notification.content}</span>) : (
-										<Link to={getNotificationRedirect(notification.type)}>
-											<span className="hover:underline">{notification.content}</span>
-									</Link>
-										)}
-											{notification.type === 2 && (
-											<div className="flex flex-row gap-x-6 mt-1">
-												<Link to={'/game'}
-													onClick={() =>
-													{
-														checkInvitedGame(notification.id);
-														markNotificationAsRead(notification.id);
-														setSelectedSection(null);
-													}}
-												>
-												<div 
-													className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
-													style={{cursor: 'pointer'}}
-													>
-													<FaCheck className="w-[10px] h-[10px] text-acid-green"/>
-													</div>
-													</Link>
-												<div 
-													className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
-													onClick={() =>
-													{
-														markNotificationAsRead(notification.id);
-														setSelectedSection(null);
-													}}
-													style={{cursor: 'pointer'}}
-													>
-													<FaXmark className="w-[10px] h-[10px] text-red-orange"/>
-												</div>
-											</div>
-											)}
-									</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+          {notifications.length > 0 ? (
+            <div
+              ref={menuRef}
+              className="shadow-md bg-dark-violet w-44 rounded-lg py-2 px-4 absolute right-2 mt-1"
+              style={{ cursor: "default", zIndex: 1 }}
+            >
+              <ul>
+                {notifications.map((notification) => (
+                  <li
+                    key={notification.id}
+                    className={`flex flex-row text-fushia text-xs py-2 ${
+                      notification.read ? "text-opacity-40 text-lilac" : ""
+                    }`}
+                    onClick={() =>
+                      handleNotificationItemClick(
+                        notification.id,
+                        notification.type
+                      )
+                    }
+                  >
+                    {notification.type === 3 && (
+                      <FaTrophy className="mr-2 w-7 h-5" />
+                    )}
+                    {notification.type === 0 && (
+                      <FaUserPlus className="mr-2 w-5 h-5" />
+                    )}
+                    {notification.type === 1 && (
+                      <FaUserPlus className="mr-2 w-5 h-5" />
+                    )}
+                    {notification.type === 5 && (
+                      <RiMessage3Fill className="mr-2 w-7 h-5" />
+                    )}
+                    {notification.type === 6 && (
+                      <LuBadgeCheck className="mr-2 w-7 h-5" />
+                    )}
+                    {notification.type === 2 && (
+                      <RiGamepadFill className="mr-2 w-7 h-5" />
+                    )}
+                    <div>
+                      {notification.type === 2 ? (
+                        <span>{notification.content}</span>
+                      ) : (
+                        <Link to={getNotificationRedirect(notification.type)}>
+                          <span className="hover:underline">
+                            {notification.content}
+                          </span>
+                        </Link>
+                      )}
+                      {notification.type === 2 && (
+                        <div className="flex flex-row gap-x-6 mt-1">
+                          <Link
+                            to={"/game"}
+                            onClick={() => {
+                              checkInvitedGame(notification.id);
+                              markNotificationAsRead(notification.id);
+                              setSelectedSection(null);
+                            }}
+                          >
+                            <div
+                              className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
+                              style={{ cursor: "pointer" }}
+                            >
+                              <FaCheck className="w-[10px] h-[10px] text-acid-green" />
+                            </div>
+                          </Link>
+                          <div
+                            className="w-[26px] h-[26px] mt-1 bg-violet-black rounded-full grid justify-items-center items-center hover:bg-purple"
+                            onClick={() => {
+                              markNotificationAsRead(notification.id);
+                              setSelectedSection(null);
+                            }}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <FaXmark className="w-[10px] h-[10px] text-red-orange" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </>
       );
     }
@@ -365,13 +374,13 @@ const NavHorizontal = () => {
                 <ul className="absolute h-24 w-full bg-lilac z-10">
                   {filteredUsers.map((user, index) => (
                     <Link to={`/user/${user.username}`}>
-                        <li
-                          key={index}
-                          className="px-2 py-1 hover:bg-purple cursor-pointer"
-                          onClick={() => handleUserClick()}
-                        >
-                          {user.username}
-                        </li>
+                      <li
+                        key={index}
+                        className="px-2 py-1 hover:bg-purple cursor-pointer"
+                        onClick={() => handleUserClick()}
+                      >
+                        {user.username}
+                      </li>
                     </Link>
                   ))}
                 </ul>
