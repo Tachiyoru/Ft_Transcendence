@@ -80,4 +80,13 @@ export class NotificationController
 	{
 		return this.notificationService.getNotificationsById(userId);
 	}
+
+	// function to gat a single notification by id
+	@Get("single/:id")
+	async getSingleNotificationById(
+		@Param("id", ParseIntPipe) notificationId: number
+	): Promise<Notification>
+	{
+		return this.notificationService.getSingleNotificationById(notificationId);
+	}	
 }

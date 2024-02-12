@@ -48,7 +48,7 @@ export class GameGateway
 	)
 	{
 		const gameDB = await this.prisma.game.create({ data: {} });
-		this.gameService.createGame(gameDB.gameId, player1User, player1Socket, player2User, player2Socket);
+		this.gameService.createGame(gameDB.gameId, player1User.id, player1Socket, player2User, player2Socket);
 	}
 
 	@SubscribeMessage("start")
@@ -64,9 +64,54 @@ export class GameGateway
 			this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
 			this.server.to(game.player2.playerSocket).emit("CreatedGame", game);
 		}
+	}
+
+	@SubscribeMessage("createInviteGame")
+	async createInviteGame(
+		@MessageBody() invitedId: number,
+		@ConnectedSocket() client: Socket,
+		@Request() req: any
+	)
+	{
+		const game = await this.gameService.createInviteGame(invitedId, client, req);
+	}
+
+	@SubscribeMessage("checkInvitedGame")
+	async checkInvitedGame(
+		@MessageBody() hostId: number,
+		@ConnectedSocket() client: Socket,
+		@Request() req: any
+	)
+	{
+		const game = await this.gameService.checkInvitedGame(hostId, client, req);
+		if (game && game.invitedSocket && game.status === 1)
+		{
+			const invitedUser = await this.prisma.user.findUnique({
+				where: { id: game.invitedId }
+			});
+			if (!invitedUser)
+				throw new Error("User not found");
+			const gameDB = await this.prisma.game.create({ data: {} });
+			const gameSession = await this.gameService.createGame(gameDB.gameId, hostId, game.hostSocket, invitedUser, game.invitedSocket);
+			if (gameSession)
+			{
+				this.server.to(gameSession.player1.playerSocket).emit("CreatedGame", gameSession);
+				this.server.to(gameSession.player2.playerSocket).emit("CreatedGame", gameSession);
+				await this.gameService.removeGameInvite(game.gameInviteId);
+			}
+			return gameSession;
+		}
 
 	}
 
+	// @SubscribeMessage("createInviteGame")
+	// async createInviteGame(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@Request() req: any
+	// )
+	// {
+	// 	const game = await this.gameService.createInviteGame(client, req);
+	// }
 
 	// @SubscribeMessage("gotDisconnected")
 	// async removeUserFromGame(
@@ -217,6 +262,8 @@ export class GameGateway
 	{
 		console.log(`Client disconnected: ${client.id}`);
 	}
+
+
 
 	// @SubscribeMessage('start_game')
 	// handleGameStart(client: any, payload: any): void {

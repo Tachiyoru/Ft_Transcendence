@@ -11,6 +11,7 @@ import Draw from "../../components/popin/Draw";
 import { WebSocketContext } from "../../socket/socket";
 import axiosInstance from "../../axios/api";
 import UserNameField from "../_auth/fields/UserNameField";
+import { set } from "react-hook-form";
 
 const Game = () => {
 	const location = useLocation();
@@ -22,6 +23,8 @@ const Game = () => {
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
 	const [friendsList, setFriendsList] = useState<{ username: string; }[]>([]);
+	const [userData, setUserData] = useState<{ username: string; id: number } | null>(null);
+	const [invitedFriend, setInvitedFriend] = useState<{ username: string; } | null>(null);
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -33,8 +36,12 @@ const Game = () => {
         }
 		};
 
-	useEffect(() => {
-    const fetchUserData = async () => {
+	useEffect(() =>
+	{
+		
+		// need to change to only friend list, not all users
+
+    const fetchAllUsersData = async () => {
       try {
         const response = await axiosInstance.get<{ username: string }[]>("/users/all");
         setFriendsList(response.data);
@@ -42,7 +49,19 @@ const Game = () => {
         console.error("Error fetching user list:", error);
       }
     };
-    fetchUserData();
+		fetchAllUsersData();
+		
+		const fetchUserData = async () =>
+		{
+			try {
+				const response = await axiosInstance.get<{ username: string; id: number }>("/users/me");
+				setUserData(response.data);
+
+			} catch (error) {
+				console.error("Error fetching user list:", error);
+			}
+		}
+		fetchUserData();
   }, []);
 
 	const setClickedIndex = (index: number, user: {username: string, id: number}) => {
@@ -50,12 +69,20 @@ const Game = () => {
 
 		const indexExists = updatedIndexes.indexOf(index);
 		console.log(user.username, user.id);
+		setInvitedFriend(user);
 		// envoyer une notification à l'utilisateur sélectionné
 		const sendNotification = async () =>
 		{
-			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: "Mansha", type: 2 });
+			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
 		}
 		sendNotification();
+
+		const createInviteGame = async () =>
+		{
+			socket.emit("createInviteGame", user.id);
+		}
+
+		createInviteGame();
 
 		if (indexExists === -1) {
 			updatedIndexes.push(index);
@@ -169,7 +196,7 @@ const Game = () => {
 											className="flex flex-row justify-content items-center px-2 py-1 cursor-pointer"
 											onMouseEnter={() => setHoveredIndex(index)}
 											onMouseLeave={() => setHoveredIndex(null)}
-											onClick={() => setClickedIndex(index, user)}
+										onClick={() => setClickedIndex(index, user)}
 										>
 											<div className="mr-2">
 											{index === hoveredIndex ? (
@@ -212,9 +239,9 @@ const Game = () => {
 								<h3 className="absolute font-audiowide text-xl">Waiting for...</h3>
 								<div className="w-full h-5/6 bg-filter my-4 p-4 flex flex-col justify-center items-center">
 									<div className="element-to-animate rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
-										<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
+										<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50" style={{ fontSize: '40px' }} />
 									</div>
-									<p>Name</p>
+									<p>{invitedFriend?.username}</p>
 									<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
 										<div className="h-full bg-fushia" style={{ width: '50%' }} />
 									</div>
@@ -252,7 +279,7 @@ const Game = () => {
 										<div className="bg-purple rounded-full mt-10" style={{ width: '80px', height: '80px' }}>
 											<FaUser className="absolute transform translate-x-1/2  translate-y-1/2 text-lilac z-50 " style={{ fontSize: '40px' }} />
 										</div>
-										<p>Name</p>
+										<p>{invitedFriend?.username}</p>
 										<div className="mt-auto mb-4 w-full h-2 bg-violet-black relative">
 											<div className="h-full" style={{ width: '50%' }} />
 										</div>
@@ -351,7 +378,7 @@ const Game = () => {
 												<div className="element-to-animate rounded-full mt-2" style={{ width: '70px', height: '70px' }}>
 													<FaUser className="absolute top-5 left-5 text-lilac z-50 " style={{ fontSize: '30px' }} />
 												</div>
-												<p>Name</p>
+												<p>{invitedFriend?.username}</p>
 											</div>
 											<div className="flex flex-col items-center">
 												<div className="element-to-animate rounded-full mt-2" style={{ width: '70px', height: '70px' }}>

@@ -59,6 +59,7 @@ const AboutToPlay = () => {
 			socket.on("findGame", (game) => {
 				setGame(game);
 			});
+			console.log(game);
 			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
 			socket.on("verifyGame", (boolean) => {
 			if (!boolean)
@@ -81,7 +82,7 @@ const AboutToPlay = () => {
 		<MainLayout currentPage={currentPage}>
 		<div className="flex-1 bg-violet-black h-[80vh] flex justify-center items-center text-lilac">
 		{game ? (
-			<div className="grid grid-cols-1 gap-20 text-center">
+			<div className="grid grid-cols-1 gap-20 text-center cursor-default">
 			<div>
 				<h3 className="font-audiowide text-2xl mb-12">Get ready</h3>
 				<div className="flex flex-row justify-center gap-14 mb-32">
@@ -122,7 +123,7 @@ const AboutToPlay = () => {
 				</div>
 			</div>
 			<p
-				className="font-audiowide text-purple underline hover:text-red-orange"
+				className="font-audiowide text-purple underline hover:text-red-orange cursor-pointer"
 				onClick={handleStartGame}
 				>
 				Start Game
