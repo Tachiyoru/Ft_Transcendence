@@ -96,6 +96,12 @@ export class GameService
 
 	async createInviteGame(invitedUserId: number, socket: Socket, @Request() req: any)
 	{
+		await this.prisma.gameInvite.deleteMany({
+			where: {
+				hostId: req.user.id,
+				invitedId: invitedUserId,
+			}
+		});
 		const gameInvite = await this.prisma.gameInvite.create(
 			{
 				data:
@@ -120,6 +126,7 @@ export class GameService
 				},
 			},
 		);
+		console.log("game found by searching hostId and invitedId :", gameInvite);
 		if (gameInvite)
 		{
 			const updatedGameInvite = await this.prisma.gameInvite.update(
@@ -133,7 +140,14 @@ export class GameService
 			);
 			return (updatedGameInvite);
 		}
-		return (gameInvite);
+		return (null);
+	}
+
+	async getAllGameInvite()
+	{
+		const gameinvites = await this.prisma.gameInvite.findMany();
+		console.log("all gameInvites : ", gameinvites);
+		return (gameinvites);
 	}
 
 	async removeGameInvite(gameInviteId: number)
@@ -143,7 +157,7 @@ export class GameService
 				where: { gameInviteId: gameInviteId },
 			},
 		);
-		if (gameInvite && gameInvite.status === 1)
+		if (gameInvite)
 		{
 			return (await this.prisma.gameInvite.delete(
 				{

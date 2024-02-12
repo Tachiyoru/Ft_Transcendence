@@ -74,6 +74,8 @@ export class GameGateway
 	)
 	{
 		const game = await this.gameService.createInviteGame(invitedId, client, req);
+		client.emit("gameInviteData", game);
+		return (game);
 	}
 
 	@SubscribeMessage("checkInvitedGame")
@@ -86,6 +88,7 @@ export class GameGateway
 		const game = await this.gameService.checkInvitedGame(hostId, client, req);
 		if (game && game.invitedSocket && game.status === 1)
 		{
+			console.log("Game found");
 			const invitedUser = await this.prisma.user.findUnique({
 				where: { id: game.invitedId }
 			});
@@ -101,7 +104,27 @@ export class GameGateway
 			}
 			return gameSession;
 		}
+		else
+		{
+			console.log("Game not found");
+			return (null);
+		}
+	}
 
+	@SubscribeMessage("removeGameInvite")
+	async removeGameInvite(@MessageBody() gameInviteId: number)
+	{
+		console.log("deleting gameInvite : ", gameInviteId);
+		await this.gameService.removeGameInvite(gameInviteId);
+		const gameDeleted = await this.prisma.gameInvite.findFirst({
+			where: { gameInviteId: gameInviteId }
+		});
+	}
+
+	@SubscribeMessage("getAllGameInvites")
+	async getAllGameInvites()
+	{
+		return (this.gameService.getAllGameInvite());
 	}
 
 	// @SubscribeMessage("createInviteGame")

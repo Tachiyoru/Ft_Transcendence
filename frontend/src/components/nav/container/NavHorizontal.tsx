@@ -213,7 +213,10 @@ const NavHorizontal = () => {
 		{
 			const notification = await fetchSingleNotification(notificationId);
 			if (notification && notification.fromId)
+			{
 				socket.emit("checkInvitedGame", notification.fromId);
+			}
+				
 		}
 		catch (error)
 		{
