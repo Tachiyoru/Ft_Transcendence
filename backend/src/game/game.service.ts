@@ -78,7 +78,6 @@ export class GameService
 				this.waitingRoomGame = undefined;
 				const gameDB = await this.prisma.game.create({ data: {} });
 				const gameSession = await this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId);
-				console.log("random gameSession", gameSession);
 				return gameSession;
 			}
 		} else
@@ -91,7 +90,6 @@ export class GameService
 				hostId: gamer.user.id,
 				participants: [gamer],
 			};
-			console.log({ matchFound: false, waitingSession: this.waitingRoomGame });
 			return null;
 		}
 	}
@@ -239,7 +237,6 @@ export class GameService
 
 	async verifyGame(gameSocket: string, socket: Socket, userId: number)
 	{
-		console.log(userId);
 		const game = this.games.find((game) => game.gameSocket === gameSocket);
 		if (
 			(game?.player1.playerSocket === socket.id && game?.player1.playerProfile?.id === userId) ||

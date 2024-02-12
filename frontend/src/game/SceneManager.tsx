@@ -60,7 +60,6 @@ export default function Experience() {
 	
 	const launchBall = () => {
 		socket.emit('launchBall');
-		console.log('ok')
 	};
 
 	useEffect(() => {

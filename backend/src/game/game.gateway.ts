@@ -58,7 +58,7 @@ export class GameGateway
 	)
 	{
 		const game = await this.gameService.prepareQueListGame(client, req);
-		console.log(game);
+		// console.log(game);
 		if (game)
 		{
 			this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
@@ -183,7 +183,7 @@ export class GameGateway
 				game.ball.z += (game.ball.z * velocity[0]);
 				game.ball.x += velocity[1];
 
-				console.log(game.paddle[1].x);
+				// console.log(game.paddle[1].x);
 				// if (game.pScore[0] == 3 || game.pScore[1] == 3) {
 				//   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
 				// }

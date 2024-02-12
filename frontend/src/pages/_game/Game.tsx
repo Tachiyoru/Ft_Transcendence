@@ -68,7 +68,6 @@ const Game = () => {
 		let updatedIndexes = [...selectedIndexes];
 
 		const indexExists = updatedIndexes.indexOf(index);
-		console.log(user.username, user.id);
 		setInvitedFriend(user);
 		// envoyer une notification à l'utilisateur sélectionné
 		const sendNotification = async () =>
@@ -91,7 +90,6 @@ const Game = () => {
 		}
 
 		setSelectedIndexes(updatedIndexes);
-		console.log(selectedIndexes)
 	};
 
 	const connectServ = () =>	{

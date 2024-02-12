@@ -29,7 +29,6 @@ export class TwoFAService
 		);
 
 		await this.set2FaSecret(secret, user.id);
-		console.log("user.twoFaSecret : ", user.twoFASecret);
 		return otpAuthUrl;
 	}
 

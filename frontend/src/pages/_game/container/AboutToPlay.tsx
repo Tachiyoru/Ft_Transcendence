@@ -59,7 +59,7 @@ const AboutToPlay = () => {
 			socket.on("findGame", (game) => {
 				setGame(game);
 			});
-			console.log(game);
+			// console.log(game);
 			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
 			socket.on("verifyGame", (boolean) => {
 			if (!boolean)

@@ -61,7 +61,6 @@ export class UserController {
   ) {
     const filepath = file[0].path;
     this.userService.editAvatar(user.id, filepath);
-    console.log(filepath, user.avatar)
     return (filepath)
   }
 

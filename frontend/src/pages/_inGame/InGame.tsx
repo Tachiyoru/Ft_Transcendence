@@ -11,7 +11,7 @@ const InGame = () => {
 	const socket = useContext(WebSocketContext);
 	const connectServ = () =>	{
 		socket.emit("saucisse");
-		console.log(socket.id);
+		// console.log(socket.id);
 	}
 	useEffect(() => {
 		const script = document.createElement('script');

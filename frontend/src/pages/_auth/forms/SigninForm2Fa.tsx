@@ -14,7 +14,6 @@ const SigninForm2Fa = () =>
 	const handleSubmitTwoFa = async () =>
 	{
 		try {
-			console.log(tokenGoogle)
 			const isValid = await axios.post('/two-fa/authenticate', { token: tokenGoogle });
 			setResStatus("Successful Registration!");
 			dispatch(loginSuccess(isValid.data));

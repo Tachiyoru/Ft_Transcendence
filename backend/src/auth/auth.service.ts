@@ -62,10 +62,9 @@ export class AuthService
 				where: { id: user.id },
 				data: { status: 'ONLINE' }
 			});
-			return (this.forgeTokens(updatedUser, res), console.log("user connected"));
+			return (this.forgeTokens(updatedUser, res));
 		}
 		await this.forgeTokens(user, res);
-		console.log("2FA enabled for this account");
 		return user;
 	}
 

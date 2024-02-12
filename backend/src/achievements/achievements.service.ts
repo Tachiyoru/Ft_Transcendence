@@ -100,7 +100,6 @@ export class AchievementsService
 		const lockedAchievements = achievementsList.filter(
 			(achievement) => !userAchievements.achievements.find((userAchievement) => userAchievement.id === achievement.id)
 		);
-		console.log("locked Achievements : ", lockedAchievements);
 		return (lockedAchievements);
 	}
 
