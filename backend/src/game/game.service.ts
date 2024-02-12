@@ -40,10 +40,16 @@ export class GameService
 		};
 	}
 
-	async createGame(gameID: number, player1User: User, player1Socket: string, player2User: User, player2Socket: string)
+	async createGame(gameID: number, player1User: number, player1Socket: string, player2User: User, player2Socket: string)
 	{
+		const host = await this.prisma.user.findUnique(
+			{
+				where: { id: player1User },
+			});
+		if (!host)
+			return;
 		// console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket);
-		const game = new Game(gameID, player1Socket, player1User, player2Socket, player2User);
+		const game = new Game(gameID, player1Socket, host, player2Socket, player2User);
 		this.games.push(game);
 		return (game);
 
@@ -71,7 +77,7 @@ export class GameService
 				// remove the waiting game session
 				this.waitingRoomGame = undefined;
 				const gameDB = await this.prisma.game.create({ data: {} });
-				const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId);
+				const gameSession = await this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId);
 				console.log("random gameSession", gameSession);
 				return gameSession;
 			}
@@ -118,7 +124,7 @@ export class GameService
 		);
 		if (gameInvite)
 		{
-			const updateGameInvite = await this.prisma.gameInvite.update(
+			const updatedGameInvite = await this.prisma.gameInvite.update(
 				{
 					where: { gameInviteId: gameInvite.gameInviteId },
 					data: {
@@ -127,7 +133,7 @@ export class GameService
 					},
 				},
 			);
-			return (updateGameInvite);
+			return (updatedGameInvite);
 		}
 		return (gameInvite);
 	}
