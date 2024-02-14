@@ -5,7 +5,10 @@ import Invitations from "./Invitations";
 import Blocked from "./Blocked";
 import axios from "../../../axios/api";
 import { getLoggedInUserInfo } from "../../../components/nav/container/NavHorizontal";
-import { setListUsersNotFriend, setListUsersPending } from "../../../services/friendSlice";
+import {
+  setListUsersNotFriend,
+  setListUsersPending,
+} from "../../../services/friendSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
@@ -15,10 +18,10 @@ import { WebSocketContext } from "../../../socket/socket";
 type FilterType = "tous" | "invitations" | "blocked";
 
 interface Users {
-	username: string;
-	avatar: string;
-	id: number;
-	status: string;
+  username: string;
+  avatar: string;
+  id: number;
+  status: string;
 }
 
 const SetFriends: React.FC = () => {
@@ -36,11 +39,29 @@ const SetFriends: React.FC = () => {
     { id: number; username: string }[]
   >([]);
   const dispatch = useDispatch();
-  const listUsersPending = useSelector((state: RootState) => state.friend.listUsersPending);
-	const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
-	const socket = useContext(WebSocketContext);
+  const listUsersPending = useSelector(
+    (state: RootState) => state.friend.listUsersPending
+  );
+  const listUsersNotFriend = useSelector(
+    (state: RootState) => state.friend.listUsersNotFriend
+  );
+  const socket = useContext(WebSocketContext);
 
+const hasNewInvitations = async () => {
+    const { id: userId } = await getLoggedInUserInfo();
+    const fetchedPendingList = await getPendingList();
+    return fetchedPendingList.length;
+  };
 
+  const [hasNewInvitationsCount, setHasNewInvitationsCount] =
+    useState<number>(0);
+
+    const updateNewInvitationsCount = async () => {
+      const count = await hasNewInvitations();
+	  console.log(count);
+      setHasNewInvitationsCount(count);
+    };
+    updateNewInvitationsCount();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -49,7 +70,7 @@ const SetFriends: React.FC = () => {
           "/friends-list/non-friends"
         );
         setNoFriendsList(response.data);
-        setLoadingFriendsList(false); 
+        setLoadingFriendsList(false);
       } catch (error) {
         console.error("Error fetching user list:", error);
         setLoadingFriendsList(false);
@@ -81,9 +102,7 @@ const SetFriends: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<Users[]>(
-          "/friends-list/non-friends"
-        );
+        const response = await axios.get<Users[]>("/friends-list/non-friends");
         dispatch(setListUsersNotFriend(response.data));
 
         const pending = await axios.get<Users[]>(
@@ -95,6 +114,13 @@ const SetFriends: React.FC = () => {
       }
     };
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash.substr(1) as FilterType;
+    if (hash && ["tous", "invitations", "blocked"].includes(hash)) {
+      setFiltreActif(hash);
+    }
   }, []);
 
   const handleInputChange = (e) => {
@@ -113,31 +139,9 @@ const SetFriends: React.FC = () => {
     }
   };
 
-  const hasNewInvitations = async () => {
-    const { id: userId } = await getLoggedInUserInfo();
-    const fetchedPendingList = await getPendingList();
-    return fetchedPendingList.length;
-  };
-
-  const [hasNewInvitationsCount, setHasNewInvitationsCount] =
-    useState<number>(0);
-
-  useEffect(() => {
-    const updateNewInvitationsCount = async () => {
-      const count = await hasNewInvitations();
-      setHasNewInvitationsCount(count);
-    };
-    updateNewInvitationsCount();
-  }, [filtreActif]);
-
   const handleInputClick = () => {
     setIsDropdownOpen(true);
   };
-
-  const notifMoins = () => {
-	const count = hasNewInvitationsCount - 1;
-	setHasNewInvitationsCount(count)
-  }
 
   const filteredUsers = listUsersNotFriend.filter((user) =>
     user.username.toLowerCase().includes(searchText.toLowerCase())
@@ -150,27 +154,18 @@ const SetFriends: React.FC = () => {
 
   const contenuFiltre: { [key in FilterType]: JSX.Element } = {
     tous: <AllFriends />,
-    invitations: <Invitations />,
+    invitations: <Invitations onAcceptFriendRequest={updateNewInvitationsCount} />,
     blocked: <Blocked />,
   };
-
-  useEffect(() => {
-    const hash = window.location.hash.substr(1) as FilterType;
-    if (hash && ["tous", "invitations", "blocked"].includes(hash)) {
-      setFiltreActif(hash);
-    }
-  }, []);
 
   const handleUserSelection = async (selectedUser: Users) => {
     setCheckedItems({ [selectedUser.id]: selectedUser });
     try {
-      await axios.post(
-        `/friends-list/friend-request/${selectedUser.id}`
-			);
-			dispatch(setListUsersPending([...listUsersPending, selectedUser]));
-			socket.emit("all-update")
+      await axios.post(`/friends-list/friend-request/${selectedUser.id}`);
+      dispatch(setListUsersPending([...listUsersPending, selectedUser]));
+      socket.emit("all-update");
     } catch (error) {
-			console.error("Error adding friend:", error);
+      console.error("Error adding friend:", error);
     }
   };
 
@@ -181,9 +176,7 @@ const SetFriends: React.FC = () => {
   return (
     <div className="flex flex-row h-[80vh]">
       {/*NAV FRIENDS*/}
-      <div
-        className="w-[260px] md:rounded-l-lg bg-violet-black"
-      >
+      <div className="w-[260px] md:rounded-l-lg bg-violet-black">
         <div className="p-4">
           <h1
             className="font-outline-2 mt-6 m-2 text-white"
@@ -207,7 +200,6 @@ const SetFriends: React.FC = () => {
                 value={searchText}
               />
               <span className="absolute inset-y-0 left-0 pl-3 pt-3.5 flex items-center">
-				
                 {isTyping || isDropdownOpen ? (
                   <FaArrowTurnUp className="text-accent-violet mt-1 w-3 h-3 transform rotate-90" />
                 ) : (
@@ -232,38 +224,51 @@ const SetFriends: React.FC = () => {
                     {filteredUsers.map((user, index) => (
                       <div
                         key={index}
-                        style={{ cursor: !listUsersPending.find(pending => pending.id === user.id) ? "pointer" : "not-allowed"}}
+                        style={{
+                          cursor: !listUsersPending.find(
+                            (pending) => pending.id === user.id
+                          )
+                            ? "pointer"
+                            : "not-allowed",
+                        }}
                         className={`flex flex-row justify-between items-center py-1 ${
                           hoveredUser === user.id ? "opacity-100" : "opacity-40"
                         }`}
                         onClick={() => {
-                          if (!listUsersPending.find(pending => pending.id === user.id))
-                            handleUserSelection(user)}
-                        }
+                          if (
+                            !listUsersPending.find(
+                              (pending) => pending.id === user.id
+                            )
+                          )
+                            handleUserSelection(user);
+                        }}
                         onMouseEnter={() => handleUserHover(user.id)}
                         onMouseLeave={() => handleUserHover(null)}
                       >
                         <div className="flex items-center mx-2">
-                          {user.avatar ?
-                            (
-                              <div>
-                                <img
-                                  src={user.avatar}
-                                  className="h-[20px] w-[20px] object-cover rounded-full text-lilac border-lilac"
-                                />
-                              </div>	
-                            ) : (
-                              <div className="w-[20px] h-[20px] bg-purple border border-lilac rounded-full grid justify-items-center items-center">
-                                <FaUser className="w-[8px] h-[8px] text-lilac" />
-                              </div>
-                            )
-                          }
+                          {user.avatar ? (
+                            <div>
+                              <img
+                                src={user.avatar}
+                                className="h-[20px] w-[20px] object-cover rounded-full text-lilac border-lilac"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-[20px] h-[20px] bg-purple border border-lilac rounded-full grid justify-items-center items-center">
+                              <FaUser className="w-[8px] h-[8px] text-lilac" />
+                            </div>
+                          )}
                           <p className="text-xs font-regular ml-2 text-lilac ">
                             {user.username}
                           </p>
                         </div>
-                        {!listUsersPending.find(pending => pending.id === user.id) ? 
-                        <FaUserPlus className="text-lilac w-3 h-3 mr-4" /> : <RiTimer2Line className="text-lilac w-3 h-3 mr-4" />}
+                        {!listUsersPending.find(
+                          (pending) => pending.id === user.id
+                        ) ? (
+                          <FaUserPlus className="text-lilac w-3 h-3 mr-4" />
+                        ) : (
+                          <RiTimer2Line className="text-lilac w-3 h-3 mr-4" />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -288,7 +293,7 @@ const SetFriends: React.FC = () => {
             <li
               className={`mb-2 relative text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "invitations"
-                  ? "bg-violet-black-nav py-2 pl-4 rounded-l-md" // Assurez-vous que cette classe relative est présente
+                  ? "bg-violet-black-nav py-2 pl-4 rounded-l-md"
                   : "py-2 pl-4"
               }`}
               onClick={() => handleFiltre("invitations")}

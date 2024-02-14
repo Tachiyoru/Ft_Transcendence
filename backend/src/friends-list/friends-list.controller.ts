@@ -44,6 +44,13 @@ export class FriendsListController
 		return this.friendListService.pendingList(user.id);
 	}
 
+	@Get('/my-pending-list')
+	async myPendingList(@GetUser() user: User)
+	{
+		return this.friendListService.myPendingList(user.id);
+	}
+
+
 	@Delete('/pending-list/reject/:id')
 	rejectPending(@GetUser() user: User, @Param('id') id: string)
 	{
