@@ -11,7 +11,14 @@ import Draw from "../../components/popin/Draw";
 import { WebSocketContext } from "../../socket/socket";
 import axiosInstance from "../../axios/api";
 import UserNameField from "../_auth/fields/UserNameField";
-import { set } from "react-hook-form";
+import { set, useFormState } from "react-hook-form";
+
+interface gameData
+{
+	gameInviteId: number;
+	hostId: number;
+	invitedId: number;
+}
 
 const Game = () => {
 	const location = useLocation();
@@ -22,9 +29,10 @@ const Game = () => {
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
-	const [friendsList, setFriendsList] = useState<{ username: string; }[]>([]);
-	const [userData, setUserData] = useState<{ username: string; id: number } | null>(null);
-	const [invitedFriend, setInvitedFriend] = useState<{ username: string; } | null>(null);
+	const [friendsList, setFriendsList] = useState<{ username: string; id: number; }[]>([]);
+	const [userData, setUserData] = useState<{ username: string; id: number; } | null>(null);
+	const [invitedFriend, setInvitedFriend] = useState<{ username: string; id: number; } | null>(null);
+	const [gameData, setGameData] = useState<gameData>();
 
 	const names = ['Shan', 'Manu', 'Bob'];
 
@@ -43,7 +51,7 @@ const Game = () => {
 
     const fetchAllUsersData = async () => {
       try {
-        const response = await axiosInstance.get<{ username: string }[]>("/users/all");
+				const response = await axiosInstance.get<{ username: string; id: number; }[]>("/users/all");
         setFriendsList(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -80,6 +88,14 @@ const Game = () => {
 		const createInviteGame = async () =>
 		{
 			socket.emit("createInviteGame", user.id);
+			socket.on("gameInviteData", (game) =>
+			{
+				if (game)
+					setGameData(game);
+			});
+			// console.log(game);
+			// if (game)
+			// 	setGameData(game);
 		}
 
 		createInviteGame();
@@ -132,13 +148,33 @@ const Game = () => {
 		}
 	}, [selectedIndexes]);
 
-	const handleCrossClick = () => {
+	const handleCrossClick = async () => {
 	setShowSecondDiv(false);
 	setSelectedIndexes([]);
+	if (gameData && gameData.gameInviteId)
+	{
+		socket.emit("removeGameInvite", gameData.gameInviteId);
+		// rajouter popup "Game/invitation not found/expired"; 
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
 	socket.emit("gotDisconnected");
 	localStorage.removeItem('showSecondDiv');
+	// socket.emit("getAllGameInvites");
 	};
-
 
 	return (
 	<MainLayout currentPage={currentPage}>
