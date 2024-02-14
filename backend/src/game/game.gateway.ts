@@ -161,6 +161,21 @@ export class GameGateway
 		}
 	}
 
+	@SubscribeMessage("setGoalsToWin")
+	async setGoalsToWin(
+		@MessageBody('gameSocket') gameSocket: string,
+		@MessageBody('goalsToWin') goalsToWin: number,
+	)
+	{
+		const game = await this.gameService.findGame(gameSocket);
+		if (game)
+		{
+			game.goalsToWin = goalsToWin;
+			this.server.to(game.player1.playerSocket).emit("goalsToWin", game);
+			this.server.to(game.player2.playerSocket).emit("goalsToWin", game);
+		}
+	}
+
 	@SubscribeMessage("verifyGame")
 	async verifyGame(
 		@MessageBody('gameSocket') gameSocket: string,

@@ -7,6 +7,7 @@ import { delay } from "rxjs";
 
 export class Game  {
     gameId: number;
+		goalsToWin: number;
     gameSocket: string;
     paddle: Paddle[] = [{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }];
     camera: Camera[] = [{ x: 0, y: 0, z: 0, fov: 0, angle: 0 }, { x: 0, y: 0, z: 0, fov: 0, angle: 0 }];

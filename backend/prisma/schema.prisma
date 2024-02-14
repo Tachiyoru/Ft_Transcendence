@@ -162,12 +162,12 @@ model Game {
 }
 
 model GameInvite {
-  gameInviteId  Int  @id @default(autoincrement())
+  gameInviteId  Int     @id @default(autoincrement())
   hostSocket    String
   hostId        Int
   invitedSocket String?
   invitedId     Int
-  status        Int  @default(0)
+  status        Int     @default(0)
 
   @@map("GameInvite")
 }
