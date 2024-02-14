@@ -18,15 +18,25 @@ import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
-import { setListUsersNotFriend, setListUsersPending } from "../../../services/friendSlice";
+import {
+  setListUsersNotFriend,
+  setListUsersPending,
+} from "../../../services/friendSlice";
 
 const AllFriends = () => {
-  const [listUsers, setListUsers] = useState<{ id: number; username: string; avatar: string }[]>([]);
-  const listUsersPending = useSelector((state: RootState) => state.friend.listUsersPending);
+  const [listUsers, setListUsers] = useState<
+    { id: number; username: string; avatar: string }[]
+  >([]);
+  const listUsersPending = useSelector(
+    (state: RootState) => state.friend.listUsersPending
+  );
+  const [pendinglist, setPendingList] = useState<
+    { id: number; username: string; avatar: string }[]
+  >([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [previousUserId, setPreviousUserId] = useState<number | null>(null);
-	const socket = useContext(WebSocketContext);
-	const dispatch = useDispatch();
+  const socket = useContext(WebSocketContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const togglePopinPending = (userId: number) => {
@@ -61,7 +71,7 @@ const AllFriends = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [listUsersPending]);
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -69,7 +79,10 @@ const AllFriends = () => {
         const response = await axios.get<{ id: number; username: string }[]>(
           "/friends-list/mine"
         );
-        setListUsers(response.data);
+		const a = response.data;
+        setListUsers(a);
+		const updateListUsersPending = listUsersPending.filter(pendingUser => !a.some(user => user.id === pendingUser.id));
+		dispatch(setListUsersPending(updateListUsersPending));
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
@@ -77,19 +90,22 @@ const AllFriends = () => {
     fetchUserData();
   }, []);
 
-
-	const rejectFriendRequest = async (userId: number) => {
+  const rejectFriendRequest = async (userId: number) => {
     try {
       await axios.delete(`/friends-list/pending-list/reject/${userId}`);
-      const updateListUsersPending = listUsersPending.filter(user => user.id !== userId);
+      const updateListUsersPending = listUsersPending.filter(
+        (user) => user.id !== userId
+      );
       dispatch(setListUsersPending(updateListUsersPending));
-		} catch (error) {
-            console.error('Error accepting friend request:', error);
-        }
-    };
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
 
-  const listUsersNotFriend = useSelector((state: RootState) => state.friend.listUsersNotFriend);
-  
+  const listUsersNotFriend = useSelector(
+    (state: RootState) => state.friend.listUsersNotFriend
+  );
+
   const removeFriend = async (user) => {
     try {
       await axios.delete(`/friends-list/remove/${user.id}`);
@@ -117,12 +133,12 @@ const AllFriends = () => {
   };
 
   const handleClickSendMessage = (username: string, id: number) => {
-		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
-		socket.on('chatChannelCreated', (data) => {
-			dispatch(setSelectedChannelId(data.channelId));
-      navigate('/chat')
-		});
-	}
+    socket.emit("getOrCreateChatChannel", { username2: username, id: id });
+    socket.on("chatChannelCreated", (data) => {
+      dispatch(setSelectedChannelId(data.channelId));
+      navigate("/chat");
+    });
+  };
 
   return (
     <div
@@ -160,27 +176,31 @@ const AllFriends = () => {
             </div>
           )}
 
-          {user.avatar ?
-            (
-              <div>
-                <img
-                  src={user.avatar}
-                  className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
-                />
-              </div>	
-            ) : (
-              <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
-                <FaUser className="w-[30px] h-[30px] text-lilac" />
-              </div>
-            )
-          }
-          <p className="text-base text-opacity-60 text-lilac pt-1" title={user.username}>
-            {user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
+          {user.avatar ? (
+            <div>
+              <img
+                src={user.avatar}
+                className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
+              />
+            </div>
+          ) : (
+            <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
+              <FaUser className="w-[30px] h-[30px] text-lilac" />
+            </div>
+          )}
+          <p
+            className="text-base text-opacity-60 text-lilac pt-1"
+            title={user.username}
+          >
+            {user.username.length > 10
+              ? `${user.username.slice(0, 10)}...`
+              : user.username}
           </p>
           <p className="text-xs text-lilac opacity-40 italic">Pending...</p>
         </div>
       ))}
 
+      {/* Autres utilisateurs */}
       {listUsers.length === 0 ? (
         <div className="text-center mt-4">
           <p className="text-sm font-regular text-lilac"></p>
@@ -244,22 +264,25 @@ const AllFriends = () => {
                 </div>
               </div>
             )}
-            {user.avatar ?
-              (
-                <div>
-                  <img
-                    src={user.avatar}
-                    className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
-                  />
-                </div>	
-              ) : (
-                <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
-                  <FaUser className="w-[30px] h-[30px] text-lilac" />
-                </div>
-              )
-            }
-            <p className="text-base text-opacity-60 text-lilac pt-1" title={user.username}>
-              {user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
+            {user.avatar ? (
+              <div>
+                <img
+                  src={user.avatar}
+                  className="h-[80px] w-[80px] object-cover rounded-full text-lilac border-lilac mt-2"
+                />
+              </div>
+            ) : (
+              <div className="w-[80px] h-[80px] bg-purple rounded-full grid justify-items-center items-center mt-2">
+                <FaUser className="w-[30px] h-[30px] text-lilac" />
+              </div>
+            )}
+            <p
+              className="text-base text-opacity-60 text-lilac pt-1"
+              title={user.username}
+            >
+              {user.username.length > 10
+                ? `${user.username.slice(0, 10)}...`
+                : user.username}
             </p>
           </div>
         ))

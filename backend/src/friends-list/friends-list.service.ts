@@ -26,6 +26,19 @@ export class FriendsListService
 		return user.pendingList;
 	}
 
+	async myPendingList(userId: number)
+	{
+		const user = await this.prismaService.user.findUnique(
+			{
+				where: { id: userId },
+				include: { pendingFrom: true },
+			}
+		)
+		if (!user)
+			throw new Error("User not found");
+		return user.pendingFrom;
+	}
+
 	async rejectPending(user: User, friendId: number, notificationId?: number) 
 	{
 		user = await this.prismaService.user.update(
@@ -128,14 +141,16 @@ export class FriendsListService
 		);
 		if (!friend)
 			throw new Error('Friend not found.');
-
-		await this.prismaService.user.update(
+		const uuser = await this.prismaService.user.update(
 			{
 				where: { id: friendId },
+				include: { pendingList: true },
 				data: { pendingList: { connect: { id: user.id }, }, },
 			}
 		);
-
+		if (!uuser)
+			throw new Error('User not found.');
+		console.log("friendrequest = ", uuser.pendingList);
 		const notificationDto = new CreateNotificationDto();
 		if (user.username) notificationDto.fromUser = user.username;
 

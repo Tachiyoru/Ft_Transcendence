@@ -31,7 +31,7 @@ const Invitations = ({ onAcceptFriendRequest }) => {
       await axios.post(`/friends-list/friend-request/accept/${userId}`);
       const updatedList = listUsers.filter((user) => user.id !== userId);
       setListUsers(updatedList);
-      onAcceptFriendRequest(); // Appel de la fonction pour mettre à jour le compteur
+      onAcceptFriendRequest();
     } catch (error) {
       console.error("Error accepting friend request:", error);
     }
