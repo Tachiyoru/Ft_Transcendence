@@ -22,12 +22,6 @@ export class NotificationController
 {
 	constructor(private notificationService: NotificationService) {}
 
-	@Get("mine")
-	async getMyNotifications(@GetUser() user: User): Promise<Notification[]>
-	{
-		return this.notificationService.getMyNotifications(user);
-	}
-
 	// test only, delete after
 	@Get("all")
 	async getAllNotifications(): Promise<Notification[]>

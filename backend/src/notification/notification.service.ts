@@ -15,28 +15,13 @@ export class NotificationService
 		private prismaService: PrismaService,
 	) {}
 
-	async getMyNotifications(user: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: { notifications: true },
-		});
-
-		if (!me) throw new Error("User not found");
-
-		return me.notifications;
-	}
-
 	async getNotificationsById(userId: number)
 	{
-		const user = await this.prismaService.user.findUnique({
-			where: { id: userId },
-			include: { notifications: true },
+		const notifications = await this.prismaService.notification.findMany({
+			where: { userId: userId },
+			orderBy: { id: 'desc' },
 		});
-
-		if (!user) throw new Error("User not found");
-
-		return user.notifications;
+		return notifications;
 	}
 
 	async getUnreadNotifications(userId: number): Promise<Notification[]>
@@ -186,7 +171,7 @@ export class NotificationService
 
 		await this.deleteNotificationById(userId, notificationId);
 
-		const myNotifs = await this.getMyNotifications(user);
+		const myNotifs = await this.getNotificationsById(userId);
 
 		return myNotifs;
 	}
