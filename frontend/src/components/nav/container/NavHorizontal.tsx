@@ -262,7 +262,7 @@ const NavHorizontal = () => {
   ) => {
     if (notificationType === 2) return;
     markNotificationAsRead(notificationId);
-    setSelectedSection(null);
+		toggleSection("Notifications");
   };
 
   const getContent = () => {
