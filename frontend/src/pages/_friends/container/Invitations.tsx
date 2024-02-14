@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { FaCheck, FaXmark } from "react-icons/fa6";
 import axios from "../../../axios/api";
+import { Websocket } from "../../../components/Websocket";
+import { WebSocketContext } from "../../../socket/socket";
+
 
 interface Props {
   onAcceptFriendRequest: () => void;
@@ -11,6 +14,7 @@ const Invitations = ({ onAcceptFriendRequest }) => {
   const [listUsers, setListUsers] = useState<
     { id: number; username: string; avatar: string }[]
   >([]);
+  const socket = useContext(WebSocketContext)
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,6 +36,7 @@ const Invitations = ({ onAcceptFriendRequest }) => {
       const updatedList = listUsers.filter((user) => user.id !== userId);
       setListUsers(updatedList);
       onAcceptFriendRequest();
+      socket.emit("all-update");
     } catch (error) {
       console.error("Error accepting friend request:", error);
     }
@@ -42,7 +47,8 @@ const Invitations = ({ onAcceptFriendRequest }) => {
       await axios.delete(`/friends-list/friend-request/reject/${userId}/`);
       const updatedList = listUsers.filter((user) => user.id !== userId);
       setListUsers(updatedList);
-      onAcceptFriendRequest(); // Appel de la fonction pour mettre à jour le compteur
+	  console.log("list pending ",updatedList);
+      onAcceptFriendRequest();
     } catch (error) {
       console.error("Error rejecting friend request:", error);
     }

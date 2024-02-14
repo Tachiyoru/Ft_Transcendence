@@ -76,12 +76,28 @@ const AllFriends = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const response2 = await axios.get<{ id: number; username: string }[]>(
+          "/friends-list/my-pending-list"
+        );
+        const a2 = response2.data;
+        console.log(" myYYYYYYlist pending", a2);
         const response = await axios.get<{ id: number; username: string }[]>(
           "/friends-list/mine"
         );
-		const a = response.data;
+        const a = response.data;
         setListUsers(a);
-		const updateListUsersPending = listUsersPending.filter(pendingUser => !a.some(user => user.id === pendingUser.id));
+        let updateListUsersPending;
+        if (a2.length !== listUsersPending.length) {
+          updateListUsersPending = listUsersPending.filter(
+            (pendingUser) => a2.some((user) => user.id === pendingUser.id)
+          );
+          console.log("SSSSSSSSSSSS");
+        //   dispatch(setListUsersPending(updateListUsersPending));
+        } else
+          updateListUsersPending = listUsersPending.filter(
+            (pendingUser) => !a.some((user) => user.id === pendingUser.id)
+			);
+		console.log("liiiiiiiiiiist pending",updateListUsersPending);
 		dispatch(setListUsersPending(updateListUsersPending));
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -96,6 +112,7 @@ const AllFriends = () => {
       const updateListUsersPending = listUsersPending.filter(
         (user) => user.id !== userId
       );
+      console.log("list pending", updateListUsersPending);
       dispatch(setListUsersPending(updateListUsersPending));
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -112,8 +129,10 @@ const AllFriends = () => {
 
       const updateListUsers = listUsers.filter((user) => user.id !== user.id);
       setListUsers(updateListUsers);
-
-      dispatch(setListUsersNotFriend([...listUsersNotFriend, user]));
+      const sexe = listUsersNotFriend.filter((User) => User.id !== user.id);
+      if (listUsersNotFriend.length === sexe.length) {
+        dispatch(setListUsersNotFriend([...listUsersNotFriend, user]));
+      }
     } catch (error) {
       console.error("Error deleting friend:", error);
     }

@@ -148,9 +148,15 @@ export class FriendsListService
 				data: { pendingList: { connect: { id: user.id }, }, },
 			}
 		);
-		if (!uuser)
-			throw new Error('User not found.');
-		console.log("friendrequest = ", uuser.pendingList);
+		if (uuser)
+			console.log("friendrequest = ", uuser.pendingList);
+		const test = await this.prismaService.user.findUnique({
+			where: { id: user.id },
+			include: { pendingFrom: true },
+		});
+		if (test) 
+			console.log("pendingFrom = ", test.pendingFrom);	
+
 		const notificationDto = new CreateNotificationDto();
 		if (user.username) notificationDto.fromUser = user.username;
 
