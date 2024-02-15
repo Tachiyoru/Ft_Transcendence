@@ -42,7 +42,7 @@ const AboutToPlay = () => {
 	const [isReset, setIsReset]  = useState<boolean>(false);
 	const navigate = useNavigate();
 	const [userData, setUserData] = useState<Users>();
-	const	[goalCount, setGoalCount] = useState<number>(3);
+	const [goalCount, setGoalCount] = useState<number>(3);
 
 	useEffect(() => {
 		const fetchData = async () => {

@@ -223,7 +223,7 @@ export class GameGateway
               game.ball.z += (100 * velocity[0]);
               game.ball.x += velocity[1];
               
-              if (game.pScore[0] == 3 || game.pScore[1] == 3) {
+              if (game.pScore[0] == game.goalsToWin || game.pScore[1] == game.goalsToWin) {
                 clearInterval(i);
               }
               const collideRet = await this.gameService.collide(game);
