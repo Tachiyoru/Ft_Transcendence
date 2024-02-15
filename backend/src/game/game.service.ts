@@ -6,10 +6,14 @@ import { disconnect, emit } from 'process';
 import { User } from '@prisma/client';
 import { Game } from './game.class';
 import { Server } from 'socket.io';
-import
-{
-	WaitingGameSession,
-	Gamer,
+import {
+  WaitingGameSession,
+  Gamer,
+  Ball,
+  Paddle,
+  Camera,
+  Player,
+  PaddleHit
 } from './interfaces';
 import { delay } from 'rxjs';
 
@@ -58,153 +62,139 @@ export class GameService
 	async prepareQueListGame(socket: Socket, @Request() req: any)
 	{
 
-		const gamer = this.createGamer(
-			req.user,
-			socket.id,
-			true,
-		);
-		// check someone is not already waiting in the waiting room
-		if (this.waitingRoomGame)
-		{
-			// check if one game session is already waiting for an opponent
-			if (this.waitingRoomGame.hostId === req.user.id)
-			{
-				return null;
-			} else
-			{
-				gamer.isHost = false;
-				const participants = [gamer, this.waitingRoomGame.participants[0]];
-				// remove the waiting game session
-				this.waitingRoomGame = undefined;
-				const gameDB = await this.prisma.game.create({ data: {} });
-				const gameSession = await this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId);
-				return gameSession;
-			}
-		} else
-		{
-			const waitingListIds = Array.from(this.waitingChallenge.keys());
-			const id =
-				waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
-			this.waitingRoomGame = {
-				waitingGameId: id,
-				hostId: gamer.user.id,
-				participants: [gamer],
-			};
-			return null;
-		}
-	}
+      const gamer = this.createGamer(
+        req.user,
+        socket.id,
+        true,
+      );
+      // check someone is not already waiting in the waiting room
+      if (this.waitingRoomGame) {
+        // check if one game session is already waiting for an opponent
+        if (this.waitingRoomGame.hostId === req.user.id) {
+          return null;
+        } else {
+          gamer.isHost = false;
+          const participants = [gamer, this.waitingRoomGame.participants[0]];
+          // remove the waiting game session
+          this.waitingRoomGame = undefined;
+          const gameDB = await this.prisma.game.create({data: {}});
+          const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId); 
+          return gameSession;
+        }
+      } else {
+        const waitingListIds = Array.from(this.waitingChallenge.keys());
+        const id =
+          waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
+        this.waitingRoomGame = {
+          waitingGameId: id,
+          hostId: gamer.user.id,
+          participants: [gamer],
+        };
+        console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
+        return null;
+      }
+    }
 
-	async createInviteGame(invitedUserId: number, socket: Socket, @Request() req: any)
-	{
-		await this.prisma.gameInvite.deleteMany({
-			where: {
-				hostId: req.user.id,
-				invitedId: invitedUserId,
-			}
-		});
-		const gameInvite = await this.prisma.gameInvite.create(
-			{
-				data:
-				{
-					hostId: req.user.id,
-					hostSocket: socket.id,
-					invitedId: invitedUserId,
-				},
-			},
-		);
-		return (gameInvite);
-	}
+    // 10 = Out P1 | 1 = P1Left | 2 = P1Mid | 3 = P1Right | 4 = P2Left | 5 = P2Mid | 6 = P2 Right | 7 = WallLeft | 8 = WallRight | 9 = Out P2
+    async collide(game : Game)  {
+      const halfPaddle = game.paddleHitbox[0].sizex / 2;
+      const halfPaddle1Left = game.paddle[0].x - halfPaddle;
+      const halfPaddle1Right = game.paddle[0].x + halfPaddle;
+      const halfPaddle2Left = game.paddle[1].x + halfPaddle;
+      const halfPaddle2Right = game.paddle[1].x - halfPaddle;
+      const cornerPaddle = halfPaddle / 2;
+      const cornerPaddle1Left = game.paddle[0].x - cornerPaddle;
+      const cornerPaddle1Right = game.paddle[0].x + cornerPaddle;
+      const cornerPaddle2Left = game.paddle[1].x + cornerPaddle;
+      const cornerPaddle2Right = game.paddle[1].x - cornerPaddle;
+      const halfBall = game.ballHitbox.sizex / 2;
+      const ballRightWall = 60 - halfBall;
+      const ballLeftWall = -60 + halfBall;
+      const paddle1BallZ = 87.5 - halfBall;
+      const paddle2BallZ = -87.5 + halfBall;
 
-	async checkInvitedGame(hostId: number, socket: Socket, @Request() req: any)
-	{
-		const gameInvite = await this.prisma.gameInvite.findFirst(
-			{
-				where:
-				{
-					hostId: hostId,
-					invitedId: req.user.id,
-				},
-			},
-		);
-		console.log("game found by searching hostId and invitedId :", gameInvite);
-		if (gameInvite)
-		{
-			const updatedGameInvite = await this.prisma.gameInvite.update(
-				{
-					where: { gameInviteId: gameInvite.gameInviteId },
-					data: {
-						invitedSocket: socket.id,
-						status: 1
-					},
-				},
-			);
-			return (updatedGameInvite);
-		}
-		return (null);
-	}
+      // Wall Check
+      if (game.ball.x <= ballLeftWall)  {
+        return (7);
+      }
+      else if (game.ball.x >= ballRightWall)  {
+        return (8);
+      }
+      // Paddle1 side Check
+      if (game.ball.z >= paddle1BallZ && game.ball.z < paddle1BallZ + 1)  {
+        if ((game.ball.x < halfPaddle1Left && game.ball.x > ballLeftWall) || (game.ball.x > halfPaddle1Right && game.ball.x < ballRightWall))  {
+          return (10)
+        }
+        else if (game.ball.x >= halfPaddle1Left && game.ball.x < cornerPaddle1Left) {
+          return (1);
+        }
+        else if (game.ball.x >= cornerPaddle1Left && game.ball.x <= cornerPaddle1Right) {
+          return (2);
+        }
+        else if (game.ball.x > cornerPaddle1Right && game.ball.x <= halfPaddle1Right) {
+          return (3);
+        }
+      }
+      // Paddle2 side Check
+      else if (game.ball.z <= paddle2BallZ && game.ball.z > paddle2BallZ - 1) {
+        if ((game.ball.x < halfPaddle2Right && game.ball.x > ballLeftWall) || (game.ball.x > halfPaddle2Left && game.ball.x < ballRightWall))  {
+          return (9)
+        }
+        else if (game.ball.x >= halfPaddle2Right && game.ball.x < cornerPaddle2Right) {
+          return (6);
+        }
+        else if (game.ball.x >= cornerPaddle2Right && game.ball.x <= cornerPaddle2Left) {
+          return (5);
+        }
+        else if (game.ball.x > cornerPaddle2Left && game.ball.x <= halfPaddle2Left) {
+          return (4);
+        }
+      }
+      if (game.ball.z > 90)
+        return (10);
+      else if (game.ball.z < -90)
+        return (9);
+      return (0);
+    }
 
-	async getAllGameInvite()
-	{
-		const gameinvites = await this.prisma.gameInvite.findMany();
-		console.log("all gameInvites : ", gameinvites);
-		return (gameinvites);
-	}
-
-	async removeGameInvite(gameInviteId: number)
-	{
-		const gameInvite = await this.prisma.gameInvite.findFirst(
-			{
-				where: { gameInviteId: gameInviteId },
-			},
-		);
-		if (gameInvite)
-		{
-			return (await this.prisma.gameInvite.delete(
-				{
-					where: { gameInviteId: gameInviteId },
-				},
-			));
-		}
-	}
-
-	// async connection(socket: Socket, @Request() req: any)  {
-	//   const game = await this.prisma.game.findFirst({
-	//     where: {connectedPlayers: 1}
-	//   })
-	//   const alreadyIG = await this.checkGameUsers(socket);
-	//   if (!alreadyIG)  {
-	//     if (game) {
-	//       const updateGame = await this.prisma.game.update({
-	//         where: {gameId: game.gameId},
-	//         data: {
-	//           connectedPlayers: 2,
-	//           player2: socket.id,
-	//           player2User: { connect: { id: req.user.id } },
-	//         },
-	//         include:  {player1User: true, player2User: true}
-	//       })
-	//       socket.join(updateGame.gameSocket);
-	//       console.log(updateGame)
-	//       return (updateGame);
-	//     } else  {
-	//       socket.join("Game" + socket.id);
-	//       const rooms = socket.rooms;
-	//       const game = await this.prisma.game.create({
-	//         data: {
-	//           player1: socket.id,
-	//           player1User: { connect: { id: req.user.id } },
-	//           player2User: { connect: { id: req.user.id } },
-	//           connectedPlayers: 1,
-	//           gameSocket: ("Game" + socket.id)
-	//         }
-	//       })
-	//       const allGames = await this.prisma.game.findMany({
-	//       });
-	//       return (null);
-	//     }
-	//   }
-	//   return (null);
-	// }
+    // async connection(socket: Socket, @Request() req: any)  {
+    //   const game = await this.prisma.game.findFirst({
+    //     where: {connectedPlayers: 1}
+    //   })
+    //   const alreadyIG = await this.checkGameUsers(socket);
+    //   if (!alreadyIG)  {
+    //     if (game) {
+    //       const updateGame = await this.prisma.game.update({
+    //         where: {gameId: game.gameId},
+    //         data: {
+    //           connectedPlayers: 2,
+    //           player2: socket.id,
+    //           player2User: { connect: { id: req.user.id } },
+    //         },
+    //         include:  {player1User: true, player2User: true}
+    //       })
+    //       socket.join(updateGame.gameSocket);
+    //       console.log(updateGame)
+    //       return (updateGame);
+    //     } else  {
+    //       socket.join("Game" + socket.id);
+    //       const rooms = socket.rooms;
+    //       const game = await this.prisma.game.create({
+    //         data: {
+    //           player1: socket.id,
+    //           player1User: { connect: { id: req.user.id } },
+    //           player2User: { connect: { id: req.user.id } },
+    //           connectedPlayers: 1,
+    //           gameSocket: ("Game" + socket.id)
+    //         }
+    //       })
+    //       const allGames = await this.prisma.game.findMany({
+    //       });
+    //       return (null);
+    //     }
+    //   }
+    //   return (null);
+    // }
 
 	//     async removeUserFromGame(userID: string)  {
 	//       let game = await this.prisma.game.findFirst({
@@ -269,7 +259,14 @@ export class GameService
 		else
 			return (false);
 
-	}
+    }
+
+    async destroyInGame(game: Game) {
+      game?.destroyGame(this.prisma);
+      const index = this.games.indexOf(game);
+      if (index !== -1)
+        this.games.splice(index, 1)
+    }
 
 	async notInGame(@Request() req: any)
 	{

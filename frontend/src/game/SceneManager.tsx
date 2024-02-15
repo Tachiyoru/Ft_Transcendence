@@ -105,6 +105,7 @@ export default function Experience() {
 						aspect={window.innerWidth / window.innerHeight}
 						near={0.1}
 						far={1000}
+						rotation = {[-0.4, 0, 0]}
 					/>)}
 					{userData && userData.id == game.player2.playerProfile?.id && (
 					<PerspectiveCamera 
@@ -114,7 +115,7 @@ export default function Experience() {
 						aspect={window.innerWidth / window.innerHeight}
 						near={0.1}
 						far={1000}
-						rotation={[0, Math.PI, 0]}
+						rotation={[0.4, Math.PI, 0]}
 						/>
 					)}
 
@@ -124,10 +125,18 @@ export default function Experience() {
 					<Physics>
 					<PaddlePos/>
 					</Physics>
-					{/* <mesh position={[0, -20, -146]}>
-						<boxGeometry args={[120, 2, 170]} />
+					{/* <mesh position={[0, -15, -60]}>
+						<boxGeometry args={[35, 7, 5]} />
 						<meshLambertMaterial color={0x460994} />
 					</mesh> */}
+					{/* <mesh position={[0, -15, -232]}>
+						<boxGeometry args={[35, 7, 5]} />
+						<meshLambertMaterial color={0x460994} />
+					</mesh> */}
+					<mesh position={[0, 0, 0]}>
+						<boxGeometry args={[120, 2, 170]} />
+						<meshLambertMaterial color={0x460994} />
+					</mesh>
 				</Canvas>
 			</div>
 			}

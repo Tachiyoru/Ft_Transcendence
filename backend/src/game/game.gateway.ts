@@ -8,6 +8,7 @@ import { UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { disconnect } from 'process';
 import { delay } from 'rxjs';
+import { IsNumber, isNumber } from 'class-validator';
 
 @WebSocketGateway({
 	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
@@ -206,79 +207,161 @@ export class GameGateway
 		}
 	}
 
-	@SubscribeMessage("launchBall")
-	async LaunchBall(
-		@Request() req: any,
-	)
-	{
-		const game = await this.gameService.LaunchBall(req);
-		if (game)
-		{
-			let velocity = [0.01, 0];
-			delay(50);
-			var i = setInterval(() =>
-			{
-				game.ball.z += (game.ball.z * velocity[0]);
-				game.ball.x += velocity[1];
 
-				// console.log(game.paddle[1].x);
-				// if (game.pScore[0] == 3 || game.pScore[1] == 3) {
-				//   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
-				// }
-				// }, 50); 
-				if (Math.floor(game.ball.x) === 60 || Math.floor(game.ball.x) === -60)
-					velocity[1] *= -1;
-				else if
-					(
-					(Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x) === Math.floor(game.paddle[1].x + 31 / 2)) ||
-					(Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x) === Math.floor(game.paddle[0].x + 31 / 2))
-				)
-				{
-					velocity[0] *= -1;
-					velocity[1] = 1;
-				}
-				else if
-					(
-					(Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x) === Math.floor(-game.paddle[1].x + 31 / 2)) ||
-					(Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x) === Math.floor(-game.paddle[0].x + 31 / 2))
-				)
-				{
-					velocity[0] *= -1;
-					velocity[1] = -1;
-				}
-				else if (
-					((Math.floor(game.ball.z) < -231 && Math.floor(game.ball.x - game.paddle[1].x) <= 31 / 2) ||
-						(Math.floor(game.ball.z) > -62 && Math.floor(game.ball.x - game.paddle[0].x) <= 31 / 2))
-				)
-					velocity[0] *= -1;
-				else if (Math.abs(game.ball.z) > -231 || Math.abs(game.ball.z) < -61)
-				{
-					if (game.ball.z < -231)
-					{
-						++game.pScore[0];
-						game.resetBallPosition();
-						velocity[1] = 0;
-						this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-						this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-					}
-					else if ((game.ball.z > -61))
-					{
-						++game.pScore[1];
-						game.resetBallPosition();
-						velocity[1] = 0;
-						this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-						this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-					}
-				}
+      @SubscribeMessage("launchBall")
+      async LaunchBall(
+        @Request() req: any,
+        )
+        {
+          const game = await this.gameService.LaunchBall(req);
+          if (game)
+          {
+            console.log(game.ball.z);
+            let velocity = [0.01, 0];
+            delay(50)
+            var i = setInterval(async () => {
+              game.ball.z += (100 * velocity[0]);
+              game.ball.x += velocity[1];
+              
+              if (game.pScore[0] == 3 || game.pScore[1] == 3) {
+                clearInterval(i);
+              }
+              const collideRet = await this.gameService.collide(game);
+              
+              console.log(collideRet);
+              switch (collideRet) {
+                case  0:
+                  break;
+                case  1:
+                  if (velocity[1] >= 0)
+                    velocity[1] = -1;
+                  velocity[0] *= -1;
+                  break;
+                case  2:
+                  velocity[0] *= -1;
+                  break;
+                case  3:
+                  if (velocity[1] <= 0)
+                    velocity[1] = 1;
+                  velocity[0] *= -1;
+                  break;
+                case  4:
+                  if (velocity[1] <= 0)
+                    velocity[1] = 1;
+                  velocity[0] *= -1;
+                  break;
+                case  5:
+                  velocity[0] *= -1;
+                  break;
+                case  6:
+                  if (velocity[1] >= 0)
+                    velocity[1] = -1;
+                  velocity[0] *= -1;
+                  break;
+                case  7:
+                  velocity[1] *= -1;
+                  break;
+                case  8:
+                  velocity[1] *= -1;
+                  break;
+                case  9:
+                  if (game.ball.z <= -100)  {
+                    ++game.pScore[0];
+                    game.resetBallPosition();
+                    velocity[1] = 0;
+                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+                  }
+                  break;
+                case  10:
+                  if (game.ball.z >= 100)  {
+                    ++game.pScore[1];
+                    game.resetBallPosition()
+                    velocity[1] = 0;
+                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+                  }
+                  break;
+              }
+              this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
+              this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
 
-				this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
-				this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
+              this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
+              this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
+          }, 50);
+        }
+      }
 
-				this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
-				this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
-			}, 50);
-		}
-	}
+      // @SubscribeMessage("launchBall")
+      // async LaunchBall(
+      //   @Request() req: any,
+      //   )
+      //   {
+      //     const game = await this.gameService.LaunchBall(req);
+      //     if (game)
+      //     {
+      //       let velocity = [0.01, 0];
+      //       delay(50)
+      //       var i = setInterval(() => {
+      //         game.ball.z += (game.ball.z * velocity[0]);
+      //         game.ball.x += velocity[1];
+              
+      //         // console.log(game.paddle[1].x)
+      //         // if (game.pScore[0] == 3 || game.pScore[1] == 3) {
+      //         //   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
+      //         // }
+      //         // }, 50); 
+      //         if (Math.floor(game.ball.x) === 60 || Math.floor(game.ball.x) === -60)
+      //           velocity[1] *= -1;
+      //         else if
+      //         (
+      //           (Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x) === Math.floor(game.paddle[1].x + 31 / 2)) ||
+      //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x) === Math.floor(game.paddle[0].x + 31 / 2))
+      //         )
+      //         {
+      //               velocity[0] *= -1;
+      //               velocity[1] = 1 ;
+      //         }
+      //         else if
+      //         (
+      //           (Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x) === Math.floor(-game.paddle[1].x + 31 / 2)) ||
+      //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x) === Math.floor(-game.paddle[0].x + 31 / 2))
+      //         )
+      //         {
+      //               velocity[0] *= -1;
+      //               velocity[1] = -1;
+      //         } 
+      //         else if (
+      //           ((Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x - game.paddle[1].x) <= 31 / 2) ||
+      //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x - game.paddle[0].x) <= 31 / 2))
+      //         )
+      //             velocity[0] *= -1;
+      //         else if (Math.abs(game.ball.z) > -232 || Math.abs(game.ball.z) < -58) {
+      //           console.log(game.ball.z);
+      //           if (game.ball.z < -232) {
+      //               ++game.pScore[0];
+      //               game.resetBallPosition();
+      //               velocity[1] = 0;
+      //               this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+      //               this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+      //           }
+      //           else if ((game.ball.z > -58)){
+      //               ++game.pScore[1];
+      //               game.resetBallPosition()
+      //               velocity[1] = 0;
+      //               this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+      //               this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+      //           }
+      //         }
+              
+      //         this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
+      //         this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
+
+      //         this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
+      //         this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
+      //       }, 50);
+      //     }
+      // }
 
 	@SubscribeMessage("movesInputs")
 	async movesInputs(

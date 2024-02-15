@@ -3,7 +3,7 @@ import { WebSocketContext } from "../socket/socket";
 
 
 const BallObj = () => {
-	const [ball, setBall] = useState({ x: 0, y: -17, z: -146 });
+	const [ball, setBall] = useState({ x: 0, y: 5, z: 0});
 	const socket = useContext(WebSocketContext);
 	const ref = useRef();
 

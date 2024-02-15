@@ -38,6 +38,11 @@ export interface Paddle
 	z: number;
 }
 
+export interface PaddleHit    {
+	sizex: number;
+	sizey: number;
+	sizez: number;
+}
 
 export interface Ball
 {
@@ -46,6 +51,11 @@ export interface Ball
 	z: number;
 }
 
+export interface BallHit	{
+	sizex: number;
+	sizey: number;
+	sizez: number;
+}
 
 export interface Camera
 {
