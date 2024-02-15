@@ -78,7 +78,7 @@ export class GameService
           // remove the waiting game session
           this.waitingRoomGame = undefined;
           const gameDB = await this.prisma.game.create({data: {}});
-          const gameSession = this.createGame(gameDB.gameId, participants[0].user, participants[0].socketId, participants[1].user, participants[1].socketId); 
+          const gameSession = this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId); 
           return gameSession;
         }
       } else {
@@ -156,6 +156,79 @@ export class GameService
         return (9);
       return (0);
     }
+
+	async createInviteGame(invitedUserId: number, socket: Socket, @Request() req: any)
+	{
+		await this.prisma.gameInvite.deleteMany({
+			where: {
+				hostId: req.user.id,
+				invitedId: invitedUserId,
+			}
+		});
+		const gameInvite = await this.prisma.gameInvite.create(
+			{
+				data:
+				{
+					hostId: req.user.id,
+					hostSocket: socket.id,
+					invitedId: invitedUserId,
+				},
+			},
+		);
+		return (gameInvite);
+	}
+
+	async checkInvitedGame(hostId: number, socket: Socket, @Request() req: any)
+	{
+		const gameInvite = await this.prisma.gameInvite.findFirst(
+			{
+				where:
+				{
+					hostId: hostId,
+					invitedId: req.user.id,
+				},
+			},
+		);
+		console.log("game found by searching hostId and invitedId :", gameInvite);
+		if (gameInvite)
+		{
+			const updatedGameInvite = await this.prisma.gameInvite.update(
+				{
+					where: { gameInviteId: gameInvite.gameInviteId },
+					data: {
+						invitedSocket: socket.id,
+						status: 1
+					},
+				},
+			);
+			return (updatedGameInvite);
+		}
+		return (null);
+	}
+
+	async getAllGameInvite()
+	{
+		const gameinvites = await this.prisma.gameInvite.findMany();
+		console.log("all gameInvites : ", gameinvites);
+		return (gameinvites);
+	}
+
+	async removeGameInvite(gameInviteId: number)
+	{
+		const gameInvite = await this.prisma.gameInvite.findFirst(
+			{
+				where: { gameInviteId: gameInviteId },
+			},
+		);
+		if (gameInvite)
+		{
+			return (await this.prisma.gameInvite.delete(
+				{
+					where: { gameInviteId: gameInviteId },
+				},
+			));
+		}
+	}
 
     // async connection(socket: Socket, @Request() req: any)  {
     //   const game = await this.prisma.game.findFirst({
