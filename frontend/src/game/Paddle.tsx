@@ -45,7 +45,7 @@ export default function PaddlePos() {
 	const socket = useContext(WebSocketContext);
 	const ref = useRef();
 	const refPaddle2 = useRef();
-	const [paddles, setPaddles] = useState({ paddle1: { x: 0, y: -18, z: -60 }, paddle2: { x: 0, y: -18, z: -232 } });
+	const [paddles, setPaddles] = useState({ paddle1: { x: 0, y: 3.5, z: 87.5 }, paddle2: { x: 0, y: 3.5, z: -87.5 } });
 	
 	const paddleobj1 = useLoader(GLTFLoader, '/src/paddlePink.glb')
 	const paddleobj2 = useLoader(GLTFLoader, '/src/paddleBlue.glb')

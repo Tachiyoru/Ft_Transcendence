@@ -12,7 +12,8 @@ import {
   Ball,
   Paddle,
   Camera,
-  Player
+  Player,
+  PaddleHit
 } from './interfaces';
 import { delay } from 'rxjs';
 
@@ -82,6 +83,69 @@ export class GameService {
         return null;
       }
     }
+
+    // 10 = Out P1 | 1 = P1Left | 2 = P1Mid | 3 = P1Right | 4 = P2Left | 5 = P2Mid | 6 = P2 Right | 7 = WallLeft | 8 = WallRight | 9 = Out P2
+    async collide(game : Game)  {
+      const halfPaddle = game.paddleHitbox[0].sizex / 2;
+      const halfPaddle1Left = game.paddle[0].x - halfPaddle;
+      const halfPaddle1Right = game.paddle[0].x + halfPaddle;
+      const halfPaddle2Left = game.paddle[1].x + halfPaddle;
+      const halfPaddle2Right = game.paddle[1].x - halfPaddle;
+      const cornerPaddle = halfPaddle / 2;
+      const cornerPaddle1Left = game.paddle[0].x - cornerPaddle;
+      const cornerPaddle1Right = game.paddle[0].x + cornerPaddle;
+      const cornerPaddle2Left = game.paddle[1].x + cornerPaddle;
+      const cornerPaddle2Right = game.paddle[1].x - cornerPaddle;
+      const halfBall = game.ballHitbox.sizex / 2;
+      const ballRightWall = 60 - halfBall;
+      const ballLeftWall = -60 + halfBall;
+      const paddle1BallZ = 87.5 - halfBall;
+      const paddle2BallZ = -87.5 + halfBall;
+
+      // Wall Check
+      if (game.ball.x <= ballLeftWall)  {
+        return (7);
+      }
+      else if (game.ball.x >= ballRightWall)  {
+        return (8);
+      }
+      // Paddle1 side Check
+      if (game.ball.z >= paddle1BallZ && game.ball.z < paddle1BallZ + 1)  {
+        if ((game.ball.x < halfPaddle1Left && game.ball.x > ballLeftWall) || (game.ball.x > halfPaddle1Right && game.ball.x < ballRightWall))  {
+          return (10)
+        }
+        else if (game.ball.x >= halfPaddle1Left && game.ball.x < cornerPaddle1Left) {
+          return (1);
+        }
+        else if (game.ball.x >= cornerPaddle1Left && game.ball.x <= cornerPaddle1Right) {
+          return (2);
+        }
+        else if (game.ball.x > cornerPaddle1Right && game.ball.x <= halfPaddle1Right) {
+          return (3);
+        }
+      }
+      // Paddle2 side Check
+      else if (game.ball.z <= paddle2BallZ && game.ball.z > paddle2BallZ - 1) {
+        if ((game.ball.x < halfPaddle2Right && game.ball.x > ballLeftWall) || (game.ball.x > halfPaddle2Left && game.ball.x < ballRightWall))  {
+          return (9)
+        }
+        else if (game.ball.x >= halfPaddle2Right && game.ball.x < cornerPaddle2Right) {
+          return (6);
+        }
+        else if (game.ball.x >= cornerPaddle2Right && game.ball.x <= cornerPaddle2Left) {
+          return (5);
+        }
+        else if (game.ball.x > cornerPaddle2Left && game.ball.x <= halfPaddle2Left) {
+          return (4);
+        }
+      }
+      if (game.ball.z > 90)
+        return (10);
+      else if (game.ball.z < -90)
+        return (9);
+      return (0);
+    }
+
     // async connection(socket: Socket, @Request() req: any)  {
     //   const game = await this.prisma.game.findFirst({
     //     where: {connectedPlayers: 1}
@@ -183,6 +247,13 @@ export class GameService {
       else
         return (false)
 
+    }
+
+    async destroyInGame(game: Game) {
+      game?.destroyGame(this.prisma);
+      const index = this.games.indexOf(game);
+      if (index !== -1)
+        this.games.splice(index, 1)
     }
 
     async notInGame(@Request() req: any)

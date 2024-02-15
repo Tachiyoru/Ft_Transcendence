@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { PrismaService } from '../prisma/prisma.service';
-import { Paddle, Camera, Ball, Player, Velocity } from "./interfaces";
+import { Paddle, Camera, Ball, Player, Velocity, PaddleHit, BallHit } from "./interfaces";
 import { Server } from 'socket.io';
 import { WebSocketServer } from '@nestjs/websockets';
 import { delay } from "rxjs";
@@ -9,8 +9,10 @@ export class Game  {
     gameId: number;
     gameSocket: string;
     paddle: Paddle[] = [{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }];
+    paddleHitbox: PaddleHit[] = [{sizex: 0, sizey: 0, sizez: 0}, {sizex : 0, sizey : 0, sizez : 0}];
     camera: Camera[] = [{ x: 0, y: 0, z: 0, fov: 0, angle: 0 }, { x: 0, y: 0, z: 0, fov: 0, angle: 0 }];
     ball: Ball = { x: 0, y: 0, z: 0 };
+    ballHitbox: BallHit = {sizex: 0, sizey: 0, sizez: 0};
     pScore: number[] = [0, 0];
     player1: Player = { playerSocket: "", playerProfile: null }; 
     player2: Player = { playerSocket: "", playerProfile: null }; 
@@ -30,29 +32,43 @@ export class Game  {
 
         // Player 1 Paddle
         this.paddle[0].x = 0;
-        this.paddle[0].y = -18;
-        this.paddle[0].z = -60;
+        this.paddle[0].y = 3.5;
+        this.paddle[0].z = 87.5;
+
+        // Player 1 Paddle Hitbox
+        this.paddleHitbox[0].sizex = 35;
+        this.paddleHitbox[0].sizey = 7;
+        this.paddleHitbox[0].sizez = 5; 
 
         // Player 1 Camera
         this.camera[0].x = 0;
-        this.camera[0].y = 0;
-        this.camera[0].z = 20;
+        this.camera[0].y = 65;
+        this.camera[0].z = 187.5;
         this.camera[0].angle = 0;
 
         // Player 2 Paddle
         this.paddle[1].x = 0;
-        this.paddle[1].y = -18;
-        this.paddle[1].z = -232;
+        this.paddle[1].y = 3.5;
+        this.paddle[1].z = -87.5;
+
+        // Player 2 Paddle Hitbox
+        this.paddleHitbox[1].sizex = 35;
+        this.paddleHitbox[1].sizey = 7;
+        this.paddleHitbox[1].sizez = 5;
 
         // Player 2 Camera
         this.camera[1].x = 0;
-        this.camera[1].y = 0;
-        this.camera[1].z = -310;
+        this.camera[1].y = 65;
+        this.camera[1].z = -187.5;
         this.camera[1].angle = 0;
 
         this.ball.x = 0;
-        this.ball.y = -15;
-        this.ball.z = -100;
+        this.ball.y = 5;
+        this.ball.z = 0;
+
+        this.ballHitbox.sizex = 10;
+        this.ballHitbox.sizey = 10;
+        this.ballHitbox.sizez = 10;
 
         this.pScore[0] = 0;
         this.pScore[1] = 0;
@@ -90,12 +106,13 @@ export class Game  {
         if (this.status === 3)  {
             this.saveGame(prisma);
         }
+
     }
 
     resetBallPosition() {
         this.ball.x = 0;
-        this.ball.y = -17;
-        this.ball.z = -146;
+        this.ball.y = 5;
+        this.ball.z = 0;
     }
 
     startBallMovement()	{
@@ -129,35 +146,41 @@ export class Game  {
     }
 
     move(input: string, player: string, server: Server) {
+        const halfPaddle = this.paddleHitbox[0].sizex / 2;
+        const wallLeftP1 = -60 + halfPaddle;
+        const wallRightP1 = 60 - halfPaddle;
+        const wallLeftP2 = wallRightP1;
+        const wallRightP2 = wallLeftP1;
+
         if (player === this.player1.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    if ((this.paddle[0].x + this.multiplier > -31))
+                    if (this.paddle[0].x + this.multiplier > wallLeftP1)
                         this.camera[0].x = this.paddle[0].x -= 1 * this.multiplier;
                 break;
                 case "ArrowRight":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    if ((this.paddle[0].x + this.multiplier < 35))
+                    if (this.paddle[0].x + this.multiplier < wallRightP1)
                         this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
                 break;
             }
+            console.log("PADDLE 1 X : ", this.paddle[0].x);
         }
-
         if (player === this.player2.playerSocket)   {
             switch (input)  {
                 case "ArrowLeft":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    if ((this.paddle[1].x + this.multiplier < 35))
+                    if (this.paddle[1].x + this.multiplier < wallLeftP2)
                         this.camera[1].x = this.paddle[1].x += 1 * this.multiplier;
                 break;
                 case "ArrowRight":
                     if (this.multiplier < 3)
                         this.multiplier += 0.3;
-                    if ((this.paddle[1].x + this.multiplier > -31))
+                    if (this.paddle[1].x + this.multiplier > wallRightP2)
                         this.camera[1].x = this.paddle[1].x -= 1 * this.multiplier;
                 break;
             }
