@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineMail, AiOutlineUser } from "react-icons/ai";
 import { FaUser } from "react-icons/fa6";
 import axios from "../../../axios/api";
 import FileUpload from "../../../components/photo/FileUpload";
 import { useNavigate } from "react-router-dom";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface IdataRegister {
 	username: string;
@@ -19,6 +20,7 @@ interface Users {
 }
 
 const AccountEdit = () => {
+	const socket = useContext(WebSocketContext);
 	const [loading, setLoading] = useState(true);
 	const [userData, setUserData] = useState<Users>();
 	const navigate = useNavigate()
@@ -57,7 +59,7 @@ const AccountEdit = () => {
 		}
 
 		await axios.patch("/users/edit", filteredData);
-
+		socket.emit("all-update");
 		} catch (error) {
 		console.error("Error updating user data:", error);
 		} finally {
@@ -67,7 +69,8 @@ const AccountEdit = () => {
 
 	const handleDeleteAccount = async () => {
 		try {
-			axios.delete('/users/delete-user');
+			await axios.delete('/users/delete-user');
+			socket.emit("all-update");
 			navigate("/sign-in")
 		} catch (error) {
 			console.error('Error fetching user data:', error);

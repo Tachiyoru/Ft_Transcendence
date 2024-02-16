@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "../../axios/api";
+import { WebSocketContext } from "../../socket/socket";
 
 interface Users {
 	username: string;
@@ -15,6 +16,7 @@ interface FileUploadProps {
 const FileUpload : React.FC<FileUploadProps> = ({ userData, setUserData }) => {
   const [selectedFile, setSelectedFile] = useState<FileList | null>(null);
   const [error, setError] = useState<string>('');
+  const socket = useContext(WebSocketContext);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -35,6 +37,7 @@ const FileUpload : React.FC<FileUploadProps> = ({ userData, setUserData }) => {
         });
         url = response.data;
         await axios.post(`achievements/add/${6}`);
+		socket.emit("all-update");
       } catch (error) {
         console.error("Error uploading file:", error);
         setError('Incorrect file')

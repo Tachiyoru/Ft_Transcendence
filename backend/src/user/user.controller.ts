@@ -45,6 +45,7 @@ export class UserController {
 
   @Delete("delete-user")
   deleteUser(@GetUser("id") userId: number) {
+	console.log("delete user id : ",userId);
     return this.userService.deleteUser(userId);
   }
 
@@ -59,8 +60,9 @@ export class UserController {
     @GetUser() user: User,
     @UploadedFiles() file: Express.Multer.File[]
   ) {
-    const filepath = file[0].path;
+    const filepath = "/" + file[0].path;
     this.userService.editAvatar(user.id, filepath);
+	console.log("filepaht :",filepath);
     return (filepath)
   }
 

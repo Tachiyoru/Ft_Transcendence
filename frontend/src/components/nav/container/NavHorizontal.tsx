@@ -138,8 +138,9 @@ const NavHorizontal = () => {
   }, [actuReceived]);
 
   socket.on("actu-notif", (channelList) => {
+    console.log("actu-notif received");
     socket.emit("unread-notification");
-	console.log("actu-notif received");
+    console.log("actu-notif received");
     socket.off("actu-notif");
   });
 
@@ -202,38 +203,29 @@ const NavHorizontal = () => {
     }
   }, [selectedSection, notificationVisible]);
 
-	const fetchSingleNotification = async (notificationId: number | null) =>
-	{
-		if (!notificationId)
-			return ;
-		try
-		{
-			const response = await axios.get<Notification>(`/notification/single/${notificationId}`);
-			return (response.data);
-		}
-		catch (error)
-		{
-			console.error("Error fetching single notification:", error);
-			return (null);
-		}
-	}
-	
-	const checkInvitedGame = async (notificationId: number) =>
-	{
-		try
-		{
-			const notification = await fetchSingleNotification(notificationId);
-			if (notification && notification.fromId)
-			{
-				socket.emit("checkInvitedGame", notification.fromId);
-			}
-				
-		}
-		catch (error)
-		{
-			console.error("Error checking invited game notification:", error);
-		}
-	}
+  const fetchSingleNotification = async (notificationId: number | null) => {
+    if (!notificationId) return;
+    try {
+      const response = await axios.get<Notification>(
+        `/notification/single/${notificationId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching single notification:", error);
+      return null;
+    }
+  };
+
+  const checkInvitedGame = async (notificationId: number) => {
+    try {
+      const notification = await fetchSingleNotification(notificationId);
+      if (notification && notification.fromId) {
+        socket.emit("checkInvitedGame", notification.fromId);
+      }
+    } catch (error) {
+      console.error("Error checking invited game notification:", error);
+    }
+  };
 
   useEffect(() => {
     if (selectedSection === "Notifications") {
@@ -262,7 +254,7 @@ const NavHorizontal = () => {
   ) => {
     if (notificationType === 2) return;
     markNotificationAsRead(notificationId);
-		toggleSection("Notifications");
+    toggleSection("Notifications");
   };
 
   const getContent = () => {

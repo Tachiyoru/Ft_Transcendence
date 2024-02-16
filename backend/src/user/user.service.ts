@@ -5,6 +5,7 @@ import { UserCreateInput } from "./user-create.input";
 import * as argon from "argon2";
 import { unlink } from "fs/promises";
 import { StatusUser } from "@prisma/client";
+import { access } from "fs";
 
 @Injectable()
 export class UserService {
@@ -83,51 +84,51 @@ export class UserService {
         partyWon: 1,
         partyLost: 42,
         history: [
-			"3-0 Creme Victory +5exp",
-			"3-0 Creme Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Tachi Defeat +5exp",
-		],
+          "3-0 Creme Victory +5exp",
+          "3-0 Creme Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+          "3-0 Tachi Defeat +5exp",
+        ],
       },
     });
     await this.createInitialUser({
@@ -142,10 +143,7 @@ export class UserService {
         partyPlayed: 2,
         partyWon: 1,
         partyLost: 1,
-        history: [
-			"3-0 Tachi Defeat +5exp",
-			"3-0 Manshaa Victory +10exp",
-		],
+        history: ["3-0 Tachi Defeat +5exp", "3-0 Manshaa Victory +10exp"],
       },
     });
   }
@@ -181,10 +179,16 @@ export class UserService {
   }
 
   async getMePlus(userId: number) {
-	return this.prisma.user.findUnique({
-		where: { id: userId },
-		include: { friends: true, stats: true, achievements: true , channel: {include: {members: true},}, blockedList: true },
-	  });
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        friends: true,
+        stats: true,
+        achievements: true,
+        channel: { include: { members: true } },
+        blockedList: true,
+      },
+    });
   }
 
   async getUserById(userId: number) {
@@ -213,18 +217,20 @@ export class UserService {
   }
 
   async deleteUser(userId: number) {
+	console.log("userId : 2 si manu",userId);
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
     });
     if (user) {
+	  console.log("user.avatar",user);
       if (user.avatar && user.avatar.startsWith("/upload")) {
-        await unlink(user.avatar); //attention a la suppression de l'avatar
+        if (await this.tryFile(user.avatar)) await unlink(user.avatar); //attention a la suppression de l'avatar
       }
-      await this.prisma.user.delete({
-        where: {
-          id: userId,
-        },
-      });
+	  await this.prisma.user.delete({
+		where: {
+		  id: user.id,
+		},
+	  });
     }
   }
 
@@ -247,6 +253,18 @@ export class UserService {
     }
   }
 
+  async tryFile(file: string) {
+    const fs = require("fs").promises;
+    try {
+      await access(file, fs.constants.F_OK);
+      console.log("file exist");
+      return true;
+    } catch (e) {
+      console.log("file not exist");
+      return false;
+    }
+  }
+
   async editAvatar(userId: number, file: string) {
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
@@ -260,7 +278,7 @@ export class UserService {
           user.avatar != "/upload/Manu.png" &&
           user.avatar != "/upload/Clem.png"
         ) {
-          await unlink(user.avatar);
+		  if (await this.tryFile(user.avatar)) await unlink(user.avatar);
         }
         await this.prisma.user.update({
           where: {
@@ -373,14 +391,14 @@ export class UserService {
   async getHim(name: string) {
     return this.prisma.user.findUnique({
       where: { username: name },
-	  include: { friends: true, stats: true, achievements: true },
+      include: { friends: true, stats: true, achievements: true },
     });
   }
 
   async getHisHisto(name: string) {
     this.prisma.user.findUnique({
       where: { username: name },
-	  include: { friends: true, stats: true,  },
+      include: { friends: true, stats: true },
     });
   }
 }
