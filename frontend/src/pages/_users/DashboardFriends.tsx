@@ -236,7 +236,7 @@ return (
 						</Link>
 
 						<div 
-							className={`flex flex-row items-center bg-purple p-2 pl-5 rounded-md text-lilac text-sm ${friendPending ? 'opacity-40' : 'hover:bg-violet-black-nav cursor-pointer'}`}
+							className={`flex flex-row items-center bg-purple p-2 pl-5 rounded-md text-lilac text-sm ${friendPending ? 'opacity-40 cursor-not-allowed' : 'hover:bg-violet-black-nav cursor-pointer'}`}
 							onClick={!friend ? addFriend : (friendPending ? undefined : removeFriend)}
 						>
 							{!friend && !friendPending ? <FaUserPlus className="w-3 h-4 mr-2"/> : friendPending ?  (<RiTimer2Line className="w-3 h-4 mr-2"/>) : (<FaUserMinus className="w-3 h-4 mr-2"/>)}
@@ -246,7 +246,7 @@ return (
 
 						<div
 							onClick={() => handleBlockUser(userData)}
-							className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm"
+							className="flex cursor-pointer flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm"
 						>
 							<FaMinusCircle className="w-3 h-4 mr-2"/>
 							<p className={`${blockedUser ? 'text-red-orange' : ''} `}>{blockedUser ? 'Unblock user' : 'Block user'}</p>

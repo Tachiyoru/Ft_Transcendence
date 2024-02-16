@@ -15,7 +15,7 @@ const History: React.FC<historyProps> = ({ history }) => {
   const [matchHistory, setMatchHistory] = useState<Histo[]>([]);
 
   useEffect(() => {
-	formatHisto();
+    formatHisto();
   }, [history]);
 
   const formatHisto = () => {
@@ -30,7 +30,6 @@ const History: React.FC<historyProps> = ({ history }) => {
     });
     setMatchHistory(histoFormated);
   };
-
 
   return (
     <div className="flex mx-2 flex-row gap-4 md:gap-6">
@@ -48,9 +47,10 @@ const History: React.FC<historyProps> = ({ history }) => {
                 <tbody className="text-lilac scrollbar-thin scrollbar-thumb-black">
                   <tr className="text-purple">
                     <th className="w-1/6 font-thin">Score</th>
-                    <th className="w-80 font-thin">Opponent</th>
-                    <th className="w-80 font-thin">Result</th>
-                    <th className="w-80 font-thin">Exp</th>
+                    <th className="w-1/3 font-thin">Opponent</th>
+                    <th className="w-1/3 font-thin">Result</th>
+                    <th className="w-1/6 font-thin">Exp</th>
+                    <td className="w-10px text-violet-black font-thin">iil</td>
                   </tr>
                 </tbody>
               </table>
@@ -63,9 +63,11 @@ const History: React.FC<historyProps> = ({ history }) => {
                       {matchHistory.map((match, index) => (
                         <tr key={index}>
                           <td className="w-1/6 text-center">{match.score}</td>
-                          <td className="w-80 text-center">{match.opponent}</td>
-                          <td className="w-80 text-center">{match.result}</td>
-                          <td className="w-80 text-center">{match.exp}</td>
+                          <td className="w-1/3 text-center">
+                            {match.opponent}
+                          </td>
+                          <td className="w-1/3 text-center">{match.result}</td>
+                          <td className="w-1/6 text-center">{match.exp}</td>
                         </tr>
                       ))}
                     </tbody>
