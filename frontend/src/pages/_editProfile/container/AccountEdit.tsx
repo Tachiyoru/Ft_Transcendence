@@ -67,7 +67,7 @@ const AccountEdit = () => {
 
 	const handleDeleteAccount = async () => {
 		try {
-			axios.delete('/users/delete-user');
+			await axios.delete('/users/delete-user');
 			navigate("/sign-in")
 		} catch (error) {
 			console.error('Error fetching user data:', error);

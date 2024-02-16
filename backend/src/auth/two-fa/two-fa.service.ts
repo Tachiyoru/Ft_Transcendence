@@ -62,7 +62,7 @@ export class TwoFAService
 
 	async set2FaSecret(secret: string, userId: number): Promise<User>
 	{
-		const updatedUser = this.prismaService.user.update({
+		const updatedUser = await this.prismaService.user.update({
 			where: { id: userId },
 			data: { twoFASecret: secret },
 		});
@@ -71,7 +71,7 @@ export class TwoFAService
 
 	async setTwoFaStatusTrue(userId: number)
 	{
-		const updatedUser = this.prismaService.user.update({
+		const updatedUser = await this.prismaService.user.update({
 			where: { id: userId },
 			data: { isTwoFaEnabled: true },
 		});
@@ -82,7 +82,7 @@ export class TwoFAService
 	{
 		if (status === true)
 		{
-			const updatedUser = this.prismaService.user.update({
+			const updatedUser = await this.prismaService.user.update({
 				where: { id: userId },
 				data: {
 					isTwoFaEnabled: false,

@@ -181,21 +181,21 @@ export class UserService {
   }
 
   async getMePlus(userId: number) {
-	return this.prisma.user.findUnique({
+	return await this.prisma.user.findUnique({
 		where: { id: userId },
 		include: { friends: true, stats: true, achievements: true , channel: {include: {members: true},}, blockedList: true },
 	  });
   }
 
   async getUserById(userId: number) {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: { id: userId },
       include: { friends: true, stats: true, achievements: true },
     });
   }
 
   async getAllUsers(userId: number) {
-    return this.prisma.user.findMany({
+    return await this.prisma.user.findMany({
       where: {
         NOT: {
           id: userId,
@@ -205,7 +205,7 @@ export class UserService {
   }
 
   async getAllOnlineUsers() {
-    return this.prisma.user.findMany({
+    return await this.prisma.user.findMany({
       where: {
         status: StatusUser.ONLINE,
       },
@@ -371,14 +371,14 @@ export class UserService {
   }
 
   async getHim(name: string) {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: { username: name },
 	  include: { friends: true, stats: true, achievements: true },
     });
   }
 
   async getHisHisto(name: string) {
-    this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: { username: name },
 	  include: { friends: true, stats: true,  },
     });

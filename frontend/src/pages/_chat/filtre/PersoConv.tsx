@@ -55,7 +55,7 @@ const PersoConv = () => {
 			console.error('Error fetching user data:', error);
 		}
 
-		axios.get<User[]>('friends-list/non-friends')
+		await axios.get<User[]>('friends-list/non-friends')
 		.then((response) => {
 			setNoFriends(response.data);
 		})

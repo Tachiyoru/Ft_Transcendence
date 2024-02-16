@@ -113,7 +113,7 @@ const NavHorizontal = () => {
   const [prevSelectedSection, setPrevSelectedSection] = useState<string | null>(
     null
   );
-  const [listUsers, setListUsers] = useState<{ username: string }[]>([]);
+	const [listUsers, setListUsers] = useState<{ username: string; id:number }[]>([]);
   const [searchValue, setSearchValue] = useState<string>(""); // État pour la valeur de recherche
   const [showUserList, setShowUserList] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
