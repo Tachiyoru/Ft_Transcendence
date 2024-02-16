@@ -27,17 +27,11 @@ interface Users {
 const SetFriends: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [filtreActif, setFiltreActif] = useState<FilterType>("tous");
-  const [checkedItems, setCheckedItems] = useState<{
-    [key: string]: { id: number };
-  }>({});
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [loadingFriendsList, setLoadingFriendsList] = useState(true);
-  const [friendsList, setNoFriendsList] = useState<
-    { id: number; username: string }[]
-  >([]);
   const dispatch = useDispatch();
   const listUsersPending = useSelector(
     (state: RootState) => state.friend.listUsersPending
@@ -68,8 +62,11 @@ const hasNewInvitations = async () => {
       try {
         const response = await axios.get<{ id: number; username: string }[]>(
           "/friends-list/non-friends"
-        );
-        setNoFriendsList(response.data);
+				);
+				
+				// on en fait rien de la non friends list 
+
+				
         setLoadingFriendsList(false);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -123,7 +120,7 @@ const hasNewInvitations = async () => {
     }
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const inputValue = e.target.value;
     setIsTyping(inputValue !== "");
     setSearchText(e.target.value);
@@ -159,7 +156,6 @@ const hasNewInvitations = async () => {
   };
 
   const handleUserSelection = async (selectedUser: Users) => {
-    setCheckedItems({ [selectedUser.id]: selectedUser });
     try {
       await axios.post(`/friends-list/friend-request/${selectedUser.id}`);
       dispatch(setListUsersPending([...listUsersPending, selectedUser]));

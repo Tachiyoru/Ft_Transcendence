@@ -1,7 +1,14 @@
-import { set } from "immer/dist/internal.js";
 import { AiOutlineUser } from "react-icons/ai";
 
-const UserNameField = ({ register, errors, showUsernameErrors, resStatus, setShowUsernameErrors}) => (
+type UserNameFieldProps = {
+	register: any;
+	errors: any;
+	showUsernameErrors: boolean;
+	resStatus: string;
+	setShowUsernameErrors: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const UserNameField = ({ register, errors, showUsernameErrors }: UserNameFieldProps) => (
 
 	<div className='mb-2 w-full'>
 		<div className='flex flex-row items-center border-lilac border-b'>

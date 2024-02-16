@@ -44,7 +44,6 @@ const PersoConv = () => {
 	const socket = useContext(WebSocketContext);
 	const id = useSelector((state: RootState) => state.selectedChannelId);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
-	const [allNoFriends, setNoFriends] = useState<User[]>([]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -53,16 +52,7 @@ const PersoConv = () => {
 			setUserData(userDataResponse.data);
 		} catch (error) {
 			console.error('Error fetching user data:', error);
-		}
-
-		axios.get<User[]>('friends-list/non-friends')
-		.then((response) => {
-			setNoFriends(response.data);
-		})
-		.catch((error) => {
-			console.error('Erreur lors de la récupération des non-amis:', error);
-		});
-
+			}
 		};
 		fetchData();
 	}, []);

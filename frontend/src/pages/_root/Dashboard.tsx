@@ -8,7 +8,6 @@ import Animation from "./container/Animation";
 import Leaderboard from "./container/Leaderboard";
 import History from "./container/History";
 import { fetchDataUser } from "../../api/apiCalls";
-import axiosInstance from "../../axios/api";
 import { WebSocketContext } from "../../socket/socket";
 
 

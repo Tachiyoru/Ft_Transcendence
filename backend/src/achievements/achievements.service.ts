@@ -189,7 +189,7 @@ export class AchievementsService
 		return updatedUser;
 	}
 
-	// async setTittle(userId: number, achievementId: number){
+	// async settitle(userId: number, achievementId: number){
 	// 	const user = await this.prismaService.user.findUnique({
 	// 		where: {
 	// 			id: userId,
@@ -209,7 +209,7 @@ export class AchievementsService
 	// 			id: userId,
 	// 		},
 	// 		data: {
-	// 			tittle: (achievement.idType),
+	// 			title: (achievement.idType),
 	// 		},
 	// 	});
 	// }

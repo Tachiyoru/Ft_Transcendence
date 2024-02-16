@@ -7,13 +7,11 @@ import {
 } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../store/store";
 
 interface RightSidebarProps {
   isRightSidebarOpen: boolean;
@@ -62,12 +60,24 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   onUpdateList,
 }) => {
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
-  const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
+
+	
+	
+	
+	
+
+	// keske ce que ca Clem ???
+	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
   const [commonChannelCount, setCommonChannelCount] = useState(0);
+	
+	
+	
+	
+	
+	
   const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<
     Users[]
   >([]);
-  const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
   const [commonFriendsCount, setCommonFriendsCount] = useState(0);
   const [usersInFriends, setUsersInFriends] = useState<Users[]>([]);
   const [showCommonFriends, setShowCommonFriends] = useState(false);
@@ -142,7 +152,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 
       socket.emit("check-user-in-channel", { chanId: channel.chanId });
       socket.on("user-in-channel", (boolean) => {
-        setCheckUserInChannel(boolean);
       });
 
       return () => {
@@ -200,7 +209,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   const handleJoinChannel = async () => {
     socket.emit("joinChan", { chanId: channel.chanId });
     socket.on("channelJoined", () => {});
-    setCheckUserInChannel(true);
   };
 
   const handleBlockUser = async (user: Users) => {

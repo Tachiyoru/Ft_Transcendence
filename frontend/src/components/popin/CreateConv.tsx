@@ -60,7 +60,7 @@ const CreateConv: React.FC = () => {
     fetchUserData();
   }, []);
 
-  const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     setIsTyping(inputValue !== "");
     setSearchText(inputValue);
@@ -158,13 +158,13 @@ const CreateConv: React.FC = () => {
           {/*RESEARCH BAR*/}
           <div className="relative">
             <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Research friends"
-                className="text-xs placeholder-accent-violet text-accent-violet pt-1.5 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
-                onChange={handleInputChange}
-                value={searchText}
-              />
+							<input
+								type="text"
+								placeholder="Research friends"
+								className="text-xs placeholder-accent-violet text-accent-violet pt-1.5 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(e)}
+								value={searchText}
+							/>
               <span className="absolute left-0 pl-1 pt-1 items-center">
                 {isTyping ? (
                   <FaArrowTurnUp className="text-violet-black mt-1 w-3 h-3 transform rotate-90 m-2" />

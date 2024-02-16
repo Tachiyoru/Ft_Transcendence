@@ -5,7 +5,6 @@ import {
   FaUser,
   FaUserPlus,
 } from "react-icons/fa6";
-import io from "socket.io-client";
 import { Link } from "react-router-dom";
 import { WebSocketContext } from "../../socket/socket";
 import { setUsersInChannel, setUsersNotInChannel } from "../../services/selectedChannelSlice";
@@ -72,7 +71,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
     fetchUserData();
   }, []);
 
-  const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     setIsTyping(inputValue !== "");
     setSearchText(inputValue);
@@ -120,8 +119,11 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
   
     setTimeout(() => {
       if (!isError) {
-        togglePopin();
-        dispatch(setUsersInChannel({ channelId: channel.chanId, users: [...usersInChannel, ...selectedItems] }))
+				togglePopin();
+				if (usersInChannel)
+				{
+					dispatch(setUsersInChannel({ channelId: channel.chanId, users: [...usersInChannel, ...selectedItems] }));
+				}
         setCheckedItems({});
         setErrorMessage("");
       }
@@ -146,13 +148,13 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
           {/*RESEARCH BAR*/}
           <div className="relative">
             <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Research"
-                className="text-xs placeholder-accent-violet text-accent-violet pt-1 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
-                onChange={handleInputChange}
-                value={searchText}
-              />
+							<input
+								type="text"
+								placeholder="Research"
+								className="text-xs placeholder-accent-violet text-accent-violet pt-1 pb-1 pl-9 w-full my-2 rounded-md bg-lilac focus:outline-none focus:border-fushia"
+								onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange(e)}
+								value={searchText}
+							/>
               <span className="absolute left-0 pl-1 pt-1 items-center">
                 {isTyping ? (
                   <FaArrowTurnUp className="text-purple mt-1 w-3 h-3 transform rotate-90 m-2" />

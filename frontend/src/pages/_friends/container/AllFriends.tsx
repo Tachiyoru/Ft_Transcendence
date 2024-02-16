@@ -1,12 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
-  FaBan,
-  FaGamepad,
-  FaMessage,
   FaRegPenToSquare,
   FaUser,
   FaUserMinus,
-  FaXmark,
 } from "react-icons/fa6";
 import { SlOptions } from "react-icons/sl";
 import axios from "../../../axios/api";
@@ -30,9 +26,6 @@ const AllFriends = () => {
   const listUsersPending = useSelector(
     (state: RootState) => state.friend.listUsersPending
   );
-  const [pendinglist, setPendingList] = useState<
-    { id: number; username: string; avatar: string }[]
-  >([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [previousUserId, setPreviousUserId] = useState<number | null>(null);
   const socket = useContext(WebSocketContext);
@@ -80,8 +73,7 @@ const AllFriends = () => {
           "/friends-list/my-pending-list"
         );
         const a2 = response2.data;
-        console.log(" myYYYYYYlist pending", a2);
-        const response = await axios.get<{ id: number; username: string }[]>(
+				const response = await axios.get<{ id: number; username: string; avatar: string; }[]>(
           "/friends-list/mine"
         );
         const a = response.data;
@@ -91,13 +83,11 @@ const AllFriends = () => {
           updateListUsersPending = listUsersPending.filter(
             (pendingUser) => a2.some((user) => user.id === pendingUser.id)
           );
-          console.log("SSSSSSSSSSSS");
         //   dispatch(setListUsersPending(updateListUsersPending));
         } else
           updateListUsersPending = listUsersPending.filter(
             (pendingUser) => !a.some((user) => user.id === pendingUser.id)
 			);
-		console.log("liiiiiiiiiiist pending",updateListUsersPending);
 		dispatch(setListUsersPending(updateListUsersPending));
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -112,7 +102,6 @@ const AllFriends = () => {
       const updateListUsersPending = listUsersPending.filter(
         (user) => user.id !== userId
       );
-      console.log("list pending", updateListUsersPending);
       dispatch(setListUsersPending(updateListUsersPending));
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -123,7 +112,7 @@ const AllFriends = () => {
     (state: RootState) => state.friend.listUsersNotFriend
   );
 
-  const removeFriend = async (user) => {
+	const removeFriend = async (user: any) => {
     try {
       await axios.delete(`/friends-list/remove/${user.id}`);
 

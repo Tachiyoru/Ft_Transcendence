@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { IoSettingsSharp } from 'react-icons/io5';
 import ChannelSettings from './ChannelSettings';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
-import { useDispatch } from 'react-redux';
 import { WebSocketContext } from '../../socket/socket';
 
 interface Member {

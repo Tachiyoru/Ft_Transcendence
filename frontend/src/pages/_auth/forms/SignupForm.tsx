@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useEffect, useContext } from "react";
+import { useState, ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AiOutlineLock,
@@ -6,7 +6,7 @@ import {
   AiOutlineEyeInvisible,
   AiOutlineCheck,
 } from "react-icons/ai";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import axios from "../../../axios/api";
 import UserNameField from "../fields/UserNameField";
 import EmailField from "../fields/EmailField";
@@ -14,8 +14,6 @@ import SocialIcons from "../fields/SocialIcons";
 
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../services/UserSlice";
-import { WebSocketContext } from "../../../socket/socket";
-import { error } from "console";
 
 interface IdataRegister {
   username: string;
@@ -23,7 +21,6 @@ interface IdataRegister {
   password: string;
   confirmPassword: string;
 }
-
 
 const SignupForm = () => {
   const dispatch = useDispatch();
@@ -51,7 +48,7 @@ const SignupForm = () => {
     register,
     handleSubmit,
 	setError,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<IdataRegister>();
 
   const SubmitHandler = async (data: IdataRegister) => {

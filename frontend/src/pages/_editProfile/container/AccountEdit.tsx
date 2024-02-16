@@ -14,6 +14,7 @@ interface IdataRegister {
 
 interface Users {
 	username: string;
+	email?: string;
 	avatar: string;
 	id: number;
 	status: string;
@@ -47,7 +48,6 @@ const AccountEdit = () => {
 
 	const submitHandler = async () => {
 		try {
-		setLoading(true);
 		const filteredData: Partial<IdataRegister> = {};
 
 		if (username) {
@@ -63,7 +63,6 @@ const AccountEdit = () => {
 		} catch (error) {
 		console.error("Error updating user data:", error);
 		} finally {
-		setLoading(false);
 		}
 	};
 
@@ -95,7 +94,7 @@ const AccountEdit = () => {
 					</div>
 				)}
 				<div>
-				<FileUpload userData={userData} setUserData={setUserData}/>
+					{userData && <FileUpload userData={userData} setUserData={setUserData as (newUserData: Users | undefined) => void}/>}
 				</div>
 			</div>
 

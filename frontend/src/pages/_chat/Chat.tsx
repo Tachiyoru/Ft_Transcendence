@@ -1,5 +1,5 @@
 import MainLayout from "../../components/nav/MainLayout";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import SidebarLeft from "./container/SidebaLeft";
 import ContentConv from "./container/ContentConv";

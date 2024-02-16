@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
-import { MdWallet } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 
 interface Props {
@@ -29,8 +28,6 @@ const OhOh: React.FC<Props> = ({error}) => {
 		document.removeEventListener("mousedown", handleClickOutside);
 	};
 	}, []);
-
-	const numberOfPlayers = 4;
 
 	return (
 	<div className="flex items-center justify-center">

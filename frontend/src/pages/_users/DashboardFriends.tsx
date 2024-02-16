@@ -23,6 +23,7 @@ interface Users {
 	id: number;
 	status: string;
 	achievements: Achievements[];
+	createdAt: string;
 	stats: Stats;
 }
 
@@ -236,7 +237,7 @@ return (
 
 						<div 
 							className={`flex flex-row items-center bg-purple p-2 pl-5 rounded-md text-lilac text-sm ${friendPending ? 'opacity-40' : 'hover:bg-violet-black-nav cursor-pointer'}`}
-							onClick={!friend ? addFriend : (friendPending ? null : removeFriend)}
+							onClick={!friend ? addFriend : (friendPending ? undefined : removeFriend)}
 						>
 							{!friend && !friendPending ? <FaUserPlus className="w-3 h-4 mr-2"/> : friendPending ?  (<RiTimer2Line className="w-3 h-4 mr-2"/>) : (<FaUserMinus className="w-3 h-4 mr-2"/>)}
 							<p>{!friend && !friendPending ? 'Add as friend' : (friendPending ? 'Pending invitation' : 'Remove from friend')}</p>
