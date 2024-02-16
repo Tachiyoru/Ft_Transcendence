@@ -1,7 +1,7 @@
 import NavHorizontal from "./container/NavHorizontal"
 import NavVertical from "./container/NavVertical"
 
-const MainLayout = ({ children, currentPage }) => {
+const MainLayout = ({ children, currentPage }: { children: React.ReactNode, currentPage: string }) => {
 	return (
 		<div className="bg-violet-black-nav h-screen bg-opacity-50">
 			<div className="m-5 mt-2 h-full">

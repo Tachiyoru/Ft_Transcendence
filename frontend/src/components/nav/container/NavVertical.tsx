@@ -1,7 +1,7 @@
 import { GoHomeFill } from "react-icons/go";
 import { RiGamepadFill, RiMessage3Fill } from "react-icons/ri";
 import { FaArrowRightFromBracket, FaUserGroup } from "react-icons/fa6";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { setLogout } from "../../../services/UserSlice";
 import { useDispatch } from "react-redux";
 import axios from "../../../axios/api";
@@ -31,7 +31,6 @@ interface User {
 
 const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const socket = useContext(WebSocketContext);
   const [userData, setUserData] = useState<User>();
   const [actuReceived, setActuReceived] = useState<boolean>(false);

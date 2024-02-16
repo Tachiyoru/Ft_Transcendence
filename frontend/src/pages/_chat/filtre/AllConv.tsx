@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
-import { io } from "socket.io-client";
 import {
   setSelectedChannelId,
   setPrevChannelId,
@@ -124,7 +123,6 @@ const [actuReceived, setActuReceived] = useState<boolean>(false);
   const renderLastMessage = (channel: Channel) => {
 	if (allBlockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
 	  const lastMessage = channel.messages[channel.messages.length - 1];
-	  const chanName =
 		lastMessage.authorId === userData.username
 		  ? "me"
 		  : lastMessage.authorId;

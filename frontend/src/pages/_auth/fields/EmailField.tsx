@@ -1,6 +1,15 @@
 import { AiOutlineMail } from "react-icons/ai";
 
-const EmailField = ({ register, errors, showUsernameErrors, resStatus, setShowUsernameErrors}) => (
+
+type EmailFieldProps = {
+	register: any;
+	errors: any;
+	showUsernameErrors: boolean;
+	resStatus: string;
+	setShowUsernameErrors: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const EmailField = ({ register, errors, showUsernameErrors}: EmailFieldProps) => (
 	<div className='mb-2 w-full'>
 	<div className='flex flex-row items-center border-b border-lilac'>
 		<AiOutlineMail className= 'w-4 h-4 text-lilac'/>

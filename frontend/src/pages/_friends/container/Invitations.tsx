@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { FaCheck, FaXmark } from "react-icons/fa6";
 import axios from "../../../axios/api";
-import { Websocket } from "../../../components/Websocket";
 import { WebSocketContext } from "../../../socket/socket";
 
 
@@ -10,7 +9,7 @@ interface Props {
   onAcceptFriendRequest: () => void;
 }
 
-const Invitations = ({ onAcceptFriendRequest }) => {
+const Invitations = ({ onAcceptFriendRequest } : any) => {
   const [listUsers, setListUsers] = useState<
     { id: number; username: string; avatar: string }[]
   >([]);
@@ -19,7 +18,7 @@ const Invitations = ({ onAcceptFriendRequest }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<{ id: number; username: string }[]>(
+				const response = await axios.get<{ id: number; username: string; avatar: string; }[]>(
           "/friends-list/pending-list"
         );
         setListUsers(response.data);

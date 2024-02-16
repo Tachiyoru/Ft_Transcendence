@@ -7,7 +7,8 @@ export const useDashboardState = () => {
 	partyWon: 0,
 	partyLost: 0,
 	lvl: 0,
-	exp: 0,
+		exp: 0,
+	history: [],
 	});
 	const [userRankingGlobal, setUserRankingGlobal] = useState<{ username: string; id: number}[]>([]);
 	const [userRankingFriends, setUserRankingFriends] = useState<{ username: string; }[]>([]);

@@ -4,13 +4,11 @@ import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
 import { Link } from 'react-router-dom';
-import { setSelectedChannelId, setUsersBan, setUsersInChannel, setUsersNotInChannel, setUsersOperatorsChannel } from '../../services/selectedChannelSlice';
+import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
 import { WebSocketContext } from '../../socket/socket';
 import 	axios from '../../axios/api';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
 
 
 interface Owner {
@@ -51,13 +49,10 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 
 	const [popinOpen, setPopinOpen] = useState(false);
 	const cardRef = useRef<HTMLDivElement>(null);
-    const opMembers = channel.members.filter((members) => channel.op.includes(members.username));
 	const dispatch = useDispatch();
 	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const socket = useContext(WebSocketContext);
-	const usersInChannel = useSelector((state: RootState) => state.selectedChannelId.channelUsers[channel.chanId]);
-	const usersNotInChannel = useSelector((state: RootState) => state.selectedChannelId.usersNotInChannel[channel.chanId]);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
 
 	useEffect(() => {

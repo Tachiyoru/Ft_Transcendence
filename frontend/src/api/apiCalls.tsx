@@ -1,9 +1,26 @@
 import axios from "../axios/api";
 
+interface User {
+	username: string;
+	avatar: string;
+	createdAt: string;
+	id: number;
+	title: string;
+}
+
+interface Achievement {
+
+	icon: string;
+	id: number;
+	idType: number;
+	title: string;
+	description: string;
+}
+
 interface FetchDataParams {
   setUserData: React.Dispatch<
     React.SetStateAction<
-			{ username: string; avatar: string; createdAt: string; id: number; title: string; } | undefined
+			User | undefined
     >
   >;
   setUserStats: React.Dispatch<
@@ -23,8 +40,7 @@ interface FetchDataParams {
     React.SetStateAction<{ username: string }[]>
   >;
   setUserAchievements: React.Dispatch<
-		React.SetStateAction<{
-			icon: string; id: number, idType: number; title: string; description: string;}[]>
+		React.SetStateAction<Achievement[]>
   >;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -56,7 +72,7 @@ export const fetchDataUser = async ({
     }
     const userInTop3 = userRankingGlobals.data
       .slice(0, 3)
-      .some((user) => user.id === userDataResponse.data.id);
+      .some((user: User) => user.id === userDataResponse.data.id);
     if (userInTop3) {
       await axios.post(`achievements/add/${3}`);
     }
@@ -69,21 +85,21 @@ export const fetchDataUser = async ({
       //first game
       if (
 				userStatResponse.data.partyPlayed >= 1 &&
-        !userAchievementsData.some((achievement) => achievement.idType === 5)
+        !userAchievementsData.some((achievement: Achievement) => achievement.idType === 5)
 				) {
 					await axios.post(`achievements/add/${5}`);
 				}
 				//win 10 parties
 				if (
 					userStatResponse.data.partyWon >= 10 &&
-					!userAchievementsData.some((achievement) => achievement.idType === 2)
+					!userAchievementsData.some((achievement: Achievement) => achievement.idType === 2)
 					) {
 						await axios.post(`achievements/add/${2}`);
 					}
 					//did 42 parties
 					if (
 						userStatResponse.data.partyPlayed >= 42 &&
-						!userAchievementsData.some((achievement) => achievement.idType === 7)
+						!userAchievementsData.some((achievement: Achievement) => achievement.idType === 7)
 						) {
 							await axios.post(`achievements/add/${7}`);
 						}
@@ -92,7 +108,6 @@ export const fetchDataUser = async ({
 						const history = userStatResponse.data.history;
 						for (let i = 0; i < history.length; i++) {
 							const currentItem = history[i];
-							const nextItem = history[i + 1];
 							if (currentItem.includes(`Defeat`)) {
 								consecutiveDefeats++;
 								if (consecutiveDefeats === 10)

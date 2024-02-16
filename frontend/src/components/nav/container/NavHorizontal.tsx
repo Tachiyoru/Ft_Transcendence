@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa6";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdSettings } from "react-icons/md";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "../../../axios/api";
 import { IconType } from "react-icons";
 import { WebSocketContext } from "../../../socket/socket";
@@ -119,7 +119,6 @@ const NavHorizontal = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const [actuReceived, setActuReceived] = useState<boolean>(false);
 
   const socket = useContext(WebSocketContext);
@@ -127,7 +126,7 @@ const NavHorizontal = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get<{ username: string }[]>("/users/all");
+				const response = await axios.get<{ username: string; id: number; }[]>("/users/all");
         setListUsers(response.data);
       } catch (error) {
         console.error("Error fetching user list:", error);
@@ -137,7 +136,7 @@ const NavHorizontal = () => {
     setActuReceived(false);
   }, [actuReceived]);
 
-  socket.on("actu-notif", (channelList) => {
+  socket.on("actu-notif", () => {
     socket.emit("unread-notification");
 	console.log("actu-notif received");
     socket.off("actu-notif");
@@ -194,7 +193,6 @@ const NavHorizontal = () => {
         const fetchedNotifications = await getNotifications(userId);
         setNotifications(fetchedNotifications);
 
-        setHasNewNotifications(true);
         setNotificationVisible(true);
       } catch (error) {
         console.error("Error fetching and setting notifications:", error);

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "../../../axios/api";
-import { set } from "react-hook-form";
 
 interface Badge {
   id: number;

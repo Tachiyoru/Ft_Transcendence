@@ -11,7 +11,6 @@ interface IdataRegister {
   
 const SecurityEdit = () => {
 	const [passwordIsVisible, setPasswordIsVisible] = useState(false);
-	const [loading, setLoading] = useState(true);
   const [tokenGoogle, setTokenGoogle] = useState<string>("");
 	const [userData, setUserData] = useState<{otpAuthUrl: string, isTwoFaEnabled: boolean, username: string} | undefined>();
   const [isQrCode, setIsQrCode] = useState<boolean>(false);
@@ -45,8 +44,6 @@ const SecurityEdit = () => {
 
     const submitHandler = async (data: IdataRegister) => {
       try {
-        setLoading(true);
-    
         if (data.newPassword !== data.confirmPassword) {
           console.error('New Password and Confirm Password do not match');
           return;
@@ -59,13 +56,11 @@ const SecurityEdit = () => {
           setError('Invalid password');
       }
       finally {
-        setLoading(false);
       }
     };
 
     const handleQrCode = async (isChecked: boolean) => {
       try {
-        setLoading(true);
         await axios.post('/two-fa/set-status');
         if (!userData?.otpAuthUrl)
           await axios.get('/two-fa/generate-qrcode');
@@ -76,7 +71,6 @@ const SecurityEdit = () => {
       } catch (error) {
         console.error("Error two-fa verification", error);
       } finally {
-        setLoading(false);
       }
     };
 	

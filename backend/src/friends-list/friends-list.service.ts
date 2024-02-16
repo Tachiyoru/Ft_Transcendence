@@ -20,7 +20,7 @@ export class FriendsListService
 				where: { id: userId },
 				include: { pendingList: true },
 			}
-		)
+		);
 		if (!user)
 			throw new Error("User not found");
 		return user.pendingList;
@@ -33,7 +33,7 @@ export class FriendsListService
 				where: { id: userId },
 				include: { pendingFrom: true },
 			}
-		)
+		);
 		if (!user)
 			throw new Error("User not found");
 		return user.pendingFrom;
@@ -71,6 +71,7 @@ export class FriendsListService
 
 	async acceptRequest(user: User, friendId: number) 
 	{
+		console.log("user : ", user);
 		await this.prismaService.user.update(
 			{
 				where: { id: user.id },
@@ -84,7 +85,7 @@ export class FriendsListService
 				data: { friends: { connect: { id: friendId } } }
 			}
 		);
-		user = await this.prismaService.user.update(
+		await this.prismaService.user.update(
 			{
 				where: { id: friendId },
 				include: { friends: true },
@@ -95,11 +96,12 @@ export class FriendsListService
 		);
 
 		const notificationDto = new CreateNotificationDto();
+		console.log("username = ", user.username, user.id);
 		if (user.username)
 			notificationDto.fromUser = user.username;
 
 		await this.notificationService.addNotificationByUserId(
-			user.id,
+			friendId,
 			notificationDto,
 			NotificationType.FRIENDREQUEST_ACCEPTED
 		);
@@ -125,7 +127,7 @@ export class FriendsListService
 				include: { notifications: true },
 			});
 			if (updatedUser)
-			return (updatedUser);
+				return (updatedUser);
 		}
 
 		return (user);
@@ -154,8 +156,8 @@ export class FriendsListService
 			where: { id: user.id },
 			include: { pendingFrom: true },
 		});
-		if (test) 
-			console.log("pendingFrom = ", test.pendingFrom);	
+		if (test)
+			console.log("pendingFrom = ", test.pendingFrom);
 
 		const notificationDto = new CreateNotificationDto();
 		if (user.username) notificationDto.fromUser = user.username;
@@ -248,7 +250,8 @@ export class FriendsListService
 		return me.blockedList;
 	}
 
-	async isUserBlockedById(userId: number, loggedInUser: User) {
+	async isUserBlockedById(userId: number, loggedInUser: User)
+	{
 		const me = await this.prismaService.user.findUnique({
 			where: { id: loggedInUser.id },
 			include: {
@@ -257,13 +260,14 @@ export class FriendsListService
 				},
 			},
 		});
-		
-		if (!me) {
+
+		if (!me)
+		{
 			throw new Error('User not found');
 		}
-	
+
 		return me.blockedList.length > 0;
-    }
+	}
 
 	async getMyFriends(user: User)
 	{

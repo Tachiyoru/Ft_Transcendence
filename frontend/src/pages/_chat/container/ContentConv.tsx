@@ -9,9 +9,7 @@ import SidebarRightMobile from "./SidebarRightMobile";
 import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 
 interface Channel {
   name: string;
@@ -59,11 +57,9 @@ const ContentConv = () => {
   });
   const messageContainerRef = useRef(null);
   const [isTyping, setIsTyping] = useState<string>("");
-  const [checkUserInChannel, setCheckUserInChannel] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -125,9 +121,6 @@ const ContentConv = () => {
       chanId: selectedChannelId,
       password: passwordInput,
     });
-    socket.on("channelJoined", (updatedChannel) => {
-      setCheckUserInChannel(true);
-    });
     socket.on("channelJoinedError", (error) => {
       setErrorMessage("Wrong password");
       console.error("Error joining channel:", error);
@@ -166,9 +159,6 @@ const ContentConv = () => {
       });
 
       socket.emit("check-user-in-channel", { chanId: selectedChannelId });
-      socket.on("user-in-channel", (boolean) => {
-        setCheckUserInChannel(boolean);
-      });
 
       return () => {
         socket.off("check-user-in-channel");
