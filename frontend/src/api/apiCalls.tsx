@@ -3,7 +3,7 @@ import axios from "../axios/api";
 interface FetchDataParams {
   setUserData: React.Dispatch<
     React.SetStateAction<
-      { username: string; avatar: string; createdAt: string } | undefined
+			{ username: string; avatar: string; createdAt: string; id: number; title: string; } | undefined
     >
   >;
   setUserStats: React.Dispatch<
@@ -12,17 +12,19 @@ interface FetchDataParams {
       partyWon: number;
       partyLost: number;
       lvl: number;
-      exp: number;
+			exp: number;
+			history: string[];
     }>
   >;
   setUserRankingGlobal: React.Dispatch<
-    React.SetStateAction<{ username: string }[]>
+		React.SetStateAction<{ username: string;  id: number;}[]>
   >;
   setUserRankingFriends: React.Dispatch<
     React.SetStateAction<{ username: string }[]>
   >;
   setUserAchievements: React.Dispatch<
-    React.SetStateAction<{ icon: string; id: number, idType: number}[]>
+		React.SetStateAction<{
+			icon: string; id: number, idType: number; title: string; description: string;}[]>
   >;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }

@@ -6,7 +6,7 @@ import { IoSettingsSharp } from "react-icons/io5";
 interface UserData {
   username: string;
   avatar: string;
-  tittle: string;
+  title: string;
   createdAt: string;
 }
 
@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userData, userStats }) => {
           </p>
           <p className="mt-2 text-xs font-medium text-white">
             <span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">
-              {userData.tittle}
+              {userData.title}
             </span>
           </p>
         </div>
