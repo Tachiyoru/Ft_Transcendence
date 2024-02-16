@@ -300,6 +300,7 @@ export class chatService {
   async isUserInChannel(@Request() req: any, chanId: number): Promise<boolean> {
     try {
       const userList = await this.findAllMembers(chanId);
+	  if (!userList) return false;
       const isInChannel = userList.some((user) => user.id === req.user.id);
       return isInChannel;
     } catch (error) {
@@ -684,7 +685,7 @@ export class chatService {
       include: { members: true },
     });
     if (!chan) {
-      throw new Error("Could not find channel");
+      return null;
     }
     return chan.members;
   }

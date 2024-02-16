@@ -30,7 +30,6 @@ export class NotificationService
 			where: { id: userId },
 			include: { notifications: true },
 		});
-
 		if (!user)
 			throw new Error("User not found");
 
