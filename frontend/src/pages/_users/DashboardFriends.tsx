@@ -16,6 +16,7 @@ import { WebSocketContext } from "../../socket/socket";
 import { setSelectedChannelId } from "../../services/selectedChannelSlice";
 import { RiTimer2Line } from "react-icons/ri";
 import History from "./container/HystoryUser";
+import Badges from "../_root/container/Badges";
 
 interface Users {
 	username: string;
@@ -38,6 +39,7 @@ interface Stats {
 
 interface Achievements {
 	id: number;
+	idType: number;
 	icon: string;
 	title: string;
 	description: string;
@@ -47,6 +49,7 @@ const DashboardFriends = () => {
 	const location = useLocation();
 	const currentPage = location.pathname;
 	const [userData, setUserData] = useState<Users>();
+	const [userAchievements, setUserAchievements] = useState<Achievements[]>([]);
 	const [userStats, setUserStats] = useState<{ partyPlayed: number; partyWon: number; partyLost: number, lvl: number; exp: number }>({
 		partyPlayed: 0,
 		partyWon: 0,
@@ -73,6 +76,8 @@ const DashboardFriends = () => {
 			setUserData(response.data);
 			const responsestat = await axios.get(`stats/${username}`);
 			setUserStats(responsestat.data);
+			const friendsAchievements = await axios.get(`/achievements/${response.data.id}`);
+			setUserAchievements(friendsAchievements.data);
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
@@ -289,15 +294,12 @@ return (
 				
 				</div>
 				</div>
-
-				
 			) : (
 				<p className="text-lilac">User not found</p>
 			)}
-			
 				<div className="flex-1 bg-violet-black-nav bg-opacity-80 p-4 md:rounded-r-lg">
 					<div className="flex mx-2 flex-row gap-4 md:gap-6">
-						<BadgesUser userAchievements={userData?.achievements?? []}/>
+						<BadgesUser userAchievements={userAchievements}/>
 						<MatchesPlayedTogether history={userData?.stats.history?? []} username={me?? ""}/>
 					</div>
 					<div className="flex flex-row m-2 gap-4 md:gap-6">

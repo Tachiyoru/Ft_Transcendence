@@ -1,5 +1,6 @@
 interface Badge {
 	id: number;
+	idType: number;
 	icon: string;
 	title: string;
 	description: string;
@@ -10,7 +11,7 @@ interface Badge {
   }
 
 const BadgesUser : React.FC<BadgesSectionProps> = ({ userAchievements }) => {
-	const badgeIds = userAchievements.map(badge => badge.id);
+	const badgeIds = userAchievements.map(badge => badge.idType);
 
 	const achievementTitles = [
 	  "Link your profile to 42 or Github",

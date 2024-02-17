@@ -43,9 +43,9 @@ const Dashboard = () => {
       setUserRankingFriends,
       setUserAchievements,
       setLoading,
-    });
+		});
   }, [
-    setUserData,
+		setUserData,
     setUserStats,
     setUserRankingGlobal,
     setUserRankingFriends,

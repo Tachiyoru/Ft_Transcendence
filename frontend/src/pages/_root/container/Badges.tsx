@@ -16,14 +16,7 @@ interface BadgesSectionProps {
 
 const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) =>
 {
-	const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
 	// const [achievementLocked, setAchievementLocked] = useState<Badge[]>([]);
-	const handleBadgeClick = async (badgeId: number) =>
-	{
-		setSelectedBadgeId(badgeId);
-		await axios.patch(`achievements/settitle/${badgeId}`);
-		badgeId = 0;
-	};
 	const badgeIds = userAchievements.map(badge => badge.idType);
 
 	const achievementTitles = [
@@ -49,11 +42,8 @@ const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) =>
           {userAchievements.map((badge, index) => (
             <div
               key={index}
-              className={`w-12 h-12 m-1 ${
-                selectedBadgeId === badge.id ? "selected" : ""
-              }`}
+              className="w-12 h-12 m-1"
               title={`${badge.description}`}
-              onClick={() => handleBadgeClick(badge.id)}
             >
               <img src={badge.icon} alt={badge.title} />
             </div>
