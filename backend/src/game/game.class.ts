@@ -106,7 +106,6 @@ export class Game  {
         if (this.status === 3)  {
             this.saveGame(prisma);
         }
-
     }
 
     resetBallPosition() {
