@@ -363,13 +363,25 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("channel-in-common")
   async getChannelsInCommon(
     @ConnectedSocket() client: Socket,
-    @MessageBody("friendId") friendId: number
+    @MessageBody("chanId") chanId: number
   ): Promise<void> {
     const chanlist = await this.chatService.getChannelsInCommon(
       client.handshake.auth.id,
-      friendId
+      chanId
     );
     client.emit("channel-in-common", chanlist);
+  }
+
+  @SubscribeMessage("friends-in-common")
+  async getCommonFriend(
+    @ConnectedSocket() client: Socket,
+    @MessageBody("chanId") chanId: number
+  ): Promise<void> {
+    const chanlist = await this.chatService.getCommonFriend(
+      client.handshake.auth.id,
+      chanId
+    );
+    client.emit("friends", chanlist);
   }
 
   @SubscribeMessage("joinChan")

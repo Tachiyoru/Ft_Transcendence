@@ -189,38 +189,53 @@ export class chatService {
     return usersInChannel;
   }
 
-  async getChannelsInCommon(userId: number, friendId: number) {
+  async getChannelsInCommon(userId: number, chanId: number) {
+	const channel = await this.prisma.channel.findUnique({
+	  where: { chanId: chanId },
+	  include: { members: true },});
+	let friendId = -1;
+	if (channel) {
+	  const friend = channel.members.find((member) => member.id !== userId);
+	  if (friend) friendId = friend.id;
+	  console.log("friend id = ",friendId);
+	}
+	if (friendId === -1) return [];
     const userChannels = await this.prisma.channel.findMany({
       where: {
         members: {
           some: {
-            id: userId,
+            id: userId && friendId,
           },
         },
+		NOT: {
+			modes: "CHAT",
+		  },
       },
     });
+	console.log("userChannels = ",userChannels);
+    return userChannels;
+  }
 
-    const friendChannels = await this.prisma.channel.findMany({
-      where: {
-        members: {
-          some: {
-            id: friendId,
-          },
-        },
-        NOT: {
-          modes: "CHAT",
-        },
-      },
-    });
-
-    if (!userChannels || !friendChannels) return [];
-
-    const channelsInCommon = userChannels.filter((channel) =>
-      friendChannels.some(
-        (friendChannel) => friendChannel.chanId === channel.chanId
-      )
-    );
-    return channelsInCommon;
+  async getCommonFriend(userId: number, chanId: number) {
+	const channel = await this.prisma.channel.findUnique({
+		where: { chanId: chanId },
+		include: { members: true },});
+	  let friendId = -1;
+	  if (channel) {
+		const friend = channel.members.find((member) => member.id !== userId);
+		if (friend) friendId = friend.id;
+	  }
+	  if (friendId === -1) return [];
+	  const friends = await this.prisma.user.findMany({
+		where: {
+		  friends: {
+			some: {
+			  id: userId && friendId,
+			},
+		  },
+		},
+	  });
+	return friends;
   }
 
   async addOp(chanId: number, username: string, @Request() req: any) {
