@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import tailwindScrollbar from 'tailwind-scrollbar';
+import tailwindCheckbox from 'flowbite/plugin'
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],

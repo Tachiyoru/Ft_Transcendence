@@ -19,7 +19,7 @@ const AccountSetting: React.FC = () => {
   return (
     <div className="flex flex-row h-[80vh]" style={{ cursor: "default" }}>
       {/*NAV SETTINGS*/}
-      <div className="w-[260px] md:rounded-l-lg bg-violet-black">
+      <div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black">
         <div className="p-4">
           <h1 className="font-outline-2 mt-6 m-2 text-white">Settings</h1>
         </div>
