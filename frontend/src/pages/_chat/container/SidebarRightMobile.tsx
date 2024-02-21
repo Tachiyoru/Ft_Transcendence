@@ -7,11 +7,13 @@ import {
 } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
+import { useDispatch } from "react-redux";
+import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
 
 interface RightSidebarProps {
   isRightSidebarOpen: boolean;
@@ -61,20 +63,10 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 }) => {
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
 
-	
-	
-	
-	
-
-	// keske ce que ca Clem ???
-	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
+  // keske ce que ca Clem ???
+  const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
   const [commonChannelCount, setCommonChannelCount] = useState(0);
-	
-	
-	
-	
-	
-	
+
   const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<
     Users[]
   >([]);
@@ -90,6 +82,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
     username: "",
     id: -1,
   });
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,9 +143,20 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
         setUsersMute(users);
       });
 
-      socket.emit("check-user-in-channel", { chanId: channel.chanId });
-      socket.on("user-in-channel", (boolean) => {
+      socket.emit("channel-in-common", { chanId: channel.chanId });
+      socket.on("channel-in-common", (channels) => {
+        console.log("channels :", channels);
+        setChannelInCommon(channels);
+        setCommonChannelCount(channels.length);
       });
+      socket.emit("friends-in-common", { chanId: channel.chanId });
+      socket.on("friends-in-common", (friends) => {
+        setUsersInFriends(friends);
+        setCommonFriendsCount(friends.length);
+      });
+
+      socket.emit("check-user-in-channel", { chanId: channel.chanId });
+      socket.on("user-in-channel", (boolean) => {});
 
       return () => {
         socket.off("allMembers");
@@ -236,13 +240,13 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
       await axios.post(`/friends-list/block/${userId}`);
       socket.emit("all-update");
     } catch (error) {
-		console.error("Erreur lors du blocage de l'utilisateur :", error);
+      console.error("Erreur lors du blocage de l'utilisateur :", error);
     }
-};
+  };
 
-const unblockUser = async (userId: number) => {
-	try {
-		await axios.post(`/friends-list/unblock/${userId}`);
+  const unblockUser = async (userId: number) => {
+    try {
+      await axios.post(`/friends-list/unblock/${userId}`);
       socket.emit("all-update");
     } catch (error) {
       console.error("Error deblocked users:", error);
@@ -252,11 +256,17 @@ const unblockUser = async (userId: number) => {
   const unBanUser = async (username: string) => {
     try {
       socket.emit("unBanUser", { chanId: channel.chanId, username: username });
-      socket.on("userUnBanned", (users) => {
-      });
+      socket.on("userUnBanned", (users) => {});
     } catch (error) {
       console.error("Error deblocked users:", error);
     }
+  };
+
+  const navigate = useNavigate();
+  const handleNavigation = (path) => {
+	toggleRightSidebar();
+    dispatch(setSelectedChannelId(path));
+    navigate("/chat");
   };
 
   return (
@@ -390,19 +400,20 @@ const unblockUser = async (userId: number) => {
               <IoIosArrowForward className="w-2 h-2 text-lilac" />
             </div>
             {showCommonChannel && (
-              <div className="pt-2 text-xs">
+              <div className="text-xs" >
                 {channelInCommon.map((channel) => (
-                  <div key={channel.name} className="mb-2">
-                    <Link to={""} className="text-lilac">
-                      <div className="flex flex-row justify-between items-center">
-                        <div className="w-[20px] h-[20px] bg-lilac rounded-full grid justify-items-center items-center">
+                  <div onClick={() => handleNavigation(channel.chanId)}
+				  	className="w-full m-auto text-left rounded px-1 hover:bg-dark-violet cursor-pointer">
+                    <div key={channel.name}>
+                      <div className="flex flex-row py-1 h-full justify-content m-auto items-center">
+                        <div className="w-[20px] h-[20px] bg-lilac rounded-full grid items-center items-center">
                           <FaUserGroup className="w-6 h-2 text-purple pr-1" />
                         </div>
-                        <p className="w-full font-regular ml-2">
+                        <p className="w-full text-lilac font-regular ml-2">
                           {channel.name}
                         </p>
                       </div>
-                    </Link>
+                    </div>
                   </div>
                 ))}
               </div>

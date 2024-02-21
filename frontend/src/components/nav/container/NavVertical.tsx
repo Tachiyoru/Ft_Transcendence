@@ -168,7 +168,6 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
         console.log("Déconnexion réussie");
         socket.disconnect();
         window.location.href = "/sign-in";
-		// window.location.reload();
       })
       .catch((error) => {
         console.error("Erreur lors de la déconnexion côté serveur :", error);

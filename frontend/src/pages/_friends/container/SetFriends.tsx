@@ -101,7 +101,6 @@ const hasNewInvitations = async () => {
       try {
         const response = await axios.get<Users[]>("/friends-list/non-friends");
         dispatch(setListUsersNotFriend(response.data));
-
         const pending = await axios.get<Users[]>(
           "/friends-list/pending-request/"
         );

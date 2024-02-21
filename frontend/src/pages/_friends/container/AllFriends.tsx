@@ -66,6 +66,13 @@ const AllFriends = () => {
     };
   }, []);
 
+  interface Users {
+	username: string;
+	avatar: string;
+	id: number;
+	status: string;
+  }
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -73,7 +80,7 @@ const AllFriends = () => {
           "/friends-list/my-pending-list"
         );
         const a2 = response2.data;
-				const response = await axios.get<{ id: number; username: string; avatar: string; }[]>(
+			const response = await axios.get<{ id: number; username: string; avatar: string; }[]>(
           "/friends-list/mine"
         );
         const a = response.data;
@@ -83,12 +90,16 @@ const AllFriends = () => {
           updateListUsersPending = listUsersPending.filter(
             (pendingUser) => a2.some((user) => user.id === pendingUser.id)
           );
-        //   dispatch(setListUsersPending(updateListUsersPending));
         } else
           updateListUsersPending = listUsersPending.filter(
             (pendingUser) => !a.some((user) => user.id === pendingUser.id)
 			);
 		dispatch(setListUsersPending(updateListUsersPending));
+
+		const response3 = await axios.get<Users[]>("/friends-list/non-friends");
+		console.log("res 3 = update nonfriends list :",response3.data);
+        dispatch(setListUsersNotFriend(response3.data));
+
       } catch (error) {
         console.error("Error fetching user list:", error);
       }
