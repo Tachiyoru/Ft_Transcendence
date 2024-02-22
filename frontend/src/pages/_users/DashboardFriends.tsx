@@ -17,6 +17,7 @@ import { setSelectedChannelId } from "../../services/selectedChannelSlice";
 import { RiTimer2Line } from "react-icons/ri";
 import History from "./container/HystoryUser";
 import Badges from "../_root/container/Badges";
+import { setGameData, setInvitedFriend } from "../../services/gameInvitSlice";
 
 interface Users {
 	username: string;
@@ -202,22 +203,45 @@ const DashboardFriends = () => {
 		}
 	};
 
+	const invitToPlay = async (user) => {
+		dispatch(setInvitedFriend(user));
+	
+			const sendNotification = async () =>
+			{
+				await axios.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+				socket.emit("all-update")
+			}
+			sendNotification();
+	
+			const createInviteGame = async () =>
+			{
+				socket.emit("createInviteGame", user.id);
+				socket.on("gameInviteData", (game) =>
+				{
+					if (game)
+						dispatch(setGameData(game));
+				});
+			navigate('/game')
+			}
+	
+			createInviteGame();
+	}
 
-return (
+	return (
 	<MainLayout currentPage={currentPage}>
 		<div className="flex-1 flex flex-row">
 			{/*leftSideBar*/}
 				{userData ? (
-					<div className="md:w-[260px] md:rounded-l-lg bg-violet-black p-4 text-xs">
-					<div className="flex mt-4 mb-10 m-2">
+					<div className="w-[66px] md:w-[260px] md:rounded-l-lg bg-violet-black p-2 md:p-4 text-xs">
+					<div className="flex mt-4 mb-10 m-0 md:m-2">
 					{userData.avatar ? (
-						<img src={userData.avatar} className="h-20 w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
+						<img src={userData.avatar} className="h-[48px] w-[48px] md:h-20 md:w-20 object-cover rounded-full text-lilac" alt="User Avatar" />
 					) : (
 						<div className="bg-purple rounded-full p-2 mt-2">
-							<FaUser className="w-[60px] h-[60px] p-3 text-lilac"/>
+							<FaUser className="h-[38px] w-[38px] md:w-[60px] md:h-[60px] p-3 text-lilac"/>
 						</div>
 					)}
-						<div className="pl-4 pt-4">
+						<div className="pl-4 pt-4 md:block hidden">
 							<DateConverter initialDate={userData.createdAt}/>
 							<p className="text-sm font-semibold text-lilac">{userData.username}</p>
 							<p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
@@ -230,22 +254,23 @@ return (
 						className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm cursor-pointer"
 						>
 							<FaRegPenToSquare className="w-3 h-4 mr-2"/>
-							<p>Send a message</p>
+							<p className="md:block hidden">Send a message</p>
 						</div>
 
-						<Link to="/settings">
-							<div className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm">
-								<RiGamepadFill className="w-3 h-4 mr-2"/>
-								<p>Invite to play</p>
-							</div>
-						</Link>
+						<div 
+							className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm cursor-pointer"
+							onClick={() => invitToPlay(userData)}
+						>
+							<RiGamepadFill className="w-3 h-4 mr-2"/>
+							<p className="md:block hidden">Invite to play</p>
+						</div>
 
 						<div 
 							className={`flex flex-row items-center bg-purple p-2 pl-5 rounded-md text-lilac text-sm ${friendPending ? 'opacity-40 cursor-not-allowed' : 'hover:bg-violet-black-nav cursor-pointer'}`}
 							onClick={!friend ? addFriend : (friendPending ? undefined : removeFriend)}
 						>
 							{!friend && !friendPending ? <FaUserPlus className="w-3 h-4 mr-2"/> : friendPending ?  (<RiTimer2Line className="w-3 h-4 mr-2"/>) : (<FaUserMinus className="w-3 h-4 mr-2"/>)}
-							<p>{!friend && !friendPending ? 'Add as friend' : (friendPending ? 'Pending invitation' : 'Remove from friend')}</p>
+							<p className="md:block hidden">{!friend && !friendPending ? 'Add as friend' : (friendPending ? 'Pending invitation' : 'Remove from friend')}</p>
 
 						</div>
 
@@ -254,11 +279,11 @@ return (
 							className="flex cursor-pointer flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm"
 						>
 							<FaMinusCircle className="w-3 h-4 mr-2"/>
-							<p className={`${blockedUser ? 'text-red-orange' : ''} `}>{blockedUser ? 'Unblock user' : 'Block user'}</p>
+							<p className={`${blockedUser ? 'text-red-orange' : ''} md:block hidden`}>{blockedUser ? 'Unblock user' : 'Block user'}</p>
 						</div>
 					</div>
 
-					<div className="mt-40 mb-10">
+					<div className="mt-40 mb-10 md:block hidden">
 						<div className='h-1 bg-white'>
 							<div
 							style={{ width: userStats.exp }}
@@ -271,7 +296,7 @@ return (
 						</div>
 					</div>
 
-					<div className="flex flex-col justify-end">
+					<div className="justify-end md:block hidden">
 						<div className="bg-accent-violet font-kanit font-extrabold flex flex-row items-center p-4 mt-2 h-24 w-full rounded-md ">
 							<p className="text-5xl text-lilac">{userStats.partyPlayed}</p>
 							<div className="pt-7 text-xl text-purple ml-2">

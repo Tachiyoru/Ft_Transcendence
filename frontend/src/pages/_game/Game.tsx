@@ -1,24 +1,16 @@
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { IoIosArrowForward } from "react-icons/io";
 import { useContext, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { RiTriangleFill } from "react-icons/ri";
 import { useRef, useEffect } from "react";
-import Winner from "../../components/popin/Victory";
-import Defeat from "../../components/popin/Defeat";
-import Draw from "../../components/popin/Draw";
 import { WebSocketContext } from "../../socket/socket";
 import axiosInstance from "../../axios/api";
-import UserNameField from "../_auth/fields/UserNameField";
-import { set, useFormState } from "react-hook-form";
-
-interface gameData
-{
-	gameInviteId: number;
-	hostId: number;
-	invitedId: number;
-}
+import { setGameData, setInvitedFriend } from "../../services/gameInvitSlice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "@react-three/fiber";
 
 const Game = () => {
 	const location = useLocation();
@@ -31,8 +23,9 @@ const Game = () => {
 	const navigate = useNavigate();
 	const [friendsList, setFriendsList] = useState<{ username: string; id: number; }[]>([]);
 	const [userData, setUserData] = useState<{ username: string; id: number; } | null>(null);
-	const [invitedFriend, setInvitedFriend] = useState<{ username: string; id: number; } | null>(null);
-	const [gameData, setGameData] = useState<gameData>();
+	const dispatch = useDispatch();
+	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
+	const gameData = useSelector((state: RootState) => state.gameInvit.gameData);
 
 	const [gameOption1, setGameOption1] = useState(true);
     const [gameOption2, setGameOption2] = useState(false);
@@ -57,17 +50,15 @@ const Game = () => {
 
 	useEffect(() =>
 	{
-		
 		// need to change to only friend list, not all users
-
-    const fetchAllUsersData = async () => {
-      try {
-				const response = await axiosInstance.get<{ username: string; id: number; }[]>("/users/all");
-        setFriendsList(response.data);
-      } catch (error) {
-        console.error("Error fetching user list:", error);
-      }
-    };
+		const fetchAllUsersData = async () => {
+			try {
+						const response = await axiosInstance.get<{ username: string; id: number; }[]>("/users/all");
+				setFriendsList(response.data);
+			} catch (error) {
+				console.error("Error fetching user list:", error);
+			}
+		};
 		fetchAllUsersData();
 		
 		const fetchUserData = async () =>
@@ -81,14 +72,17 @@ const Game = () => {
 			}
 		}
 		fetchUserData();
-  }, []);
+
+		if (invitedFriend)
+			toggleCard(0);
+	}, []);
 
 	const setClickedIndex = (index: number, user: {username: string, id: number}) => {
 		let updatedIndexes = [...selectedIndexes];
 
 		const indexExists = updatedIndexes.indexOf(index);
-		setInvitedFriend(user);
-		// envoyer une notification à l'utilisateur sélectionné
+		dispatch(setInvitedFriend(user));
+
 		const sendNotification = async () =>
 		{
 			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
@@ -102,11 +96,8 @@ const Game = () => {
 			socket.on("gameInviteData", (game) =>
 			{
 				if (game)
-					setGameData(game);
+					dispatch(setGameData(game));
 			});
-			// console.log(game);
-			// if (game)
-			// 	setGameData(game);
 		}
 
 		createInviteGame();
@@ -161,26 +152,12 @@ const Game = () => {
 
 	const handleCrossClick = async () => {
 	setShowSecondDiv(false);
+	dispatch(setInvitedFriend(null));
 	setSelectedIndexes([]);
 	if (gameData && gameData.gameInviteId)
 	{
 		socket.emit("removeGameInvite", gameData.gameInviteId);
 		// rajouter popup "Game/invitation not found/expired"; 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 	}
 	socket.emit("gotDisconnected");
 	localStorage.removeItem('showSecondDiv');
@@ -192,16 +169,17 @@ const Game = () => {
 		<div>
 			{/*TITLE*/}
 			<h1 className="text-xl font-outline-2 text-white px-4">Game</h1>
-			<p className="text-sm text-lilac mt-3 w-4/5 px-4">
+			<p className="text-sm text-lilac mt-3 w-full md:w-4/5 px-4">
 			A match lasts 3 minutes. You can choose to invite your friend(s) to play with you or play with someone random
 			(some delay may occur because you can’t play by yourself).
 			</p>
 
 			{/*GAME*/}
 			<div>
-			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4  cursor-default sm:px-2 py-10 md:px-5">
+			<div className="flex flex-col md:grid md:grid-cols-3 lg:grid-cols-4  cursor-default sm:px-2 py-10 md:px-5">
 					
 					{/*GAME 1*/}
+					{!invitedFriend && (
 					<div className={`h-[50vh] md:h-[50vh] lg:h-[62vh] p-4 rounded-lg flex flex-col bg-filter bg-opacity-75 ${showBackIndex === 0 ? 'hidden' : ''}`}>
 						<div className="relative h-4/5">
 							<img src="src/game.png" alt='img' className="w-full h-full object-cover"/>
@@ -223,11 +201,12 @@ const Game = () => {
 							</div>
 						</div>
 						</div>
+						)}
 					<div
 					ref={cardsRef}
 					className={`h-[50vh] md:h-[50vh] lg:h-[62vh] p-3 rounded-md bg-violet-black border-container grid grid-rows-[2fr,auto] ${showBackIndex === 0 ? '' : 'hidden'}`}
 						>
-					{selectedIndexes.length === 0 ? (
+					{selectedIndexes.length === 0 && !invitedFriend? (
 						<div className="relative">
 						{/*LIST*/}
 						<div className="h-2/3 bg-filter my-4">
@@ -335,8 +314,8 @@ const Game = () => {
 					)}
 					</div>
 
-					{/*GAME 2*/}
-					<div className={`sm:col-span-1 md:col-span-2 lg:col-span-3 h-[50vh] md:h-[50vh] lg:h-[62vh] p-4 rounded-lg bg-filter bg-opacity-75 ml-4 ${showBackIndex === 1 ? 'hidden' : ''}`}>
+					{/*OPTIONS*/}
+					<div className={`md:col-span-2 lg:col-span-3 h-[14vh] md:h-[50vh] lg:h-[62vh] p-4 rounded-lg bg-filter bg-opacity-75 mt-4 md:mt-0 md:ml-4 ${showBackIndex === 1 ? 'hidden' : ''}`}>
 						{/*MOBILE*/}
 						<div className="text-lilac text-sm block md:hidden">
 							<p>You can choose between two themes for your game.

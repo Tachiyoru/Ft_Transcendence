@@ -123,13 +123,19 @@ const [actuReceived, setActuReceived] = useState<boolean>(false);
   const renderLastMessage = (channel: Channel) => {
 	if (allBlockedUsers.filter((user) => user.username === channel.members.filter((member) => member.username !== userData.username)[0].username).length > 0) {
 	  const lastMessage = channel.messages[channel.messages.length - 1];
+    if (lastMessage) {
 		lastMessage.authorId === userData.username
 		  ? "me"
 		  : lastMessage.authorId;
+    }
 	  return (
 		<>
-		  <p className="text-sm pt-1 text-lilac text-opacity-60">Message blocked</p>
-		  <TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
+      <p className="text-sm pt-1 text-lilac text-opacity-60">Message blocked</p>
+      {lastMessage && (
+        <div>
+          <TimeConverter initialDate={lastMessage.createdAt.toLocaleString()} />
+      </div>
+      )}
 		</>
 	  );
 	}
@@ -229,7 +235,7 @@ const [actuReceived, setActuReceived] = useState<boolean>(false);
                       ) : (
                         <div>
                           {checkRead(channel)}
-                          <div className="relative w-full h-full md:w-[45px] md:h-[45px] bg-purple rounded-full grid justify-items-center items-center">
+                          <div className="relative w-[45px] h-[45px] md:w-[45px] md:h-[45px] bg-purple rounded-full grid justify-items-center items-center">
                             <FaUser className="text-lilac" />
                           </div>
                         </div>

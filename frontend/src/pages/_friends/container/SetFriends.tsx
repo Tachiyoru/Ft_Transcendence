@@ -41,7 +41,6 @@ const SetFriends: React.FC = () => {
     (state: RootState) => state.friend.listUsersNotFriend
   );
   const socket = useContext(WebSocketContext);
-
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -51,7 +50,6 @@ const SetFriends: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener('resize', handleResize);
     };
@@ -68,7 +66,6 @@ const hasNewInvitations = async () => {
 
     const updateNewInvitationsCount = async () => {
       const count = await hasNewInvitations();
-	  console.log(count);
       setHasNewInvitationsCount(count);
     };
     updateNewInvitationsCount();
@@ -198,12 +195,12 @@ const hasNewInvitations = async () => {
             Friends
           </h1>
 
-          <div ref={dropdownRef} className="m-2">
+          <div ref={dropdownRef} className="my-2 mx-0 md:m-2">
             <div className="flex items-center absolute top-18">
               <input
                 type="text"
                 placeholder={!isMobile ? "Add Friends" : ""}
-                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 mt-4 md:w-full focus:outline-none focus:border-fushia ${
+                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 mt-4 md:w-full focus:outline-none focus:border-fushia ${isMobile ? "cursor-pointer" : ""} ${
                   isDropdownOpen
                     ? "bg-lilac text-white rounded-t-lg w-full"
                     : "bg-accent-violet rounded-md text-lilac w-2"
@@ -292,7 +289,7 @@ const hasNewInvitations = async () => {
         </div>
 
         <nav className="mt-16">
-          <ul className="ml-6" style={{ cursor: "pointer" }}>
+          <ul className="ml-4 md:ml-6" style={{ cursor: "pointer" }}>
             <li
               className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "tous"
@@ -301,7 +298,7 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("tous")}
             >
-              {isMobile ? <FaUsers /> : 'Invitations'}
+              {isMobile ? <FaUsers className="w-4 h-4"/> : 'Invitations'}
             </li>
             <li
               className={`mb-2 relative text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
@@ -311,10 +308,10 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("invitations")}
             >
-              {isMobile ? <FaUserClock /> : 'Invitations'}
+              {isMobile ? <FaUserClock className="w-4 h-4"/> : 'Invitations'}
               {hasNewInvitationsCount > 0 && (
                 <div className="absolute top-2.5 left-20  w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
-                  <span className="text-white text-xss font-semibold">
+                  <span className="text-white text-xs font-semibold">
                     {hasNewInvitationsCount}
                   </span>
                 </div>
@@ -328,7 +325,7 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("blocked")}
             >
-              {isMobile ? <FaUserAltSlash /> : 'Blocked'}
+              {isMobile ? <FaUserAltSlash className="w-4 h-4"/> : 'Blocked'}
             </li>
           </ul>
         </nav>

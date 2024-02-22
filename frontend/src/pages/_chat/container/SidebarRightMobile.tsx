@@ -7,11 +7,14 @@ import {
 } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
+import { setGameData, setInvitedFriend } from "../../../services/gameInvitSlice";
+import axiosInstance from "../../../axios/api";
+import { useDispatch } from "react-redux";
 
 interface RightSidebarProps {
   isRightSidebarOpen: boolean;
@@ -60,21 +63,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   onUpdateList,
 }) => {
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
-
-	
-	
-	
-	
-
-	// keske ce que ca Clem ???
 	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
   const [commonChannelCount, setCommonChannelCount] = useState(0);
-	
-	
-	
-	
-	
-	
   const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<
     Users[]
   >([]);
@@ -90,6 +80,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
     username: "",
     id: -1,
   });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -259,6 +251,30 @@ const unblockUser = async (userId: number) => {
     }
   };
 
+  const invitToPlay = async (user) => {
+    dispatch(setInvitedFriend(user));
+
+		const sendNotification = async () =>
+		{
+			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+			socket.emit("all-update")
+		}
+		sendNotification();
+
+		const createInviteGame = async () =>
+		{
+			socket.emit("createInviteGame", user.id);
+			socket.on("gameInviteData", (game) =>
+			{
+				if (game)
+					dispatch(setGameData(game));
+			});
+      navigate('/game')
+		}
+
+		createInviteGame();
+  }
+
   return (
     <div
       className={`absolute h-[80vh] top-0 right-0 w-[260px] md:rounded-r-lg bg-violet-black p-4 text-gray-300 text-xs ${
@@ -321,13 +337,12 @@ const unblockUser = async (userId: number) => {
                         <li
                           className="hover:opacity-40"
                           style={{ cursor: "pointer" }}
+                          onClick={() => invitToPlay(member)}
                         >
-                          <Link to="">
                             <div className="flex flex-row items-center mt-1">
                               <RiGamepadFill className="w-3 h-4 mr-2" />
                               <p className="hover:underline">Invite to play</p>
                             </div>
-                          </Link>
                         </li>
                       )}
                       <li

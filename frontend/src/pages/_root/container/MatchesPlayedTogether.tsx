@@ -9,7 +9,7 @@ const MatchesPlayedTogether: React.FC<MatchesPlayedTogetherProps> = ({ history, 
 	const count = history.filter((item) => item.includes(`${username}`)).length;
 
   return (
-    <div className="sm:w-full relative lg:w-40">
+    <div className="sm:w-full relative lg:w-40 md:block hidden">
       <p>
         <span
           className="text-4xl pl-2 absolute font-kanit font-extrabold text-fushia mix-blend-difference"
