@@ -1,6 +1,6 @@
 import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Game, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { Server } from 'socket.io';
 import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
@@ -9,6 +9,7 @@ import { Socket } from 'socket.io';
 import { disconnect } from 'process';
 import { delay } from 'rxjs';
 import { IsNumber, isNumber } from 'class-validator';
+import { Game } from './game.class';
 
 @WebSocketGateway({
 	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },
@@ -49,17 +50,17 @@ export class GameGateway
 	)
 	{
 		const gameDB = await this.prisma.game.create({ data: {} });
-		this.gameService.createGame(gameDB.gameId, player1User.id, player1Socket, player2User, player2Socket);
+		this.gameService.createGame(gameDB.gameId, player1User.id, player1Socket, player2User, player2Socket, 1);
 	}
 
 	@SubscribeMessage("start")
 	async startGameSession(
 		@ConnectedSocket() client: Socket,
+		@MessageBody() option: number,
 		@Request() req: any
 	)
 	{
-		const game = await this.gameService.prepareQueListGame(client, req);
-		// console.log(game);
+		const game = await this.gameService.prepareQueListGame(client, req, option);
 		if (game)
 		{
 			this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
@@ -70,11 +71,12 @@ export class GameGateway
 	@SubscribeMessage("createInviteGame")
 	async createInviteGame(
 		@MessageBody() invitedId: number,
+		@MessageBody() option: number,
 		@ConnectedSocket() client: Socket,
 		@Request() req: any
 	)
 	{
-		const game = await this.gameService.createInviteGame(invitedId, client, req);
+		const game = await this.gameService.createInviteGame(invitedId, client, req, option);
 		client.emit("gameInviteData", game);
 		return (game);
 	}
@@ -96,7 +98,7 @@ export class GameGateway
 			if (!invitedUser)
 				throw new Error("User not found");
 			const gameDB = await this.prisma.game.create({ data: {} });
-			const gameSession = await this.gameService.createGame(gameDB.gameId, hostId, game.hostSocket, invitedUser, game.invitedSocket);
+			const gameSession = await this.gameService.createGame(gameDB.gameId, hostId, game.hostSocket, invitedUser, game.invitedSocket, game.option);
 			if (gameSession)
 			{
 				this.server.to(gameSession.player1.playerSocket).emit("CreatedGame", gameSession);
@@ -162,6 +164,21 @@ export class GameGateway
 		}
 	}
 
+	@SubscribeMessage("readyToStart")
+	async bothPlayerReadyToStart(
+		@Request() req: any,
+		@MessageBody('gameSocket') gameSocket: string,
+	)
+	{
+		const game = await this.gameService.findGame(gameSocket);
+
+		if (game && (game?.player1.playerProfile?.id === req.user.id || game?.player2.playerProfile?.id === req.user.id))
+		{
+			this.server.to(game.player1.playerSocket).emit("bothReadyToStart", req.user.id);
+			this.server.to(game.player2.playerSocket).emit("bothReadyToStart", req.user.id);
+		}
+	}
+
 	@SubscribeMessage("setGoalsToWin")
 	async setGoalsToWin(
 		@MessageBody('gameSocket') gameSocket: string,
@@ -207,90 +224,117 @@ export class GameGateway
 		}
 	}
 
+	handleGameFinish(game: Game, winner: number) {
+		game.victory = winner;
+		game.saveGame(this.prisma);
+		let p1Hist = null;
+		let p2Hist = null;
+	
+		if (winner === 1) {
+			this.server.to(game.player1.playerSocket).emit("finish", true);
+			this.server.to(game.player2.playerSocket).emit("finish", false);
+			p2Hist = game.pScore + " " + game.player2.playerProfile?.username + " " + "Defeat" + " " + "+5"
+			p1Hist = game.pScore + " " + game.player1.playerProfile?.username + " " + "Winner" + " " + "+10"
+		} else if (winner === 2) {
+			this.server.to(game.player1.playerSocket).emit("finish", false);
+			this.server.to(game.player2.playerSocket).emit("finish", true);
+			p1Hist = game.pScore + " " + game.player1.playerProfile?.username + " " + "Defeat" + " " + "+5"
+			p2Hist = game.pScore + " " + game.player2.playerProfile?.username + " " + "Winner" + " " + "+10"
+		}
+		this.server.to(game.player1.playerSocket).emit("findGame", game);
+		this.server.to(game.player2.playerSocket).emit("findGame", game);
+	
+		this.gameService.destroyInGame(game);
+	}
 
-      @SubscribeMessage("launchBall")
-      async LaunchBall(
+	@SubscribeMessage("launchBall")
+	async LaunchBall(
         @Request() req: any,
         )
         {
-          const game = await this.gameService.LaunchBall(req);
-          if (game)
-          {
+		const game = await this.gameService.LaunchBall(req);
+		if (game)
+		{
             console.log(game.ball.z);
             let velocity = [0.01, 0];
             delay(50)
             var i = setInterval(async () => {
               game.ball.z += (100 * velocity[0]);
-              game.ball.x += velocity[1];
-              
-              if (game.pScore[0] == game.goalsToWin || game.pScore[1] == game.goalsToWin) {
-                clearInterval(i);
-              }
-              const collideRet = await this.gameService.collide(game);
-              
-              console.log(collideRet);
-              switch (collideRet) {
-                case  0:
-                  break;
-                case  1:
-                  if (velocity[1] >= 0)
-                    velocity[1] = -1;
-                  velocity[0] *= -1;
-                  break;
-                case  2:
-                  velocity[0] *= -1;
-                  break;
-                case  3:
-                  if (velocity[1] <= 0)
-                    velocity[1] = 1;
-                  velocity[0] *= -1;
-                  break;
-                case  4:
-                  if (velocity[1] <= 0)
-                    velocity[1] = 1;
-                  velocity[0] *= -1;
-                  break;
-                case  5:
-                  velocity[0] *= -1;
-                  break;
-                case  6:
-                  if (velocity[1] >= 0)
-                    velocity[1] = -1;
-                  velocity[0] *= -1;
-                  break;
-                case  7:
-                  velocity[1] *= -1;
-                  break;
-                case  8:
-                  velocity[1] *= -1;
-                  break;
-                case  9:
-                  if (game.ball.z <= -100)  {
-                    ++game.pScore[0];
-                    game.resetBallPosition();
-                    velocity[1] = 0;
-                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-                  }
-                  break;
-                case  10:
-                  if (game.ball.z >= 100)  {
-                    ++game.pScore[1];
-                    game.resetBallPosition()
-                    velocity[1] = 0;
-                    this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-                    this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-                  }
-                  break;
-              }
-              this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
-              this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
+			game.ball.x += velocity[1];
+			
+			if (game.pScore[0] == game.goalsToWin || game.pScore[1] == game.goalsToWin) {
+				if (game.pScore[0] === game.goalsToWin) {
+					this.handleGameFinish.call(this, game, 1);
+				} else if (game.pScore[1] === game.goalsToWin) {
+					this.handleGameFinish.call(this, game, 2);
+				}
+				clearInterval(i);
+            }
+			const collideRet = await this.gameService.collide(game);
+			
+			console.log(collideRet);
+			switch (collideRet) {
+			case  0:
+				break;
+			case  1:
+				if (velocity[1] >= 0)
+				velocity[1] = -1;
+				velocity[0] *= -1;
+				break;
+			case  2:
+				velocity[0] *= -1;
+				break;
+			case  3:
+				if (velocity[1] <= 0)
+				velocity[1] = 1;
+				velocity[0] *= -1;
+				break;
+			case  4:
+				if (velocity[1] <= 0)
+				velocity[1] = 1;
+				velocity[0] *= -1;
+				break;
+			case  5:
+				velocity[0] *= -1;
+				break;
+			case  6:
+				if (velocity[1] >= 0)
+				velocity[1] = -1;
+				velocity[0] *= -1;
+				break;
+			case  7:
+				velocity[1] *= -1;
+				break;
+			case  8:
+				velocity[1] *= -1;
+				break;
+			case  9:
+				if (game.ball.z <= -100)  {
+				++game.pScore[0];
+				game.resetBallPosition();
+				velocity[1] = 0;
+				this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+				this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+				}
+				break;
+			case  10:
+				if (game.ball.z >= 100)  {
+				++game.pScore[1];
+				game.resetBallPosition()
+				velocity[1] = 0;
+				this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
+				this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
+				}
+				break;
+			}
+			this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
+			this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
 
-              this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
-              this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
-          }, 50);
-        }
-      }
+			this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
+			this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
+		}, 50);
+	}
+	}
 
       // @SubscribeMessage("launchBall")
       // async LaunchBall(

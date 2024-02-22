@@ -29,15 +29,18 @@ const Game = () => {
 
 	const [gameOption1, setGameOption1] = useState(true);
     const [gameOption2, setGameOption2] = useState(false);
+	const [gameOptionSelected, setGameOptionSelected] = useState<number>(1);
 
     const handleGameOption1Change = () => {
         setGameOption1(true);
         setGameOption2(false);
+		setGameOptionSelected(1);
     };
 
     const handleGameOption2Change = () => {
         setGameOption1(false);
         setGameOption2(true);
+		setGameOptionSelected(2);
     };
 
     const toggleCard = (index: number) => {
@@ -53,7 +56,7 @@ const Game = () => {
 		// need to change to only friend list, not all users
 		const fetchAllUsersData = async () => {
 			try {
-						const response = await axiosInstance.get<{ username: string; id: number; }[]>("/users/all");
+				const response = await axiosInstance.get<{ username: string; id: number; }[]>("/users/all");
 				setFriendsList(response.data);
 			} catch (error) {
 				console.error("Error fetching user list:", error);
@@ -92,7 +95,7 @@ const Game = () => {
 
 		const createInviteGame = async () =>
 		{
-			socket.emit("createInviteGame", user.id);
+			socket.emit("createInviteGame", {invitedId: user.id, option: gameOptionSelected});
 			socket.on("gameInviteData", (game) =>
 			{
 				if (game)
@@ -112,7 +115,8 @@ const Game = () => {
 	};
 
 	const connectServ = () =>	{
-		socket.emit("start");
+		console.log(gameOptionSelected)
+		socket.emit("start", {option: gameOptionSelected});
 		setSelectedIndexes([-1]);
 	}
 
@@ -123,7 +127,6 @@ const Game = () => {
 	useEffect(() => {
 		socket.on("CreatedGame", (game) => {
 			try {
-			console.log("New Game:", game);
 			navigate(`/gamestart/${game.gameSocket}`)
 
 		} catch (error) {
@@ -318,19 +321,20 @@ const Game = () => {
 					<div className={`md:col-span-2 lg:col-span-3 h-[14vh] md:h-[50vh] lg:h-[62vh] p-4 rounded-lg bg-filter bg-opacity-75 mt-4 md:mt-0 md:ml-4 ${showBackIndex === 1 ? 'hidden' : ''}`}>
 						{/*MOBILE*/}
 						<div className="text-lilac text-sm block md:hidden">
-							<p>You can choose between two themes for your game.
-								The scores will be on your screen with the timer.<br/><br/>
+							<p>You can choose between two themes, the first front view, the second top view. If you launch a random game, the one selected by the host will be taken.<br/><br/>
 							</p>
 							<p>Change theme</p>
 								<div className="block">
 									<div className="mt-2">
 										<label className="inline-flex items-center space-x-2">
+												<label>1</label>
 												<input
 													type="checkbox"
 													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
 													checked={gameOption1}
 													onChange={handleGameOption1Change}
 												/>
+												<label>2</label>
 												<input
 													type="checkbox"
 													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
@@ -349,26 +353,21 @@ const Game = () => {
 							</div>
 							<div className="text-sm text-lilac md:block hidden">
 								<div>
-									<p>With your mouse you can control the paddle of 
-										your side and move it up or down. 
-										In order to score points, the other player has to 
-										miss the ball. A game will stop after 3 minutes 
-										and the winner will be the higher score.<br/><br/>
-
-										You can choose between two themes for your game.
-										The scores will be on your screen with the timer.<br/><br/>
+									<p>You can choose between two themes, the first front view, the second top view. If you launch a random game, the one selected by the host will be taken.<br/><br/>
 									</p>
 								</div>
 								<p>Change theme</p>
 								<div className="block">
 									<div className="mt-2">
 										<label className="inline-flex items-center space-x-2">
+												<label>1</label>
 												<input
 													type="checkbox"
 													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
 													checked={gameOption1}
 													onChange={handleGameOption1Change}
 												/>
+												<label>2</label>
 												<input
 													type="checkbox"
 													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"

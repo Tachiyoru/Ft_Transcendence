@@ -18,6 +18,8 @@ import { RiTimer2Line } from "react-icons/ri";
 import History from "./container/HystoryUser";
 import Badges from "../_root/container/Badges";
 import { setGameData, setInvitedFriend } from "../../services/gameInvitSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@react-three/fiber";
 
 interface Users {
 	username: string;
@@ -90,6 +92,7 @@ const DashboardFriends = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const socket = useContext(WebSocketContext);
+	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
 
 	const handleClickSendMessage = (username: string, id: number) => {
 		socket.emit('getOrCreateChatChannel', { username2: username, id: id }); 
@@ -204,7 +207,9 @@ const DashboardFriends = () => {
 	};
 
 	const invitToPlay = async (user) => {
-		dispatch(setInvitedFriend(user));
+		if (!invitedFriend)
+		{
+			dispatch(setInvitedFriend(user));
 	
 			const sendNotification = async () =>
 			{
@@ -225,6 +230,7 @@ const DashboardFriends = () => {
 			}
 	
 			createInviteGame();
+		}
 	}
 
 	return (
@@ -258,11 +264,11 @@ const DashboardFriends = () => {
 						</div>
 
 						<div 
-							className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm cursor-pointer"
+							className={`flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm ${invitedFriend ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
 							onClick={() => invitToPlay(userData)}
 						>
 							<RiGamepadFill className="w-3 h-4 mr-2"/>
-							<p className="md:block hidden">Invite to play</p>
+							<p className="md:block hidden">Invite to play </p>
 						</div>
 
 						<div 

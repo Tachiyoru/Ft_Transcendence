@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { WebSocketContext } from "../../../socket/socket";
 
 interface Histo {
   score: string;
@@ -13,10 +14,6 @@ interface historyProps {
 
 const History: React.FC<historyProps> = ({ history }) => {
   const [matchHistory, setMatchHistory] = useState<Histo[]>([]);
-
-  useEffect(() => {
-    formatHisto();
-  }, [history]);
 
   const formatHisto = () => {
     let histoFormated: Histo[] = [];

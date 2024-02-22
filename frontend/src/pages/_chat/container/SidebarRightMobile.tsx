@@ -15,6 +15,8 @@ import { WebSocketContext } from "../../../socket/socket";
 import { setGameData, setInvitedFriend } from "../../../services/gameInvitSlice";
 import axiosInstance from "../../../axios/api";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "@react-three/fiber";
 
 interface RightSidebarProps {
   isRightSidebarOpen: boolean;
@@ -82,6 +84,7 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,27 +255,26 @@ const unblockUser = async (userId: number) => {
   };
 
   const invitToPlay = async (user) => {
-    dispatch(setInvitedFriend(user));
+    if (!invitedFriend)
+    {
+      dispatch(setInvitedFriend(user));
 
-		const sendNotification = async () =>
-		{
-			await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
-			socket.emit("all-update")
-		}
-		sendNotification();
+      const sendNotification = async () =>
+      {
+        await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+        socket.emit("all-update")
+      }
+      sendNotification();
 
-		const createInviteGame = async () =>
-		{
-			socket.emit("createInviteGame", user.id);
-			socket.on("gameInviteData", (game) =>
-			{
-				if (game)
-					dispatch(setGameData(game));
-			});
+
+      socket.emit("createInviteGame", user.id);
+      socket.on("gameInviteData", (game) =>
+      {
+        if (game)
+          dispatch(setGameData(game));
+      });
       navigate('/game')
-		}
-
-		createInviteGame();
+    }
   }
 
   return (
@@ -335,8 +337,7 @@ const unblockUser = async (userId: number) => {
                       </li>
                       {!isBlocked && (
                         <li
-                          className="hover:opacity-40"
-                          style={{ cursor: "pointer" }}
+                          className={`hover:opacity-40 ${invitedFriend ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
                           onClick={() => invitToPlay(member)}
                         >
                             <div className="flex flex-row items-center mt-1">

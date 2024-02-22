@@ -12,6 +12,8 @@ import { Game } from "../../../backend/src/game/game.class.ts"
 import PaddlePos from "./Paddle.tsx";
 import BallObj from "./Ball.tsx";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import Winner from "../components/popin/Victory.tsx";
+import Defeat from "../components/popin/Defeat.tsx";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -48,19 +50,15 @@ const Map = async () => {
 }
 
 
-export default function Experience() {
-	const location = useLocation();
-	const currentPage = location.pathname;
-	
+export default function Experience() {	
 	const { gameSocket } = useParams();
 	const socket = useContext(WebSocketContext);
 	const [game, setGame] = useState<Game | null>();
 	const [score, setScore] = useState<number[]>([0,0]);
 	const [userData, setUserData] = useState<Users>();
-	
-	const launchBall = () => {
-		socket.emit('launchBall');
-	};
+	const [start, setStart] = useState(false);
+	const [popinLooser, setTogglePopinLooser] = useState(false);
+	const [popinWinner, setTogglePopinWinner] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -78,26 +76,41 @@ export default function Experience() {
 		try {
 			socket.emit("findGame", {gameSocket: gameSocket})
 			socket.on("findGame", (game) => {
+				console.log(game)
 				setGame(game);
 			});
 			socket.on("gamescore", (score) => {
 				setScore(score);
 			});
 			
+			socket.on('finish', (boolean: boolean) => {
+				if (boolean) {
+					setTogglePopinWinner(true);
+				} else {
+					setTogglePopinLooser(true);
+				}
+			});
+
+			if (!start)
+			{
+				socket.emit('launchBall');
+				setStart(true);
+			}
+
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
-	}, [socket]);
+	}, [socket, gameSocket]);
 
 	return (
-		<MainLayout currentPage={currentPage}>
+		<>
 			{game && 
-			<div className="h-[80vh]">
-				<div onClick={launchBall}>Start Game</div>
-				{score.join(':')}
+			<div className="h-[80vh] p-2">
+				<p className="text-center font-kanit font-bold font-outline-1 text-lilac text-3xl">{score.join(' : ')}</p>
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
-					{userData && userData.id == game.player1.playerProfile?.id && (
+					{game.mode.option === 1 && (
+					userData && userData.id == game.player1.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[0].x, game.camera[0].y, game.camera[0].z]}
@@ -106,8 +119,9 @@ export default function Experience() {
 						near={0.1}
 						far={1000}
 						rotation = {[-0.4, 0, 0]}
-					/>)}
-					{userData && userData.id == game.player2.playerProfile?.id && (
+					/>))}
+					{game.mode.option === 1 && (
+					userData && userData.id == game.player2.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[game.camera[1].x, game.camera[1].y, game.camera[1].z]}
@@ -117,6 +131,17 @@ export default function Experience() {
 						far={1000}
 						rotation={[0.4, Math.PI, 0]}
 						/>
+					))}
+					{game.mode.option === 2 && (
+					<PerspectiveCamera 
+						makeDefault
+						position={[0, 200, 0]}
+						fov={60}
+						aspect={window.innerWidth / window.innerHeight}
+						near={0.1}
+						far={1000}
+						rotation={[-1.57, 0, 0]}
+					/>
 					)}
 
 					<ambientLight intensity={0.5} />
@@ -125,22 +150,16 @@ export default function Experience() {
 					<Physics>
 					<PaddlePos/>
 					</Physics>
-					{/* <mesh position={[0, -15, -60]}>
-						<boxGeometry args={[35, 7, 5]} />
-						<meshLambertMaterial color={0x460994} />
-					</mesh> */}
-					{/* <mesh position={[0, -15, -232]}>
-						<boxGeometry args={[35, 7, 5]} />
-						<meshLambertMaterial color={0x460994} />
-					</mesh> */}
 					<mesh position={[0, 0, 0]}>
 						<boxGeometry args={[120, 2, 170]} />
 						<meshLambertMaterial color={0x460994} />
 					</mesh>
 				</Canvas>
+				{popinWinner && game && <Winner game={game}/>}
+				{popinLooser && game && <Defeat game={game}/>}
 			</div>
 			}
-		</MainLayout>
+		</>
 	);
 }
 
