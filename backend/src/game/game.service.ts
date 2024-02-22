@@ -44,7 +44,7 @@ export class GameService
 		};
 	}
 
-	async createGame(gameID: number, player1User: number, player1Socket: string, player2User: User, player2Socket: string, option: number)
+	async createGame(gameID: number, player1User: number, player1Socket: string, player2User: User, player2Socket: string)
 	{
 		const host = await this.prisma.user.findUnique(
 			{
@@ -53,13 +53,13 @@ export class GameService
 		if (!host)
 			return;
 		// console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket);
-		const game = new Game(gameID, player1Socket, host, player2Socket, player2User, option);
+		const game = new Game(gameID, player1Socket, host, player2Socket, player2User);
 		this.games.push(game);
 		return (game);
 
 	}
 
-	async prepareQueListGame(socket: Socket, @Request() req: any, option: number)
+	async prepareQueListGame(socket: Socket, @Request() req: any)
 	{
 
 		const gamer = this.createGamer(
@@ -78,7 +78,7 @@ export class GameService
 			// remove the waiting game session
 			this.waitingRoomGame = undefined;
 			const gameDB = await this.prisma.game.create({data: {}});
-			const gameSession = this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId, option); 
+			const gameSession = this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId); 
 			return gameSession;
 			}
 		} else {
@@ -89,7 +89,6 @@ export class GameService
 			waitingGameId: id,
 			hostId: gamer.user.id,
 			participants: [gamer],
-			option: option
 			};
 			console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
 			return null;
@@ -158,7 +157,7 @@ export class GameService
       return (0);
     }
 
-	async createInviteGame(invitedUserId: number, socket: Socket, @Request() req: any, option: number)
+	async createInviteGame(invitedUserId: number, socket: Socket, @Request() req: any)
 	{
 		await this.prisma.gameInvite.deleteMany({
 			where: {
@@ -173,7 +172,6 @@ export class GameService
 					hostId: req.user.id,
 					hostSocket: socket.id,
 					invitedId: invitedUserId,
-					option: option,
 				},
 			},
 		);

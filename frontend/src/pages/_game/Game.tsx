@@ -95,7 +95,7 @@ const Game = () => {
 
 		const createInviteGame = async () =>
 		{
-			socket.emit("createInviteGame", {invitedId: user.id, option: gameOptionSelected});
+			socket.emit("createInviteGame", user.id);
 			socket.on("gameInviteData", (game) =>
 			{
 				if (game)
@@ -115,8 +115,7 @@ const Game = () => {
 	};
 
 	const connectServ = () =>	{
-		console.log(gameOptionSelected)
-		socket.emit("start", {option: gameOptionSelected});
+		socket.emit("start");
 		setSelectedIndexes([-1]);
 	}
 

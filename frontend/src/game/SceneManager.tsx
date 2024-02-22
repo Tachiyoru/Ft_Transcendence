@@ -109,7 +109,7 @@ export default function Experience() {
 				<p className="text-center font-kanit font-bold font-outline-1 text-lilac text-3xl">{score.join(' : ')}</p>
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
-					{game.mode.option === 1 && (
+					{game.mode === 1 && (
 					userData && userData.id == game.player1.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
@@ -120,7 +120,7 @@ export default function Experience() {
 						far={1000}
 						rotation = {[-0.4, 0, 0]}
 					/>))}
-					{game.mode.option === 1 && (
+					{game.mode === 1 && (
 					userData && userData.id == game.player2.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
@@ -132,7 +132,7 @@ export default function Experience() {
 						rotation={[0.4, Math.PI, 0]}
 						/>
 					))}
-					{game.mode.option === 2 && (
+					{game.mode === 2 && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[0, 200, 0]}

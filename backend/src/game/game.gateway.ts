@@ -50,17 +50,16 @@ export class GameGateway
 	)
 	{
 		const gameDB = await this.prisma.game.create({ data: {} });
-		this.gameService.createGame(gameDB.gameId, player1User.id, player1Socket, player2User, player2Socket, 1);
+		this.gameService.createGame(gameDB.gameId, player1User.id, player1Socket, player2User, player2Socket);
 	}
 
 	@SubscribeMessage("start")
 	async startGameSession(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() option: number,
 		@Request() req: any
 	)
 	{
-		const game = await this.gameService.prepareQueListGame(client, req, option);
+		const game = await this.gameService.prepareQueListGame(client, req);
 		if (game)
 		{
 			this.server.to(game.player1.playerSocket).emit("CreatedGame", game);
@@ -71,12 +70,11 @@ export class GameGateway
 	@SubscribeMessage("createInviteGame")
 	async createInviteGame(
 		@MessageBody() invitedId: number,
-		@MessageBody() option: number,
 		@ConnectedSocket() client: Socket,
 		@Request() req: any
 	)
 	{
-		const game = await this.gameService.createInviteGame(invitedId, client, req, option);
+		const game = await this.gameService.createInviteGame(invitedId, client, req);
 		client.emit("gameInviteData", game);
 		return (game);
 	}
@@ -98,7 +96,7 @@ export class GameGateway
 			if (!invitedUser)
 				throw new Error("User not found");
 			const gameDB = await this.prisma.game.create({ data: {} });
-			const gameSession = await this.gameService.createGame(gameDB.gameId, hostId, game.hostSocket, invitedUser, game.invitedSocket, game.option);
+			const gameSession = await this.gameService.createGame(gameDB.gameId, hostId, game.hostSocket, invitedUser, game.invitedSocket);
 			if (gameSession)
 			{
 				this.server.to(gameSession.player1.playerSocket).emit("CreatedGame", gameSession);

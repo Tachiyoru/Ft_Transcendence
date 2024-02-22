@@ -22,7 +22,6 @@ export interface WaitingGameSession
 	hostId: number;
 	participants: Gamer[];
 	played?: boolean;
-	option: number;
 }
 
 export interface Player

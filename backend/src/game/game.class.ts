@@ -28,10 +28,10 @@ export class Game  {
     mode: number;
 
 
-    constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User, option: number)   {
+    constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
         this.gameSocket = "Game" + player1;
-        this.mode = option;
+        this.mode = 1;
 
         // Player 1 Paddle
         this.paddle[0].x = 0;

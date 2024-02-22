@@ -168,7 +168,6 @@ model GameInvite {
   invitedSocket String?
   invitedId     Int
   status        Int     @default(0)
-  option        Int
 
   @@map("GameInvite")
 }
