@@ -43,6 +43,8 @@ const AboutToPlay = () => {
 	const navigate = useNavigate();
 	const [userData, setUserData] = useState<Users>();
 	const [goalCount, setGoalCount] = useState<number>(3);
+	let playerReadyToStart = 0;
+	const [isGameStarted, setGameStarted] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -61,26 +63,37 @@ const AboutToPlay = () => {
 			socket.emit("findGame", {gameSocket: gameSocket});
 			socket.on("findGame", (game) =>
 			{
-				// console.log("game.goalsToWin set to : ", game.goalsToWin);
 				setGame(game);
-				console.log(game);
 			});
+
 			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
 			socket.on("verifyGame", (boolean) => {
+
 			if (!boolean)
 				setGame(null);
 			});
+
+			socket.on('bothReadyToStart', (data) => {
+				if (data)
+					playerReadyToStart++;
+				if (playerReadyToStart === 2) {
+					navigate(`/test/${gameSocket}`);
+			}})
+
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
 		}
-	}, [socket, userData, goalCount]);
+	}, [socket, userData]);
 
 	const handleStartGame = () => {
 		if (game)
 		{
-			navigate(`/test/${gameSocket}`);
+			socket.emit('readyToStart', {gameSocket: gameSocket});
+			setGameStarted(true);
 		}
 	};
+
+	
 
 	const handleGoalCountChange = (e: any) =>
 	{
@@ -156,9 +169,9 @@ const AboutToPlay = () => {
 					)}
 				<p
 					className="font-audiowide text-purple underline hover:text-red-orange cursor-pointer mt-8"
-					onClick={handleStartGame}
+					onClick={isGameStarted ? undefined : handleStartGame}
 					>
-					Start Game
+					{isGameStarted ? 'We wait for the other participant' : 'Start Game'}
 				</p>
 				</div>
 			</div>

@@ -169,7 +169,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 				</div>
 
 				<div className='flex flex-row items-center mt-2'>
-						<p className='text-sm'>Channel Name:</p>
+						<p className='text-sm pr-2'>Channel Name:</p>
 						<input
 						type="text"
 						placeholder={channel.name}
@@ -181,7 +181,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
 						onClick={handleSubmit}
 						>
-							Save Change
+							Change Name
 					</button>
 				</div>
 				</>

@@ -7,13 +7,13 @@ import { User } from '@prisma/client';
 import { Game } from './game.class';
 import { Server } from 'socket.io';
 import {
-  WaitingGameSession,
-  Gamer,
-  Ball,
-  Paddle,
-  Camera,
-  Player,
-  PaddleHit
+	WaitingGameSession,
+	Gamer,
+	Ball,
+	Paddle,
+	Camera,
+	Player,
+	PaddleHit
 } from './interfaces';
 import { delay } from 'rxjs';
 
@@ -62,37 +62,37 @@ export class GameService
 	async prepareQueListGame(socket: Socket, @Request() req: any)
 	{
 
-      const gamer = this.createGamer(
-        req.user,
-        socket.id,
-        true,
-      );
-      // check someone is not already waiting in the waiting room
-      if (this.waitingRoomGame) {
-        // check if one game session is already waiting for an opponent
-        if (this.waitingRoomGame.hostId === req.user.id) {
-          return null;
-        } else {
-          gamer.isHost = false;
-          const participants = [gamer, this.waitingRoomGame.participants[0]];
-          // remove the waiting game session
-          this.waitingRoomGame = undefined;
-          const gameDB = await this.prisma.game.create({data: {}});
-          const gameSession = this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId); 
-          return gameSession;
-        }
-      } else {
-        const waitingListIds = Array.from(this.waitingChallenge.keys());
-        const id =
-          waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
-        this.waitingRoomGame = {
-          waitingGameId: id,
-          hostId: gamer.user.id,
-          participants: [gamer],
-        };
-        console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
-        return null;
-      }
+		const gamer = this.createGamer(
+			req.user,
+			socket.id,
+			true,
+		);
+		// check someone is not already waiting in the waiting room
+		if (this.waitingRoomGame) {
+			// check if one game session is already waiting for an opponent
+			if (this.waitingRoomGame.hostId === req.user.id) {
+			return null;
+			} else {
+			gamer.isHost = false;
+			const participants = [gamer, this.waitingRoomGame.participants[0]];
+			// remove the waiting game session
+			this.waitingRoomGame = undefined;
+			const gameDB = await this.prisma.game.create({data: {}});
+			const gameSession = this.createGame(gameDB.gameId, participants[0].user.id, participants[0].socketId, participants[1].user, participants[1].socketId); 
+			return gameSession;
+			}
+		} else {
+			const waitingListIds = Array.from(this.waitingChallenge.keys());
+			const id =
+			waitingListIds.length > 0 ? Math.max(...waitingListIds) + 1 : 1;
+			this.waitingRoomGame = {
+			waitingGameId: id,
+			hostId: gamer.user.id,
+			participants: [gamer],
+			};
+			console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
+			return null;
+		}
     }
 
     // 10 = Out P1 | 1 = P1Left | 2 = P1Mid | 3 = P1Right | 4 = P2Left | 5 = P2Mid | 6 = P2 Right | 7 = WallLeft | 8 = WallRight | 9 = Out P2
@@ -357,7 +357,6 @@ export class GameService
 
 		return (game);
 	}
-
 
 
 	//     async checkGameUsers(socket: Socket)  {

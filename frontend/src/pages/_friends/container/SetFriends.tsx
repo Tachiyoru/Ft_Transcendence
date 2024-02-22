@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { FaArrowTurnUp, FaUser, FaUserPlus } from "react-icons/fa6";
+import { FaArrowTurnUp, FaUser, FaUserClock, FaUserPlus, FaUsers } from "react-icons/fa6";
 import AllFriends from "./AllFriends";
 import Invitations from "./Invitations";
 import Blocked from "./Blocked";
@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { RiTimer2Line } from "react-icons/ri";
 import { WebSocketContext } from "../../../socket/socket";
+import { FaUserAltSlash } from "react-icons/fa";
 
 type FilterType = "tous" | "invitations" | "blocked";
 
@@ -40,6 +41,19 @@ const SetFriends: React.FC = () => {
     (state: RootState) => state.friend.listUsersNotFriend
   );
   const socket = useContext(WebSocketContext);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
 const hasNewInvitations = async () => {
     const { id: userId } = await getLoggedInUserInfo();
@@ -52,7 +66,6 @@ const hasNewInvitations = async () => {
 
     const updateNewInvitationsCount = async () => {
       const count = await hasNewInvitations();
-	  console.log(count);
       setHasNewInvitationsCount(count);
     };
     updateNewInvitationsCount();
@@ -168,27 +181,28 @@ const hasNewInvitations = async () => {
     setHoveredUser(userId);
   };
 
+
   return (
-    <div className="flex flex-row h-[80vh]">
+    <div className="flex flex-row h-[80vh] relative">
       {/*NAV FRIENDS*/}
-      <div className="w-[260px] md:rounded-l-lg bg-violet-black">
+      <div className="w-[66px] md:w-[260px] lg:w-[260px] md:rounded-l-lg bg-violet-black">
         <div className="p-4">
           <h1
-            className="font-outline-2 mt-6 m-2 text-white"
+            className="font-outline-2 mt-6 m-2 text-white md:block hidden"
             style={{ cursor: "default" }}
           >
             Friends
           </h1>
 
-          <div ref={dropdownRef} className="relative m-2">
-            <div className="flex items-center relative">
+          <div ref={dropdownRef} className="my-2 mx-0 md:m-2">
+            <div className="flex items-center absolute top-18">
               <input
                 type="text"
-                placeholder="Add Friends"
-                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 w-full mt-4 focus:outline-none focus:border-fushia ${
+                placeholder={!isMobile ? "Add Friends" : ""}
+                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 mt-4 md:w-full focus:outline-none focus:border-fushia ${isMobile ? "cursor-pointer" : ""} ${
                   isDropdownOpen
-                    ? "bg-lilac text-white rounded-t-lg"
-                    : "bg-accent-violet rounded-md text-lilac"
+                    ? "bg-lilac text-white rounded-t-lg w-full"
+                    : "bg-accent-violet rounded-md text-lilac w-2"
                 }`}
                 onClick={handleInputClick}
                 onChange={handleInputChange}
@@ -205,7 +219,7 @@ const hasNewInvitations = async () => {
 
             {isDropdownOpen && (
               <div
-                className="h-34 overflow-auto w-full bg-accent-violet absolute rounded-b-lg py-2"
+                className="h-34 overflow-auto w-[193px] bg-accent-violet absolute top-[70px] md:top-[116px] rounded-b-lg py-2"
                 style={{ zIndex: 1 }}
               >
                 {filteredUsers.length === 0 ? (
@@ -273,8 +287,8 @@ const hasNewInvitations = async () => {
           </div>
         </div>
 
-        <nav>
-          <ul className="ml-6" style={{ cursor: "pointer" }}>
+        <nav className="mt-16">
+          <ul className="ml-4 md:ml-6" style={{ cursor: "pointer" }}>
             <li
               className={`mb-2 text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
                 filtreActif === "tous"
@@ -283,7 +297,7 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("tous")}
             >
-              Friends
+              {isMobile ? <FaUsers className="w-4 h-4"/> : 'Invitations'}
             </li>
             <li
               className={`mb-2 relative text-sm text-lilac hover:bg-purple hover:bg-opacity-10 rounded-l-md ${
@@ -293,10 +307,10 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("invitations")}
             >
-              Invitations
+              {isMobile ? <FaUserClock className="w-4 h-4"/> : 'Invitations'}
               {hasNewInvitationsCount > 0 && (
                 <div className="absolute top-2.5 left-20  w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
-                  <span className="text-white text-xss font-semibold">
+                  <span className="text-white text-xs font-semibold">
                     {hasNewInvitationsCount}
                   </span>
                 </div>
@@ -310,7 +324,7 @@ const hasNewInvitations = async () => {
               }`}
               onClick={() => handleFiltre("blocked")}
             >
-              Blocked
+              {isMobile ? <FaUserAltSlash className="w-4 h-4"/> : 'Blocked'}
             </li>
           </ul>
         </nav>

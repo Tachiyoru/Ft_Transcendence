@@ -7,13 +7,16 @@ import {
 } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
 import { RiGamepadFill } from "react-icons/ri";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "../../../axios/api";
 import UserConvOptions from "../../../components/popin/UserConvOptions";
 import { WebSocketContext } from "../../../socket/socket";
+import { setGameData, setInvitedFriend } from "../../../services/gameInvitSlice";
+import axiosInstance from "../../../axios/api";
 import { useDispatch } from "react-redux";
-import { setSelectedChannelId } from "../../../services/selectedChannelSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@react-three/fiber";
 
 interface RightSidebarProps {
   isRightSidebarOpen: boolean;
@@ -62,11 +65,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
   onUpdateList,
 }) => {
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
-
-  // keske ce que ca Clem ???
-  const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
+	const [channelInCommon, setChannelInCommon] = useState<Channel[]>([]);
   const [commonChannelCount, setCommonChannelCount] = useState(0);
-
   const [usersInChannelExceptHim, setUsersInChannelExceptHim] = useState<
     Users[]
   >([]);
@@ -83,6 +83,8 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
     id: -1,
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -262,12 +264,28 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
     }
   };
 
-  const navigate = useNavigate();
-  const handleNavigation = (path) => {
-	toggleRightSidebar();
-    dispatch(setSelectedChannelId(path));
-    navigate("/chat");
-  };
+  const invitToPlay = async (user) => {
+    if (!invitedFriend)
+    {
+      dispatch(setInvitedFriend(user));
+
+      const sendNotification = async () =>
+      {
+        await axiosInstance.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+        socket.emit("all-update")
+      }
+      sendNotification();
+
+
+      socket.emit("createInviteGame", user.id);
+      socket.on("gameInviteData", (game) =>
+      {
+        if (game)
+          dispatch(setGameData(game));
+      });
+      navigate('/game')
+    }
+  }
 
   return (
     <div
@@ -329,15 +347,13 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
                       </li>
                       {!isBlocked && (
                         <li
-                          className="hover:opacity-40"
-                          style={{ cursor: "pointer" }}
+                          className={`hover:opacity-40 ${invitedFriend ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
+                          onClick={() => invitToPlay(member)}
                         >
-                          <Link to="">
                             <div className="flex flex-row items-center mt-1">
                               <RiGamepadFill className="w-3 h-4 mr-2" />
                               <p className="hover:underline">Invite to play</p>
                             </div>
-                          </Link>
                         </li>
                       )}
                       <li

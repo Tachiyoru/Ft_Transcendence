@@ -25,11 +25,13 @@ export class Game  {
     releasedp2: number = 0;
     velocity: Velocity = {x: 0, z: 0};
     stopped: boolean = false;
+    mode: number;
 
 
     constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
         this.gameSocket = "Game" + player1;
+        this.mode = 1;
 
         // Player 1 Paddle
         this.paddle[0].x = 0;

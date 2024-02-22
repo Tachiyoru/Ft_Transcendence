@@ -3,12 +3,15 @@ import { FaRegPenToSquare, FaUser, FaVolumeXmark } from 'react-icons/fa6';
 import { SlOptions } from 'react-icons/sl';
 import { RiGamepadFill } from 'react-icons/ri';
 import { LuBadgePlus } from "react-icons/lu";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { setSelectedChannelId } from '../../services/selectedChannelSlice';
 import { useDispatch } from 'react-redux';
 import { FaMinusCircle } from 'react-icons/fa';
 import { WebSocketContext } from '../../socket/socket';
 import 	axios from '../../axios/api';
+import { setGameData, setInvitedFriend } from '../../services/gameInvitSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@react-three/fiber';
 
 
 interface Owner {
@@ -54,6 +57,8 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 	const [isMuted, setIsMuted] = useState<boolean>(false);
 	const socket = useContext(WebSocketContext);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const navigate = useNavigate();
+	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -170,6 +175,33 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 
 	};
 
+	const invitToPlay = async (user) => {
+		if (!invitedFriend)
+		{
+			dispatch(setInvitedFriend(user));
+		
+				const sendNotification = async () =>
+				{
+					await axios.post(`/notification/add/${user.id}`, { fromUser: userData?.username , type: 2, fromUserId: userData?.id});
+					socket.emit("all-update")
+				}
+				sendNotification();
+		
+				const createInviteGame = async () =>
+				{
+					socket.emit("createInviteGame", user.id);
+					socket.on("gameInviteData", (game) =>
+					{
+						if (game)
+							dispatch(setGameData(game));
+					});
+				navigate('/game')
+				}
+		
+				createInviteGame();
+		}
+	}
+
 	const handleBlockUser = async (user: Users) => {
 		try {
 			if (isBlocked) {
@@ -232,8 +264,8 @@ const UserConvOptions: React.FC<ChannelProps> = ({
 						<p className="ml-2">Send a message</p>
 					</div>
 					<div
-						style={{ cursor: "pointer" }}
-						className="flex flex-row items-center pb-1 hover:opacity-40"
+						className={`flex flex-row items-center pb-1 hover:opacity-40 ${invitedFriend ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
+						onClick={() => invitToPlay(user)}
 					>
 						<RiGamepadFill size={11}/>
 						<p className="ml-2">Invite to play</p>
