@@ -27,22 +27,6 @@ const Game = () => {
 	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
 	const gameData = useSelector((state: RootState) => state.gameInvit.gameData);
 
-	const [gameOption1, setGameOption1] = useState(true);
-    const [gameOption2, setGameOption2] = useState(false);
-	const [gameOptionSelected, setGameOptionSelected] = useState<number>(1);
-
-    const handleGameOption1Change = () => {
-        setGameOption1(true);
-        setGameOption2(false);
-		setGameOptionSelected(1);
-    };
-
-    const handleGameOption2Change = () => {
-        setGameOption1(false);
-        setGameOption2(true);
-		setGameOptionSelected(2);
-    };
-
     const toggleCard = (index: number) => {
         if (showBackIndex === index) {
             setShowBackIndex(null);
@@ -322,27 +306,6 @@ const Game = () => {
 						<div className="text-lilac text-sm block md:hidden">
 							<p>You can choose between two themes, the first front view, the second top view. If you launch a random game, the one selected by the host will be taken.<br/><br/>
 							</p>
-							<p>Change theme</p>
-								<div className="block">
-									<div className="mt-2">
-										<label className="inline-flex items-center space-x-2">
-												<label>1</label>
-												<input
-													type="checkbox"
-													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
-													checked={gameOption1}
-													onChange={handleGameOption1Change}
-												/>
-												<label>2</label>
-												<input
-													type="checkbox"
-													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
-													checked={gameOption2}
-													onChange={handleGameOption2Change}
-												/>
-										</label>
-									</div>
-								</div>
 						</div>
 						{/*TABLET DESKTOP*/}
 						<div className="grid grid-cols-2 space-x-6 p-4">
@@ -354,27 +317,6 @@ const Game = () => {
 								<div>
 									<p>You can choose between two themes, the first front view, the second top view. If you launch a random game, the one selected by the host will be taken.<br/><br/>
 									</p>
-								</div>
-								<p>Change theme</p>
-								<div className="block">
-									<div className="mt-2">
-										<label className="inline-flex items-center space-x-2">
-												<label>1</label>
-												<input
-													type="checkbox"
-													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
-													checked={gameOption1}
-													onChange={handleGameOption1Change}
-												/>
-												<label>2</label>
-												<input
-													type="checkbox"
-													className="w-5 h-5 rounded-full text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
-													checked={gameOption2}
-													onChange={handleGameOption2Change}
-												/>
-										</label>
-									</div>
 								</div>
 							</div>
 						</div>

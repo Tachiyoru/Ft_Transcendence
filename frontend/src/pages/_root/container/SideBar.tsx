@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userData, userStats }) => {
       <div className="mt-60 mb-10 md:block hidden">
         <div className="h-1 bg-lilac">
           <div
-            style={{ width: userStats.exp }}
+            style={{ width: (userStats.exp * 240) / 100 }}
             className="h-full bg-purple"
           ></div>
         </div>

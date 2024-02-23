@@ -8,15 +8,13 @@ import MatchesPlayedTogether from "../_root/container/MatchesPlayedTogether";
 import BadgesUser from "./container/BadgesUser";
 import Animation from "./container/Animation";
 import LeaderboardUser from "./container/LeaderboardUser";
-import { Link } from "react-router-dom";
 import { RiGamepadFill } from "react-icons/ri";
 import { FaMinusCircle } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { WebSocketContext } from "../../socket/socket";
 import { setSelectedChannelId } from "../../services/selectedChannelSlice";
 import { RiTimer2Line } from "react-icons/ri";
-import History from "./container/HystoryUser";
-import Badges from "../_root/container/Badges";
+import History from "./container/HistoryUser";
 import { setGameData, setInvitedFriend } from "../../services/gameInvitSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@react-three/fiber";
@@ -73,9 +71,11 @@ const DashboardFriends = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const test = await axios.get(`users/me`);
+			const test = await axios.get(`users/me`);
 			setMe(test.data.username);
-				const response = await axios.get(`users/him/${username}`);
+			if (test.data.username === username)
+				navigate('/');
+			const response = await axios.get(`users/him/${username}`);
 			setUserData(response.data);
 			const responsestat = await axios.get(`stats/${username}`);
 			setUserStats(responsestat.data);
@@ -254,7 +254,7 @@ const DashboardFriends = () => {
 						</div>
 					</div>
 
-					<div className="flex flex-col gap-y-2">
+					<div className="flex flex-col gap-y-2 mt-6">
 						<div 
 						onClick={() => handleClickSendMessage(userData.username, userData.id)}
 						className="flex flex-row items-center bg-purple hover:bg-violet-black-nav p-2 pl-5 rounded-md text-lilac text-sm cursor-pointer"

@@ -1,6 +1,6 @@
 import { Canvas, extend, useThree } from "@react-three/fiber";
 import MainLayout from "../components/nav/MainLayout";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { PerspectiveCamera } from '@react-three/drei';
 import { HemisphereLight, ColorRepresentation } from "three";
 extend({ HemisphereLight });
@@ -14,6 +14,7 @@ import BallObj from "./Ball.tsx";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Winner from "../components/popin/Victory.tsx";
 import Defeat from "../components/popin/Defeat.tsx";
+import OhOh from "../components/popin/OhOh.tsx";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;
@@ -59,6 +60,10 @@ export default function Experience() {
 	const [start, setStart] = useState(false);
 	const [popinLooser, setTogglePopinLooser] = useState(false);
 	const [popinWinner, setTogglePopinWinner] = useState(false);
+	const [gameOption1, setGameOption1] = useState(true);
+    const [gameOption2, setGameOption2] = useState(false);
+	const [gameOptionSelected, setGameOptionSelected] = useState<number>(1);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -91,6 +96,10 @@ export default function Experience() {
 				}
 			});
 
+			socket.on('reconnect', (usersocket) => {
+				navigate('/');
+			})
+
 			if (!start)
 			{
 				socket.emit('launchBall');
@@ -102,6 +111,18 @@ export default function Experience() {
 		}
 	}, [socket, gameSocket]);
 
+    const handleGameOption1Change = () => {
+        setGameOption1(true);
+        setGameOption2(false);
+		setGameOptionSelected(1);
+    };
+
+    const handleGameOption2Change = () => {
+        setGameOption1(false);
+        setGameOption2(true);
+		setGameOptionSelected(2);
+    };
+
 	return (
 		<>
 			{game && 
@@ -109,7 +130,7 @@ export default function Experience() {
 				<p className="text-center font-kanit font-bold font-outline-1 text-lilac text-3xl">{score.join(' : ')}</p>
 				<Canvas>
 					<color attach="background" args={[0x160030]} />
-					{game.mode === 1 && (
+					{gameOptionSelected === 1 && (
 					userData && userData.id == game.player1.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
@@ -120,7 +141,7 @@ export default function Experience() {
 						far={1000}
 						rotation = {[-0.4, 0, 0]}
 					/>))}
-					{game.mode === 1 && (
+					{gameOptionSelected === 1 && (
 					userData && userData.id == game.player2.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
@@ -132,7 +153,8 @@ export default function Experience() {
 						rotation={[0.4, Math.PI, 0]}
 						/>
 					))}
-					{game.mode === 2 && (
+					{gameOptionSelected === 2 && (
+					userData && userData.id == game.player1.playerProfile?.id && (
 					<PerspectiveCamera 
 						makeDefault
 						position={[0, 200, 0]}
@@ -142,7 +164,19 @@ export default function Experience() {
 						far={1000}
 						rotation={[-1.57, 0, 0]}
 					/>
-					)}
+					))}
+					{gameOptionSelected === 2 && (
+					userData && userData.id == game.player2.playerProfile?.id && (
+					<PerspectiveCamera 
+						makeDefault
+						position={[0, 200, 0]}
+						fov={60}
+						aspect={window.innerWidth / window.innerHeight}
+						near={0.1}
+						far={1000}
+						rotation={[-1.57, 0, 0]}
+					/>
+					))}
 
 					<ambientLight intensity={0.5} />
 					<CustomHemisphereLight skyColor={0xFFFFFF} groundColor={0x003300} intensity={1} />
@@ -157,6 +191,27 @@ export default function Experience() {
 				</Canvas>
 				{popinWinner && game && <Winner game={game}/>}
 				{popinLooser && game && <Defeat game={game}/>}
+				<p className="text-center font-kanit font-bold text-lilac">Change theme</p>
+				<div className="block text-center">
+					<div className="mt-2">
+						<label className="inline-flex items-center space-x-2 text-lilac">
+								<label>1</label>
+								<input
+									type="checkbox"
+									className="w-5 h-5 rounded-full checkbox checkbox-secondary text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
+									checked={gameOption1}
+									onChange={handleGameOption1Change}
+								/>
+								<label>2</label>
+								<input
+									type="checkbox"
+									className="w-5 h-5 rounded-full checkbox checkbox-secondary text-dark-violet bg-transparent border-lilac border-2 focus:ring-transparent focus:ring-opacity-0"
+									checked={gameOption2}
+									onChange={handleGameOption2Change}
+								/>
+						</label>
+					</div>
+				</div>
 			</div>
 			}
 		</>

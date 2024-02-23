@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import HighlightMiddle from '../../_root/container/HighlightMiddle';
 import { useEffect, useState } from 'react';
 import axios from '../../../axios/api';
+import { Link } from 'react-router-dom';
 
 const LeaderboardUser = () => {
 	const [userRankingGlobal, setUserRankingGlobal] = useState<{ username: string; }[]>([]);
@@ -65,9 +66,11 @@ const LeaderboardUser = () => {
 				<HighlightMiddle>
 				<div className="h-20 py-2 overflow-y-auto max-h-20 scrollbar-thin scrollbar-thumb-black">
 					{userRankingGlobal.map((user, index) => (
-					<div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
-						{`${index + 1}-${user.username}`}
-					</div>
+					<Link key={index} to={`/user/${user.username}`}>
+						<div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
+							{`${index + 1}-${user.username}`}
+						</div>
+					</Link>
 					))}
 				</div>
 				</HighlightMiddle>

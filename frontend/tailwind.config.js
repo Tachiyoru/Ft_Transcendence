@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import tailwindScrollbar from 'tailwind-scrollbar';
-import tailwindCheckbox from 'flowbite/plugin'
+import tailwindCheckbox from 'daisyui'
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -47,6 +47,7 @@ export default {
   },
   plugins: [
     tailwindScrollbar,
+    tailwindCheckbox
   ],
 };
 

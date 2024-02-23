@@ -1,5 +1,6 @@
 import React from 'react';
 import HighlightMiddle from './HighlightMiddle';
+import { Link } from 'react-router-dom';
 
 interface User {
 	username: string;
@@ -51,9 +52,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ userRankingFriends, userRanki
 				<HighlightMiddle>
 				<div className="h-20 py-2 overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-black">
 					{userRankingGlobal.map((user, index) => (
-					<div key={index} className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
-						{`${index + 1}-${user.username}`}
-					</div>
+					<Link key={index} to={`/user/${user.username}`}>
+						<div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
+							{`${index + 1}-${user.username}`}
+						</div>
+					</Link>
 					))}
 				</div>
 				</HighlightMiddle>

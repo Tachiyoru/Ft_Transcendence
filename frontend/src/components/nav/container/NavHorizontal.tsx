@@ -361,7 +361,7 @@ const NavHorizontal = () => {
             <div className="relative mt-2">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search user..."
                 value={searchValue}
                 onChange={(e) => {
                   setSearchValue(e.target.value);
@@ -370,12 +370,12 @@ const NavHorizontal = () => {
                 className="bg-dark-violet text-lilac px-2 rounded py-0.5 focus:outline-none"
               />
               {showUserList && (
-                <ul className="absolute h-24 w-full bg-lilac z-10">
+                <ul className="absolute h-24 w-full bg-lilac z-10 rounded-b">
                   {filteredUsers.map((user, index) => (
                     <Link to={`/user/${user.username}`}>
                       <li
                         key={index}
-                        className="px-2 py-1 hover:bg-purple cursor-pointer"
+                        className="px-2 py-1 hover:bg-purple cursor-pointer text-dark-violet"
                         onClick={() => handleUserClick()}
                       >
                         {user.username}

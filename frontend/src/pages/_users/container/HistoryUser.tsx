@@ -15,6 +15,10 @@ interface historyProps {
 const History: React.FC<historyProps> = ({ history }) => {
   const [matchHistory, setMatchHistory] = useState<Histo[]>([]);
 
+  useEffect(() => {
+    formatHisto();
+  }, [history]);
+  
   const formatHisto = () => {
     let histoFormated: Histo[] = [];
     history.map((match) => {

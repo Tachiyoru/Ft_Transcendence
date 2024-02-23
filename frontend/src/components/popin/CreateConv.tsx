@@ -214,7 +214,7 @@ const CreateConv: React.FC = () => {
                       checked={checkedItems[user.username] !== undefined}
                       style={{ cursor: "pointer" }}
                       onChange={() => handleCheckboxChange(user)}
-                      className="h-5 w-5 rounded border border-gray-300 focus:ring-indigo-500 text-indigo-600"
+                      className="h-5 w-5 rounded border border-lilac checkbox checked:border-lilac [--chkbg:theme(colors.purple)] focus:ring-indigo-500 [--chkfg:#D8F828] text-indigo-600"
                     />
                   </label>
                 </div>

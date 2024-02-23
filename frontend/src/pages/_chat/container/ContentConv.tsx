@@ -262,7 +262,7 @@ const ContentConv = () => {
                 </button>
               </div>
             </div>
-            <div className="border border-t-lilac border-opacity-40 mt-6"></div>
+            <div className="border-t border-lilac border-opacity-40 mt-6"></div>
           </div>
 
           {/* CONTENT */}

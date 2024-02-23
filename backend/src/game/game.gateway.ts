@@ -6,7 +6,7 @@ import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { disconnect } from 'process';
+import { disconnect, emit } from 'process';
 import { delay } from 'rxjs';
 import { IsNumber, isNumber } from 'class-validator';
 import { Game } from './game.class';
@@ -187,6 +187,8 @@ export class GameGateway
 		if (game)
 		{
 			game.goalsToWin = goalsToWin;
+			if (goalsToWin > 20) 
+				game.goalsToWin = 20;
 			this.server.to(game.player1.playerSocket).emit("goalsToWin", game);
 			this.server.to(game.player2.playerSocket).emit("goalsToWin", game);
 		}
@@ -216,28 +218,41 @@ export class GameGateway
 		const data = await this.gameService.notInGame(req);
 		if (data.game)
 		{
+			this.server.to(data.game.player1.playerSocket).emit("reconnect2", data.boolean);
+			this.server.to(data.game.player2.playerSocket).emit("reconnect2", data.boolean);
 			this.server.to(data.game.player1.playerSocket).emit("verifyGame", data.boolean);
 			this.server.to(data.game.player2.playerSocket).emit("verifyGame", data.boolean);
 			data.game.destroyGame(this.prisma);
 		}
 	}
 
-	handleGameFinish(game: Game, winner: number) {
+	async handleGameFinish(game: Game, winner: number) {
 		game.victory = winner;
 		game.saveGame(this.prisma);
 		let p1Hist = null;
 		let p2Hist = null;
+		let p1Exp = 0;
+		let p2Exp = 0;
 	
 		if (winner === 1) {
 			this.server.to(game.player1.playerSocket).emit("finish", true);
 			this.server.to(game.player2.playerSocket).emit("finish", false);
-			p2Hist = game.pScore + " " + game.player2.playerProfile?.username + " " + "Defeat" + " " + "+5"
-			p1Hist = game.pScore + " " + game.player1.playerProfile?.username + " " + "Winner" + " " + "+10"
+			p2Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player1.playerProfile?.username + " " + "Defeat" + " " + "+5exp"
+			p1Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player2.playerProfile?.username + " " + "Winner" + " " + "+10exp"
+			p1Exp = 10;
+			p2Exp = 5;
 		} else if (winner === 2) {
 			this.server.to(game.player1.playerSocket).emit("finish", false);
 			this.server.to(game.player2.playerSocket).emit("finish", true);
-			p1Hist = game.pScore + " " + game.player1.playerProfile?.username + " " + "Defeat" + " " + "+5"
-			p2Hist = game.pScore + " " + game.player2.playerProfile?.username + " " + "Winner" + " " + "+10"
+			p1Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player2.playerProfile?.username + " " + "Defeat" + " " + "+5exp"
+			p2Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player1.playerProfile?.username + " " + "Winner" + " " + "+10exp"
+			p1Exp = 5;
+			p2Exp = 10;
+		}
+		if (game.player1.playerProfile && game.player2.playerProfile && p1Hist && p2Hist)
+		{
+			await this.gameService.addHistory(game.player1.playerProfile, p1Hist, p1Exp);
+			await this.gameService.addHistory(game.player2.playerProfile, p2Hist, p2Exp);
 		}
 		this.server.to(game.player1.playerSocket).emit("findGame", game);
 		this.server.to(game.player2.playerSocket).emit("findGame", game);
@@ -257,9 +272,14 @@ export class GameGateway
             let velocity = [0.01, 0];
             delay(50)
             var i = setInterval(async () => {
-              game.ball.z += (100 * velocity[0]);
+            game.ball.z += (100 * velocity[0]);
 			game.ball.x += velocity[1];
 			
+			if (game.victory !== 0)    {
+				this.handleGameFinish.call(this, game, game.victory);
+				clearInterval(i);
+            }
+
 			if (game.pScore[0] == game.goalsToWin || game.pScore[1] == game.goalsToWin) {
 				if (game.pScore[0] === game.goalsToWin) {
 					this.handleGameFinish.call(this, game, 1);
@@ -416,14 +436,32 @@ export class GameGateway
 		const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown, this.server);
 	}
 
+	@SubscribeMessage("gameStatusUpdate")
+	async gameStatusUpdate(
+		@MessageBody('gameSocket') gameSocket: string,
+	)
+	{
+		const game = await this.gameService.findGame(gameSocket);
+		if (game)
+			game.status = 3;
+	}
+
 	handleConnection(client: any, ...args: any[])
 	{
 		console.log(`Game Client connected: ${client.id}`);
+		this.server.to(client.id).emit("reconnect", client.id);
 	}
 
-	handleDisconnect(client: any)
+	async handleDisconnect(client: any)
 	{
 		console.log(`Client disconnected: ${client.id}`);
+		const result = await this.gameService.userInGame(client.id);
+		if (result)	{
+			this.server.to(result.player1.playerSocket).emit("reconnect2", client.id);
+			this.server.to(result.player2.playerSocket).emit("reconnect2", client.id);
+			this.server.to(client.id).emit("reconnect", client.id);
+		}
+
 	}
 
 

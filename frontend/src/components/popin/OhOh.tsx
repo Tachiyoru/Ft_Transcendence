@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Props {
 	error: boolean;
@@ -9,16 +9,17 @@ interface Props {
 const OhOh: React.FC<Props> = ({error}) => {
 	const [popinOpen, setPopinOpen] = useState(error);
 	const cardRef = useRef<HTMLDivElement>(null);
-	console.log(error)
 	const togglePopin = () => {
 		setPopinOpen(!popinOpen);
 	};
+	const navigate = useNavigate();
 
 
 	useEffect(() => {
 	const handleClickOutside = (event: MouseEvent) => {
 		if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
 			setPopinOpen(false);
+			navigate('/');
 		}
 	};
 

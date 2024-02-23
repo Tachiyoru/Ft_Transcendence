@@ -45,6 +45,8 @@ const AboutToPlay = () => {
 	const [goalCount, setGoalCount] = useState<number>(3);
 	let playerReadyToStart = 0;
 	const [isGameStarted, setGameStarted] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -60,17 +62,20 @@ const AboutToPlay = () => {
 
 	useEffect(() => {
 		try {
+			socket.on('reconnect2', (usersocket) => {
+				setError(true);
+			})
+			socket.on('reconnect', (usersocket) => {
+				setError(true);
+				navigate('/')
+			})
 			socket.emit("findGame", {gameSocket: gameSocket});
 			socket.on("findGame", (game) =>
 			{
 				setGame(game);
-			});
-
-			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
-			socket.on("verifyGame", (boolean) => {
-
-			if (!boolean)
-				setGame(null);
+				setLoading(false)
+				if (!game)
+					setError(true);
 			});
 
 			socket.on('bothReadyToStart', (data) => {
@@ -78,13 +83,26 @@ const AboutToPlay = () => {
 					playerReadyToStart++;
 				if (playerReadyToStart === 2) {
 					navigate(`/test/${gameSocket}`);
+					socket.emit("gameStatusUpdate", {gameSocket: gameSocket, userId: userData?.id})
 			}})
-
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données:', error);
+		} finally {
+			setLoading(false);
+			console.log(game)
+			if (game)
+			{
+			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
+			socket.on("verifyGame", (boolean) => {
+				console.log('verif', boolean)
+				if (!boolean)
+					setError(true);
+			});
+		}
 		}
 	}, [socket, userData]);
 
+	
 	const handleStartGame = () => {
 		if (game)
 		{
@@ -92,14 +110,12 @@ const AboutToPlay = () => {
 			setGameStarted(true);
 		}
 	};
-
 	
-
 	const handleGoalCountChange = (e: any) =>
 	{
 		let goalCountNumber = parseInt(e.target.value);
 		if (goalCountNumber === 0 || Number.isNaN(goalCountNumber))
-				goalCountNumber = 0;
+		goalCountNumber = 0;
 		setGoalCount(goalCountNumber);
 	}
 
@@ -113,10 +129,12 @@ const AboutToPlay = () => {
 		});
 	}, [goalCount]);
 
+
+
 	return (
 		<MainLayout currentPage={currentPage}>
 		<div className="flex-1 bg-violet-black h-[80vh] flex justify-center items-center text-lilac">
-		{game ? (
+		{game && !error ? (
 			<div className="grid grid-cols-1 gap-20 text-center cursor-default">
 			<div>
 				<h3 className="font-audiowide text-2xl mb-12">Get ready</h3>
@@ -156,7 +174,7 @@ const AboutToPlay = () => {
 						<p className='text-base mt-2'>{game.player2.playerProfile.username}</p>
 					</div>
 					</div>
-					<p className="font-audiowide text-1xl mb-1">First to [{game.goalsToWin}] goals wins
+					<p className="font-audiowide text-1xl mb-1">First to [{game.goalsToWin}] goals wins (max 20)
 					</p>
 					{userData && userData.id === game.player1.playerProfile.id && (
 					<input
@@ -175,7 +193,7 @@ const AboutToPlay = () => {
 				</p>
 				</div>
 			</div>
-		) : <OhOh error={true}/> }
+		) : <OhOh error={error}/> }
 		</div>
 		</MainLayout>
 	)

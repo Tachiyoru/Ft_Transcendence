@@ -95,6 +95,60 @@ export class GameService
 		}
     }
 
+	async addHistory(user: User, pHist: string, exp: number) {
+		const userfind = await this.prisma.user.findUnique({
+			where: { id: user.id },
+			include: {stats: true}
+		});
+		
+		if (userfind && userfind.stats) {
+			const newHistory = [...userfind.stats.history, pHist];
+			if (exp === 10)
+				userfind.stats.partyWon++;
+			else
+				userfind.stats.partyLost++;
+
+			userfind.stats.exp += exp;
+			if (userfind.stats.exp >= 100)
+			{
+				userfind.stats.lvl++;
+				userfind.stats.exp -= 100;
+			}
+			userfind.stats.partyPlayed++;
+			await this.prisma.user.update({
+			where: { id: user.id },
+			data: { stats: { update: { 
+				history: newHistory, 
+				exp: userfind.stats.exp, 
+				partyPlayed: userfind.stats.partyPlayed,
+				partyWon: userfind.stats.partyWon,
+				partyLost: userfind.stats.partyLost,
+				lvl: userfind.stats.lvl
+			} } },
+			});
+		} else {
+			console.error(`Error`);
+		}
+	}
+
+	async userInGame(playerSocket: string)    {
+        let winner = 0;
+        let game = this.games.find(game => game.player1.playerSocket === playerSocket);
+        if (!game)    {
+            game = this.games.find(game => game.player2.playerSocket === playerSocket);
+            if (game)
+                winner = 1;
+        } else    {
+            winner = 2;
+        }
+		if (game && game.status === 3)
+        	game?.winner(winner);
+		else if (game)	{
+			this.destroyInGame(game);
+		}
+		return (game);
+    }
+
     // 10 = Out P1 | 1 = P1Left | 2 = P1Mid | 3 = P1Right | 4 = P2Left | 5 = P2Mid | 6 = P2 Right | 7 = WallLeft | 8 = WallRight | 9 = Out P2
     async collide(game : Game)  {
       const halfPaddle = game.paddleHitbox[0].sizex / 2;

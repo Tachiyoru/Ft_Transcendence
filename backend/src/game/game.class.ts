@@ -27,7 +27,7 @@ export class Game  {
     stopped: boolean = false;
     mode: number;
 
-
+    
     constructor(gameId: number, player1: string, player1Profile: User, player2: string, player2Profile: User)   {
         this.gameId = gameId;
         this.gameSocket = "Game" + player1;
@@ -133,18 +133,17 @@ export class Game  {
         else
             this.pScore[1]++;
         if (this.pScore[0] === 8)
-            this.winner(1, prisma);
+            this.winner(1);
         else if (this.pScore[1] === 8)
-            this.winner(2, prisma);
+            this.winner(2);
     }
 
-    winner(playerWon: number, prisma: PrismaService)  {
+
+    winner(playerWon: number)  {
         if (playerWon === 1)    {
             this.victory = 1;
-            this.destroyGame(prisma);
         } else  {
             this.victory = 2;
-            this.destroyGame(prisma);
         }
     }
 
