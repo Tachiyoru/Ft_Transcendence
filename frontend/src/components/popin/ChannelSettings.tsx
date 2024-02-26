@@ -36,6 +36,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	const [channelName, setChannelName] = useState("");
 	const socket = useContext(WebSocketContext);
 	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const [error, setError] = useState<string>();
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -80,13 +81,17 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 			password: channelType === 'PROTECTED' ? password : undefined,
 			},
 		});
+		setPopinOpen(false);
 	};
 
 	const handleSubmit = () => {
 		try {
-				socket.emit("renameChan", { chanId: channel.chanId, newName: channelName });
+			socket.emit("renameChan", { chanId: channel.chanId, newName: channelName });
+			socket.on("renameChanError", ({ message }) => {
+				setError(message);
+			});
 		} catch (error) {
-		console.error("Error fetching user list:", error);
+			console.error("Error fetching user list:", error);
 		}
 	};
 
@@ -100,7 +105,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
 				<div ref={cardRef} className="bg-dark-violet text-lilac rounded-lg p-8 w-2/3 h-auto relative">
 					<span className="absolute text-lilac top-6 right-6 cursor-pointer" onClick={togglePopin}>
-					X
+					&#10005;
 					</span>
 					<h2 className='text-xl text-lilac font-semibold'>Channel parameters</h2>
 					<p className='pt-2'>Manage channel members and their account permissions here.</p>
@@ -176,11 +181,12 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						onChange={(e) => setChannelName(e.target.value)}
 						className="rounded-md w-24 px-2 bg-lilac text-dark-violet placeholder:text-accent-violet text-sm placeholder:text-opacity-40 "
 						/>
+						{error && <p className='text-xs text-red-orange'>{error}</p>}
 					<button
 						disabled={channelName.length === 0}
 						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
 						onClick={handleSubmit}
-						>
+					>
 							Change Name
 					</button>
 				</div>
