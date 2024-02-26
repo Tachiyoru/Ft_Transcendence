@@ -6,341 +6,305 @@ import { NotificationService } from "src/notification/notification.service";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
-export class FriendsListService
-{
-	constructor(
-		private prismaService: PrismaService,
-		private notificationService: NotificationService
-	) {}
+export class FriendsListService {
+  constructor(
+    private prismaService: PrismaService,
+    private notificationService: NotificationService
+  ) {}
 
-	async pendingList(userId: number)
-	{
-		const user = await this.prismaService.user.findUnique(
-			{
-				where: { id: userId },
-				include: { pendingList: true },
-			}
-		);
-		if (!user)
-			throw new Error("User not found");
-		return user.pendingList;
-	}
+  async pendingList(userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { pendingList: true },
+    });
+    if (!user) throw new Error("User not found");
+    return user.pendingList;
+  }
 
-	async myPendingList(userId: number)
-	{
-		const user = await this.prismaService.user.findUnique(
-			{
-				where: { id: userId },
-				include: { pendingFrom: true },
-			}
-		);
-		if (!user)
-			throw new Error("User not found");
-		return user.pendingFrom;
-	}
+  async myPendingList(userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { pendingFrom: true },
+    });
+    if (!user) throw new Error("User not found");
+    return user.pendingFrom;
+  }
 
-	async rejectPending(user: User, friendId: number, notificationId?: number) 
-	{
-		user = await this.prismaService.user.update(
-			{
-				where: { id: friendId },
-				include: { pendingList: true },
-				data: {
-					pendingList: { disconnect: { id: user.id } },
-				}
-			}
-		);
-		return (user);
-	}
+  async rejectPending(user: User, friendId: number, notificationId?: number) {
+    user = await this.prismaService.user.update({
+      where: { id: friendId },
+      include: { pendingList: true },
+      data: {
+        pendingList: { disconnect: { id: user.id } },
+      },
+    });
+    return user;
+  }
 
-	async getUsersWithMeInPendingList(user: User)
-	{
-		const users = await this.prismaService.user.findMany(
-			{
-				where: {
-					pendingList: {
-						some: {
-							id: user.id,
-						},
-					},
-				},
-			});
+  async getUsersWithMeInPendingList(user: User) {
+    const users = await this.prismaService.user.findMany({
+      where: {
+        pendingList: {
+          some: {
+            id: user.id,
+          },
+        },
+      },
+    });
 
-		return users;
-	}
+    return users;
+  }
 
-	async acceptRequest(user: User, friendId: number) 
-	{
-		console.log("user : ", user);
-		await this.prismaService.user.update(
-			{
-				where: { id: user.id },
-				data: { pendingList: { disconnect: { id: friendId } } }
-			}
-		);
-		await this.prismaService.user.update(
-			{
-				where: { id: user.id },
-				include: { friends: true },
-				data: { friends: { connect: { id: friendId } } }
-			}
-		);
-		await this.prismaService.user.update(
-			{
-				where: { id: friendId },
-				include: { friends: true },
-				data: {
-					friends: { connect: { id: user.id } }
-				}
-			}
-		);
+  async acceptRequest(user: User, friendId: number) {
+    console.log("user : ", user);
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: { pendingList: { disconnect: { id: friendId } } },
+    });
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      include: { friends: true },
+      data: { friends: { connect: { id: friendId } } },
+    });
+    await this.prismaService.user.update({
+      where: { id: friendId },
+      include: { friends: true },
+      data: {
+        friends: { connect: { id: user.id } },
+      },
+    });
 
-		const notificationDto = new CreateNotificationDto();
-		console.log("username = ", user.username, user.id);
-		if (user.username)
-			notificationDto.fromUser = user.username;
+    const notificationDto = new CreateNotificationDto();
+    console.log("username = ", user.username, user.id);
+    if (user.username) notificationDto.fromUser = user.username;
 
-		await this.notificationService.addNotificationByUserId(
-			friendId,
-			notificationDto,
-			NotificationType.FRIENDREQUEST_ACCEPTED
-		);
+    await this.notificationService.addNotificationByUserId(
+      friendId,
+      notificationDto,
+      NotificationType.FRIENDREQUEST_ACCEPTED
+    );
 
-		return (user);
-	}
+    return user;
+  }
 
-	async rejectRequest(user: User, friendId: number, notificationId?: number) 
-	{
-		user = await this.prismaService.user.update(
-			{
-				where: { id: user.id },
-				include: { pendingList: true },
-				data: {
-					pendingList: { disconnect: { id: friendId } },
-				}
-			}
-		);
-		if (notificationId)
-		{
-			const updatedUser = await this.prismaService.user.findUnique({
-				where: { id: user.id },
-				include: { notifications: true },
-			});
-			if (updatedUser)
-				return (updatedUser);
-		}
+  async rejectRequest(user: User, friendId: number, notificationId?: number) {
+    user = await this.prismaService.user.update({
+      where: { id: user.id },
+      include: { pendingList: true },
+      data: {
+        pendingList: { disconnect: { id: friendId } },
+      },
+    });
+    if (notificationId) {
+      const updatedUser = await this.prismaService.user.findUnique({
+        where: { id: user.id },
+        include: { notifications: true },
+      });
+      if (updatedUser) return updatedUser;
+    }
 
-		return (user);
-	}
+    return user;
+  }
 
-	async friendRequest(user: User, friendId: number)
-	{
-		const friend = await this.prismaService.user.findUnique(
-			{
-				where: { id: friendId },
-				include: { pendingList: true },
-			}
-		);
-		if (!friend)
-			throw new Error('Friend not found.');
-		const uuser = await this.prismaService.user.update(
-			{
-				where: { id: friendId },
-				include: { pendingList: true },
-				data: { pendingList: { connect: { id: user.id }, }, },
-			}
-		);
-		if (uuser)
-			console.log("friendrequest = ", uuser.pendingList);
-		const test = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: { pendingFrom: true },
-		});
-		if (test)
-			console.log("pendingFrom = ", test.pendingFrom);
+  async friendRequest(user: User, friendId: number) {
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId },
+      include: { pendingList: true },
+    });
+    if (!friend) throw new Error("Friend not found.");
+    const uuser = await this.prismaService.user.update({
+      where: { id: friendId },
+      include: { pendingList: true },
+      data: { pendingList: { connect: { id: user.id } } },
+    });
+    if (uuser) console.log("friendrequest = ", uuser.pendingList);
+    const test = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+      include: { pendingFrom: true },
+    });
+    if (test) console.log("pendingFrom = ", test.pendingFrom);
 
-		const notificationDto = new CreateNotificationDto();
-		if (user.username) notificationDto.fromUser = user.username;
+    const notificationDto = new CreateNotificationDto();
+    if (user.username) notificationDto.fromUser = user.username;
 
-		await this.notificationService.addNotificationByUserId(
-			friendId,
-			notificationDto,
-			NotificationType.FRIENDREQUEST_RECEIVED
-		);
+    await this.notificationService.addNotificationByUserId(
+      friendId,
+      notificationDto,
+      NotificationType.FRIENDREQUEST_RECEIVED
+    );
 
-		return user;
-	}
+    return user;
+  }
 
-	async removeFriend(user: User, friendId: number)
-	{
-		const friend = await this.prismaService.user.findUnique({
-			where: {
-				id: friendId,
-			},
-			include: {
-				friends: true,
-			},
-		});
+  async removeFriend(user: User, friendId: number) {
+    const friend = await this.prismaService.user.findUnique({
+      where: {
+        id: friendId,
+      },
+      include: {
+        friends: true,
+      },
+    });
 
-		if (!user || !friend) throw new Error("User not found");
+    if (!user || !friend) throw new Error("User not found");
 
-		user = await this.prismaService.user.update({
-			where: { id: user.id },
-			data: {
-				friends: {
-					disconnect: { id: friendId },
-				},
-			},
-			include: { friends: true },
-		});
+    user = await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        friends: {
+          disconnect: { id: friendId },
+        },
+      },
+      include: { friends: true },
+    });
 
-		await this.prismaService.user.update({
-			where: { id: friendId },
-			data: {
-				friends: {
-					disconnect: { id: user.id },
-				},
-			},
-			include: { friends: true },
-		});
+    await this.prismaService.user.update({
+      where: { id: friendId },
+      data: {
+        friends: {
+          disconnect: { id: user.id },
+        },
+      },
+      include: { friends: true },
+    });
 
-		return (user);
-	}
+    return user;
+  }
 
-	async blockUser(user: User, blockedUserId: number)
-	{
-		user = await this.prismaService.user.update({
-			where: { id: user.id },
-			data: {
-				blockedList: {
-					connect: { id: blockedUserId },
-				},
-			},
-		});
-		return (user);
-	}
+  async blockUser(user: User, blockedUserId: number) {
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: user.id },
+      include: { blockedList: true, friends: true },
+      data: {
+        blockedList: {
+          connect: { id: blockedUserId },
+        },
+      },
+    });
+    if (!updatedUser) throw new Error("User not found");
+    if (updatedUser.friends.length > 0) {
+      const a = updatedUser.friends.map((friend) => friend.id);
+      const b = updatedUser.blockedList.map((blocked) => blocked.id);
+      const common = a.filter((id) => b.includes(id));
+      if (common.length > 0) {
+		await this.removeFriend(user, common[0]);
+      }
+    }
+    return updatedUser;
+  }
 
-	async unblockUser(user: User, unblockedUserId: number)
-	{
-		user = await this.prismaService.user.update({
-			where: { id: user.id },
-			data: {
-				blockedList: {
-					disconnect: { id: unblockedUserId },
-				},
-			},
-		});
-		return (user);
-	}
+  async unblockUser(user: User, unblockedUserId: number) {
+    user = await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        blockedList: {
+          disconnect: { id: unblockedUserId },
+        },
+      },
+    });
+    return user;
+  }
 
-	async getBlockedUsers(user: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: {
-				blockedList: true,
-			},
-		});
+  async getBlockedUsers(user: User) {
+    const me = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+      include: {
+        blockedList: true,
+      },
+    });
 
-		if (!me)
-		{
-			throw new Error('User not found');
-		}
+    if (!me) {
+      throw new Error("User not found");
+    }
 
-		return me.blockedList;
-	}
+    return me.blockedList;
+  }
 
-	async isUserBlockedById(userId: number, loggedInUser: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: loggedInUser.id },
-			include: {
-				blockedList: {
-					where: { id: userId }
-				},
-			},
-		});
+  async isUserBlockedById(userId: number, loggedInUser: User) {
+    const me = await this.prismaService.user.findUnique({
+      where: { id: loggedInUser.id },
+      include: {
+        blockedList: {
+          where: { id: userId },
+        },
+      },
+    });
 
-		if (!me)
-		{
-			throw new Error('User not found');
-		}
+    if (!me) {
+      throw new Error("User not found");
+    }
 
-		return me.blockedList.length > 0;
-	}
+    return me.blockedList.length > 0;
+  }
 
-	async getMyFriends(user: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: {
-				friends: true,
-				blockedList: true,
-			},
-		});
+  async getMyFriends(user: User) {
+    const me = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+      include: {
+        friends: true,
+        blockedList: true,
+      },
+    });
 
-		if (!me)
-		{
-			throw new Error('User not found');
-		}
+    if (!me) {
+      throw new Error("User not found");
+    }
 
-		const blockedUserIds = me.blockedList.map(user => user.id);
-		const filteredFriends = me.friends.filter(friend => !blockedUserIds.includes(friend.id));
+    const blockedUserIds = me.blockedList.map((user) => user.id);
+    const filteredFriends = me.friends.filter(
+      (friend) => !blockedUserIds.includes(friend.id)
+    );
 
-		return filteredFriends;
-	}
+    return filteredFriends;
+  }
 
+  async getNonFriends(user: User) {
+    const me = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+      include: {
+        friends: true,
+      },
+    });
 
-	async getNonFriends(user: User)
-	{
-		const me = await this.prismaService.user.findUnique({
-			where: { id: user.id },
-			include: {
-				friends: true,
-			},
-		});
+    if (!me) throw new Error("User not found");
 
-		if (!me) throw new Error("User not found");
+    const friendIds = me.friends.map((friend) => friend.id);
 
-		const friendIds = me.friends.map((friend) => friend.id);
+    const nonFriends = await this.prismaService.user.findMany({
+      where: {
+        id: { notIn: [user.id, ...friendIds] },
+      },
+    });
+    return nonFriends;
+  }
 
-		const nonFriends = await this.prismaService.user.findMany({
-			where: {
-				id: { notIn: [user.id, ...friendIds] },
-			},
-		});
-		return nonFriends;
-	}
+  async getFriendsInCommon(userId: number, friendId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { friends: true },
+    });
+    if (!user) throw new Error("User not found");
 
-	async getFriendsInCommon(userId: number, friendId: number)
-	{
-		const user = await this.prismaService.user.findUnique({
-			where: { id: userId },
-			include: { friends: true },
-		});
-		if (!user)
-			throw new Error("User not found");
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId },
+      include: { friends: true },
+    });
+    if (!friend) throw new Error("Friend not found");
 
-		const friend = await this.prismaService.user.findUnique({
-			where: { id: friendId },
-			include: { friends: true },
-		});
-		if (!friend)
-			throw new Error("Friend not found");
+    const friendIds = friend.friends.map((friend) => friend.id);
+    const friendsInCommon = user.friends.filter((friend) =>
+      friendIds.includes(friend.id)
+    );
 
-		const friendIds = friend.friends.map((friend) => friend.id);
-		const friendsInCommon = user.friends.filter((friend) => friendIds.includes(friend.id));
+    return friendsInCommon;
+  }
 
-		return (friendsInCommon);
-	}
-
-	async getFriendsFrom(userId: number)
-	{
-		const user = await this.prismaService.user.findUnique({
-			where: { id: userId },
-			include: { friends: true },
-		});
-		if (!user) throw new Error("User not found");
-		return user.friends;
-	}
+  async getFriendsFrom(userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { friends: true },
+    });
+    if (!user) throw new Error("User not found");
+    return user.friends;
+  }
 }
