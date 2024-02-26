@@ -89,7 +89,7 @@ const SigninForm = () => {
   const handleGitClick = async () => {
     try {
       const response = (window.location.href =
-        "http://paul-f4ar7s9:5001/auth/github/callback");
+        "http://paul-f4ar1s4:5001/auth/github/callback");
       if (response) dispatch(loginSuccess(response));
     } catch {
       setResStatus("Error");

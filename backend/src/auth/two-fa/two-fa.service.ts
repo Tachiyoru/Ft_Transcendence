@@ -20,13 +20,14 @@ export class TwoFAService
 	{
 		const secret = authenticator.generateSecret();
 		const issuerName: string =
-			this.configService.get<string>("ISSUER_NAME") || "DEFAULT_NAME";
-		if (!user.email) return "ntm manu";
+		this.configService.get<string>("ISSUER_NAME") || "DEFAULT_NAME";
+		if (!user.email) return "error";
 		const otpAuthUrl: string = authenticator.keyuri(
 			'twofa@gmail.com',
 			issuerName,
 			secret
-		);
+			);
+		console.log("generate2FASecret", user.id, secret, otpAuthUrl, issuerName, user.email);
 
 		await this.set2FaSecret(secret, user.id);
 		return otpAuthUrl;
@@ -80,6 +81,7 @@ export class TwoFAService
 
 	async setTwoFaStatus(status: boolean | null, userId: number)
 	{
+		console.log(status);
 		if (status === true)
 		{
 			const updatedUser = await this.prismaService.user.update({

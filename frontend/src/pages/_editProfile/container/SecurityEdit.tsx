@@ -55,13 +55,12 @@ const SecurityEdit = () => {
           console.error(error.response.data.message);
           setError('Invalid password');
       }
-      finally {
-      }
     };
 
     const handleQrCode = async (isChecked: boolean) => {
       try {
         await axios.post('/two-fa/set-status');
+        console.log("otpAuthUrl : ", userData?.otpAuthUrl);
         if (!userData?.otpAuthUrl)
           await axios.get('/two-fa/generate-qrcode');
         const userDataResponse = await axios.get('/users/me');
@@ -70,7 +69,6 @@ const SecurityEdit = () => {
         setIsTwoFaEnabled(false)
       } catch (error) {
         console.error("Error two-fa verification", error);
-      } finally {
       }
     };
 	
