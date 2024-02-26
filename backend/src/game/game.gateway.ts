@@ -238,14 +238,14 @@ export class GameGateway
 			this.server.to(game.player1.playerSocket).emit("finish", true);
 			this.server.to(game.player2.playerSocket).emit("finish", false);
 			p2Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player1.playerProfile?.username + " " + "Defeat" + " " + "+5exp"
-			p1Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player2.playerProfile?.username + " " + "Winner" + " " + "+10exp"
+			p1Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player2.playerProfile?.username + " " + "Victory" + " " + "+10exp"
 			p1Exp = 10;
 			p2Exp = 5;
 		} else if (winner === 2) {
 			this.server.to(game.player1.playerSocket).emit("finish", false);
 			this.server.to(game.player2.playerSocket).emit("finish", true);
 			p1Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player2.playerProfile?.username + " " + "Defeat" + " " + "+5exp"
-			p2Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player1.playerProfile?.username + " " + "Winner" + " " + "+10exp"
+			p2Hist = game.pScore[0] + "-" +game.pScore[1] + " " + game.player1.playerProfile?.username + " " + "Victory" + " " + "+10exp"
 			p1Exp = 5;
 			p2Exp = 10;
 		}

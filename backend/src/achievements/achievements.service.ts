@@ -53,20 +53,13 @@ export class AchievementsService
 		});
 		await this.createInitialAchievements({
 			idType: 8,
-			description: "Serial looser : lose 10 times in a row",
+			description: "Serial loser : lose 10 times in a row",
 			icon: "src/achievements-8.png",
 		});
 	}
 
 	async createInitialAchievements(achievementInput: AchievementCreateImput)
 	{
-		// const achievement = await this.prismaService.achievement.findUnique({
-		// 	where: {
-		// 		id: achievementInput.idType,
-		// 	},
-		// });
-		// if (!achievement)
-		// {
 		const achiev = await this.prismaService.achievement.create({
 			data: {
 				idType: achievementInput.idType,
@@ -75,7 +68,6 @@ export class AchievementsService
 			},
 		});
 		return achiev;
-		// }
 	}
 
 	async getAchievementsList()
@@ -185,32 +177,6 @@ export class AchievementsService
 			notificationDto,
 			NotificationType.ACHIEVEMENT_UNLOCKED
 		);
-
 		return updatedUser;
 	}
-
-	// async settitle(userId: number, achievementId: number){
-	// 	const user = await this.prismaService.user.findUnique({
-	// 		where: {
-	// 			id: userId,
-	// 		},
-	// 		include: {
-	// 			achievements: true,
-	// 		},
-	// 	});
-	// 	const achievement = await this.prismaService.achievement.findUnique({
-	// 		where: {
-	// 			id: achievementId,
-	// 		},
-	// 	});
-	// 	if (!achievement) throw new Error("Achievement not found");
-	// 	const updatedUser = await this.prismaService.user.update({
-	// 		where: {
-	// 			id: userId,
-	// 		},
-	// 		data: {
-	// 			title: (achievement.idType),
-	// 		},
-	// 	});
-	// }
 }

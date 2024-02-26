@@ -30,6 +30,7 @@ const History = () => {
     let histoFormated: Histo[] = [];
     let prevOpp = "";
     let prevresult = "";
+	let revenge = false;
     histo.reverse().map((match) => {
       let parts = match.split(" ");
       let score = parts[0];
@@ -38,12 +39,18 @@ const History = () => {
       let exp = parts[parts.length - 1];
       if (
         prevOpp === opponent &&
-        prevresult === "Defeat" &&
-        result === "Victory"
+        prevresult === "Victory" &&
+        result === "Defeat" &&
+		revenge === false
       ) {
-        axiosInstance.post(`achievements/add/${4}`);
+		revenge = true;
+		console.log("REVENGEEEEEEEEEE");
+        axios.post(`achievements/add/${4}`);
       }
+	  console.log("revenge :", revenge);	
+	  console.log("prevOpp :", prevOpp, "opponent :", opponent);
       prevOpp = opponent;
+	  console.log("prevresult :", prevresult, "result :", result);
       prevresult = result;
       histoFormated.push({ score, opponent, result, exp });
     });
