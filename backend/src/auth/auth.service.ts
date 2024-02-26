@@ -72,8 +72,7 @@ export class AuthService
 	{
 		{
 			const name: string = userInfo.username;
-			const email: string = userInfo._json.email ?? name + "@platform.fr";
-			console.log("email : ", email);
+			const email: string = userInfo._json.email ?? name + "";
 			const user = await this.prisma.user.findFirst({
 				where: { username: name },
 				include: { friends: true, stats: true, achievements: true },
