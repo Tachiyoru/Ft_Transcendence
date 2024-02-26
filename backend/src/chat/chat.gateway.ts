@@ -103,11 +103,8 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.allUpdate();
 	  console.log(" ALL UPDATE CALL ");
     } catch (error) {
-      console.error("Error editing channel:", error.message);
-      client.emit("channelError", {
-        message: "Error editing channel",
-        error: error.message,
-      });
+      console.error("Error editing channel:");
+      client.emit("channelEditError");
     }
   }
 
@@ -310,7 +307,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("renameChan")
   async renameChan(
-    client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody() data: { chanId: number; newName: string },
     @Request() req: any
   ) {
