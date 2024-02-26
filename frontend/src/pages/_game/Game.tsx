@@ -122,19 +122,19 @@ const Game = () => {
 		localStorage.getItem('showSecondDiv') === 'true'
 		);
 
-		useEffect(() => {
-		if (selectedIndexes.length === 1) {
-			const timer = setTimeout(() => {
-			setShowSecondDiv(true);
-			localStorage.setItem('showSecondDiv', 'true');
-			}, 10000);
+	// 	useEffect(() => {
+	// 	if (selectedIndexes.length === 1) {
+	// 		const timer = setTimeout(() => {
+	// 		setShowSecondDiv(true);
+	// 		localStorage.setItem('showSecondDiv', 'true');
+	// 		}, 90000);
 		
-			return () => clearTimeout(timer);
-		} else {
-			setShowSecondDiv(false);
-			localStorage.removeItem('showSecondDiv');
-		}
-	}, [selectedIndexes]);
+	// 		return () => clearTimeout(timer);
+	// 	} else {
+	// 		setShowSecondDiv(false);
+	// 		localStorage.removeItem('showSecondDiv');
+	// 	}
+	// }, [selectedIndexes]);
 
 	const handleCrossClick = async () => {
 	setShowSecondDiv(false);

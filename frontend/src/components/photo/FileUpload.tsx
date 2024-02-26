@@ -49,7 +49,7 @@ const FileUpload : React.FC<FileUploadProps> = ({ userData, setUserData }) => {
 
   return (
     <div className="ml-6">
-      <input className="mb-2 block w-full text-xs text-gray-900 rounded-lg cursor-pointer bg-transparent dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple" id="small_size" type="file" onChange={handleFileChange} />
+      <input className="mb-2 p-1 block w-full text-xs text-lilac rounded dark:text-lilac focus:outline-none focus:bg-purple dark:bg-purple placeholder:bg-purple file:bg-dark-violet file:border-0 file:rounded file:text-lilac file:cursor-pointer" id="small_size" type="file" onChange={handleFileChange} />
       {error && <p className="text-red-orange text-xs ">{error}</p>}
       <button className="text-sm px-4 py-1 bg-purple rounded disabled:bg-dark-violet disabled:text-black" disabled={!selectedFile} onClick={handleUpload}>Upload</button>
     </div>

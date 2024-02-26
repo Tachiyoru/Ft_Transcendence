@@ -22,7 +22,7 @@ interface Users {
 
 const AccountEdit = () => {
 	const socket = useContext(WebSocketContext);
-	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string>();
 	const [userData, setUserData] = useState<Users>();
 	const navigate = useNavigate()
 	const {
@@ -62,7 +62,7 @@ const AccountEdit = () => {
 		socket.emit("all-update");
 		} catch (error) {
 		console.error("Error updating user data:", error);
-		} finally {
+		setError('Email or username already taken')
 		}
 	};
 
@@ -132,10 +132,11 @@ const AccountEdit = () => {
 					className="px-5 py-3 text-sm text-lilac placeholder-lilac placeholder-opacity-40 bg-transparent outline-none"
 				/>
 				</div>
+				{error && (<p className="text-xs pt-2 text-red-orange">{error}</p>)}
 				<button
 				type="submit"
 				disabled={!isValid}
-				className="mt-4 text-sm bg-dark-violet py-2 px-5 rounded mb-6 disabled:opacity-40"
+				className="mt-4 text-sm bg-dark-violet text-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
 				>
 				Save changes
 				</button>

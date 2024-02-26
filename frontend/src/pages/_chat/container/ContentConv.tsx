@@ -193,7 +193,7 @@ const ContentConv = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-filter text-xs relative p-8">
+    <div className="flex-1 flex flex-col justify-between bg-violet-black-nav bg-opacity-80 text-xs relative p-8">
       {!channel ? (
         <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
           No conversation selected

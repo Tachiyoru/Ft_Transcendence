@@ -324,7 +324,8 @@ export class UserService
 				dto.password = await argon.hash(dto.newPassword);
 			}
 		}
-		const { password, username: newusername } = dto;
+		
+		const { password, username: newusername, email: newemail } = dto;
 		const user2 = await this.prisma.user.update({
 			where: {
 				id: userId,
@@ -332,6 +333,7 @@ export class UserService
 			data: {
 				hash: password,
 				username: newusername,
+				email: newemail
 			},
 		});
 		return user2;

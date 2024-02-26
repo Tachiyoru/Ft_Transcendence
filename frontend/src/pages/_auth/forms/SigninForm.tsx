@@ -69,7 +69,7 @@ const SigninForm = () => {
     const newPassword = e.currentTarget.value;
     setPassword(newPassword);
     setShowUsernameErrors(true);
-	if (newPassword.length > 6)
+	if (newPassword.length >= 6)
 		setPasswordModified(true);
 };
 

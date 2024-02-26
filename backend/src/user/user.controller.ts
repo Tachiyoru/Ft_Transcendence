@@ -62,13 +62,14 @@ export class UserController {
   ) {
     const filepath = "/" + file[0].path;
     this.userService.editAvatar(user.id, filepath);
-	console.log("filepaht :",filepath);
+	console.log("filepath :",filepath);
     return (filepath)
   }
 
+  
   @Patch("edit")
-  editUser(@GetUser("id") userId: number, @Body() dto: EditUserDto) {
-    return this.userService.editUser(userId, dto);
+  editUser(@GetUser() user: User, @Body() dto: EditUserDto) {
+    return this.userService.editUser(user.id, dto);
   }
 
   @Get("histo")

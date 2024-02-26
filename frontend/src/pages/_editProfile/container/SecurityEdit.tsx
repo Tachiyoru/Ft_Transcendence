@@ -131,7 +131,7 @@ const SecurityEdit = () => {
                 </button>
               </div>
             </div>
-            {error && <div className="text-xs text-red-orange">{error}</div>}
+            {error && <div className="text-xs mt-2 text-red-orange">{error}</div>}
 
 
           <div className="w-[260px] flex flex-row items-center border-b border-lilac">
@@ -199,7 +199,7 @@ const SecurityEdit = () => {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <div className="text-xs text-red-orange">{errors.confirmPassword.message}</div>
+                <div className="text-xs mt-2 text-red-orange">{errors.confirmPassword.message}</div>
               )}
             </div>
 
@@ -208,7 +208,7 @@ const SecurityEdit = () => {
             <button
               type="submit"
               disabled={!isValid}
-              className="mt-4 border text-sm bg-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
+              className="text-sm bg-purple text-lilac py-2 px-5 rounded mb-6 disabled:opacity-40"
             >
               Save changes
             </button>
