@@ -438,10 +438,13 @@ export class GameGateway
 		@Request() req: any,
 	)
 	{
-		await this.prisma.user.update({
-			where: { id: req.user.id },
-			data: { status: "ONLINE"},
-		})
+		if (req.user && req.user.id)
+		{
+			await this.prisma.user.update({
+				where: { id: req.user.id },
+				data: { status: "ONLINE"},
+			})
+		}
 	}
 
 	@SubscribeMessage("gameStatusUpdate")
