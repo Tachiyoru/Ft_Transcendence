@@ -66,6 +66,7 @@ const DashboardFriends = () => {
 	
 	useEffect(() => {
 		socket.emit("notInGame");
+		socket.emit('updateStatusUser')
 	},[]);
 
 	useEffect(() => {

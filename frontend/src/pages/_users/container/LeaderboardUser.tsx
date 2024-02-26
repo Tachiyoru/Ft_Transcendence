@@ -42,7 +42,9 @@ const LeaderboardUser = () => {
 					) : (
 					userRankingFriends.map((friend, index) => (
 						<tr key={index} className={index % 2 === 0 ? "bg-accent-violet" : ""}>
-						<td className="px-2">{friend.username}-</td>
+						<Link key={index} to={`/user/${friend.username}`}>
+							<td className="px-2">{index + 1}-{friend.username}</td>
+						</Link>
 						</tr>
 					))
 					)}

@@ -64,10 +64,12 @@ const AboutToPlay = () => {
 		try {
 			socket.on('reconnect2', (usersocket) => {
 				setError(true);
+				socket.emit('updateStatusUser')
 			})
 			socket.on('reconnect', (usersocket) => {
 				setError(true);
-				navigate('/')
+				navigate('/');
+				socket.emit('updateStatusUser')
 			})
 			socket.emit("findGame", {gameSocket: gameSocket});
 			socket.on("findGame", (game) =>
@@ -182,7 +184,9 @@ const AboutToPlay = () => {
 						placeholder="select number of goals to win"
 						value={goalCount}
 						onChange={(e) => handleGoalCountChange(e)}
-						className="bg-dark-violet text-lilac px-2 rounded py-0.5 focus:outline-none"
+						className={`bg-dark-violet text-lilac px-2 rounded py-0.5 focus:outline-none ${
+							goalCount > 20 ? 'text-red-500' : ''
+						}`}
 					/>
 					)}
 				<p

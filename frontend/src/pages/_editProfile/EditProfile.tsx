@@ -11,6 +11,7 @@ const Settings = () => {
 
 	useEffect(() => {
 		socket.emit("notInGame");
+		socket.emit('updateStatusUser')
 	}, []);
 
 	return (

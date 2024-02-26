@@ -55,6 +55,18 @@ export class GameService
 		// console.log('ok', gameID, player1User, player1Socket, player2User, player2Socket);
 		const game = new Game(gameID, player1Socket, host, player2Socket, player2User);
 		this.games.push(game);
+
+		//update status
+		await this.prisma.user.update({
+			where: { id: host.id },
+			data: { status: "INGAME"},
+		})
+
+		await this.prisma.user.update({
+			where: { id: player2User.id },
+			data: { status: "INGAME"},
+		})
+
 		return (game);
 
 	}
@@ -389,10 +401,10 @@ export class GameService
     }
 
     async destroyInGame(game: Game) {
-      game?.destroyGame(this.prisma);
-      const index = this.games.indexOf(game);
-      if (index !== -1)
-        this.games.splice(index, 1)
+		game?.destroyGame(this.prisma);
+		const index = this.games.indexOf(game);
+		if (index !== -1)
+			this.games.splice(index, 1)
     }
 
 	async notInGame(@Request() req: any)

@@ -199,10 +199,10 @@ const hasNewInvitations = async () => {
               <input
                 type="text"
                 placeholder={!isMobile ? "Add Friends" : ""}
-                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 mt-4 md:w-full focus:outline-none focus:border-fushia ${isMobile ? "cursor-pointer" : ""} ${
+                className={`text-xs placeholder-lilac py-2 pl-9 pr-2 mt-4 focus:outline-none focus:border-fushia ${isMobile ? "cursor-pointer" : ""} ${
                   isDropdownOpen
                     ? "bg-lilac text-white rounded-t-lg w-full"
-                    : "bg-accent-violet rounded-md text-lilac w-2"
+                    : "bg-accent-violet rounded-md text-lilac w-2 md:w-full"
                 }`}
                 onClick={handleInputClick}
                 onChange={handleInputChange}

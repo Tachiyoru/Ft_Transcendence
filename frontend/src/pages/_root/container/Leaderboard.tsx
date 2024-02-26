@@ -4,14 +4,22 @@ import { Link } from 'react-router-dom';
 
 interface User {
 	username: string;
-  }
+}
+
+interface UserData {
+	username: string;
+	avatar: string;
+	title: string;
+	createdAt: string;
+}
 
 interface LeaderboardProps {
 	userRankingFriends: User[]; 
 	userRankingGlobal: User[];
+	userData: UserData;
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ userRankingFriends, userRankingGlobal }) => {
+const Leaderboard: React.FC<LeaderboardProps> = ({ userData, userRankingFriends, userRankingGlobal }) => {
 	return (
 		<>
 		<div className="w-full relative lg:w-60">
@@ -28,7 +36,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ userRankingFriends, userRanki
 					) : (
 					userRankingFriends.map((friend, index) => (
 						<tr key={index} className={index % 2 === 0 ? "bg-accent-violet" : ""}>
-						<td className="px-2">{friend.username}-</td>
+						<Link key={index} to={`/user/${friend.username}`}>
+							<td className={`px-2 ${friend.username === userData.username ? 'text-fushia' : 'text-lilac'}`}>
+								{index + 1}-{friend.username}
+							</td>
+						</Link>
 						</tr>
 					))
 					)}
@@ -53,7 +65,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ userRankingFriends, userRanki
 				<div className="h-20 py-2 overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-black">
 					{userRankingGlobal.map((user, index) => (
 					<Link key={index} to={`/user/${user.username}`}>
-						<div className="px-4 text-xs text-lilac" style={{ marginTop: '-0.14rem' }}>
+						<div className={`px-4 text-xs ${user.username === userData.username ? 'text-fushia' : 'text-lilac'}`} style={{ marginTop: '-0.14rem' }}>
 							{`${index + 1}-${user.username}`}
 						</div>
 					</Link>

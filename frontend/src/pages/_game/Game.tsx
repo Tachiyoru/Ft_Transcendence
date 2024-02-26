@@ -3,7 +3,7 @@ import MainLayout from "../../components/nav/MainLayout"
 import { IoIosArrowForward } from "react-icons/io";
 import { useContext, useState } from "react";
 import { FaUser } from "react-icons/fa6";
-import { RiTriangleFill } from "react-icons/ri";
+import { RiGamepadFill, RiTriangleFill } from "react-icons/ri";
 import { useRef, useEffect } from "react";
 import { WebSocketContext } from "../../socket/socket";
 import axiosInstance from "../../axios/api";
@@ -21,7 +21,7 @@ const Game = () => {
 	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 	const socket = useContext(WebSocketContext);
 	const navigate = useNavigate();
-	const [friendsList, setFriendsList] = useState<{ username: string; id: number; }[]>([]);
+	const [friendsList, setFriendsList] = useState<{ username: string; id: number; status: string}[]>([]);
 	const [userData, setUserData] = useState<{ username: string; id: number; } | null>(null);
 	const dispatch = useDispatch();
 	const invitedFriend = useSelector((state: RootState) => state.gameInvit.invitedFriend);
@@ -105,6 +105,7 @@ const Game = () => {
 
 	useEffect(() => {
 		socket.emit("notInGame");
+		socket.emit('updateStatusUser')
 	},[]);
 
 	useEffect(() => {
@@ -211,15 +212,24 @@ const Game = () => {
 												<RiTriangleFill className="w-[8px] h-[8px] text-lilac transform rotate-90" />
 												) : ( <div className="w-[8px] h-[8px]"></div> )}
 											</div>
-											<div className="w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
+											<div className="relative w-[20px] h-[20px] bg-purple rounded-full grid justify-items-center items-center">
 												<FaUser className="w-[8px] h-[8px] text-lilac" />
+												{user.status === "ONLINE" ? (
+												<div className="absolute bg-acid-green w-1.5 h-1.5 left-3.5 bottom-0 rounded-full"></div>
+												) : user.status === "OFFLINE" ? (
+												<div className="absolute bg-red-orange w-1.5 h-1.5 left-3.5 bottom-0 rounded-full"></div>
+												) : user.status === "INGAME" ? (
+												<div className="absolute bg-fushia w-1.5 h-1.5 rounded-full left-3.5 bottom-0 flex items-center justify-center z-50">
+													<RiGamepadFill className="text-white w-1 h-1" />
+												</div>
+												) : null}
 											</div>
 										<p className={`text-sm font-regular ml-2 ${index === hoveredIndex ? 'text-lilac' : 'text-lilac opacity-60'}`}>{user.username}</p>
 										</div>
 									
 								</div>
 							))}
-							<p className="absolute bottom-28 md:bottom-28 lg:bottom-36 text-lilac pl-2 font-audiowide">0/1</p>
+							<p className="absolute bottom-32 md:bottom-32 lg:bottom-40 text-lilac pl-2 font-audiowide">0/1</p>
 							</div>
 							</div>
 								<div className="flex flex-col justify-end mb-6">

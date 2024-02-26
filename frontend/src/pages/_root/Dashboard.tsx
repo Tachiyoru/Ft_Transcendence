@@ -33,6 +33,7 @@ const Dashboard = () => {
 
     useEffect(() => {
       socket.emit("notInGame");
+      socket.emit('updateStatusUser')
     },[]);
 
   useEffect(() => {
@@ -79,6 +80,7 @@ const Dashboard = () => {
             <Leaderboard
               userRankingFriends={userRankingFriends}
               userRankingGlobal={userRankingGlobal}
+              userData={userData}
             />
           </div>
           <History />

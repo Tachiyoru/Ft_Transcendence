@@ -149,7 +149,7 @@ const CreateConv: React.FC = () => {
 
       {/*POPIN*/}
       {isPopinOpen && (
-        <div  className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute top-0 inset-0 bg-black bg-opacity-50"></div>
         <div ref={cardRef} className="absolute top-28 left-40 mt-8 z-50 w-[200px] p-4 pl-5 text-lilac rounded-md bg-accent-violet ">
           <p className="text-base mb-1">Select Friends</p>

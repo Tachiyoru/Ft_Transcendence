@@ -257,7 +257,7 @@ export class GameGateway
 		this.server.to(game.player1.playerSocket).emit("findGame", game);
 		this.server.to(game.player2.playerSocket).emit("findGame", game);
 	
-		this.gameService.destroyInGame(game);
+		
 	}
 
 	@SubscribeMessage("launchBall")
@@ -278,6 +278,7 @@ export class GameGateway
 			if (game.victory !== 0)    {
 				this.handleGameFinish.call(this, game, game.victory);
 				clearInterval(i);
+				this.gameService.destroyInGame(game);
             }
 
 			if (game.pScore[0] == game.goalsToWin || game.pScore[1] == game.goalsToWin) {
@@ -287,6 +288,7 @@ export class GameGateway
 					this.handleGameFinish.call(this, game, 2);
 				}
 				clearInterval(i);
+				this.gameService.destroyInGame(game);
             }
 			const collideRet = await this.gameService.collide(game);
 			
@@ -436,6 +438,17 @@ export class GameGateway
 		const game = await this.gameService.movesInputs(gameSocket, client.id, move, upDown, this.server);
 	}
 
+	@SubscribeMessage("updateStatusUser")
+	async updateStatusUser(
+		@Request() req: any,
+	)
+	{
+		await this.prisma.user.update({
+			where: { id: req.user.id },
+			data: { status: "ONLINE"},
+		})
+	}
+
 	@SubscribeMessage("gameStatusUpdate")
 	async gameStatusUpdate(
 		@MessageBody('gameSocket') gameSocket: string,
@@ -457,6 +470,29 @@ export class GameGateway
 		console.log(`Client disconnected: ${client.id}`);
 		const result = await this.gameService.userInGame(client.id);
 		if (result)	{
+			if (client.id === result.player1.playerSocket)
+			{
+				await this.prisma.user.update({
+					where: { id: result.player2.playerProfile?.id },
+					data: { status: "ONLINE"},
+				})
+				await this.prisma.user.update({
+					where: { id: result.player2.playerProfile?.id },
+					data: { status: "OFFLINE"},
+				})
+			}
+			else if (client.id === result.player2.playerSocket)
+			{
+				await this.prisma.user.update({
+					where: { id: result.player1.playerProfile?.id },
+					data: { status: "ONLINE"},
+				})
+				await this.prisma.user.update({
+					where: { id: result.player2.playerProfile?.id },
+					data: { status: "OFFLINE"},
+				})
+			}
+			console.log('ok')
 			this.server.to(result.player1.playerSocket).emit("reconnect2", client.id);
 			this.server.to(result.player2.playerSocket).emit("reconnect2", client.id);
 			this.server.to(client.id).emit("reconnect", client.id);
