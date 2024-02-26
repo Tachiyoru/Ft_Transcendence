@@ -198,7 +198,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
 						onClick={handleSubmit}
 					>
-							Change Name
+						Change Name
 					</button>
 				</div>
 				</>
