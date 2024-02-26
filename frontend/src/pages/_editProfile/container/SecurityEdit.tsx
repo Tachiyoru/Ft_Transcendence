@@ -67,20 +67,20 @@ const SecurityEdit = () => {
     }
   };
 
-  const handleQrCode = async (isChecked: boolean) => {
-    try {
-      await axios.post("/two-fa/set-status");
-      console.log("otpAuthUrl : ", userData?.otpAuthUrl);
-      if (!userData?.otpAuthUrl) await axios.get("/two-fa/generate-qrcode");
-      const userDataResponse = await axios.get("/users/me");
-      setUserData(userDataResponse.data);
-      setIsQrCode(isChecked);
-      setIsTwoFaEnabled(false);
-    } catch (error) {
-      console.error("Error two-fa verification", error);
-    }
-  };
-
+    const handleQrCode = async (isChecked: boolean) => {
+      try {
+        await axios.post('/two-fa/set-status');
+        if (!userData?.otpAuthUrl)
+          await axios.get('/two-fa/generate-qrcode');
+        const userDataResponse = await axios.get('/users/me');
+        setUserData(userDataResponse.data);
+        setIsQrCode(isChecked);
+        setIsTwoFaEnabled(false)
+      } catch (error) {
+        console.error("Error two-fa verification", error);
+      }
+    };
+	
   const handleSubmitTwoFa = async () => {
     try {
       await axios.post("/two-fa/authenticate", { token: tokenGoogle });

@@ -97,7 +97,6 @@ const AllFriends = () => {
 		dispatch(setListUsersPending(updateListUsersPending));
 
 		const response3 = await axios.get<Users[]>("/friends-list/non-friends");
-		console.log("res 3 = update nonfriends list :",response3.data);
         dispatch(setListUsersNotFriend(response3.data));
 
       } catch (error) {

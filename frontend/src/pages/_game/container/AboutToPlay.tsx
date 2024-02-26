@@ -91,12 +91,10 @@ const AboutToPlay = () => {
 			console.error('Erreur lors de la récupération des données:', error);
 		} finally {
 			setLoading(false);
-			console.log(game)
 			if (game)
 			{
 			socket.emit("verifyGame", {gameSocket: gameSocket, userId: userData?.id})
 			socket.on("verifyGame", (boolean) => {
-				console.log('verif', boolean)
 				if (!boolean)
 					setError(true);
 			});

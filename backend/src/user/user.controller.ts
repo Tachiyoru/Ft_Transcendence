@@ -45,7 +45,6 @@ export class UserController {
 
   @Delete("delete-user")
   deleteUser(@GetUser("id") userId: number) {
-	console.log("delete user id : ",userId);
     return this.userService.deleteUser(userId);
   }
 
@@ -62,7 +61,6 @@ export class UserController {
   ) {
     const filepath = "/" + file[0].path;
     this.userService.editAvatar(user.id, filepath);
-	console.log("filepath :",filepath);
     return (filepath)
   }
 

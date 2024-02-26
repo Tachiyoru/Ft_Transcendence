@@ -147,7 +147,6 @@ const SidebarRightMobile: React.FC<RightSidebarProps> = ({
 
       socket.emit("channel-in-common", { chanId: channel.chanId });
       socket.on("channel-in-common", (channels) => {
-        console.log("channels :", channels);
         setChannelInCommon(channels);
         setCommonChannelCount(channels.length);
       });
