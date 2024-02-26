@@ -193,7 +193,7 @@ const AboutToPlay = () => {
 					className="font-audiowide text-purple underline hover:text-red-orange cursor-pointer mt-8"
 					onClick={isGameStarted ? undefined : handleStartGame}
 					>
-					{isGameStarted ? 'We wait for the other participant' : 'Start Game'}
+					{isGameStarted ? 'Waiting for your opponent' : 'Start Game'}
 				</p>
 				</div>
 			</div>

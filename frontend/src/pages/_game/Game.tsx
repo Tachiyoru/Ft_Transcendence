@@ -202,7 +202,7 @@ const Game = () => {
                       className="flex flex-row justify-between items-center hover"
                       onClick={() => toggleCard(0)}
                     >
-                      <div className="text-xs text-lilac">Invite friends</div>
+                      <div className="text-xs text-lilac">Invite to play</div>
                       <IoIosArrowForward className="w-2 h-2 text-lilac" />
                     </button>
                     <div className="border-t border-lilac"></div>
