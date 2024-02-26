@@ -45,7 +45,7 @@ const Defeat = ({game}) => {
 							<FaStar className="w-6 h-6"/>
 						</div>
 						<h3 className='font-audiowide text-2xl font-outline-1 text-lilac'>Defeat</h3>
-						<p className='font-audiowide mt-2'>+10 xp</p>
+						<p className='font-audiowide mt-2'>+5 xp</p>
 						<div className='flex flex-row gap-x-4 items-center mt-10'>
 						{game.victory === 1 ? (
 								<div className='flex flex-col items-center'>

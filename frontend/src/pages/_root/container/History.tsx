@@ -30,7 +30,7 @@ const History = () => {
     let histoFormated: Histo[] = [];
     let prevOpp = "";
     let prevresult = "";
-    histo.map((match) => {
+    histo.reverse().map((match) => {
       let parts = match.split(" ");
       let score = parts[0];
       let opponent = parts.slice(1, -2).join(" ");

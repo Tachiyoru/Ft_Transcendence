@@ -21,7 +21,7 @@ const History: React.FC<historyProps> = ({ history }) => {
   
   const formatHisto = () => {
     let histoFormated: Histo[] = [];
-    history.map((match) => {
+    history.reverse().map((match) => {
       let parts = match.split(" ");
       let score = parts[0];
       let opponent = parts.slice(1, -2).join(" ");
