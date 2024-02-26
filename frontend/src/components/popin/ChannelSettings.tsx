@@ -89,6 +89,7 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
         chanId: channel.chanId,
         newName: channelName,
       });
+	  socket.emit("all-update");
       socket.on("renameChanError", (errorData) => {
         console.log("laaaaaaaaaaaaaaaaaaaaaaaaaaaa CLEMENTINE");
       });
