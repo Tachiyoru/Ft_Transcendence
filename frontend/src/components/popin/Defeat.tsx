@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaStar, FaUser } from 'react-icons/fa6';
-import { MdWallet } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Defeat = ({game}) => {

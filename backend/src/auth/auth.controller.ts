@@ -68,16 +68,22 @@ export class AuthController {
     const user = req.user as User;
     let raw = req.user as any;
     user.username = user.username + "_42";
-    const user2 = await this.authService.authExtUserCreate(
-      user,
-      raw._json.image.versions.small
-    );
-    await this.authService.callForgeTokens(user2, res);
-    if (!user2.isTwoFaEnabled)
-      res.redirect('http://paul-f4ar1s1:5173/');
-    else
-      res.redirect('http://paul-f4ar1s1:5173/sign-in-2fa');
-    return user2;
+    try {
+			const user2 = await this.authService.authExtUserCreate(
+				user,
+				raw._json.avatar_url
+			);
+			await this.authService.callForgeTokens(user2, res);
+			if (!user2.isTwoFaEnabled)
+				res.redirect(process.env.REACT_APP_URL_FRONTEND || '');
+			else
+				res.redirect(process.env.REACT_APP_URL_FRONTEND + '/sign-in-2fa');
+			return user2;
+		}
+		catch (e) {
+			console.error(e);
+			res.redirect(process.env.REACT_APP_URL_FRONTEND + '/email-is-taken');
+		}
   }
 
   @Get("/github/callback")
@@ -88,15 +94,21 @@ export class AuthController {
     const user: User = req.user as User;
     let raw = req.user as any;
     user.username = user.username + "_git";
-    const user2 = await this.authService.authExtUserCreate(
-      user,
-      raw._json.avatar_url
-    );
-    await this.authService.callForgeTokens(user2, res);
-    if (!user2.isTwoFaEnabled)
-      res.redirect('http://paul-f4ar1s1:5173/');
-    else
-      res.redirect('http://paul-f4ar1s1:5173/sign-in-2fa');
-    return user2;
+		try {
+			const user2 = await this.authService.authExtUserCreate(
+				user,
+				raw._json.avatar_url
+			);
+			await this.authService.callForgeTokens(user2, res);
+			if (!user2.isTwoFaEnabled)
+				res.redirect(process.env.REACT_APP_URL_FRONTEND || '');
+			else
+				res.redirect(process.env.REACT_APP_URL_FRONTEND + '/sign-in-2fa');
+			return user2;
+		}
+		catch (e) {
+			console.error(e);
+			res.redirect(process.env.REACT_APP_URL_FRONTEND + '/email-is-taken');
+		}
   }
 }

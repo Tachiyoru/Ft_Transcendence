@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   UseGuards,
 } from "@nestjs/common";
 import { Stats, User } from "@prisma/client";

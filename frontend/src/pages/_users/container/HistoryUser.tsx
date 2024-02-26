@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { WebSocketContext } from "../../../socket/socket";
+import { useEffect, useState } from "react";
 
 interface Histo {
   score: string;

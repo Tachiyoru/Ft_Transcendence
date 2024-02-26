@@ -1,6 +1,5 @@
 import { Canvas, extend, useThree } from "@react-three/fiber";
-import MainLayout from "../components/nav/MainLayout";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PerspectiveCamera } from '@react-three/drei';
 import { HemisphereLight, ColorRepresentation } from "three";
 extend({ HemisphereLight });
@@ -14,7 +13,6 @@ import BallObj from "./Ball.tsx";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Winner from "../components/popin/Victory.tsx";
 import Defeat from "../components/popin/Defeat.tsx";
-import OhOh from "../components/popin/OhOh.tsx";
 
 interface CustomHemisphereLightProps {
 	skyColor?: ColorRepresentation;

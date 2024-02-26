@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AiOutlineMail,
@@ -11,17 +11,12 @@ import SocialIcons from "../fields/SocialIcons";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../services/UserSlice";
 import axios from "../../../axios/api";
-import { WebSocketContext } from "../../../socket/socket";
-
-// const socket = useContext(WebSocketContext);
 
 interface IdataLogin {
   username: string;
   email: string;
   password: string;
 }
-
-const FORTYTWOUrl = import.meta.env.FORTYTWO_CALLBACK_URL as string
 
 const SigninForm = () => {
   const dispatch = useDispatch();

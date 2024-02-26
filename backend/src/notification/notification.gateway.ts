@@ -3,7 +3,6 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, SubscribeMessag
 import { Server, Socket } from 'socket.io';
 import { SocketTokenGuard } from 'src/auth/guard/socket-token.guard';
 import { NotificationService } from './notification.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @WebSocketGateway({
 	cors: { origin: process.env.REACT_APP_URL_FRONTEND, credentials: true },

@@ -12,7 +12,6 @@ import
 } from "@nestjs/common";
 import { TokenGuard } from "src/auth/guard";
 import { NotificationService } from "./notification.service";
-import { GetUser } from "src/auth/decorator";
 import { Notification, User } from "@prisma/client";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
 

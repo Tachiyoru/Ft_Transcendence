@@ -1,7 +1,6 @@
 import { useLocation } from "react-router-dom";
 import MainLayout from "../../components/nav/MainLayout"
 import { useContext, useEffect } from "react";
-import { Websocket } from "../../components/Websocket";
 import { WebSocketContext } from "../../socket/socket";
 
 

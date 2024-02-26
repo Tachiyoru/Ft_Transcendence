@@ -1,7 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../../axios/api";
-import axiosInstance from "../../../axios/api";
-import { WebSocketContext } from "../../../socket/socket";
 
 interface Histo {
   score: string;

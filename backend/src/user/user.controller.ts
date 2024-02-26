@@ -8,7 +8,6 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
-  BadRequestException,
 } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { GetUser } from "../auth/decorator";

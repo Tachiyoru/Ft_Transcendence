@@ -2,8 +2,6 @@ import { User } from "@prisma/client";
 import { PrismaService } from '../prisma/prisma.service';
 import { Paddle, Camera, Ball, Player, Velocity, PaddleHit, BallHit } from "./interfaces";
 import { Server } from 'socket.io';
-import { WebSocketServer } from '@nestjs/websockets';
-import { delay } from "rxjs";
 
 export class Game  {
     gameId: number;

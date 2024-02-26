@@ -5,7 +5,6 @@ import OhOh from "../../../components/popin/OhOh";
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
-import Dashboard from "../../_root/Dashboard";
 
 interface Game {
 	gameId: number;

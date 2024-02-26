@@ -1,5 +1,4 @@
 import { User } from "@prisma/client";
-import { Socket } from "dgram";
 
 export interface Gamer
 {

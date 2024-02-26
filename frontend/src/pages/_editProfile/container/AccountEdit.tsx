@@ -6,6 +6,8 @@ import axios from "../../../axios/api";
 import FileUpload from "../../../components/photo/FileUpload";
 import { useNavigate } from "react-router-dom";
 import { WebSocketContext } from "../../../socket/socket";
+import { useDispatch } from "react-redux";
+import { setLogout } from "../../../services/UserSlice";
 
 interface IdataRegister {
   username: string;
@@ -25,6 +27,7 @@ const AccountEdit = () => {
   const [error, setError] = useState<string>();
   const [userData, setUserData] = useState<Users>();
   const navigate = useNavigate();
+	const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -69,6 +72,7 @@ const AccountEdit = () => {
 
   const handleDeleteAccount = async () => {
     try {
+			dispatch(setLogout());
       await axios.delete("/users/delete-user");
       socket.emit("all-update");
       navigate("/sign-in");

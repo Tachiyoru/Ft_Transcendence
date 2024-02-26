@@ -5,7 +5,7 @@ import storage from 'redux-persist/lib/storage';
 import userReducer from '../services/UserSlice';
 import friendReducer from '../services/friendSlice';
 import invitedFriendReducer from '../services/gameInvitSlice';
-import selectedChannelReducer from '../services/selectedChannelSlice'; // Assurez-vous que le chemin est correct
+import selectedChannelReducer from '../services/selectedChannelSlice';
 import thunk from 'redux-thunk';
 
 export type RootState = ReturnType<typeof rootReducer>;

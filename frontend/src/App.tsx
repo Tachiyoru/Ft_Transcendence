@@ -1,10 +1,9 @@
-import { Routes as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes as Router, Route, Navigate } from 'react-router-dom';
 
 import AuthLayout from './pages/_auth/AuthLayout';
 import SigninForm from './pages/_auth/forms/SigninForm';
 import SignupForm from './pages/_auth/forms/SignupForm';
 import Dashboard from './pages/_root/Dashboard';
-import ForgetPassword from './pages/_auth/forms/ForgetPassword';
 import InGame from './pages/_inGame/InGame';
 import Game from './pages/_game/Game';
 import Chat from './pages/_chat/Chat';
@@ -27,7 +26,6 @@ import PageNotFound from './pages/_404/PageNotFound';
 const App:React.FC = () => {  
 
 const {user} = useSelector((state: RootState) => state.user)
-
 return (
 	<WebSocketContext.Provider value={socket}>
 		<Websocket />

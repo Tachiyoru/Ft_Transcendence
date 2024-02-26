@@ -1,4 +1,4 @@
-import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, WebSocketServer, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { Server } from 'socket.io';
@@ -6,9 +6,7 @@ import { GameService } from './game.service';
 import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { disconnect, emit } from 'process';
 import { delay } from 'rxjs';
-import { IsNumber, isNumber } from 'class-validator';
 import { Game } from './game.class';
 
 @WebSocketGateway({

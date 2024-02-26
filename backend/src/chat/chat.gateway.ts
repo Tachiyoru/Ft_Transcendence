@@ -22,7 +22,6 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
 import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
-import { Console } from "console";
 
 @WebSocketGateway({
   cors: { origin: "http://paul-f4ar1s1:5173", credentials: true },
