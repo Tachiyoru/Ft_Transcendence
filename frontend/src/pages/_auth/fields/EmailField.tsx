@@ -35,7 +35,7 @@ const EmailField = ({ register, errors, showUsernameErrors}: EmailFieldProps) =>
 
 	</div>
 	{
-	showUsernameErrors && errors.email?.message && 
+	showUsernameErrors || errors.email?.message && 
 	(<p className='text-red-500 text-xs mt-1'>{errors.email?.message}</p>)
 	}
 	</div>
