@@ -22,6 +22,7 @@ import { SocketTokenGuard } from "src/auth/guard/socket-token.guard";
 import { CreateNotificationDto } from "src/notification/dto/create-notification.dto";
 import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
+import { Console } from "console";
 
 @WebSocketGateway({
   cors: { origin: "http://paul-f4ar2s4:5173", credentials: true },
@@ -93,7 +94,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     try {
       if (!id) throw new Error("id not found");
-
       const updatedChannel = await this.chatService.editChannel(
         id,
         updatedSettings,
@@ -101,6 +101,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       client.emit("edit-channel", updatedChannel);
       this.allUpdate();
+	  console.log(" ALL UPDATE CALL ");
     } catch (error) {
       console.error("Error editing channel:", error.message);
       client.emit("channelError", {
@@ -403,6 +404,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.handshake.auth.id
       );
       client.emit("channel-public-protected-list", chanlist);
+    //   await this.server.to(result.name).emit("update-call");
     } catch (error) {
       client.emit("channelJoinedError", { message: error.message });
     }
@@ -421,7 +423,10 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.emit("channel", result.chan, result.chan.messages);
       }
       this.server.emit("channel", null, null);
-      await this.server.to(result.room).emit("update-call");
+	  const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
+        client.handshake.auth.id
+      );
+	  client.emit("channel-public-protected-list", chanlist);
     } catch (error) {
       client.emit("chanLeftError", { message: error.message });
     }

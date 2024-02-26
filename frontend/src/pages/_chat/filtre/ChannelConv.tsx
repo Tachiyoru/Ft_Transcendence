@@ -62,7 +62,6 @@ const ChannelConv = () => {
 		socket.on("my-channel-list", (channelList) => {
 		setAllChannel(channelList);
 		});
-
 		return () => {
 		socket.off("my-channel-list");
 		};
@@ -73,8 +72,6 @@ const ChannelConv = () => {
 		socket.on("last-channel-mesage", (channelList) => {
 		setAllChannel(channelList);
     });
-
-	
 	return () => {
 		socket.off("my-channel-list");
 	};
@@ -83,7 +80,6 @@ const ChannelConv = () => {
 
 
 	useEffect(() => {
-
 		socket.emit("find-channels-public-protected");
 		socket.on("channel-public-protected-list", (channelList) => {
 		setPublicChannel(channelList);
