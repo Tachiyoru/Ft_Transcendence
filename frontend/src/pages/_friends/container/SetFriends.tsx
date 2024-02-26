@@ -309,7 +309,7 @@ const hasNewInvitations = async () => {
             >
               {isMobile ? <FaUserClock className="w-4 h-4"/> : 'Invitations'}
               {hasNewInvitationsCount > 0 && (
-                <div className="absolute top-2.5 left-20  w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
+                <div className="absolute left-1 top-0.5 md:top-2.5 md:left-20 w-3 h-3 bg-red-orange rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-semibold">
                     {hasNewInvitationsCount}
                   </span>
