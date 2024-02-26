@@ -266,10 +266,8 @@ export class UserService
     const fs = require("fs").promises;
     try {
       await access(file, fs.constants.F_OK);
-      console.log("file exist");
       return true;
     } catch (e) {
-      console.log("file not exist");
       return false;
     }
   }

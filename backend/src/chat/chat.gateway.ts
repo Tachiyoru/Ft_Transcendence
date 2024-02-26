@@ -24,7 +24,7 @@ import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
 
 @WebSocketGateway({
-  cors: { origin: "http://paul-f4ar2s4:5173", credentials: true },
+  cors: { origin: "http://paul-f4ar1s1:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
 export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {

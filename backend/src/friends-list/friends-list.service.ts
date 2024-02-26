@@ -56,7 +56,6 @@ export class FriendsListService {
   }
 
   async acceptRequest(user: User, friendId: number) {
-    console.log("user : ", user);
     await this.prismaService.user.update({
       where: { id: user.id },
       data: { pendingList: { disconnect: { id: friendId } } },
@@ -75,7 +74,6 @@ export class FriendsListService {
     });
 
     const notificationDto = new CreateNotificationDto();
-    console.log("username = ", user.username, user.id);
     if (user.username) notificationDto.fromUser = user.username;
 
     await this.notificationService.addNotificationByUserId(
@@ -117,12 +115,10 @@ export class FriendsListService {
       include: { pendingList: true },
       data: { pendingList: { connect: { id: user.id } } },
     });
-    if (uuser) console.log("friendrequest = ", uuser.pendingList);
     const test = await this.prismaService.user.findUnique({
       where: { id: user.id },
       include: { pendingFrom: true },
     });
-    if (test) console.log("pendingFrom = ", test.pendingFrom);
 
     const notificationDto = new CreateNotificationDto();
     if (user.username) notificationDto.fromUser = user.username;

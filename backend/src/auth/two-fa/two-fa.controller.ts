@@ -24,7 +24,6 @@ export class TwoFaController
 	@Get("generate-qrcode")
 	async generate(@GetUser() user: User)
 	{
-		console.log("generate");
 		if (user)
 		{
 			const otpAuthUrl = await this.twoFAService.generate2FASecret(user);
@@ -39,7 +38,6 @@ export class TwoFaController
 	@Post("authenticate")
 	async authenticateWith2FA(@GetUser() user: User, @Body() body: { token: string; })
 	{
-		console.log("generat2");
 		if (user)
 		{
 			const isValid = await this.twoFAService.verify2FACode(user, body.token);
@@ -53,7 +51,6 @@ export class TwoFaController
 	@Post("set-status")
 	async setTwoFaStatus(@GetUser() user: User): Promise<User>
 	{
-		console.log("set-status");
 		return (this.twoFAService.setTwoFaStatus(user.isTwoFaEnabled, user.id));
 	}
 }

@@ -27,7 +27,6 @@ export class TwoFAService
 			issuerName,
 			secret
 			);
-		console.log("generate2FASecret", user.id, secret, otpAuthUrl, issuerName, user.email);
 
 		await this.set2FaSecret(secret, user.id);
 		return otpAuthUrl;
@@ -81,7 +80,6 @@ export class TwoFAService
 
 	async setTwoFaStatus(status: boolean | null, userId: number)
 	{
-		console.log(status);
 		if (status === true)
 		{
 			const updatedUser = await this.prismaService.user.update({

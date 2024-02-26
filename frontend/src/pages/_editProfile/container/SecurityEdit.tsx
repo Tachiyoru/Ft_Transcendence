@@ -60,7 +60,6 @@ const SecurityEdit = () => {
     const handleQrCode = async (isChecked: boolean) => {
       try {
         await axios.post('/two-fa/set-status');
-        console.log("otpAuthUrl : ", userData?.otpAuthUrl);
         if (!userData?.otpAuthUrl)
           await axios.get('/two-fa/generate-qrcode');
         const userDataResponse = await axios.get('/users/me');

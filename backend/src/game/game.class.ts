@@ -169,7 +169,6 @@ export class Game  {
                         this.camera[0].x = this.paddle[0].x += 1 * this.multiplier;
                 break;
             }
-            console.log("PADDLE 1 X : ", this.paddle[0].x);
         }
         if (player === this.player2.playerSocket)   {
             switch (input)  {

@@ -21,7 +21,7 @@ import { ConfigService } from "@nestjs/config";
 export class AuthController {
   constructor(
     private config: ConfigService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
     ) {}
 
   @Post("signup")
@@ -74,16 +74,17 @@ export class AuthController {
     );
     await this.authService.callForgeTokens(user2, res);
     if (!user2.isTwoFaEnabled)
-      res.redirect('http://paul-f4ar1s4:5173/');
+      res.redirect('http://paul-f4ar1s1:5173/');
     else
-      res.redirect('http://paul-f4ar1s4:5173/sign-in-2fa');
+      res.redirect('http://paul-f4ar1s1:5173/sign-in-2fa');
     return user2;
   }
 
   @Get("/github/callback")
   @UseGuards(AuthGuard("github"))
   async GithubCallback(@Req() req: Request, @Res() res: Response) {
-    if (req.user === undefined) throw new UnauthorizedException();
+    if (req.user === undefined)
+			throw new UnauthorizedException();
     const user: User = req.user as User;
     let raw = req.user as any;
     user.username = user.username + "_git";
@@ -92,7 +93,10 @@ export class AuthController {
       raw._json.avatar_url
     );
     await this.authService.callForgeTokens(user2, res);
-    res.redirect(`${process.env.REACT_APP_URL_FRONTEND}`);
+    if (!user2.isTwoFaEnabled)
+      res.redirect('http://paul-f4ar1s1:5173/');
+    else
+      res.redirect('http://paul-f4ar1s1:5173/sign-in-2fa');
     return user2;
   }
 }

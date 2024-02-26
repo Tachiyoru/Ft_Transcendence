@@ -81,7 +81,6 @@ export default function Experience() {
 		try {
 			socket.emit("findGame", {gameSocket: gameSocket})
 			socket.on("findGame", (game) => {
-				console.log(game)
 				setGame(game);
 			});
 			socket.on("gamescore", (score) => {

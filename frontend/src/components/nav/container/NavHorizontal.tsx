@@ -138,7 +138,6 @@ const NavHorizontal = () => {
 
   socket.on("actu-notif", () => {
     socket.emit("unread-notification");
-    console.log("actu-notif received");
     socket.off("actu-notif");
   });
 

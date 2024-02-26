@@ -197,7 +197,6 @@ export class chatService {
 	if (channel) {
 	  const friend = channel.members.find((member) => member.id !== userId);
 	  if (friend) friendId = friend.id;
-	  console.log("friend id = ",friendId);
 	}
 	if (friendId === -1) return [];
     const userChannels = await this.prisma.channel.findMany({
@@ -212,7 +211,6 @@ export class chatService {
 		  },
       },
     });
-	console.log("userChannels = ",userChannels);
     return userChannels;
   }
 
