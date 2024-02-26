@@ -102,7 +102,6 @@ export class GameService
 			hostId: gamer.user.id,
 			participants: [gamer],
 			};
-			console.log ({ matchFound: false, waitingSession: this.waitingRoomGame});
 			return null;
 		}
     }
@@ -255,7 +254,6 @@ export class GameService
 				},
 			},
 		);
-		console.log("game found by searching hostId and invitedId :", gameInvite);
 		if (gameInvite)
 		{
 			const updatedGameInvite = await this.prisma.gameInvite.update(
@@ -275,7 +273,6 @@ export class GameService
 	async getAllGameInvite()
 	{
 		const gameinvites = await this.prisma.gameInvite.findMany();
-		console.log("all gameInvites : ", gameinvites);
 		return (gameinvites);
 	}
 

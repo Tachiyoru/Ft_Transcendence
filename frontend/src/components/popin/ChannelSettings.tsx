@@ -28,26 +28,15 @@ interface ChannelProps {
 }
 
 const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
-  const [popinOpen, setPopinOpen] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const opMembers = channel.members.filter((member) =>
-    channel.op.includes(member.username)
-  );
-  const [channelType, setChannelType] = useState<
-    "GROUPCHAT" | "PRIVATE" | "PROTECTED"
-  >(
-    channel.modes === "GROUPCHAT"
-      ? "GROUPCHAT"
-      : channel.modes === "PRIVATE"
-      ? "PRIVATE"
-      : "PROTECTED"
-  );
-  const [password, setPassword] = useState("");
-  const [channelName, setChannelName] = useState("");
-  const socket = useContext(WebSocketContext);
-  const [userData, setUserData] = useState<{ username: string }>({
-    username: "",
-  });
+	const [popinOpen, setPopinOpen] = useState(false);
+	const cardRef = useRef<HTMLDivElement>(null);
+    const opMembers = channel.members.filter((member) => channel.op.includes(member.username));
+	const [channelType, setChannelType] = useState<"GROUPCHAT" | "PRIVATE" | "PROTECTED">(channel.modes === "GROUPCHAT" ? "GROUPCHAT" : channel.modes === "PRIVATE" ? "PRIVATE" : "PROTECTED");
+	const [password, setPassword] = useState("");
+	const [channelName, setChannelName] = useState("");
+	const socket = useContext(WebSocketContext);
+	const [userData, setUserData] = useState<{username: string}>({ username: '' });
+	const [error, setError] = useState<string>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,14 +74,15 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
   const editChannel = () => {
     const chanelId = channel.chanId;
 
-    socket.emit("editChannel", {
-      id: chanelId,
-      updatedSettings: {
-        mode: channelType,
-        password: channelType === "PROTECTED" ? password : undefined,
-      },
-    });
-  };
+		socket.emit('editChannel', {
+			id: chanelId,
+			updatedSettings: {
+			mode: channelType,
+			password: channelType === 'PROTECTED' ? password : undefined,
+			},
+		});
+		setPopinOpen(false);
+	};
 
   const handleSubmit = () => {
       socket.emit("renameChan", {
@@ -107,33 +97,20 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 	  }
   };
 
-  return (
-    <div className="flex items-center justify-center">
-      <button
-        className="pr-4 flex flex-row text-lilac items-center"
-        onClick={togglePopin}
-      >
-        <MdSettings className="w-4 h-5 mr-2" />
-        Settings
-      </button>
-      {popinOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            ref={cardRef}
-            className="bg-dark-violet text-lilac rounded-lg p-8 w-2/3 h-auto relative"
-          >
-            <span
-              className="absolute text-lilac top-6 right-6 cursor-pointer"
-              onClick={togglePopin}
-            >
-              X
-            </span>
-            <h2 className="text-xl text-lilac font-semibold">
-              Channel parameters
-            </h2>
-            <p className="pt-2">
-              Manage channel members and their account permissions here.
-            </p>
+	return (
+	<div className="flex items-center justify-center">
+		<button className="pr-4 flex flex-row text-lilac items-center" onClick={togglePopin}>
+			<MdSettings className="w-4 h-5 mr-2" />
+			Settings
+		</button>
+		{popinOpen && (
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+				<div ref={cardRef} className="bg-dark-violet text-lilac rounded-lg p-8 w-2/3 h-auto relative">
+					<span className="absolute text-lilac top-6 right-6 cursor-pointer" onClick={togglePopin}>
+					&#10005;
+					</span>
+					<h2 className='text-xl text-lilac font-semibold'>Channel parameters</h2>
+					<p className='pt-2'>Manage channel members and their account permissions here.</p>
 
             <div className="mt-6 flex flex-row">
               <div className="w-40 border-y border-l rounded-l-md p-4">
@@ -207,29 +184,31 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
                   </div>
                 </div>
 
-                <div className="flex flex-row items-center mt-2">
-                  <p className="text-sm pr-2">Channel Name:</p>
-                  <input
-                    type="text"
-                    placeholder={channel.name}
-                    onChange={(e) => setChannelName(e.target.value)}
-                    className="rounded-md w-24 px-2 bg-lilac text-dark-violet placeholder:text-accent-violet text-sm placeholder:text-opacity-40 "
-                  />
-                  <button
-                    disabled={channelName.length === 0}
-                    className="ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md"
-                    onClick={handleSubmit}
-                  >
-                    Change Name
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+				<div className='flex flex-row items-center mt-2'>
+						<p className='text-sm pr-2'>Channel Name:</p>
+						<input
+						type="text"
+						placeholder={channel.name}
+						onChange={(e) => setChannelName(e.target.value)}
+						className="rounded-md w-24 px-2 bg-lilac text-dark-violet placeholder:text-accent-violet text-sm placeholder:text-opacity-40 "
+						/>
+						{error && <p className='text-xs text-red-orange'>{error}</p>}
+					<button
+						disabled={channelName.length === 0}
+						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
+						onClick={handleSubmit}
+					>
+							Change Name
+					</button>
+				</div>
+				</>
+				)}
+				</div>
+
+			</div>
+		)}
+		</div>
+	);
 };
 
 export default ChannelSettings;

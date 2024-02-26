@@ -89,7 +89,6 @@ export class GameGateway
 		const game = await this.gameService.checkInvitedGame(hostId, client, req);
 		if (game && game.invitedSocket && game.status === 1)
 		{
-			console.log("Game found");
 			const invitedUser = await this.prisma.user.findUnique({
 				where: { id: game.invitedId }
 			});
@@ -107,7 +106,6 @@ export class GameGateway
 		}
 		else
 		{
-			console.log("Game not found");
 			return (null);
 		}
 	}
@@ -115,7 +113,6 @@ export class GameGateway
 	@SubscribeMessage("removeGameInvite")
 	async removeGameInvite(@MessageBody() gameInviteId: number)
 	{
-		console.log("deleting gameInvite : ", gameInviteId);
 		await this.gameService.removeGameInvite(gameInviteId);
 		const gameDeleted = await this.prisma.gameInvite.findFirst({
 			where: { gameInviteId: gameInviteId }
@@ -268,7 +265,6 @@ export class GameGateway
 		const game = await this.gameService.LaunchBall(req);
 		if (game)
 		{
-            console.log(game.ball.z);
             let velocity = [0.01, 0];
             delay(50)
             var i = setInterval(async () => {
@@ -292,7 +288,6 @@ export class GameGateway
             }
 			const collideRet = await this.gameService.collide(game);
 			
-			console.log(collideRet);
 			switch (collideRet) {
 			case  0:
 				break;
@@ -492,7 +487,6 @@ export class GameGateway
 					data: { status: "OFFLINE"},
 				})
 			}
-			console.log('ok')
 			this.server.to(result.player1.playerSocket).emit("reconnect2", client.id);
 			this.server.to(result.player2.playerSocket).emit("reconnect2", client.id);
 			this.server.to(client.id).emit("reconnect", client.id);

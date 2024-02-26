@@ -18,7 +18,7 @@ const SecurityEdit = () => {
   const [passwordIsVisible, setPasswordIsVisible] = useState(false);
   const [tokenGoogle, setTokenGoogle] = useState<string>("");
   const [userData, setUserData] = useState<
-    | { otpAuthUrl: string; isTwoFaEnabled: boolean; username: string }
+    | { otpAuthUrl: string; isTwoFaEnabled: boolean; username: string; email: string }
     | undefined
   >();
   const [isQrCode, setIsQrCode] = useState<boolean>(false);
@@ -67,20 +67,20 @@ const SecurityEdit = () => {
     }
   };
 
-  const handleQrCode = async (isChecked: boolean) => {
-    try {
-      await axios.post("/two-fa/set-status");
-      console.log("otpAuthUrl : ", userData?.otpAuthUrl);
-      if (!userData?.otpAuthUrl) await axios.get("/two-fa/generate-qrcode");
-      const userDataResponse = await axios.get("/users/me");
-      setUserData(userDataResponse.data);
-      setIsQrCode(isChecked);
-      setIsTwoFaEnabled(false);
-    } catch (error) {
-      console.error("Error two-fa verification", error);
-    }
-  };
-
+    const handleQrCode = async (isChecked: boolean) => {
+      try {
+        await axios.post('/two-fa/set-status');
+        if (!userData?.otpAuthUrl)
+          await axios.get('/two-fa/generate-qrcode');
+        const userDataResponse = await axios.get('/users/me');
+        setUserData(userDataResponse.data);
+        setIsQrCode(isChecked);
+        setIsTwoFaEnabled(false)
+      } catch (error) {
+        console.error("Error two-fa verification", error);
+      }
+    };
+	
   const handleSubmitTwoFa = async () => {
     try {
       await axios.post("/two-fa/authenticate", { token: tokenGoogle });
@@ -224,6 +224,7 @@ const SecurityEdit = () => {
         </form>
       )}
       {/*2FA*/}
+      {userData && userData.email ? (
       <div>
         <div className="flex flex-row items-center mb-6">
           <h3 className="text-sm text-lilac mr-4">2-Step Verification</h3>
@@ -256,7 +257,7 @@ const SecurityEdit = () => {
           </label>
         </div>
         {isQrCode && !isTwoFaEnabled && (
-          <div className="flex flex-row gap-x-4">
+          <div className="flex flex-col md:flex-row gap-x-4">
             <img src={userData?.otpAuthUrl} className="w-32 h-32" />
             <div className="flex flex-col gap-y-4">
               <input
@@ -266,7 +267,7 @@ const SecurityEdit = () => {
                 onChange={(e) => {
                   setTokenGoogle(e.target.value);
                 }}
-                className="border-b border-lilac bg-transparent text-lilac placeholder:text-lilac focus:outline-none text-sm p-2"
+                className="border-b border-lilac bg-transparent text-lilac w-32 placeholder:text-lilac focus:outline-none text-sm p-2"
               />
               <button
                 disabled={tokenGoogle.length === 0}
@@ -284,6 +285,7 @@ const SecurityEdit = () => {
           </div>
         )}
       </div>
+      ) : (<div className="text-xs text-lilac">⚠️ Add an email to activate the 2fa</div>)}
     </div>
   );
 };

@@ -138,7 +138,6 @@ const NavHorizontal = () => {
 
   socket.on("actu-notif", () => {
     socket.emit("unread-notification");
-    console.log("actu-notif received");
     socket.off("actu-notif");
   });
 
@@ -369,7 +368,7 @@ const NavHorizontal = () => {
                 }}
                 className="bg-dark-violet text-lilac px-2 rounded py-0.5 focus:outline-none"
               />
-              {showUserList && (
+              {showUserList && searchValue.length > 0 && (
                 <ul className="absolute h-24 w-full bg-lilac z-10 rounded-b">
                   {filteredUsers.map((user, index) => (
                     <Link to={`/user/${user.username}`}>

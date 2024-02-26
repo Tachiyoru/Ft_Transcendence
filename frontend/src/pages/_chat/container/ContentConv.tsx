@@ -194,7 +194,9 @@ const ContentConv = () => {
 
   return (
     <div className="flex-1 flex flex-col justify-between bg-violet-black-nav bg-opacity-80 text-xs relative p-8">
-      {!channel ? (
+      {!channel || (channel && channel.modes === 'PRIVATE' && channel.members.every(
+          (member) => member.username !== userData.username
+        )) ? (
         <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
           No conversation selected
           <br />

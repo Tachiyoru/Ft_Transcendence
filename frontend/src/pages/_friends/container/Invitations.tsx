@@ -46,7 +46,6 @@ const Invitations = ({ onAcceptFriendRequest } : any) => {
       await axios.delete(`/friends-list/friend-request/reject/${userId}/`);
       const updatedList = listUsers.filter((user) => user.id !== userId);
       setListUsers(updatedList);
-	  console.log("list pending ",updatedList);
       onAcceptFriendRequest();
     } catch (error) {
       console.error("Error rejecting friend request:", error);
