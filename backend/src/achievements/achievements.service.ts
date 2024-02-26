@@ -43,7 +43,7 @@ export class AchievementsService
 		});
 		await this.createInitialAchievements({
 			idType: 6,
-			description: "Changed your avatar/username",
+			description: "Changed your avatar",
 			icon: "src/achievements-6.png",
 		});
 		await this.createInitialAchievements({

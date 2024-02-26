@@ -165,7 +165,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             </div>
           </div>
 
-          {usersNotInChannel.length === 0 ? (
+          {usersNotInChannel && usersNotInChannel.length === 0 ? (
             <div className="text-center mt-4">
               <p className="text-sm font-regular">No members found</p>
               <Link to="/friends">
@@ -176,7 +176,7 @@ const AddUserConv: React.FC<ChannelProps> = ({ channel }) => {
             </div>
           ) : (
             <div className="h-38 overflow-auto pr-3">
-              {usersNotInChannel.map((user, index) => (
+              {usersNotInChannel && usersNotInChannel.map((user, index) => (
                 <div
                   key={index}
                   className="flex flex-row justify-between items-center mt-2"

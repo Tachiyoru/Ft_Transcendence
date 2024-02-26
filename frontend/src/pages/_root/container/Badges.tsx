@@ -25,7 +25,7 @@ const Badges: React.FC<BadgesSectionProps> = ({ userAchievements }) =>
 		"Top 3 worldwide",
 		"Take revenge",
 		"First game",
-		"Changed your avatar/username",
+		"Changed your avatar",
 		"Did 42 games",
 		"Serial looser : lose 10 times in a row",
 	];

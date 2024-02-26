@@ -399,6 +399,10 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       client.emit("channelJoined", result);
       this.server.emit("channel", result, result.messages);
+      const chanlist = await this.chatService.getGroupChatChannelsUserIsNotIn(
+        client.handshake.auth.id
+      );
+      client.emit("channel-public-protected-list", chanlist);
     } catch (error) {
       client.emit("channelJoinedError", { message: error.message });
     }
