@@ -84,19 +84,26 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 		setPopinOpen(false);
 	};
 
-  const handleSubmit = () => {
-      socket.emit("renameChan", {
-        chanId: channel.chanId,
-        newName: channelName,
-      });
-	  socket.emit("all-update");
-      socket.on("renameChanError", (errorData) => {
-        console.log("laaaaaaaaaaaaaaaaaaaaaaaaaaaa CLEMENTINE");
-      });
-	  return() => {
-		  socket.off("renameChanError");
-	  }
-  };
+	const handleSubmit = () => {
+		socket.emit("renameChan", {
+		chanId: channel.chanId,
+		newName: channelName,
+		});
+
+		socket.on("renameChan", () => {
+			setError('');
+			togglePopin();
+		});
+
+		socket.on("renameChanError", (errorData) => {
+			setError('Channel name is already taken')
+		});
+		socket.emit("all-update");
+
+		return() => {
+			socket.off("renameChanError");
+		}
+	};
 
 	return (
 	<div className="flex items-center justify-center">
@@ -193,15 +200,15 @@ const ChannelSettings: React.FC<ChannelProps> = ({ channel }) => {
 						onChange={(e) => setChannelName(e.target.value)}
 						className="rounded-md w-24 px-2 bg-lilac text-dark-violet placeholder:text-accent-violet text-sm placeholder:text-opacity-40 "
 						/>
-						{error && <p className='text-xs text-red-orange'>{error}</p>}
 					<button
 						disabled={channelName.length === 0}
 						className='ml-2 w-[90px] bg-purple text-lilac px-3 py-1 rounded-md'
 						onClick={handleSubmit}
-					>
-							Change Name
+						>
+						Change Name
 					</button>
 				</div>
+				{error && <p className='text-xs text-red-orange'>{error}</p>}
 				</>
 				)}
 				</div>

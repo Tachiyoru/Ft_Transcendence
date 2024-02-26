@@ -317,7 +317,8 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         data.newName,
         req
       );
-      this.server.to(result.name).emit("update-call");
+      this.allUpdate();
+      client.emit("renameChan");
     } catch (error) {
       client.emit("renameChanError", { message: error.message });
     }
