@@ -123,9 +123,9 @@ const Game = () => {
     socket.on("CreatedGame", (game) => {
       try {
         navigate(`/gamestart/${game.gameSocket}`);
-		setShowSecondDiv(false);
-		dispatch(setInvitedFriend(null));
-		setSelectedIndexes([]);
+        setShowSecondDiv(false);
+        dispatch(setInvitedFriend(null));
+        setSelectedIndexes([]);
       } catch (error) {
         console.error("Error", error);
       }
@@ -301,7 +301,9 @@ const Game = () => {
                 </div>
               ) : (
                 <div className="relative text-lilac">
-                  {!showSecondDiv && selectedIndexes[0] !== -1 && invitedFriend ? (
+                  {!showSecondDiv &&
+                  selectedIndexes[0] !== -1 &&
+                  invitedFriend ? (
                     <>
                       <div className="pb-6">
                         <div

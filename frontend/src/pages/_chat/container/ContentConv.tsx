@@ -10,6 +10,7 @@ import ChannelOptions from "../../../components/popin/ChannelOptions";
 import { WebSocketContext } from "../../../socket/socket";
 import axios from "../../../axios/api";
 import { useNavigate } from "react-router-dom";
+import { set } from "react-hook-form";
 
 interface Channel {
   name: string;
@@ -60,6 +61,7 @@ const ContentConv = () => {
   const [passwordInput, setPasswordInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [blockedUsers, setBlockedUsers] = useState<Users[]>([]);
+  const [actuReceived, setActuReceived] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,6 +129,11 @@ const ContentConv = () => {
     });
   };
 
+  socket.on("update-call", () => {
+    socket.off("update-call");
+	setActuReceived(true);
+  });
+
   useEffect(() => {
     if (selectedChannelId !== null) {
       socket.emit("channel", {
@@ -159,7 +166,7 @@ const ContentConv = () => {
       });
 
       socket.emit("check-user-in-channel", { chanId: selectedChannelId });
-
+      setActuReceived(false);
       return () => {
         socket.off("check-user-in-channel");
         socket.off("findAllMutedMembers");
@@ -168,7 +175,7 @@ const ContentConv = () => {
         socket.off("typing");
       };
     }
-  }, [socket, selectedChannelId]);
+  }, [socket, selectedChannelId, actuReceived]);
 
   useEffect(() => {
     if (
@@ -194,7 +201,9 @@ const ContentConv = () => {
 
   return (
     <div className="flex-1 flex flex-col justify-between bg-violet-black-nav bg-opacity-80 text-xs relative p-8">
-      {!channel ? (
+      {!channel || (channel && channel.modes === 'PRIVATE' && channel.members.every(
+          (member) => member.username !== userData.username
+        )) ? (
         <div className="flex-1 flex flex-col justify-between text-xs text-lilac relative">
           No conversation selected
           <br />

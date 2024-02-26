@@ -24,7 +24,7 @@ import { NotificationType } from "src/notification/content-notification";
 import { NotificationService } from "src/notification/notification.service";
 
 @WebSocketGateway({
-  cors: { origin: "http://paul-f4ar1s1:5173", credentials: true },
+  cors: { origin: "http://paul-f4ar1s4:5173", credentials: true },
 })
 @UseGuards(SocketTokenGuard)
 export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -102,11 +102,8 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.allUpdate();
 	  console.log(" ALL UPDATE CALL ");
     } catch (error) {
-      console.error("Error editing channel:", error.message);
-      client.emit("channelError", {
-        message: "Error editing channel",
-        error: error.message,
-      });
+      console.error("Error editing channel:");
+      client.emit("channelEditError");
     }
   }
 
@@ -309,7 +306,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("renameChan")
   async renameChan(
-    client: Socket,
+    @ConnectedSocket() client: Socket,
     @MessageBody() data: { chanId: number; newName: string },
     @Request() req: any
   ) {
@@ -320,6 +317,7 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         req
       );
       this.allUpdate();
+      client.emit("renameChan");
     } catch (error) {
       client.emit("renameChanError", { message: error.message });
     }

@@ -71,7 +71,7 @@ export class AuthController {
     try {
 			const user2 = await this.authService.authExtUserCreate(
 				user,
-				raw._json.avatar_url
+				raw._json.image.versions.small
 			);
 			await this.authService.callForgeTokens(user2, res);
 			if (!user2.isTwoFaEnabled)

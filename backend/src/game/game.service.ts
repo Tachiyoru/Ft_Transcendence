@@ -36,6 +36,11 @@ export class GameService
 		};
 	}
 
+	async getGame()
+	{
+		return (this.games);
+	}
+
 	async createGame(gameID: number, player1User: number, player1Socket: string, player2User: User, player2Socket: string)
 	{
 		const host = await this.prisma.user.findUnique(

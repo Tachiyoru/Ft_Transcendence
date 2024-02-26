@@ -160,7 +160,7 @@ const AccountEdit = () => {
 
       {/*DELETE ACCOUNT*/}
       <p
-        className="text-xs text-red-orange underline absolute bottom-10"
+        className="text-xs text-red-orange underline"
         style={{ cursor: "pointer" }}
         onClick={handleDeleteAccount}
       >

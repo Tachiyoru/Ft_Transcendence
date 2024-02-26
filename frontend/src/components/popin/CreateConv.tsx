@@ -152,6 +152,9 @@ const CreateConv: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute top-0 inset-0 bg-black bg-opacity-50"></div>
         <div ref={cardRef} className="absolute top-28 left-40 mt-8 z-50 w-[200px] p-4 pl-5 text-lilac rounded-md bg-accent-violet ">
+          <span className="absolute text-lilac top-3 right-4 cursor-pointer" onClick={togglePopin}>
+					&#10005;
+					</span>
           <p className="text-base mb-1">Select Friends</p>
           <p className="text-xs">You can add 5 more friends</p>
 
