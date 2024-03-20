@@ -22,7 +22,6 @@ export class SocketTokenGuard implements CanActivate
 	async canActivate(context: ExecutionContext): Promise<boolean>
 	{
 		const request = context.switchToHttp().getRequest();
-		if (request.user) return true;
 		if (context.getType() !== "ws")
 		{
 			return true;

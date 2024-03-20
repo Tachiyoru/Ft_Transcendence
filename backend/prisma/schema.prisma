@@ -39,11 +39,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email    String? @unique
-  username String? @unique
-  avatar   String?
-  title    String? @default("Newcomer")
-  hash     String?
+  email    		String? @unique
+  originMail	String? @unique
+  username 		String? @unique
+  avatar   		String?
+  title   		String? @default("Newcomer")
+  hash     		String?
 
   twoFASecret    String?  @unique
   otpAuthUrl     String?  @unique

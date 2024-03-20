@@ -26,6 +26,7 @@ export class AuthService
 			const user = await this.prisma.user.create({
 				data: {
 					email: dto.email,
+					originMail: dto.email,
 					username: dto.username,
 					hash,
 					stats: {
@@ -74,7 +75,7 @@ export class AuthService
 			const name: string = userInfo.username;
 			const email: string = userInfo._json.email ?? name + "@platform.fr";
 			const user = await this.prisma.user.findFirst({
-				where: { username: name },
+				where: { originMail: email},
 				include: { friends: true, stats: true, achievements: true },
 			});
 			if (!user)
@@ -82,6 +83,7 @@ export class AuthService
 				const user2 = await this.prisma.user.create({
 					data: {
 						email: email,
+						originMail: email,
 						username: name,
 						hash: "",
 						avatar: imageLink,

@@ -23,6 +23,7 @@ interface Users {
 	username: string;
 	avatar: string;
 	id: number;
+	title: string;
 	status: string;
 	achievements: Achievements[];
 	createdAt: string;
@@ -251,7 +252,7 @@ const DashboardFriends = () => {
 						<div className="pl-4 pt-4 md:block hidden">
 							<DateConverter initialDate={userData.createdAt}/>
 							<p className="text-sm font-semibold text-lilac">{userData.username}</p>
-							<p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">Legend</span></p>
+							<p className="mt-2 text-xs font-medium text-white"><span className="bg-lilac py-[0.15rem] px-[0.4rem] rounded">{userData.title}</span></p>
 						</div>
 					</div>
 
