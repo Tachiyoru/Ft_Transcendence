@@ -22,17 +22,14 @@ export class SocketTokenGuard implements CanActivate
 	async canActivate(context: ExecutionContext): Promise<boolean>
 	{
 		const request = context.switchToHttp().getRequest();
-		if (context.getType() !== "ws")
-		{
+		if (context.getType() !== "ws"){
 			return true;
 		}
 		const client: Socket = context.switchToWs().getClient();
 		let token;
-		if (client.handshake.headers.cookie?.split("=")[0] === "io")
-		{
+		if (client.handshake.headers.cookie?.split("=")[0] === "io"){
 			token = client.handshake.headers.cookie?.split("=")[3].split(";")[0];
-		} else
-		{
+		} else{
 			token = client.handshake.headers.cookie?.split("=")[2].split(";")[0];
 		}
 
@@ -61,6 +58,7 @@ export class SocketTokenGuard implements CanActivate
 		} catch (error)
 		{
 			throw new UnauthorizedException("Invalid token");
+			return false;
 		}
 	}
 

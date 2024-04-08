@@ -32,7 +32,6 @@ export class chatService {
     if (existingChannel) {
       throw new Error("Channel's name is already taken");
     }
-
 	const hash = await argon.hash(settings.password);
     const channel: Channel = await this.prisma.channel.create({
       data: {
@@ -482,15 +481,17 @@ export class chatService {
       throw new Error("Could not find channel");
     }
     const banned = chan.banned.some(
-      (user) => user.username === req.user.username);
+      (user) => user.username === req.user.username
+    );
     if (banned) {
       throw new Error("You are banned from this channel");
     }
+
     if (chan.modes === Mode.PROTECTED && password !== undefined) {
-		if (chan.password !== null) {
-		  const pwdMatches = await argon.verify(chan.password, password);
+	  if (chan.password !== null) {
+		const pwdMatches = await argon.verify(chan.password, password);
         try {
-          if (!pwdMatches) {
+			if (!pwdMatches) {
             throw new Error("Wrong password");
           }
         } catch (error) {

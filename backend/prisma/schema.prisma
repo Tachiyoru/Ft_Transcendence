@@ -1,174 +1,174 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum StatusUser {
-  ONLINE
-  OFFLINE
-  INQUEUE
-  INGAME
+    ONLINE
+    OFFLINE
+    INQUEUE
+    INGAME
 }
 
 enum StatusGame {
-  WIN
-  DRAW
-  LOSE
+    WIN
+    DRAW
+    LOSE
 }
 
 enum Role {
-  ADMIN
-  USER
-  OPERATOR
-  BANNED
+    ADMIN
+    USER
+    OPERATOR
+    BANNED
 }
 
 enum Mode {
-  CHAT // user to user
-  GROUPCHAT // user to n users
-  PRIVATE // user to n users
-  PROTECTED // user to n user with password
+    CHAT // user to user
+    GROUPCHAT // user to n users
+    PRIVATE // user to n users
+    PROTECTED // user to n user with password
 }
 
 model User {
-  id        Int      @id @unique @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    id        Int      @id @unique @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  email    		String? @unique
-  originMail	String? @unique
-  username 		String? @unique
-  avatar   		String?
-  title   		String? @default("Newcomer")
-  hash     		String?
+    email      String? @unique
+    originMail String? @unique
+    username   String? @unique
+    avatar     String?
+    title      String? @default("Newcomer")
+    hash       String?
 
-  twoFASecret    String?  @unique
-  otpAuthUrl     String?  @unique
-  isTwoFaEnabled Boolean? @default(false)
+    twoFASecret    String?  @unique
+    otpAuthUrl     String?  @unique
+    isTwoFaEnabled Boolean? @default(false)
 
-  role   Role       @default(USER)
-  status StatusUser @default(ONLINE)
+    role   Role       @default(USER)
+    status StatusUser @default(ONLINE)
 
-  stats Stats? @relation("stats")
+    stats Stats? @relation("stats")
 
-  friendsof User[] @relation("friendslist")
-  friends   User[] @relation("friendslist")
+    friendsof User[] @relation("friendslist")
+    friends   User[] @relation("friendslist")
 
-  pendingList User[] @relation("pendings")
-  pendingFrom User[] @relation("pendings")
+    pendingList User[] @relation("pendings")
+    pendingFrom User[] @relation("pendings")
 
-  blockedBy   User[] @relation("blockedList")
-  blockedList User[] @relation("blockedList")
+    blockedBy   User[] @relation("blockedList")
+    blockedList User[] @relation("blockedList")
 
-  achievements Achievement[]
+    achievements Achievement[]
 
-  notifications Notification[]
+    notifications Notification[]
 
-  messages Message[] @relation("author")
-  channel  Channel[] @relation("chanMembers")
-  banned   Channel[] @relation("chanBanned")
-  Channel  Channel[] @relation("chanOwner")
+    messages Message[] @relation("author")
+    channel  Channel[] @relation("chanMembers")
+    banned   Channel[] @relation("chanBanned")
+    Channel  Channel[] @relation("chanOwner")
 
-  invitationList Channel[] @relation("invitationList")
+    invitationList Channel[] @relation("invitationList")
 
-  @@map("Users")
+    @@map("Users")
 }
 
 model Achievement {
-  id          Int    @id @default(autoincrement())
-  idType      Int
-  user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId      Int?
-  description String
-  icon        String
+    id          Int    @id @default(autoincrement())
+    idType      Int
+    user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId      Int?
+    description String
+    icon        String
 
-  @@map("Achievements")
+    @@map("Achievements")
 }
 
 model Stats {
-  id          Int   @id @default(autoincrement())
-  user        User? @relation("stats", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId      Int?  @unique
-  lvl         Int   @default(1)
-  exp         Int   @default(0)
-  partyPlayed Int   @default(0)
-  partyWon    Int   @default(0)
-  partyLost   Int   @default(0)
+    id          Int   @id @default(autoincrement())
+    user        User? @relation("stats", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId      Int?  @unique
+    lvl         Int   @default(1)
+    exp         Int   @default(0)
+    partyPlayed Int   @default(0)
+    partyWon    Int   @default(0)
+    partyLost   Int   @default(0)
 
-  history String[] @default([])
+    history String[] @default([])
 
-  @@map("Stats")
+    @@map("Stats")
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    Int
-  fromId    Int?
-  type      Int
-  content   String
-  read      Boolean  @default(false)
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId    Int
+    fromId    Int?
+    type      Int
+    content   String
+    read      Boolean  @default(false)
 
-  @@map("Notifications")
+    @@map("Notifications")
 }
 
 model Channel {
-  chanId    Int       @id @default(autoincrement())
-  name      String    @unique
-  owner     User      @relation("chanOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  ownerId   Int
-  op        String[]
-  read      String[]  @default([])
-  modes     Mode      @default(CHAT)
-  password  String?
-  muted     Int[]     @default([])
-  updatedAt DateTime  @default(now())
-  members   User[]    @relation("chanMembers")
-  messages  Message[] @relation("chanMessages")
-  banned    User[]    @relation("chanBanned")
+    chanId    Int       @id @default(autoincrement())
+    name      String    @unique
+    owner     User      @relation("chanOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    ownerId   Int
+    op        String[]
+    read      String[]  @default([])
+    modes     Mode      @default(CHAT)
+    password  String?
+    muted     Int[]     @default([])
+    updatedAt DateTime  @default(now())
+    members   User[]    @relation("chanMembers")
+    messages  Message[] @relation("chanMessages")
+    banned    User[]    @relation("chanBanned")
 
-  invitedList User[] @relation("invitationList")
+    invitedList User[] @relation("invitationList")
 
-  maxUsers Int? @default(10)
+    maxUsers Int? @default(10)
 
-  @@map("Channels")
+    @@map("Channels")
 }
 
 model Message {
-  id          Int      @id @default(autoincrement())
-  channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade, onUpdate: Cascade)
-  channelName String
-  author      User     @relation("author", fields: [authorId], references: [username], onDelete: Cascade, onUpdate: Cascade)
-  authorId    String
-  content     String
-  createdAt   DateTime @default(now())
+    id          Int      @id @default(autoincrement())
+    channel     Channel  @relation("chanMessages", fields: [channelName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+    channelName String
+    author      User     @relation("author", fields: [authorId], references: [username], onDelete: Cascade, onUpdate: Cascade)
+    authorId    String
+    content     String
+    createdAt   DateTime @default(now())
 }
 
 model Game {
-  gameId       Int    @id @default(autoincrement())
-  gameSocket   String @default("")
-  scorePlayer1 Int    @default(0)
-  scorePlayer2 Int    @default(0)
-  player1      Int    @default(0)
-  player2      Int    @default(0)
-  victory      Int    @default(0)
-  status       Int    @default(0)
+    gameId       Int    @id @default(autoincrement())
+    gameSocket   String @default("")
+    scorePlayer1 Int    @default(0)
+    scorePlayer2 Int    @default(0)
+    player1      Int    @default(0)
+    player2      Int    @default(0)
+    victory      Int    @default(0)
+    status       Int    @default(0)
 
-  @@map("Game")
+    @@map("Game")
 }
 
 model GameInvite {
-  gameInviteId  Int     @id @default(autoincrement())
-  hostSocket    String
-  hostId        Int
-  invitedSocket String?
-  invitedId     Int
-  status        Int     @default(0)
+    gameInviteId  Int     @id @default(autoincrement())
+    hostSocket    String
+    hostId        Int
+    invitedSocket String?
+    invitedId     Int
+    status        Int     @default(0)
 
-  @@map("GameInvite")
+    @@map("GameInvite")
 }

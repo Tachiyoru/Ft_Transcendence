@@ -4,7 +4,6 @@ import AuthLayout from './pages/_auth/AuthLayout';
 import SigninForm from './pages/_auth/forms/SigninForm';
 import SignupForm from './pages/_auth/forms/SignupForm';
 import Dashboard from './pages/_root/Dashboard';
-import InGame from './pages/_inGame/InGame';
 import Game from './pages/_game/Game';
 import Chat from './pages/_chat/Chat';
 import Friends from './pages/_friends/Friends';
@@ -62,10 +61,6 @@ const App: React.FC = () => {
           <Route
             path="/game"
             element={user ? <Game /> : <Navigate to="/sign-in" />}
-          />
-          <Route
-            path="/inGame"
-            element={user ? <InGame /> : <Navigate to="/sign-in" />}
           />
           <Route
             path="/test/:gameSocket"

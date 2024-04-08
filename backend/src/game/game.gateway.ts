@@ -21,23 +21,6 @@ export class GameGateway {
     private readonly prisma: PrismaService
   ) {}
 
-  // @SubscribeMessage("saucisse")
-  // async connection(
-  //   @ConnectedSocket() client : Socket,
-  //   @Request() req: any
-  // ) {
-  //   console.log("Player : " + client.id + " connected to the game.")
-  //   const gameReady = await this.gameService.connection(client, req);
-  //   if (gameReady)  {
-  //     this.server.to(gameReady.player1).emit('GameFull', gameReady);
-  //     this.server.to(gameReady.player2).emit('GameFull', gameReady);
-  //   }
-  //   client.on("disconnect", () => {
-  //     console.log("disconnected from server");
-  //     this.removeUserFromGame(client)
-  //   });
-  // }
-
   @SubscribeMessage("createGame")
   async createGameDB(
     player1User: User,
@@ -82,6 +65,26 @@ export class GameGateway {
     client.emit("gameInviteData", game);
     return game;
   }
+
+  @SubscribeMessage("uncheckInvitedGame")
+  async uncheckInvitedGame(
+    @MessageBody() hostId: number,
+    @ConnectedSocket() client: Socket,
+    @Request() req: any
+  ) {
+		const gameInvite = await this.prisma.gameInvite.findFirst(
+			{
+				where:
+				{
+					hostId: hostId,
+          invitedId: req.user.id,
+				},
+			},
+		);
+    if (gameInvite?.hostSocket)
+      this.server.to(gameInvite?.hostSocket).emit('uncheckInvitedGame', true);
+  }
+
 
   @SubscribeMessage("checkInvitedGame")
   async checkInvitedGame(
@@ -130,27 +133,6 @@ export class GameGateway {
   async getAllGameInvites() {
     return this.gameService.getAllGameInvite();
   }
-
-  // @SubscribeMessage("createInviteGame")
-  // async createInviteGame(
-  // 	@ConnectedSocket() client: Socket,
-  // 	@Request() req: any
-  // )
-  // {
-  // 	const game = await this.gameService.createInviteGame(client, req);
-  // }
-
-  // @SubscribeMessage("gotDisconnected")
-  // async removeUserFromGame(
-  //   @ConnectedSocket() client: Socket,
-  // ) {
-  //   console.log("Player : " + client.id + " got disconnected from the game.")
-  //   const game = await this.gameService.checkGameUsers(client);
-  //   if(game)  {
-  //     await this.gameService.removeGame(game?.gameId);
-  //     client.emit('GameReset', true);
-  //   }
-  // }
 
   @SubscribeMessage("findGame")
   async gamestart(@MessageBody("gameSocket") gameSocket: string) {
@@ -244,7 +226,10 @@ export class GameGateway {
       game = games.find((game) => game.player2.playerSocket === client.id);
       if (game) winner = 1;
     }
-    if (game) this.handleGameFinish(game, winner);
+    if (game && game.status === 3)
+      this.handleGameFinish(game, winner);
+    if (game)
+      this.gameService.destroyInGame(game);
   }
 
   async handleGameFinish(game: Game, winner: number) {
@@ -427,77 +412,6 @@ export class GameGateway {
       }, 50);
     }
   }
-
-  // @SubscribeMessage("launchBall")
-  // async LaunchBall(
-  //   @Request() req: any,
-  //   )
-  //   {
-  //     const game = await this.gameService.LaunchBall(req);
-  //     if (game)
-  //     {
-  //       let velocity = [0.01, 0];
-  //       delay(50)
-  //       var i = setInterval(() => {
-  //         game.ball.z += (game.ball.z * velocity[0]);
-  //         game.ball.x += velocity[1];
-
-  //         // console.log(game.paddle[1].x)
-  //         // if (game.pScore[0] == 3 || game.pScore[1] == 3) {
-  //         //   clearInterval(i); // Arrête l'intervalle lorsque la condition est vraie
-  //         // }
-  //         // }, 50);
-  //         if (Math.floor(game.ball.x) === 60 || Math.floor(game.ball.x) === -60)
-  //           velocity[1] *= -1;
-  //         else if
-  //         (
-  //           (Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x) === Math.floor(game.paddle[1].x + 31 / 2)) ||
-  //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x) === Math.floor(game.paddle[0].x + 31 / 2))
-  //         )
-  //         {
-  //               velocity[0] *= -1;
-  //               velocity[1] = 1 ;
-  //         }
-  //         else if
-  //         (
-  //           (Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x) === Math.floor(-game.paddle[1].x + 31 / 2)) ||
-  //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x) === Math.floor(-game.paddle[0].x + 31 / 2))
-  //         )
-  //         {
-  //               velocity[0] *= -1;
-  //               velocity[1] = -1;
-  //         }
-  //         else if (
-  //           ((Math.floor(game.ball.z) < -227 && Math.floor(game.ball.x - game.paddle[1].x) <= 31 / 2) ||
-  //           (Math.floor(game.ball.z) > -58 && Math.floor(game.ball.x - game.paddle[0].x) <= 31 / 2))
-  //         )
-  //             velocity[0] *= -1;
-  //         else if (Math.abs(game.ball.z) > -232 || Math.abs(game.ball.z) < -58) {
-  //           console.log(game.ball.z);
-  //           if (game.ball.z < -232) {
-  //               ++game.pScore[0];
-  //               game.resetBallPosition();
-  //               velocity[1] = 0;
-  //               this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-  //               this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-  //           }
-  //           else if ((game.ball.z > -58)){
-  //               ++game.pScore[1];
-  //               game.resetBallPosition()
-  //               velocity[1] = 0;
-  //               this.server.to(game.player1.playerSocket).emit("gamescore", game.pScore);
-  //               this.server.to(game.player2.playerSocket).emit("gamescore", game.pScore);
-  //           }
-  //         }
-
-  //         this.server.to(game.player1.playerSocket).emit("findposball", game.ball);
-  //         this.server.to(game.player2.playerSocket).emit("findposball", game.ball);
-
-  //         this.server.to(game.player1.playerSocket).emit("findpos", game.paddle);
-  //         this.server.to(game.player2.playerSocket).emit("findpos", game.paddle);
-  //       }, 50);
-  //     }
-  // }
 
   @SubscribeMessage("movesInputs")
   async movesInputs(

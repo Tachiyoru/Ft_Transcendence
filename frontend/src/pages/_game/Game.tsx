@@ -150,6 +150,22 @@ const Game = () => {
   // 	}
   // }, [selectedIndexes]);
 
+  useEffect(() =>
+  {
+    socket.on('uncheckInvitedGame', (data) =>{
+      setShowSecondDiv(false);
+      dispatch(setInvitedFriend(null));
+      setSelectedIndexes([]);
+      if (gameData && gameData.gameInviteId) {
+        socket.emit("removeGameInvite", gameData.gameInviteId);
+        // rajouter popup "Game/invitation not found/expired";
+      }
+      socket.emit("gotDisconnected");
+      localStorage.removeItem("showSecondDiv");
+    })
+  }, [socket]);
+
+
   const handleCrossClick = async () => {
     setShowSecondDiv(false);
     dispatch(setInvitedFriend(null));

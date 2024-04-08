@@ -36,11 +36,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ userData, userRankingFriends,
 					) : (
 					userRankingFriends.map((friend, index) => (
 						<tr key={index} className={index % 2 === 0 ? "bg-accent-violet" : ""}>
-						<Link key={index} to={`/user/${friend.username}`}>
 							<td className={`px-2 ${friend.username === userData.username ? 'text-fushia' : 'text-lilac'}`}>
 								{index + 1}-{friend.username}
 							</td>
-						</Link>
 						</tr>
 					))
 					)}
@@ -64,11 +62,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ userData, userRankingFriends,
 				<HighlightMiddle>
 				<div className="h-20 py-2 overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-black">
 					{userRankingGlobal.map((user, index) => (
-					<Link key={index} to={`/user/${user.username}`}>
-						<div className={`px-4 text-xs ${user.username === userData.username ? 'text-fushia' : 'text-lilac'}`} style={{ marginTop: '-0.14rem' }}>
-							{`${index + 1}-${user.username}`}
-						</div>
-					</Link>
+						<Link key={index} to={`/user/${user.username}`}>
+							<div className={`px-4 text-xs ${user.username === userData.username ? 'text-fushia' : 'text-lilac'}`} style={{ marginTop: '-0.14rem' }}>
+								{`${index + 1}-${user.username}`}
+							</div>
+						</Link>
 					))}
 				</div>
 				</HighlightMiddle>

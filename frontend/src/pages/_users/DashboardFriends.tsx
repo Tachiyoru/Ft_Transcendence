@@ -22,8 +22,8 @@ import { RootState } from "@react-three/fiber";
 interface Users {
 	username: string;
 	avatar: string;
-	id: number;
 	title: string;
+	id: number;
 	status: string;
 	achievements: Achievements[];
 	createdAt: string;

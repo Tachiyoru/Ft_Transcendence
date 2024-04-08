@@ -100,7 +100,6 @@ export class chatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       client.emit("edit-channel", updatedChannel);
       this.allUpdate();
-	  console.log(" ALL UPDATE CALL ");
     } catch (error) {
       console.error("Error editing channel:");
       client.emit("channelEditError");

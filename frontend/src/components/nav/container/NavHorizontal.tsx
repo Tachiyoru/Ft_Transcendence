@@ -223,6 +223,16 @@ const NavHorizontal = () => {
     }
   };
 
+  const uncheckInvitedGame = async (notificationId: number) => {
+    try {
+      const notification = await fetchSingleNotification(notificationId);
+      if (notification && notification.fromId)
+        socket.emit("uncheckInvitedGame", notification.fromId);
+    } catch (error) {
+      console.error("Error checking invited game notification:", error);
+    }
+  };
+
   useEffect(() => {
     if (selectedSection === "Notifications") {
       handleNotificationClick();
@@ -327,6 +337,7 @@ const NavHorizontal = () => {
                             onClick={() => {
                               markNotificationAsRead(notification.id);
                               setSelectedSection(null);
+                              uncheckInvitedGame(notification.id);
                             }}
                             style={{ cursor: "pointer" }}
                           >
@@ -371,9 +382,8 @@ const NavHorizontal = () => {
               {showUserList && searchValue.length > 0 && (
                 <ul className="absolute h-24 w-full bg-lilac z-10 rounded-b">
                   {filteredUsers.map((user, index) => (
-                    <Link to={`/user/${user.username}`}>
+                    <Link key={index} to={`/user/${user.username}`}>
                       <li
-                        key={index}
                         className="px-2 py-1 hover:bg-purple cursor-pointer text-dark-violet"
                         onClick={() => handleUserClick()}
                       >

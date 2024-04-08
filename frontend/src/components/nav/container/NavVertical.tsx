@@ -165,7 +165,6 @@ const NavVertical: React.FC<{ currentPage: string }> = ({ currentPage }) => {
     axios
       .post("/auth/logout")
       .then(() => {
-        console.log("Déconnexion réussie");
         socket.disconnect();
         window.location.href = "/sign-in";
       })
